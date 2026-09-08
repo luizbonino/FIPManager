@@ -6,8 +6,13 @@ node), and serialises it to Turtle or JSON-LD. Reuses `exporters.resolve_lang`
 and `exporters.fip_url` so the RDF and the JSON/CSV exports agree on lang
 fallback and on the FIP's canonical URL.
 
-IRIs are minted from `settings.base_url` at call time (never cached), so a
-different `FIPM_BASE_URL` changes every minted IRI and nothing else (AC9).
+Instance IRIs (FIPs, sessions, free-text FERs, ...) are minted from
+`settings.base_url` at call time (never cached), so a different
+`FIPM_BASE_URL` changes every instance IRI and nothing else (AC9). The
+`fipmx` extension VOCABULARY namespace (classes/properties FIP Manager
+defines) is a separate, fixed IRI -- `settings.ext_ns`, default
+`https://w3id.org/fipm/ns#` -- independent of base_url, so the same classes
+and properties mean the same thing across deployments.
 """
 
 from __future__ import annotations
@@ -17,9 +22,10 @@ import re
 import unicodedata
 from datetime import UTC, datetime
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 from rdflib import RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
+from rdflib.namespace import FOAF
 from sqlalchemy.orm import Session
 
 from fipm.config import Settings
@@ -31,11 +37,15 @@ FIP = Namespace("https://w3id.org/fair/fip/terms/")
 FAIR = Namespace("https://w3id.org/fair/principles/terms/")
 DCTERMS = Namespace("http://purl.org/dc/terms/")
 PROV = Namespace("http://www.w3.org/ns/prov#")
+# RDA DMP Common Standard ontology (audit finding 12): replaces the
+# home-grown `fipmx:Data-Management-Plan` class.
+DCSO = Namespace("https://w3id.org/dcso/ns/core#")
 
-TURTLE_HEADER = (
-    "# FIP exported by FIP Manager. Ontology terms: FIP Ontology "
-    "(https://w3id.org/fair/fip/terms/), CC0 1.0.\n"
+ONTOLOGY_CREDIT_TEXT = (
+    "FIP exported by FIP Manager. Ontology terms: FIP Ontology "
+    "(https://w3id.org/fair/fip/terms/), CC0 1.0."
 )
+TURTLE_HEADER = f"# {ONTOLOGY_CREDIT_TEXT}\n"
 
 # spec 00-fip-ontology-mapping.md §2: FIP Manager status -> ontology property.
 # `none` deliberately has no entry: no `declares-*` triple is emitted for it.
@@ -44,6 +54,18 @@ STATUS_PREDICATE: dict[str, URIRef] = {
     "planned": FIP["declares-planned-use-of"],
     "planned-development": FIP["declares-planned-development-of"],
     "planned-replacement": FIP["declares-planned-replacement-of"],
+}
+
+# audit finding 7: a FER's availability class depends on the status(es) it is
+# declared under. current/planned/planned-replacement => already available;
+# planned-development => still to be developed. A FER referenced by several
+# declarations with different statuses ends up carrying both types (a Graph
+# is a set of triples, so repeats collapse).
+STATUS_AVAILABILITY_CLASS: dict[str, URIRef] = {
+    "current": FIP["Available-FAIR-Enabling-Resource"],
+    "planned": FIP["Available-FAIR-Enabling-Resource"],
+    "planned-replacement": FIP["Available-FAIR-Enabling-Resource"],
+    "planned-development": FIP["FAIR-Enabling-Resource-to-be-Developed"],
 }
 
 # spec 03 §2.3: licence string -> IRI. An unmapped string stays a plain
@@ -82,7 +104,28 @@ KNOWN_QUESTION_INDIVIDUALS: frozenset[str] = frozenset(
     }
 )
 
-PRINCIPLE_RE = re.compile(r"^[FAIR]\d(\.\d)?$")
+# audit finding 12: whitelist of `fair:<id>` principle IRIs that may be
+# minted -- exactly the 15 individuals spec 00 (§4) actually uses. Anything
+# else (e.g. a stray "R2") is skipped rather than guessed into an IRI.
+KNOWN_PRINCIPLE_IDS: frozenset[str] = frozenset(
+    {
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "A1",
+        "A1.1",
+        "A1.2",
+        "A2",
+        "I1",
+        "I2",
+        "I3",
+        "R1",
+        "R1.1",
+        "R1.2",
+        "R1.3",
+    }
+)
 ORCID_RE = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
 
 # spec 00 §6: required attribution string for a CC-BY-SA-licensed knowledge
@@ -97,7 +140,12 @@ KM_ATTRIBUTION_NAME_LITERAL = "Jacintha Schultes"
 
 
 def _fipmx_ns(settings: Settings) -> Namespace:
-    return Namespace(f"{settings.base_url}/ns#")
+    """The `fipmx` extension VOCABULARY namespace (audit finding 2): a fixed
+    IRI (`settings.ext_ns`, default `https://w3id.org/fipm/ns#`), independent
+    of `settings.base_url`, so class/property IRIs don't differ per
+    deployment. Instance IRIs (FIPs, sessions, free-text FERs) keep following
+    base_url -- see module docstring and AC9."""
+    return Namespace(settings.ext_ns)
 
 
 def new_graph(settings: Settings) -> Graph:
@@ -109,6 +157,8 @@ def new_graph(settings: Settings) -> Graph:
     g.bind("prov", PROV)
     g.bind("rdfs", RDFS)
     g.bind("xsd", XSD)
+    g.bind("dcso", DCSO)
+    g.bind("foaf", FOAF)
     g.bind("fipmx", _fipmx_ns(settings))
     return g
 
@@ -126,6 +176,17 @@ def _license_node(value: str | None) -> URIRef | Literal | None:
     if mapped:
         return URIRef(mapped)
     return Literal(value)
+
+
+def _is_http_iri(value: str) -> bool:
+    """True if `value` parses as an http(s) IRI -- audit finding 4:
+    `fip:has-research-domain` is an ObjectProperty, so a bare literal domain
+    string must fall back to `dcterms:subject` instead."""
+    try:
+        parsed = urlparse(value)
+    except ValueError:
+        return False
+    return parsed.scheme in ("http", "https") and bool(parsed.netloc)
 
 
 def _question_individual_local(question_id: str) -> str | None:
@@ -196,13 +257,19 @@ def _emit_fer(
     decl: dict[str, Any],
     fer_type_key: str | None,
     language: str,
+    status: str | None = None,
 ) -> URIRef | None:
     """Emit the FER node for a declaration (catalogue or free-text) and
-    return its IRI, or None if the declaration carries neither."""
+    return its IRI, or None if the declaration carries neither. `status`
+    (audit finding 7) additionally types the FER `fip:Available-FAIR-
+    Enabling-Resource` (current/planned/planned-replacement) or `fip:FAIR-
+    Enabling-Resource-to-be-Developed` (planned-development); a FER used
+    under several statuses across declarations picks up both types."""
     fipmx = _fipmx_ns(settings)
     fer_id = decl.get("ferId")
     free_text = decl.get("ferFreeText")
     fer_type_iri = _fer_type_class(settings, fer_type_key)
+    availability_iri = STATUS_AVAILABILITY_CLASS.get(status) if status else None
 
     if fer_id:
         fer_iri = URIRef(fer_id)
@@ -217,6 +284,8 @@ def _emit_fer(
                     g.add((fer_iri, RDFS.label, Literal(text, lang=lang)))
         elif fer_type_iri is not None:
             g.add((fer_iri, RDF.type, fer_type_iri))
+        if availability_iri is not None:
+            g.add((fer_iri, RDF.type, availability_iri))
         return fer_iri
 
     if free_text:
@@ -224,11 +293,32 @@ def _emit_fer(
         g.add((fer_iri, RDF.type, FIP["FAIR-Enabling-Resource"]))
         if fer_type_iri is not None:
             g.add((fer_iri, RDF.type, fer_type_iri))
+        if availability_iri is not None:
+            g.add((fer_iri, RDF.type, availability_iri))
         g.add((fer_iri, RDFS.label, Literal(free_text, lang=language)))
         g.add((fer_iri, fipmx["free-text"], Literal(True)))
         return fer_iri
 
     return None
+
+
+def _none_declaration_text(
+    db: Session, decl: dict[str, Any], language: str, default_language: str
+) -> str | None:
+    """The FER label or free text that a "none"-status declaration would
+    otherwise silently drop -- audit finding 6. No FER node is minted for a
+    "none" declaration; only its label/text survives, as a plain
+    `fip:considerations` literal tagged with the FIP's own language."""
+    fer_id = decl.get("ferId")
+    if fer_id:
+        fer_row = db.get(Fer, fer_id)
+        if fer_row is not None:
+            pair = _resolve_lang_pair(fer_row.label, language, default_language)
+            if pair:
+                return pair[0]
+        return None
+    free_text = decl.get("ferFreeText")
+    return free_text or None
 
 
 def _questions_by_id(km: KnowledgeModel | None) -> dict[str, dict[str, Any]]:
@@ -266,6 +356,9 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
     g.add((fip_iri, DCTERMS.created, Literal(_iso_utc(fip.created_at), datatype=XSD.dateTime)))
     g.add((fip_iri, DCTERMS.modified, Literal(_iso_utc(fip.updated_at), datatype=XSD.dateTime)))
     g.add((fip_iri, DCTERMS.language, Literal(language)))
+    # audit finding 12: the CC0 ontology-credit, also as a triple (not only
+    # as a Turtle comment header) so it survives into JSON-LD too.
+    g.add((fip_iri, RDFS.comment, Literal(ONTOLOGY_CREDIT_TEXT, lang="en")))
 
     km = db.get(KnowledgeModel, (fip.questionnaire_id, fip.questionnaire_version))
     km_iri = URIRef(
@@ -274,7 +367,11 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
     g.add((fip_iri, DCTERMS.conformsTo, km_iri))
 
     community_iri = URIRef(f"{fip_iri}#community")
-    g.add((fip_iri, FIP["declared-by"], community_iri))
+    # audit finding 3: `fip:declared-by` has domain fip:FAIR-Declaration, not
+    # the FIP itself -- use the fipmx extension property here. Each
+    # declaration node (below) is itself a FAIR-Declaration subclass, so it
+    # keeps `fip:declared-by` pointing at the community.
+    g.add((fip_iri, fipmx["declared-by-community"], community_iri))
 
     # -- community -----------------------------------------------------
     g.add((community_iri, RDF.type, FIP["FAIR-Implementation-Community"]))
@@ -285,7 +382,14 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
         g.add((community_iri, DCTERMS.description, Literal(description, lang=language)))
     domain = community.get("domain")
     if domain:
-        g.add((community_iri, FIP["has-research-domain"], Literal(domain, lang=language)))
+        # audit finding 4: fip:has-research-domain is an ObjectProperty; a
+        # literal there would make the graph OWL-DL invalid. Only emit it
+        # when the value is itself an http(s) IRI, otherwise fall back to
+        # dcterms:subject (a literal-friendly annotation property).
+        if _is_http_iri(domain):
+            g.add((community_iri, FIP["has-research-domain"], URIRef(domain)))
+        else:
+            g.add((community_iri, DCTERMS.subject, Literal(domain, lang=language)))
     data_steward = community.get("dataSteward")
     if data_steward:
         orcid = data_steward.get("orcid")
@@ -293,7 +397,14 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
         if orcid and ORCID_RE.match(orcid):
             g.add((community_iri, FIP["has-data-steward"], URIRef(f"https://orcid.org/{orcid}")))
         elif steward_name:
-            g.add((community_iri, FIP["has-data-steward"], Literal(steward_name)))
+            # audit finding 5: fip:has-data-steward is an ObjectProperty --
+            # without a verified ORCID, mint a local foaf:Person node instead
+            # of putting a name literal directly in object position.
+            steward_iri = URIRef(f"{fip_iri}#data-steward")
+            g.add((community_iri, FIP["has-data-steward"], steward_iri))
+            g.add((steward_iri, RDF.type, FOAF.Person))
+            g.add((steward_iri, RDFS.label, Literal(steward_name)))
+            g.add((steward_iri, FOAF.name, Literal(steward_name)))
     for link in community.get("links") or []:
         g.add((community_iri, RDFS.seeAlso, URIRef(link)))
 
@@ -304,7 +415,10 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
             continue
         dmp_iri = URIRef(dmp_url)
         g.add((fip_iri, PROV.wasDerivedFrom, dmp_iri))
-        g.add((dmp_iri, RDF.type, fipmx["Data-Management-Plan"]))
+        # audit finding 12: dcso:DMP (RDA DMP Common Standard ontology)
+        # replaces the home-grown fipmx:Data-Management-Plan class; the link
+        # itself (prov:wasDerivedFrom above) is unchanged.
+        g.add((dmp_iri, RDF.type, DCSO.DMP))
         version = dmp.get("version")
         if version:
             g.add((dmp_iri, fipmx["dmp-version"], Literal(version)))
@@ -320,15 +434,30 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
             g.add((km_iri, DCTERMS.title, Literal(text, lang=tag)))
         if km.version:
             g.add((km_iri, DCTERMS.hasVersion, Literal(km.version)))
-        source = km.source
-        source_text = source.get("name") if isinstance(source, dict) else source
-        if source_text:
-            g.add((km_iri, DCTERMS.source, Literal(source_text)))
+        # The importer flattens a {"name","url"} source to its name in the
+        # `source` column; the stored document keeps the full object.
+        content_source = (km.content or {}).get("source") if isinstance(km.content, dict) else None
+        source = content_source if isinstance(content_source, dict) else km.source
+        # audit finding 8: a dict source with a "url" becomes a proper
+        # dcterms:source URIRef, with the name (if any) as a
+        # dcterms:bibliographicCitation; a plain-string source (or a dict
+        # without "url") keeps the name-literal behaviour.
+        if isinstance(source, dict):
+            source_url = source.get("url")
+            source_name = source.get("name")
+            if source_url:
+                g.add((km_iri, DCTERMS.source, URIRef(source_url)))
+                if source_name:
+                    g.add((km_iri, DCTERMS.bibliographicCitation, Literal(source_name, lang="en")))
+            elif source_name:
+                g.add((km_iri, DCTERMS.source, Literal(source_name, lang="en")))
+        elif source:
+            g.add((km_iri, DCTERMS.source, Literal(source, lang="en")))
         km_license_node = _license_node(km.license)
         if km_license_node is not None:
             g.add((km_iri, DCTERMS.license, km_license_node))
         if (km.license or "").startswith("CC-BY-SA"):
-            g.add((km_iri, DCTERMS.rights, Literal(KM_ATTRIBUTION_TEXT)))
+            g.add((km_iri, DCTERMS.rights, Literal(KM_ATTRIBUTION_TEXT, lang="en")))
             for orcid in KM_ATTRIBUTION_ORCIDS:
                 g.add((km_iri, DCTERMS.creator, URIRef(f"https://orcid.org/{orcid}")))
             g.add((km_iri, DCTERMS.creator, Literal(KM_ATTRIBUTION_NAME_LITERAL)))
@@ -356,13 +485,19 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
                 g.add((decl_iri, FIP["refers-to-question"], FIP[f"FIP-Question-{q_local}"]))
             else:
                 g.add((decl_iri, fipmx["question-id"], Literal(qid)))
-            if principle and PRINCIPLE_RE.match(principle):
+            if principle and principle in KNOWN_PRINCIPLE_IDS:
                 g.add((decl_iri, FIP["refers-to-principle"], FAIR[principle]))
 
             if status == "none":
                 g.add((decl_iri, RDF.type, FIP["FIP-No-Choice-Declaration"]))
+                # audit finding 6: don't silently drop the FER label/text a
+                # "none" declaration still carries -- surface it as a plain
+                # consideration instead (no FER node is minted for it).
+                none_text = _none_declaration_text(db, decl, language, default_language)
+                if none_text:
+                    g.add((decl_iri, FIP.considerations, Literal(none_text, lang=language)))
             else:
-                fer_iri = _emit_fer(g, db, settings, decl, fer_type_key, language)
+                fer_iri = _emit_fer(g, db, settings, decl, fer_type_key, language, status)
                 predicate = STATUS_PREDICATE.get(status) if status else None
                 if predicate is not None and fer_iri is not None:
                     g.add((decl_iri, predicate, fer_iri))
@@ -388,7 +523,11 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
             g.add((answer_iri, RDF.type, fipmx["Answer"]))
             g.add((answer_iri, fipmx["question-id"], Literal(qid)))
             if q_local:
-                g.add((answer_iri, FIP["refers-to-question"], FIP[f"FIP-Question-{q_local}"]))
+                # audit finding 1: fip:refers-to-question has rdfs:domain
+                # fip:FIP-Declaration, so using it here would type this
+                # fipmx:Answer comment node as a declaration too. Use the
+                # fipmx equivalent instead.
+                g.add((answer_iri, fipmx["refers-to-question"], FIP[f"FIP-Question-{q_local}"]))
             g.add((answer_iri, fipmx["answer-comment"], Literal(comment, lang=language)))
 
     return g
@@ -407,7 +546,9 @@ def session_graph(
     session_iri = URIRef(f"{settings.base_url}/sessions/{session.id}")
     g.add((session_iri, RDF.type, fipmx["Workshop-Session"]))
     if session.title:
-        g.add((session_iri, DCTERMS.title, Literal(session.title)))
+        # audit finding 12: tag the session title with the session's own
+        # default language rather than leaving it a bare, untagged literal.
+        g.add((session_iri, DCTERMS.title, Literal(session.title, lang=session.default_language)))
     created_literal = Literal(_iso_utc(session.created_at), datatype=XSD.dateTime)
     g.add((session_iri, DCTERMS.created, created_literal))
     for fip in fips:
@@ -424,8 +565,9 @@ def to_turtle(g: Graph) -> str:
 
 def _jsonld_context(g: Graph) -> dict[str, Any]:
     """Spec 03 §2.6, with the prefix IRIs taken from the graph's own bound
-    namespaces so `fipmx` always matches the `settings.base_url` the graph
-    was built with (AC9)."""
+    namespaces -- `fipmx` is the fixed extension-vocabulary IRI (audit
+    finding 2: `settings.ext_ns`), while `fip`/`fair`/etc. are the fixed
+    ontology IRIs; only instance IRIs vary with `settings.base_url` (AC9)."""
     ns = dict(g.namespaces())
     return {
         "fip": str(ns["fip"]),
@@ -435,6 +577,8 @@ def _jsonld_context(g: Graph) -> dict[str, Any]:
         "prov": str(ns["prov"]),
         "rdfs": str(ns["rdfs"]),
         "xsd": str(ns["xsd"]),
+        "dcso": str(ns["dcso"]),
+        "foaf": str(ns["foaf"]),
         "id": "@id",
         "type": "@type",
         "label": {"@id": "rdfs:label"},
@@ -447,8 +591,10 @@ def _jsonld_context(g: Graph) -> dict[str, Any]:
         "license": {"@id": "dcterms:license", "@type": "@id"},
         "conformsTo": {"@id": "dcterms:conformsTo", "@type": "@id"},
         "declaredBy": {"@id": "fip:declared-by", "@type": "@id"},
+        "declaredByCommunity": {"@id": "fipmx:declared-by-community", "@type": "@id"},
         "hasDeclaration": {"@id": "fipmx:has-declaration", "@type": "@id"},
         "refersToQuestion": {"@id": "fip:refers-to-question", "@type": "@id"},
+        "answerRefersToQuestion": {"@id": "fipmx:refers-to-question", "@type": "@id"},
         "refersToPrinciple": {"@id": "fip:refers-to-principle", "@type": "@id"},
         "currentUseOf": {"@id": "fip:declares-current-use-of", "@type": "@id"},
         "plannedUseOf": {"@id": "fip:declares-planned-use-of", "@type": "@id"},

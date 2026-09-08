@@ -207,7 +207,7 @@ def test_ac3_none_declaration_typed_no_choice_and_carries_status(db_session, rea
     fip = _insert_fip(db_session, real_km_loaded, answers=FIVE_DECL_ANSWERS)
     g = fip_graph(db_session, fip, real_km_loaded)
     fip_iri = URIRef(fip_url(fip, real_km_loaded))
-    fipmx = real_km_loaded.base_url + "/ns#"
+    fipmx = real_km_loaded.ext_ns
 
     none_decl = URIRef(f"{fip_iri}#decl-F1-data-1")
     assert (none_decl, RDF.type, FIP["FIP-Declaration"]) in g
@@ -240,7 +240,7 @@ def test_ac4_free_text_fer_hash_iri_typed_and_labelled(db_session, real_km_loade
     assert (fer_iri, RDF.type, FIP["FAIR-Enabling-Resource"]) in g
     assert (fer_iri, RDF.type, FIP["Structured-vocabulary"]) in g
     assert (fer_iri, RDFS.label, Literal(text, lang="pt-BR")) in g
-    fipmx = real_km_loaded.base_url + "/ns#"
+    fipmx = real_km_loaded.ext_ns
     assert (fer_iri, URIRef(fipmx + "free-text"), Literal(True)) in g
 
 
@@ -304,7 +304,7 @@ def test_ac5_considerations_per_lang_and_single_answer_comment_and_no_unanswered
         Literal("Nenhum vocabulário publicado cobre o domínio.", lang="pt-BR"),
     }
 
-    fipmx = real_km_loaded.base_url + "/ns#"
+    fipmx = real_km_loaded.ext_ns
     answer_iri = URIRef(f"{fip_iri}#answer-I2-metadata")
     comments = list(g.objects(answer_iri, URIRef(fipmx + "answer-comment")))
     assert comments == [Literal("Decidir com a equipa de terminologia.", lang="pt-BR")]
@@ -353,7 +353,7 @@ def test_ac6_session_export_union_of_fip_graphs_plus_session_node(db_session, re
     sg = session_graph(db_session, session, fips, real_km_loaded)
 
     session_iri = URIRef(f"{real_km_loaded.base_url}/sessions/{session.id}")
-    fipmx = real_km_loaded.base_url + "/ns#"
+    fipmx = real_km_loaded.ext_ns
     assert (session_iri, RDF.type, URIRef(fipmx + "Workshop-Session")) in sg
     has_fip_objs = set(sg.objects(session_iri, URIRef(fipmx + "has-fip")))
     assert has_fip_objs == {URIRef(fip_url(f, real_km_loaded)) for f in fips}
@@ -571,6 +571,306 @@ def test_ac9_base_url_change_mints_new_iris_only(db_session, real_km_loaded):
     assert (fip_iri_b, RDF.type, FIP["FAIR-Implementation-Profile"]) in g_b
     for s in g_b.subjects(RDF.type, FIP["FIP-Declaration"]):
         assert str(s).startswith(settings_b.base_url)
+
+    # audit finding 2: the fipmx VOCABULARY namespace is fixed, independent
+    # of base_url -- every fipmx predicate/type used is identical between
+    # the two graphs, not merely reproduced by the base_url substitution
+    # above (unlike instance IRIs, it never contains settings_a.base_url).
+    assert settings_a.ext_ns == settings_b.ext_ns
+    fipmx_terms_a = {p for p in g_a.predicates() if str(p).startswith(settings_a.ext_ns)}
+    fipmx_terms_a |= {
+        o for o in g_a.objects(None, RDF.type) if str(o).startswith(settings_a.ext_ns)
+    }
+    assert fipmx_terms_a  # sanity: the fixture actually exercises fipmx terms
+    fipmx_terms_b = {p for p in g_b.predicates() if str(p).startswith(settings_b.ext_ns)}
+    fipmx_terms_b |= {
+        o for o in g_b.objects(None, RDF.type) if str(o).startswith(settings_b.ext_ns)
+    }
+    assert fipmx_terms_a == fipmx_terms_b
+
+
+def test_ac9_ext_ns_fixed_by_default_and_overridable_via_setting(db_session, real_km_loaded):
+    """audit finding 2: fipmx defaults to the fixed `https://w3id.org/fipm/ns#`
+    regardless of base_url, and is overridable independently via
+    FIPM_EXT_NS (here passed directly as the `ext_ns` setting)."""
+    fip = _insert_fip(db_session, real_km_loaded, answers=FIVE_DECL_ANSWERS)
+
+    settings_default = real_km_loaded
+    g_default = fip_graph(db_session, fip, settings_default)
+    assert settings_default.ext_ns == "https://w3id.org/fipm/ns#"
+    assert any(str(p).startswith("https://w3id.org/fipm/ns#") for p in g_default.predicates())
+
+    settings_custom_ns = Settings(
+        data_dir=settings_default.data_dir,
+        db_path=settings_default.db_path,
+        base_url=settings_default.base_url,
+        ext_ns="https://example.org/custom-fipmx#",
+    )
+    g_custom = fip_graph(db_session, fip, settings_custom_ns)
+    assert any(
+        str(p).startswith("https://example.org/custom-fipmx#") for p in g_custom.predicates()
+    )
+    assert not any(str(p).startswith("https://w3id.org/fipm/ns#") for p in g_custom.predicates())
+
+
+# --------------------------------------------------------------------------
+# FAIR-ontology audit findings 1, 3-8, 12.
+# --------------------------------------------------------------------------
+
+
+def test_audit1_answer_comment_uses_fipmx_refers_to_question_not_fip(db_session, real_km_loaded):
+    """finding 1: fip:refers-to-question has rdfs:domain fip:FIP-Declaration;
+    using it on a fipmx:Answer node would mistype it as a declaration."""
+    fip = _insert_fip(db_session, real_km_loaded, answers=FIVE_DECL_ANSWERS)
+    g = fip_graph(db_session, fip, real_km_loaded)
+    fip_iri = URIRef(fip_url(fip, real_km_loaded))
+    fipmx = real_km_loaded.ext_ns
+
+    answer_iri = URIRef(f"{fip_iri}#answer-I2-metadata")
+    assert (answer_iri, FIP["refers-to-question"], None) not in g
+    assert (
+        answer_iri,
+        URIRef(fipmx + "refers-to-question"),
+        FIP["FIP-Question-I2-MD"],
+    ) in g
+    # declarations still use the ontology's own property (its domain matches).
+    dev_decl = URIRef(f"{fip_iri}#decl-I2-metadata-0")
+    assert (dev_decl, FIP["refers-to-question"], FIP["FIP-Question-I2-MD"]) in g
+
+
+def test_audit3_declared_by_moved_off_fip_node_kept_on_declarations(db_session, real_km_loaded):
+    """finding 3: fip:declared-by has domain fip:FAIR-Declaration, not the
+    FIP; the FIP node uses fipmx:declared-by-community instead, while each
+    declaration (a FAIR-Declaration subclass) keeps fip:declared-by."""
+    fip = _insert_fip(db_session, real_km_loaded, answers=FIVE_DECL_ANSWERS)
+    g = fip_graph(db_session, fip, real_km_loaded)
+    fip_iri = URIRef(fip_url(fip, real_km_loaded))
+    fipmx = real_km_loaded.ext_ns
+    community_iri = URIRef(f"{fip_iri}#community")
+
+    assert (fip_iri, FIP["declared-by"], None) not in g
+    assert (fip_iri, URIRef(fipmx + "declared-by-community"), community_iri) in g
+
+    decl_iri = URIRef(f"{fip_iri}#decl-F1-metadata-0")
+    assert (decl_iri, FIP["declared-by"], community_iri) in g
+
+
+def test_audit4_research_domain_iri_vs_dcterms_subject_fallback(db_session, real_km_loaded):
+    """finding 4: fip:has-research-domain is an ObjectProperty -- a plain
+    text domain becomes dcterms:subject, only an http(s) IRI value uses
+    fip:has-research-domain directly."""
+    from fipm.rdf import DCTERMS
+
+    fip_text = _insert_fip(
+        db_session,
+        real_km_loaded,
+        community={"name": "g", "domain": "Public health"},
+    )
+    g_text = fip_graph(db_session, fip_text, real_km_loaded)
+    community_iri = URIRef(f"{fip_url(fip_text, real_km_loaded)}#community")
+    assert (community_iri, FIP["has-research-domain"], None) not in g_text
+    assert (community_iri, DCTERMS.subject, Literal("Public health", lang="pt-BR")) in g_text
+
+    fip_iri_domain = _insert_fip(
+        db_session,
+        real_km_loaded,
+        community={"name": "g", "domain": "https://example.org/domains/public-health"},
+    )
+    g_iri = fip_graph(db_session, fip_iri_domain, real_km_loaded)
+    community_iri2 = URIRef(f"{fip_url(fip_iri_domain, real_km_loaded)}#community")
+    assert (
+        community_iri2,
+        FIP["has-research-domain"],
+        URIRef("https://example.org/domains/public-health"),
+    ) in g_iri
+    assert (community_iri2, DCTERMS.subject, None) not in g_iri
+
+
+def test_audit5_data_steward_without_orcid_mints_foaf_person(db_session, real_km_loaded):
+    """finding 5: without a verified ORCID, has-data-steward must point to a
+    minted foaf:Person node, not a bare name literal."""
+    from rdflib.namespace import FOAF
+
+    fip = _insert_fip(
+        db_session,
+        real_km_loaded,
+        community={"name": "g", "dataSteward": {"name": "Jacintha Schultes"}},
+    )
+    g = fip_graph(db_session, fip, real_km_loaded)
+    fip_iri = URIRef(fip_url(fip, real_km_loaded))
+    community_iri = URIRef(f"{fip_iri}#community")
+    steward_iri = URIRef(f"{fip_iri}#data-steward")
+
+    assert (community_iri, FIP["has-data-steward"], Literal("Jacintha Schultes")) not in g
+    assert (community_iri, FIP["has-data-steward"], steward_iri) in g
+    assert (steward_iri, RDF.type, FOAF.Person) in g
+    assert (steward_iri, RDFS.label, Literal("Jacintha Schultes")) in g
+    assert (steward_iri, FOAF.name, Literal("Jacintha Schultes")) in g
+
+
+def test_audit6_none_status_keeps_fer_text_as_consideration(db_session, real_km_loaded):
+    """finding 6: a "none"-status declaration must not silently drop its FER
+    label/free text; it survives as a fip:considerations literal."""
+    fip = _insert_fip(db_session, real_km_loaded, answers=FIVE_DECL_ANSWERS)
+    g = fip_graph(db_session, fip, real_km_loaded)
+    fip_iri = URIRef(fip_url(fip, real_km_loaded))
+    none_decl = URIRef(f"{fip_iri}#decl-F1-data-1")
+
+    assert (none_decl, FIP.considerations, Literal("n/a", lang="pt-BR")) in g
+    # and no FER node is minted for a "none" declaration.
+    declares_predicates = {
+        FIP["declares-current-use-of"],
+        FIP["declares-planned-use-of"],
+        FIP["declares-planned-development-of"],
+        FIP["declares-planned-replacement-of"],
+    }
+    for p in declares_predicates:
+        assert (none_decl, p, None) not in g
+
+
+def test_audit7_fer_typed_available_or_to_be_developed_by_status(db_session, real_km_loaded):
+    """finding 7: a FER is additionally typed fip:Available-FAIR-Enabling-
+    Resource for current/planned/planned-replacement, or fip:FAIR-Enabling-
+    Resource-to-be-Developed for planned-development."""
+    fip = _insert_fip(db_session, real_km_loaded, answers=FIVE_DECL_ANSWERS)
+    g = fip_graph(db_session, fip, real_km_loaded)
+
+    doi_fer = URIRef("https://www.doi.org/")  # status = current
+    assert (doi_fer, RDF.type, FIP["Available-FAIR-Enabling-Resource"]) in g
+    assert (doi_fer, RDF.type, FIP["FAIR-Enabling-Resource-to-be-Developed"]) not in g
+
+    handle_fer = URIRef("https://www.handle.net/")  # status = planned-replacement
+    assert (handle_fer, RDF.type, FIP["Available-FAIR-Enabling-Resource"]) in g
+
+    dev_text_fer = URIRef(
+        f"{real_km_loaded.base_url}/fers/text/{_free_text_hash('Ministério da Saúde vocabulary')}"
+    )  # status = planned-development
+    assert (dev_text_fer, RDF.type, FIP["FAIR-Enabling-Resource-to-be-Developed"]) in g
+    assert (dev_text_fer, RDF.type, FIP["Available-FAIR-Enabling-Resource"]) not in g
+
+
+def test_audit8_km_source_dict_with_url_becomes_uriref_plus_citation(db_session, real_km_loaded):
+    """finding 8: a dict source with a "url" becomes dcterms:source <url>
+    plus dcterms:bibliographicCitation "name"@en.
+
+    The importer flattens the source to its name in the `source` column, so
+    `fip_graph` reads the full {"name", "url"} object from the stored
+    knowledge-model document (`content["source"]`)."""
+    from fipm.models import KnowledgeModel
+    from fipm.rdf import DCTERMS
+
+    fip = _insert_fip(db_session, real_km_loaded, answers=[])
+    km_row = db_session.get(KnowledgeModel, (KM_ID, KM_VERSION))
+    expected = km_row.content["source"]
+    assert isinstance(expected, dict) and expected.get("url")
+
+    g = fip_graph(db_session, fip, real_km_loaded)
+    km_iri = URIRef(f"{real_km_loaded.base_url}/knowledge-models/{KM_ID}/{KM_VERSION}")
+
+    sources = list(g.objects(km_iri, DCTERMS.source))
+    assert sources == [URIRef(expected["url"])]
+    citations = list(g.objects(km_iri, DCTERMS.bibliographicCitation))
+    assert citations == [Literal(expected["name"], lang="en")]
+
+
+def test_audit12_session_title_language_tagged(db_session, real_km_loaded):
+    fip = _insert_fip(db_session, real_km_loaded, answers=[])
+    session = WorkshopSession(
+        id=short_id(real_km_loaded.id_prefix),
+        join_code="MNOPQR",
+        owner_id=None,
+        questionnaire_id=KM_ID,
+        questionnaire_version=KM_VERSION,
+        default_language="pt-BR",
+        title="sessão de teste",
+        status="open",
+    )
+    db_session.add(session)
+    db_session.commit()
+
+    g = session_graph(db_session, session, [fip], real_km_loaded)
+    session_iri = URIRef(f"{real_km_loaded.base_url}/sessions/{session.id}")
+    from fipm.rdf import DCTERMS
+
+    assert (session_iri, DCTERMS.title, Literal("sessão de teste", lang="pt-BR")) in g
+
+
+def test_audit12_dmp_typed_dcso_dmp_not_fipmx(db_session, real_km_loaded):
+    """finding 12: dcso:DMP (RDA DMP Common Standard ontology) replaces the
+    home-grown fipmx:Data-Management-Plan class."""
+    from fipm.rdf import DCSO
+
+    fip = _insert_fip(
+        db_session,
+        real_km_loaded,
+        answers=[],
+        related_dmps=[{"url": "https://fiodmp.fiocruz.br/KQU5N0C", "version": "13"}],
+    )
+    g = fip_graph(db_session, fip, real_km_loaded)
+    dmp_iri = URIRef("https://fiodmp.fiocruz.br/KQU5N0C")
+    fipmx = real_km_loaded.ext_ns
+
+    assert (dmp_iri, RDF.type, DCSO.DMP) in g
+    assert (dmp_iri, RDF.type, URIRef(fipmx + "Data-Management-Plan")) not in g
+
+
+def test_audit12_known_principle_ids_whitelist_has_15_entries(db_session, real_km_loaded):
+    from fipm.rdf import FAIR, KNOWN_PRINCIPLE_IDS
+
+    assert KNOWN_PRINCIPLE_IDS == {
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "A1",
+        "A1.1",
+        "A1.2",
+        "A2",
+        "I1",
+        "I2",
+        "I3",
+        "R1",
+        "R1.1",
+        "R1.2",
+        "R1.3",
+    }
+
+    # a principle outside the whitelist is skipped rather than minted.
+    fip = _insert_fip(
+        db_session,
+        real_km_loaded,
+        answers=[
+            {
+                "questionId": "F1-metadata",
+                "declarations": [{"ferId": "https://www.doi.org/", "status": "current"}],
+            }
+        ],
+    )
+    g = fip_graph(db_session, fip, real_km_loaded)
+    assert (None, FIP["refers-to-principle"], FAIR["R2"]) not in g
+    assert (None, FIP["refers-to-principle"], FAIR["F1"]) in g
+
+
+def test_audit12_ontology_credit_present_as_rdfs_comment_triple(db_session, real_km_loaded):
+    """finding 12: the CC0 ontology-credit must also be a triple (so it
+    survives into JSON-LD), not only the Turtle comment header."""
+    from fipm.rdf import ONTOLOGY_CREDIT_TEXT
+
+    fip = _insert_fip(db_session, real_km_loaded, answers=[])
+    g = fip_graph(db_session, fip, real_km_loaded)
+    fip_iri = URIRef(fip_url(fip, real_km_loaded))
+    assert (fip_iri, RDFS.comment, Literal(ONTOLOGY_CREDIT_TEXT, lang="en")) in g
+
+
+def test_audit12_km_rights_language_tagged_en(db_session, real_km_loaded):
+    from fipm.rdf import DCTERMS
+
+    fip = _insert_fip(db_session, real_km_loaded, answers=[])
+    g = fip_graph(db_session, fip, real_km_loaded)
+    km_iri = URIRef(f"{real_km_loaded.base_url}/knowledge-models/{KM_ID}/{KM_VERSION}")
+    rights = list(g.objects(km_iri, DCTERMS.rights))
+    assert len(rights) == 1
+    assert rights[0].language == "en"
 
 
 # --------------------------------------------------------------------------

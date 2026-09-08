@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="FIPM_", env_file=".env", extra="ignore")
 
     base_url: str = "http://localhost:8000"
+    # spec 03 §2.1 / FAIR-ontology audit finding 2: the `fipmx` extension
+    # VOCABULARY namespace (classes/properties FIP Manager defines) is a
+    # fixed, deployment-independent IRI -- unlike instance IRIs (FIPs,
+    # sessions, free-text FERs), which keep following base_url.
+    ext_ns: str = "https://w3id.org/fipm/ns#"
     db_path: str = str(_REPO_ROOT / "fipm.db")
     secret_key: str = "dev-secret-change-me"
     id_prefix: str = ""
