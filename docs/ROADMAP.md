@@ -15,13 +15,13 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] Deliverable: running skeleton where a user can register, sign in, create a FIP and read it back via API (done 8 Sep; 14/14 acceptance criteria verified, Docker image runs).
 
 ## Week 2 · 15–19 Sep · Core flows
-- [ ] Participant flow: join session by link, fill questionnaire, pick/enter FERs with status, save, get FIP URL.
-- [ ] i18n wiring: UI strings in en, pt-PT, pt-BR; questionnaire content per language; browser-locale detection with English fallback; switcher remembered per browser.
-- [ ] Export FIP as JSON and CSV; print view.
-- [ ] Personal workspace: my FIPs, my sessions, my knowledge models; visibility private / link / public; change password; delete account.
-- [ ] Anonymous session FIPs: per-FIP edit token in the browser; signed-in user can claim a FIP into their workspace.
-- [ ] Facilitator flow (signed-in user): create session, choose questionnaire version, join link + QR.
-- [ ] Deliverable: end-to-end demo with a colleague on a phone.
+- [x] Participant flow: join session by link, fill questionnaire, pick/enter FERs with status, save, get FIP URL (done 8 Sep, docs/specs/02-core-flows.md; verified in a 375 px browser run).
+- [x] i18n wiring: UI strings in en, pt-PT, pt-BR (191 keys, parity checked); questionnaire content per language; browser-locale detection with English fallback; switcher remembered per browser (done 8 Sep; Portuguese is a draft pending facilitator review).
+- [x] Export FIP as JSON and CSV; print view (done 8 Sep; CSV has a formula-injection guard).
+- [x] Personal workspace: my FIPs, my sessions, my knowledge models; visibility private / link / public; change password; delete account (done 8 Sep).
+- [x] Anonymous session FIPs: per-FIP edit token in the browser; signed-in user can claim a FIP into their workspace (done 8 Sep).
+- [x] Facilitator flow (signed-in user): create session, choose questionnaire version, join link + QR, live list of FIPs, export all, close (done 8 Sep).
+- [ ] Deliverable: end-to-end demo with a colleague on a phone (automated phone-viewport run passed 8 Sep; a real phone and a real colleague still needed).
 
 ## Week 3 · 22–26 Sep · Workshop features and content
 - [ ] Comparison matrix (principle × group) with per-principle convergence view; export all FIPs of a session.

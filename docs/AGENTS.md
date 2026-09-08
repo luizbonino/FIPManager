@@ -43,6 +43,13 @@ Translations run in parallel with steps 2–3 whenever user-facing text changes.
 - Vibe never touches docs/PLAN.md, docs/ROADMAP.md or authentication code. The `vibe-runner` agent enforces this in its prompt; `reviewer` is the safety net.
 - If the free-tier limits bite, either add a Mistral API key in `~/.vibe/config.toml` or route the task to `builder` (sonnet).
 
+## Lessons from the first day (8 Sep 2026)
+
+- Mistral Vibe scaffolded the frontend (21 files) but needed two runs, and its Haiku driver burned more tokens polling than driving; the tightened `vibe-runner` rules (single foreground call, chunks of ≤12 files, nested key counts) address that. Net saving was small; use Vibe for genuinely mechanical bulk (fixtures, boilerplate, first-draft translations), not for anything with cross-file contracts.
+- Sonnet builders reliably delivered spec-driven backend and frontend work when given exact acceptance criteria and file ownership boundaries; running two builders concurrently on disjoint file sets worked well.
+- Opus reviewers found real, verified security issues after every build round (KM authz gate, CSV formula injection, closed-session bypass via claim). Never skip the reviewer for anything touching auth, tokens or exports.
+- A browser walkthrough at phone width (Playwright, driven by a Sonnet agent) caught two visual defects unit tests cannot: an unreadable badge and an oversized header.
+
 ## Adjusting
 
 - A role is under-powered if it produces repeated verifier failures or reviewer findings: move it one tier up in its frontmatter `model:` line.
