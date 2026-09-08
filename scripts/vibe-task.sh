@@ -26,7 +26,7 @@ PROMPT="${1:?prompt required}"
 OUT="$(mktemp)"
 trap 'rm -f "$OUT"' EXIT
 set +e
-"$VIBE" -p "$PROMPT" --auto-approve --max-turns "$TURNS" --max-price "$PRICE" --output json "${TOOLS[@]}" >"$OUT" 2>"$OUT.err"
+"$VIBE" -p "$PROMPT" --auto-approve --max-turns "$TURNS" --max-price "$PRICE" --output json ${TOOLS[@]+"${TOOLS[@]}"} >"$OUT" 2>"$OUT.err"
 RC=$?
 set -e
 python3 - "$OUT" <<'PY'

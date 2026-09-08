@@ -1,6 +1,6 @@
 # FIP Manager – Tool Plan
 
-Status: draft v0.5, 2026-09-08. All four initial decisions closed; v0.5 adds multi-user accounts and personal workspaces. Owners: L. O. Bonino da Silva Santos + 2 co-facilitators.
+Status: draft v0.6, 2026-09-08. All four initial decisions closed; v0.5 added multi-user accounts and personal workspaces; v0.6 aligns statuses and FER types with the FIP ontology (see docs/specs/00-fip-ontology-mapping.md). Owners: L. O. Bonino da Silva Santos + 2 co-facilitators.
 First milestone: FIP workshop at CONFOA 2026, Faro (PT), 6 October 2026.
 
 ## 1. Why a new tool
@@ -14,7 +14,7 @@ First milestone: FIP workshop at CONFOA 2026, Faro (PT), 6 October 2026.
 ## 2. Goals
 
 1. Let a community (or a workshop group) declare a FAIR Implementation Profile by answering an editable questionnaire.
-2. Use the GO FAIR FIP mini-questionnaire as-is (21 questions, 11 FER types) for the workshop. Treat the questionnaire as an editable, versioned *knowledge model* in the DSW sense: editors can translate, reorder, hide, add or split questions and publish a new version without code changes; every FIP records which version it answers.
+2. Use the GO FAIR FIP mini-questionnaire v2.0.0 as-is (21 questions, 12 FER types; content licensed CC BY-SA 4.0 by the GO FAIR Foundation, attribution required) for the workshop. Treat the questionnaire as an editable, versioned *knowledge model* in the DSW sense: editors can translate, reorder, hide, add or split questions and publish a new version without code changes; every FIP records which version it answers.
 3. Be multilingual from day one: English (`en`), European Portuguese (`pt-PT`) and Brazilian Portuguese (`pt-BR`), for the interface *and* the questionnaire content. Default language comes from the browser's locale; English is the fallback. Spanish (`es`, a FioDMP language) is a later addition.
 4. Produce standards-based output: JSON, CSV, RDF/Turtle following the FIP ontology (https://w3id.org/fair/fip/terms/), nanopublications later.
 5. Integrate bidirectionally with FioDMP (https://fiodmp.fiocruz.br): a DMP can cite a FIP, and a FIP can point at answers in a DMP.
@@ -54,19 +54,19 @@ Questionnaire / Knowledge model    FIP (an instance)
       ├─ principle (F1…R1.3)      │   ├─ questionId
       ├─ scope (metadata|data|-)  │   ├─ declarations[]
       ├─ text{lang}, help{lang}   │   │   ├─ fer (ref to FER or free text)
-      ├─ ferType                  │   │   ├─ status: current | planned | considered | none
+      ├─ ferType                  │   │   ├─ status: current | planned | planned-development | planned-replacement | none
       └─ required, allowMultiple  │   │   └─ note{lang}, dmpEvidence (DMP url + question ref)
                                   │   └─ comment
 FER (FAIR Enabling Resource)      └─ createdAt, updatedAt, language, license
 ├─ id (IRI, nanopub if known)
-├─ label{lang}, type (11 FER types), homepage
+├─ label{lang}, type (12 FER types), homepage
 ├─ ownerId | null (seed)
 └─ source: seed | user | nanopub
 ```
 
 User-contributed FERs are visible in their owner's workspace and in any FIP that uses them; an admin can promote one to the global catalogue.
 
-The declaration statuses map to the FIP ontology properties `declares-current-use-of`, `declares-planned-development-of` / `declares-planned-replacement-of` and a "considered" state, so RDF export is a straightforward mapping.
+The declaration statuses mirror the FIP ontology one-to-one: `current` → `fip:declares-current-use-of`, `planned` → `fip:declares-planned-use-of`, `planned-development` → `fip:declares-planned-development-of`, `planned-replacement` → `fip:declares-planned-replacement-of`, and `none` → a `fip:FIP-No-Choice-Declaration`. The earlier "considered" state was dropped on 8 Sep because the ontology has no such term; deliberation goes into the declaration's `note`, exported as `fip:considerations`. Question ids follow the ontology: F1, F4, A1.1, A1.2, I1, I2, I3, R1.1 and R1.2 have metadata and data variants; F2, F3 and A2 are unscoped; there is no R1.3 question (the community description answers it). Verified terms, IRIs and a Turtle example are in docs/specs/00-fip-ontology-mapping.md.
 
 ## 5. Functional scope
 
@@ -137,3 +137,5 @@ Deliverable to ICTIC: a 2-page API contract (OpenAPI) + this mapping, to be disc
 4. ~~Licence~~ Decided 8 Sep: the tool is MIT (see `LICENSE`). Exported FIPs default to CC0 1.0, shown on the export and editable per FIP.
 5. Sign-up policy at launch: open registration, or invite-only (admin creates accounts) to avoid spam before SMTP-based verification exists. Default if undecided: open registration with a rate limit.
 6. Whether CONFOA participants are encouraged to create accounts and claim their group's FIP after the workshop (recommended: yes, mention it on the closing slide).
+7. Content licence: the GO FAIR questionnaire text is CC BY-SA 4.0, so the `gofair-fip-mini` knowledge model, forks of it and FIP exports that embed its question texts must carry CC BY-SA 4.0 with attribution (GO FAIR Foundation, CODATA; Schultes, Magagna, Schultes 2020/2023). The MIT licence covers the code only. Proposed: a `data/knowledge-models/LICENSE` note plus a UI footer credit; exported FIP *answers* stay CC0 by default. Needs facilitator confirmation.
+8. Assumptions taken on 8 Sep while facilitators were away (see docs/specs/01-foundations.md §9): one FIP per group in a session; open registration with rate limit behind a config flag; anonymous session FIPs default to `link` visibility so the room can compare; account deletion anonymises FIPs rather than deleting them.
