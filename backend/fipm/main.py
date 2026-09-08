@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fipm.auth import csrf_middleware
 from fipm.config import get_settings
 from fipm.importer import run_import
-from fipm.routers import auth, fers, fips, health, knowledge_models, me, sessions
+from fipm.routers import auth, fer_types, fers, fips, health, knowledge_models, me, sessions
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(me.router, prefix="/api")
 app.include_router(knowledge_models.router, prefix="/api")
 app.include_router(fers.router, prefix="/api")
+app.include_router(fer_types.router, prefix="/api")
 app.include_router(fips.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
 

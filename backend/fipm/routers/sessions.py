@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fipm.authz import get_readable_published_km, require_user
 from fipm.config import Settings, get_settings
 from fipm.db import get_db
+from fipm.exporters import build_session_export_csv, build_session_export_json
 from fipm.ids import join_code as gen_join_code
 from fipm.ids import short_id
-from fipm.models import Fip, User, WorkshopSession
+from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
 from fipm.schemas import (
     SessionCreateRequest,
     SessionPatchRequest,
@@ -69,6 +71,7 @@ def get_session_by_code(join_code: str, db: Session = Depends(get_db)) -> Sessio
     if row is None:
         raise HTTPException(status_code=404, detail="not_found")
     owner = db.get(User, row.owner_id)
+    km = db.get(KnowledgeModel, (row.questionnaire_id, row.questionnaire_version))
     return SessionPublicOut(
         id=row.id,
         title=row.title,
@@ -76,6 +79,7 @@ def get_session_by_code(join_code: str, db: Session = Depends(get_db)) -> Sessio
         questionnaire_ref={"id": row.questionnaire_id, "version": row.questionnaire_version},
         default_language=row.default_language,
         facilitator_name=owner.display_name if owner else "",
+        questionnaire_title=(km.title if km else {}) or {},
     )
 
 
@@ -116,3 +120,34 @@ def list_session_fips(
     rows = db.query(Fip).filter(Fip.session_id == row.id).order_by(Fip.created_at).all()
     items = [fip_out_dict(f) for f in rows]
     return {"items": items, "total": len(items)}
+
+
+@router.get("/{session_id}/export.json")
+def export_session_json(
+    session_id: str, db: Session = Depends(get_db), user: User = Depends(require_user)
+) -> Response:
+    row = _get_owned_session(session_id, db, user)
+    settings = get_settings()
+    fips = db.query(Fip).filter(Fip.session_id == row.id).order_by(Fip.created_at).all()
+    owner = db.get(User, row.owner_id)
+    doc = build_session_export_json(db, row, fips, settings, owner.display_name if owner else "")
+    return Response(
+        content=json.dumps(doc, indent=2),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{row.id}.json"'},
+    )
+
+
+@router.get("/{session_id}/export.csv")
+def export_session_csv(
+    session_id: str, db: Session = Depends(get_db), user: User = Depends(require_user)
+) -> Response:
+    row = _get_owned_session(session_id, db, user)
+    settings = get_settings()
+    fips = db.query(Fip).filter(Fip.session_id == row.id).order_by(Fip.created_at).all()
+    csv_text = build_session_export_csv(db, row, fips, settings)
+    return Response(
+        content=csv_text,
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{row.id}.csv"'},
+    )

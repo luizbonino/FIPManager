@@ -19,6 +19,9 @@ class CamelModel(BaseModel):
 # `Literal`s, not DB-native enums: the columns stay `String` per the spec.
 Visibility = Literal["private", "link", "public"]
 SessionStatus = Literal["open", "closed"]
+# spec 02-core-flows.md §5.5: the three languages the frontend ships UI
+# strings for. Plain `Literal`, not a DB-native enum (columns stay `String`).
+Language = Literal["en", "pt-PT", "pt-BR"]
 
 
 # ---------------------------------------------------------------------------
@@ -202,7 +205,7 @@ class RelatedDmp(CamelModel):
 
 class FipCreateRequest(CamelModel):
     questionnaire_ref: QuestionnaireRef
-    language: str | None = None
+    language: Language | None = None
     community: Community | None = None
     answers: list[Answer] = Field(default_factory=list)
     visibility: Visibility | None = None
@@ -216,7 +219,7 @@ class FipPatchRequest(CamelModel):
     community: Community | None = None
     answers: list[Answer] | None = None
     related_dmps: list[RelatedDmp] | None = None
-    language: str | None = None
+    language: Language | None = None
     license: str | None = None
     visibility: Visibility | None = None
 
@@ -258,13 +261,13 @@ class FipImportDoc(CamelModel):
 class SessionCreateRequest(CamelModel):
     title: str
     questionnaire_ref: QuestionnaireRef
-    default_language: str
+    default_language: Language
 
 
 class SessionPatchRequest(CamelModel):
     title: str | None = None
     status: SessionStatus | None = None
-    default_language: str | None = None
+    default_language: Language | None = None
 
 
 class SessionOut(CamelModel):
@@ -288,6 +291,9 @@ class SessionPublicOut(CamelModel):
     questionnaire_ref: QuestionnaireRef
     default_language: str
     facilitator_name: str
+    # spec 02-core-flows.md §5.1: the knowledge model's own `title` LangMap,
+    # so the join screen can render it without a ~60 kB knowledge-model fetch.
+    questionnaire_title: dict[str, str]
 
 
 # ---------------------------------------------------------------------------

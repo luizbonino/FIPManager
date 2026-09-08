@@ -63,15 +63,28 @@ def _session_owner_has_access(fip: Fip, user: User | None, db: Session) -> bool:
 
 def _authorize_fip_write(fip: Fip, user: User | None, request: Request, db: Session) -> None:
     if fip.owner_id is not None:
+        # Owned (incl. claimed-out-of-session) FIPs are unaffected by their
+        # session's status (spec 02-core-flows.md §7 A4): owner/admin only.
         if can_write_owned(fip.owner_id, user):
             return
         if not can_read(fip.owner_id, fip.visibility, user):
             raise HTTPException(status_code=404, detail="not_found")
         raise HTTPException(status_code=403, detail="forbidden")
 
-    # Ownerless (anonymous session) FIP: the session owner may write without a token.
+    # Ownerless (anonymous session) FIP: the session owner or an admin may
+    # write without a token, even once the session is closed.
     if _session_owner_has_access(fip, user, db):
         return
+    if user is not None and user.role == "admin":
+        return
+
+    # spec 02-core-flows.md §5.4: a closed session makes its anonymous FIPs
+    # read-only for everyone else, regardless of edit-token validity.
+    if fip.session_id is not None:
+        session_row = db.get(WorkshopSession, fip.session_id)
+        if session_row is not None and session_row.status == "closed":
+            raise HTTPException(status_code=409, detail="session_closed")
+
     check_edit_token(request, fip)
 
 

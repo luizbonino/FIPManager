@@ -1,20 +1,169 @@
 {
   "id": "fip-fer-types",
   "version": "1.0.0",
+  "source": {
+    "name": "FAIR Implementation Profile (FIP) Ontology",
+    "url": "https://w3id.org/fair/fip/terms/"
+  },
+  "license": "CC0-1.0",
+  "attribution": "FIP Ontology by Erik Schultes, Tobias Kuhn and Barbara Magagna, CC0 1.0. Labels and descriptions are the ontology's rdfs:label and skos:definition.",
+  "namespace": "https://w3id.org/fair/fip/terms/",
   "types": [
     {
       "key": "identifier-service",
       "iri": "https://w3id.org/fair/fip/terms/Identifier-service",
       "principle": "F1",
-      "label": {"en": "Identifier service"},
-      "description": {"en": "A service providing persistent, resolvable identifiers."}
+      "label": {
+        "en": "Identifier service",
+        "pt-PT": "Serviço de identificadores",
+        "pt-BR": "Serviço de identificadores"
+      },
+      "description": {
+        "en": "A service that provides for any digital object (1) algorithms guaranteeing global uniqueness, (2) policy document that guarantees persistent and (3) resolution of the identifier to machine-actionable metadata describing the object and its location."
+      }
     },
     {
       "key": "metadata-schema",
       "iri": "https://w3id.org/fair/fip/terms/Metadata-schema",
       "principle": "F2",
-      "label": {"en": "Metadata schema"},
-      "description": {"en": "A specification for structured metadata."}
+      "label": {
+        "en": "Metadata schema",
+        "pt-PT": "Esquema de metadados",
+        "pt-BR": "Esquema de metadados"
+      },
+      "description": {
+        "en": "A specification that specifies the structured representation of metadata describing attributes of data or other digital objects in terms of semantics, syntax and optionality."
+      }
+    },
+    {
+      "key": "metadata-data-linking-schema",
+      "iri": "https://w3id.org/fair/fip/terms/Metadata-data-linking-schema",
+      "principle": "F3",
+      "label": {
+        "en": "Metadata-data linking schema",
+        "pt-PT": "Esquema de ligação entre metadados e dados",
+        "pt-BR": "Esquema de vinculação entre metadados e dados"
+      },
+      "description": {
+        "en": "A specification that provides a unique, persistent, (ideally) bi-directional, machine-actionable link between metadata and the data they describe."
+      }
+    },
+    {
+      "key": "registry",
+      "iri": "https://w3id.org/fair/fip/terms/Registry",
+      "principle": "F4",
+      "label": {
+        "en": "Registry",
+        "pt-PT": "Registo (catálogo pesquisável)",
+        "pt-BR": "Registro (catálogo pesquisável)"
+      },
+      "description": {
+        "en": "A service that indexes metadata and data and provides search over that index."
+      }
+    },
+    {
+      "key": "communication-protocol",
+      "iri": "https://w3id.org/fair/fip/terms/Communication-protocol",
+      "principle": "A1.1",
+      "label": {
+        "en": "Communication protocol",
+        "pt-PT": "Protocolo de comunicação",
+        "pt-BR": "Protocolo de comunicação"
+      },
+      "description": {
+        "en": "A specification of how messages are structured and exchanged."
+      }
+    },
+    {
+      "key": "authentication-authorization-service",
+      "iri": "https://w3id.org/fair/fip/terms/Authentication-and-authorization-service",
+      "principle": "A1.2",
+      "label": {
+        "en": "Authentication and authorization service",
+        "pt-PT": "Serviço de autenticação e autorização",
+        "pt-BR": "Serviço de autenticação e autorização"
+      },
+      "description": {
+        "en": "A service that mediates access to digital objects according to specifed conditions."
+      }
+    },
+    {
+      "key": "metadata-preservation-policy",
+      "iri": "https://w3id.org/fair/fip/terms/Metadata-preservation-policy",
+      "principle": "A2",
+      "label": {
+        "en": "Metadata preservation policy",
+        "pt-PT": "Política de preservação de metadados",
+        "pt-BR": "Política de preservação de metadados"
+      },
+      "description": {
+        "en": "A data policy that describes the conditions under which metadata should be provided in the future."
+      }
+    },
+    {
+      "key": "knowledge-representation-language",
+      "iri": "https://w3id.org/fair/fip/terms/Knowledge-representation-language",
+      "principle": "I1",
+      "label": {
+        "en": "Knowledge representation language",
+        "pt-PT": "Linguagem de representação de conhecimento",
+        "pt-BR": "Linguagem de representação de conhecimento"
+      },
+      "description": {
+        "en": "A language specification that enables knowledge to be processed by machines."
+      }
+    },
+    {
+      "key": "structured-vocabulary",
+      "iri": "https://w3id.org/fair/fip/terms/Structured-vocabulary",
+      "principle": "I2",
+      "label": {
+        "en": "Structured vocabulary",
+        "pt-PT": "Vocabulário estruturado",
+        "pt-BR": "Vocabulário estruturado"
+      },
+      "description": {
+        "en": "A specification for a controlled list of uniquely identified and unambigous concepts with their definitions represented using web standards."
+      }
+    },
+    {
+      "key": "semantic-model",
+      "iri": "https://w3id.org/fair/fip/terms/Semantic-model",
+      "principle": "I3",
+      "label": {
+        "en": "Semantic model",
+        "pt-PT": "Modelo semântico",
+        "pt-BR": "Modelo semântico"
+      },
+      "description": {
+        "en": "A specification that defines qualified relations between entities describing data or other digital objects according to the Linked Data principles. This can include semantic data models and ontologies."
+      }
+    },
+    {
+      "key": "data-usage-license",
+      "iri": "https://w3id.org/fair/fip/terms/Data-usage-license",
+      "principle": "R1.1",
+      "label": {
+        "en": "Data usage license",
+        "pt-PT": "Licença de utilização dos dados",
+        "pt-BR": "Licença de uso dos dados"
+      },
+      "description": {
+        "en": "A data policy that specifies legal restrictions on the reuse of the data."
+      }
+    },
+    {
+      "key": "provenance-model",
+      "iri": "https://w3id.org/fair/fip/terms/Provenance-model",
+      "principle": "R1.2",
+      "label": {
+        "en": "Provenance model",
+        "pt-PT": "Modelo de proveniência",
+        "pt-BR": "Modelo de proveniência"
+      },
+      "description": {
+        "en": "A specification that specifies metadata describing the origin and lineage of data or other digital objects."
+      }
     }
   ]
 }

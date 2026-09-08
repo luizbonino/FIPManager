@@ -10,7 +10,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from fipm.config import Settings
-from fipm.models import Fer, Fip, KnowledgeModel
+from fipm.models import Fer, Fip, KnowledgeModel, WorkshopSession
 
 CSV_HEADER = [
     "fip_id",
@@ -147,11 +147,12 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
     }
 
 
-def build_export_csv(db: Session, fip: Fip, settings: Settings) -> str:
-    doc = build_export_json(db, fip, settings)
-    buf = io.StringIO()
-    writer = csv.writer(buf, lineterminator="\r\n")
-    writer.writerow(CSV_HEADER)
+def _fip_csv_rows(fip: Fip, doc: dict[str, Any]) -> list[list[Any]]:
+    """One CSV row (matching `CSV_HEADER`) per declaration of `doc`, plus one
+    row for each unanswered question. Shared by the single-FIP export and the
+    session-wide export (spec 02-core-flows.md §5.3), which prepends its own
+    `session_id, fip_title` columns to each row."""
+    rows: list[list[Any]] = []
     community_name = (fip.community or {}).get("name", "") if fip.community else ""
 
     for answer in doc["answers"]:
@@ -173,11 +174,11 @@ def build_export_csv(db: Session, fip: Fip, settings: Settings) -> str:
         ]
         declarations = answer["declarations"]
         if not declarations:
-            writer.writerow(base + ["", "", "", "", "", "", answer["comment"] or ""])
+            rows.append(base + ["", "", "", "", "", "", answer["comment"] or ""])
         else:
             for idx, decl in enumerate(declarations):
                 fer = decl.get("fer") or {}
-                writer.writerow(
+                rows.append(
                     base
                     + [
                         idx,
@@ -189,6 +190,63 @@ def build_export_csv(db: Session, fip: Fip, settings: Settings) -> str:
                         answer["comment"] or "",
                     ]
                 )
+    return rows
+
+
+def build_export_csv(db: Session, fip: Fip, settings: Settings) -> str:
+    doc = build_export_json(db, fip, settings)
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\r\n")
+    writer.writerow(CSV_HEADER)
+    for row in _fip_csv_rows(fip, doc):
+        writer.writerow(row)
+    return "﻿" + buf.getvalue()
+
+
+# spec 02-core-flows.md §5.3: session-wide export, columns prefixed by
+# `session_id, fip_title` (= community.name), all FIPs under one header row.
+SESSION_CSV_HEADER = ["session_id", "fip_title", *CSV_HEADER]
+
+
+def build_session_export_json(
+    db: Session,
+    session: WorkshopSession,
+    fips: list[Fip],
+    settings: Settings,
+    facilitator_name: str,
+) -> dict[str, Any]:
+    return {
+        "exportVersion": 1,
+        "generatedAt": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "tool": {"name": "FIP Manager", "baseUrl": settings.base_url},
+        "session": {
+            "id": session.id,
+            "title": session.title,
+            "status": session.status,
+            "joinCode": session.join_code,
+            "defaultLanguage": session.default_language,
+            "questionnaireRef": {
+                "id": session.questionnaire_id,
+                "version": session.questionnaire_version,
+            },
+            "facilitatorName": facilitator_name,
+            "createdAt": _iso_utc(session.created_at),
+        },
+        "fips": [build_export_json(db, fip, settings) for fip in fips],
+    }
+
+
+def build_session_export_csv(
+    db: Session, session: WorkshopSession, fips: list[Fip], settings: Settings
+) -> str:
+    buf = io.StringIO()
+    writer = csv.writer(buf, lineterminator="\r\n")
+    writer.writerow(SESSION_CSV_HEADER)
+    for fip in fips:
+        doc = build_export_json(db, fip, settings)
+        fip_title = (fip.community or {}).get("name") if fip.community else None
+        for row in _fip_csv_rows(fip, doc):
+            writer.writerow([session.id, fip_title or "", *row])
     return "﻿" + buf.getvalue()
 
 
