@@ -1,0 +1,16 @@
+[
+  {
+    "id": "https://w3id.org/np/doi",
+    "label": {"en": "DOI", "pt-BR": "DOI"},
+    "type": "identifier-service",
+    "homepage": "https://doi.org",
+    "source": "seed"
+  },
+  {
+    "id": "https://w3id.org/np/datacite",
+    "label": {"en": "DataCite Metadata Schema"},
+    "type": "metadata-schema",
+    "homepage": "https://schema.datacite.org",
+    "source": "seed"
+  }
+]

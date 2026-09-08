@@ -1,0 +1,20 @@
+{
+  "id": "fip-fer-types",
+  "version": "1.0.0",
+  "types": [
+    {
+      "key": "identifier-service",
+      "iri": "https://w3id.org/fair/fip/terms/Identifier-service",
+      "principle": "F1",
+      "label": {"en": "Identifier service"},
+      "description": {"en": "A service providing persistent, resolvable identifiers."}
+    },
+    {
+      "key": "metadata-schema",
+      "iri": "https://w3id.org/fair/fip/terms/Metadata-schema",
+      "principle": "F2",
+      "label": {"en": "Metadata schema"},
+      "description": {"en": "A specification for structured metadata."}
+    }
+  ]
+}

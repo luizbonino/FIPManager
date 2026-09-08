@@ -1,0 +1,45 @@
+{
+  "id": "test-km",
+  "version": "1.0.0",
+  "status": "published",
+  "license": "CC0-1.0",
+  "source": "Test fixture questionnaire",
+  "title": {
+    "en": "Test knowledge model",
+    "pt-BR": "Modelo de conhecimento de teste"
+  },
+  "description": {
+    "en": "A tiny fixture questionnaire used by the backend test suite."
+  },
+  "changelog": [
+    {"version": "1.0.0", "date": "2026-01-01", "notes": "initial fixture"}
+  ],
+  "sections": [
+    {
+      "id": "findable",
+      "title": {"en": "Findable", "pt-BR": "Localizável"},
+      "questions": [
+        {
+          "id": "F1-metadata",
+          "principle": "F1",
+          "scope": "metadata",
+          "text": {"en": "What identifiers do you use?", "pt-BR": "Quais identificadores você usa?"},
+          "help": {"en": "Name the identifier service."},
+          "ferType": "identifier-service",
+          "required": true,
+          "allowMultiple": true
+        },
+        {
+          "id": "F2",
+          "principle": "F2",
+          "scope": null,
+          "text": {"en": "Which metadata schema do you use?"},
+          "help": null,
+          "ferType": "metadata-schema",
+          "required": true,
+          "allowMultiple": false
+        }
+      ]
+    }
+  ]
+}

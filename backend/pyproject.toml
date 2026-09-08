@@ -1,0 +1,44 @@
+[project]
+name = "fipm"
+version = "0.1.0"
+description = "FIP Manager backend"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy>=2.0",
+    "pydantic[email]>=2.0",
+    "pydantic-settings>=2.0",
+    "argon2-cffi>=23.1",
+    "python-multipart>=0.0.9",
+    "rdflib>=7.0",
+    "qrcode[pil]>=7.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "httpx>=0.27",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fipm"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's Depends()/Query()/Body() are meant to be used as call-in-default-value.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "fastapi.Header"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
