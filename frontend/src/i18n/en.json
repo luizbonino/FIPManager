@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "status": "source"
+  },
+  "appName": "FIP Manager",
+  "nav": {
+    "home": "Home",
+    "login": "Login",
+    "register": "Register",
+    "workspace": "Workspace",
+    "logout": "Logout"
+  },
+  "auth": {
+    "loginTitle": "Sign In",
+    "registerTitle": "Create Account",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter your email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "displayNameLabel": "Display Name",
+    "displayNamePlaceholder": "Enter your display name",
+    "languageLabel": "Language",
+    "languagePlaceholder": "Select your language",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "submitLogin": "Sign In",
+    "submitRegister": "Create Account",
+    "forgotPassword": "Forgot password?",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "logoutConfirm": "Are you sure you want to log out?"
+  },
+  "validation": {
+    "required": "This field is required",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordTooShort": "Password must be at least 10 characters",
+    "passwordTooLong": "Password must be at most 128 characters",
+    "passwordsDontMatch": "Passwords do not match",
+    "displayNameRequired": "Display name is required"
+  },
+  "workspace": {
+    "title": "My Workspace",
+    "myFips": "My FIPs",
+    "mySessions": "My Sessions",
+    "myKnowledgeModels": "My Knowledge Models",
+    "createNewFip": "Create New FIP",
+    "createNewSession": "Create New Session",
+    "noFips": "You don't have any FIPs yet.",
+    "noSessions": "You don't have any sessions yet.",
+    "noKnowledgeModels": "You don't have any knowledge models yet.",
+    "loading": "Loading...",
+    "error": "Error loading data"
+  },
+  "fip": {
+    "title": "FIP Details",
+    "notFound": "FIP not found",
+    "readOnly": "Read-only view",
+    "edit": "Edit",
+    "export": "Export",
+    "exportJson": "Export as JSON",
+    "exportCsv": "Export as CSV",
+    "metadata": "Metadata",
+    "content": "Content",
+    "ontologyMappings": "Ontology Mappings",
+    "source": "Source",
+    "target": "Target",
+    "type": "Type"
+  },
+  "session": {
+    "joinTitle": "Join Session",
+    "joinCodeLabel": "Join Code",
+    "joinCodePlaceholder": "Enter the session join code",
+    "submitJoin": "Join",
+    "invalidJoinCode": "Invalid join code",
+    "sessionClosed": "This session is closed",
+    "joinSuccess": "Successfully joined the session!",
+    "sessionInfo": "Session Information"
+  },
+  "errors": {
+    "networkError": "Network error. Please check your connection.",
+    "serverError": "Server error. Please try again later.",
+    "unauthorized": "Unauthorized. Please log in.",
+    "forbidden": "Access denied.",
+    "notFound": "Resource not found.",
+    "rateLimited": "Too many requests. Please wait and try again.",
+    "invalidCredentials": "Invalid email or password.",
+    "emailExists": "This email is already registered.",
+    "registrationClosed": "Registration is currently closed."
+  },
+  "languages": {
+    "en": "English",
+    "pt-PT": "Portuguese (Portugal)",
+    "pt-BR": "Portuguese (Brazil)"
+  },
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "success": "Success",
+    "error": "Error",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "id": "ID",
+    "name": "Name",
+    "description": "Description",
+    "created": "Created",
+    "updated": "Updated",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}

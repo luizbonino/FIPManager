@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "status": "draft"
+  },
+  "appName": "Gestor de FIP",
+  "nav": {
+    "home": "Início",
+    "login": "Iniciar Sessão",
+    "register": "Registar",
+    "workspace": "Área de Trabalho",
+    "logout": "Terminar Sessão"
+  },
+  "auth": {
+    "loginTitle": "Iniciar Sessão",
+    "registerTitle": "Criar Conta",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Introduza o seu email",
+    "passwordLabel": "Palavra-passe",
+    "passwordPlaceholder": "Introduza a sua palavra-passe",
+    "displayNameLabel": "Nome de Exibição",
+    "displayNamePlaceholder": "Introduza o seu nome de exibição",
+    "languageLabel": "Idioma",
+    "languagePlaceholder": "Seleccione o seu idioma",
+    "confirmPasswordLabel": "Confirmar Palavra-passe",
+    "confirmPasswordPlaceholder": "Confirme a sua palavra-passe",
+    "submitLogin": "Iniciar Sessão",
+    "submitRegister": "Criar Conta",
+    "forgotPassword": "Esqueceu-se da palavra-passe?",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "dontHaveAccount": "Ainda não tem uma conta?",
+    "logoutConfirm": "Tem a certeza que quer terminar a sessão?"
+  },
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "emailInvalid": "Introduza um endereço de email válido",
+    "passwordTooShort": "A palavra-passe deve ter pelo menos 10 caracteres",
+    "passwordTooLong": "A palavra-passe deve ter no máximo 128 caracteres",
+    "passwordsDontMatch": "As palavras-passe não coincidem",
+    "displayNameRequired": "O nome de exibição é obrigatório"
+  },
+  "workspace": {
+    "title": "Minha Área de Trabalho",
+    "myFips": "Os meus FIPs",
+    "mySessions": "As minhas Sessões",
+    "myKnowledgeModels": "Os meus Modelos de Conhecimento",
+    "createNewFip": "Criar Novo FIP",
+    "createNewSession": "Criar Nova Sessão",
+    "noFips": "Ainda não tem nenhum FIP.",
+    "noSessions": "Ainda não tem nenhuma sessão.",
+    "noKnowledgeModels": "Ainda não tem nenhum modelo de conhecimento.",
+    "loading": "A carregar...",
+    "error": "Erro ao carregar os dados"
+  },
+  "fip": {
+    "title": "Detalhes do FIP",
+    "notFound": "FIP não encontrado",
+    "readOnly": "Visualização apenas de leitura",
+    "edit": "Editar",
+    "export": "Exportar",
+    "exportJson": "Exportar como JSON",
+    "exportCsv": "Exportar como CSV",
+    "metadata": "Metadados",
+    "content": "Conteúdo",
+    "ontologyMappings": "Mapeamentos de Ontologia",
+    "source": "Origem",
+    "target": "Destino",
+    "type": "Tipo"
+  },
+  "session": {
+    "joinTitle": "Participar na Sessão",
+    "joinCodeLabel": "Código de Acesso",
+    "joinCodePlaceholder": "Introduza o código de acesso",
+    "submitJoin": "Participar",
+    "invalidJoinCode": "Código de acesso inválido",
+    "sessionClosed": "Esta sessão está fechada",
+    "joinSuccess": "Participação na sessão feita com sucesso!",
+    "sessionInfo": "Informações da Sessão"
+  },
+  "errors": {
+    "networkError": "Erro de rede. Verifique a sua ligação.",
+    "serverError": "Erro do servidor. Tente novamente mais tarde.",
+    "unauthorized": "Não autorizado. Por favor inicie sessão.",
+    "forbidden": "Acesso negado.",
+    "notFound": "Recurso não encontrado.",
+    "rateLimited": "Muitas solicitações. Aguarde e tente novamente.",
+    "invalidCredentials": "Email ou palavra-passe inválidos.",
+    "emailExists": "Este email já está registado.",
+    "registrationClosed": "O registo está atualmente fechado."
+  },
+  "languages": {
+    "en": "Inglês",
+    "pt-PT": "Português (Portugal)",
+    "pt-BR": "Português (Brasil)"
+  },
+  "common": {
+    "welcome": "Bem-vindo",
+    "loading": "A carregar...",
+    "saving": "A guardar...",
+    "success": "Sucesso",
+    "error": "Erro",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "id": "ID",
+    "name": "Nome",
+    "description": "Descrição",
+    "created": "Criado",
+    "updated": "Atualizado",
+    "status": "Estado",
+    "active": "Ativo",
+    "inactive": "Inativo"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "_meta": {
+    "status": "draft"
+  },
+  "appName": "Gerenciador de FIP",
+  "nav": {
+    "home": "Início",
+    "login": "Entrar",
+    "register": "Cadastrar",
+    "workspace": "Área de Trabalho",
+    "logout": "Sair"
+  },
+  "auth": {
+    "loginTitle": "Acessar",
+    "registerTitle": "Criar Conta",
+    "emailLabel": "E-mail",
+    "emailPlaceholder": "Digite seu e-mail",
+    "passwordLabel": "Senha",
+    "passwordPlaceholder": "Digite sua senha",
+    "displayNameLabel": "Nome de Exibição",
+    "displayNamePlaceholder": "Digite seu nome de exibição",
+    "languageLabel": "Idioma",
+    "languagePlaceholder": "Selecione seu idioma",
+    "confirmPasswordLabel": "Confirmar Senha",
+    "confirmPasswordPlaceholder": "Confirme sua senha",
+    "submitLogin": "Entrar",
+    "submitRegister": "Cadastrar",
+    "forgotPassword": "Esqueceu a senha?",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "dontHaveAccount": "Ainda não tem uma conta?",
+    "logoutConfirm": "Tem certeza que deseja sair?"
+  },
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "emailInvalid": "Digite um endereço de e-mail válido",
+    "passwordTooShort": "A senha deve ter pelo menos 10 caracteres",
+    "passwordTooLong": "A senha deve ter no máximo 128 caracteres",
+    "passwordsDontMatch": "As senhas não coincidem",
+    "displayNameRequired": "O nome de exibição é obrigatório"
+  },
+  "workspace": {
+    "title": "Minha Área de Trabalho",
+    "myFips": "Meus FIPs",
+    "mySessions": "Minhas Sessões",
+    "myKnowledgeModels": "Meus Modelos de Conhecimento",
+    "createNewFip": "Criar Novo FIP",
+    "createNewSession": "Criar Nova Sessão",
+    "noFips": "Você ainda não tem nenhum FIP.",
+    "noSessions": "Você ainda não tem nenhuma sessão.",
+    "noKnowledgeModels": "Você ainda não tem nenhum modelo de conhecimento.",
+    "loading": "Carregando...",
+    "error": "Erro ao carregar os dados"
+  },
+  "fip": {
+    "title": "Detalhes do FIP",
+    "notFound": "FIP não encontrado",
+    "readOnly": "Visualização apenas de leitura",
+    "edit": "Editar",
+    "export": "Exportar",
+    "exportJson": "Exportar como JSON",
+    "exportCsv": "Exportar como CSV",
+    "metadata": "Metadados",
+    "content": "Conteúdo",
+    "ontologyMappings": "Mapeamentos de Ontologia",
+    "source": "Origem",
+    "target": "Destino",
+    "type": "Tipo"
+  },
+  "session": {
+    "joinTitle": "Entrar na Sessão",
+    "joinCodeLabel": "Código de Acesso",
+    "joinCodePlaceholder": "Digite o código de acesso",
+    "submitJoin": "Entrar",
+    "invalidJoinCode": "Código de acesso inválido",
+    "sessionClosed": "Esta sessão está fechada",
+    "joinSuccess": "Você entrou na sessão com sucesso!",
+    "sessionInfo": "Informações da Sessão"
+  },
+  "errors": {
+    "networkError": "Erro de rede. Verifique sua conexão.",
+    "serverError": "Erro no servidor. Tente novamente mais tarde.",
+    "unauthorized": "Não autorizado. Por favor faça login.",
+    "forbidden": "Acesso negado.",
+    "notFound": "Recurso não encontrado.",
+    "rateLimited": "Muitas solicitações. Aguarde e tente novamente.",
+    "invalidCredentials": "E-mail ou senha inválidos.",
+    "emailExists": "Este e-mail já está cadastrado.",
+    "registrationClosed": "O cadastro está fechado no momento."
+  },
+  "languages": {
+    "en": "Inglês",
+    "pt-PT": "Português (Portugal)",
+    "pt-BR": "Português (Brasil)"
+  },
+  "common": {
+    "welcome": "Bem-vindo",
+    "loading": "Carregando...",
+    "saving": "Salvando...",
+    "success": "Sucesso",
+    "error": "Erro",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "id": "ID",
+    "name": "Nome",
+    "description": "Descrição",
+    "created": "Criado",
+    "updated": "Atualizado",
+    "status": "Status",
+    "active": "Ativo",
+    "inactive": "Inativo"
+  }
+}
