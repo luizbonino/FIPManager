@@ -92,6 +92,12 @@ class KnowledgeModelSummary(CamelModel):
     description: dict[str, str]
     created_at: datetime
     updated_at: datetime
+    # spec 04-knowledge-model-editor.md §3 API #1: additive fields, existing
+    # ones kept so the pre-week-3 frontend keeps working.
+    owner_id: str | None = None
+    is_system: bool = False
+    question_count: int = 0
+    forked_from: dict[str, str] | None = None
 
 
 class KnowledgeModelVersionEntry(CamelModel):
@@ -113,11 +119,59 @@ class KnowledgeModelOut(CamelModel):
     content: dict[str, Any]
     created_at: datetime
     updated_at: datetime
+    owner_id: str | None = None
 
 
 class ListOut(CamelModel):
     items: list[Any]
     total: int
+
+
+# ---------------------------------------------------------------------------
+# Knowledge models -- write requests (spec 04-knowledge-model-editor.md §3)
+# ---------------------------------------------------------------------------
+
+
+class KnowledgeModelCreateRequest(CamelModel):
+    id: str | None = None
+    title: dict[str, str]
+    description: dict[str, str] | None = None
+    license: str | None = None
+    sections: list[dict[str, Any]] | None = None
+
+
+class KnowledgeModelForkRequest(CamelModel):
+    new_id: str | None = None
+    title: dict[str, str] | None = None
+
+
+class KnowledgeModelImportRequest(CamelModel):
+    id: str | None = None
+    document: dict[str, Any]
+
+
+class KnowledgeModelPatchRequest(CamelModel):
+    title: dict[str, str] | None = None
+    description: dict[str, str] | None = None
+    visibility: Visibility | None = None
+
+
+class KnowledgeModelContentPutRequest(CamelModel):
+    sections: list[dict[str, Any]]
+    title: dict[str, str] | None = None
+    description: dict[str, str] | None = None
+
+
+class KnowledgeModelPublishRequest(CamelModel):
+    # Deliberately unconstrained (no min_length): an absent `notes` key is a
+    # 422 (AC2), an empty string is a 400 `changelog_notes_required` handled
+    # in the router -- pydantic must accept "" for that distinction to work.
+    notes: str = Field(max_length=2000)
+
+
+class KnowledgeModelNewVersionRequest(CamelModel):
+    bump: Literal["minor", "patch", "major"] | None = None
+    version: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -329,6 +383,35 @@ def fip_out_dict(fip: Any, edit_token: str | None = None) -> dict[str, Any]:
     if data.get("editToken") is None:
         data.pop("editToken", None)
     return data
+
+
+def km_summary_dict(row: Any) -> dict[str, Any]:
+    """KnowledgeModelSummary as a camelCase dict, with `questionCount` (non-
+    hidden questions) and `forkedFrom` read out of the row's `content` JSON
+    (spec 04-knowledge-model-editor.md §3 API #1)."""
+    content = row.content or {}
+    question_count = sum(
+        1
+        for section in (content.get("sections") or [])
+        for question in (section.get("questions") or [])
+        if question.get("hidden") is not True
+    )
+    summary = KnowledgeModelSummary(
+        id=row.id,
+        version=row.version,
+        status=row.status,
+        visibility=row.visibility,
+        license=row.license,
+        title=row.title,
+        description=row.description,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        owner_id=row.owner_id,
+        is_system=row.owner_id is None,
+        question_count=question_count,
+        forked_from=content.get("forkedFrom"),
+    )
+    return summary.model_dump(mode="json", by_alias=True)
 
 
 def session_to_out(row: Any, base_url: str) -> SessionOut:

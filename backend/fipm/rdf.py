@@ -469,6 +469,10 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
         if not qid:
             continue
         question_meta = questions_by_id.get(qid, {})
+        # spec 04-knowledge-model-editor.md §4: hidden questions emit nothing
+        # at all in the RDF export.
+        if question_meta.get("hidden") is True:
+            continue
         principle = question_meta.get("principle")
         fer_type_key = question_meta.get("ferType")
         q_local = _question_individual_local(qid)

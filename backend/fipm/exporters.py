@@ -96,6 +96,11 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
     out_answers: list[dict[str, Any]] = []
     for section in content.get("sections", []):
         for question in section.get("questions", []):
+            # spec 04-knowledge-model-editor.md §4: hidden questions are
+            # skipped by exports (no padded row, no `answers` entry) even if
+            # the FIP still stores an answer from before it was hidden.
+            if question.get("hidden") is True:
+                continue
             qid = question["id"]
             stored = answers_by_qid.get(qid)
             declarations: list[dict[str, Any]] = []

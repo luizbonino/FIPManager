@@ -15,6 +15,7 @@ from fipm.config import Settings, get_settings
 from fipm.db import SessionLocal, init_db
 from fipm.fer_types import get_fer_types
 from fipm.ids import new_user_id
+from fipm.km_content import normalize_source, validate_content
 from fipm.models import Fer, KnowledgeModel, User
 
 logger = logging.getLogger(__name__)
@@ -58,29 +59,18 @@ class ImportSummary:
         print(f"fer_types: loaded={self.fer_types_loaded}")
 
 
-def _normalize_source(source: object) -> str:
-    """The knowledge-model `source` field may be a plain string or a
-    {"name", "url"} object (the real GO FAIR file uses the latter)."""
-    if isinstance(source, dict):
-        name = source.get("name")
-        return str(name) if name else json.dumps(source, sort_keys=True)
-    return str(source)
-
-
-def _validate_knowledge_model(doc: dict) -> None:
+def _validate_knowledge_model(doc: dict, settings: Settings) -> None:
+    """Structural top-level keys, then delegate the `content` shape (sections/
+    questions/LangMaps) to `fipm.km_content.validate_content` -- spec
+    04-knowledge-model-editor.md §3.3: "The importer's
+    `_validate_knowledge_model` is replaced by a call to this module so disk
+    and API agree." """
     missing = REQUIRED_KM_KEYS - doc.keys()
     if missing:
         raise ValueError(f"missing keys: {sorted(missing)}")
-    if not isinstance(doc["sections"], list):
-        raise ValueError("sections must be a list")
-    for section in doc["sections"]:
-        if "id" not in section or "questions" not in section:
-            raise ValueError("section missing id/questions")
-        if not isinstance(section["questions"], list):
-            raise ValueError("questions must be a list")
-        for question in section["questions"]:
-            if "id" not in question or "text" not in question:
-                raise ValueError("question missing id/text")
+    errors = validate_content(doc, settings=settings)
+    if errors:
+        raise ValueError(f"invalid content ({len(errors)} error(s)): {errors[:3]}")
 
 
 def _sha256(doc: dict) -> str:
@@ -124,7 +114,7 @@ def _import_knowledge_models(
     for path in sorted(km_dir.glob("*.json")):
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
-            _validate_knowledge_model(doc)
+            _validate_knowledge_model(doc, settings)
         except (ValueError, json.JSONDecodeError) as exc:
             logger.warning("skipping invalid knowledge model %s: %s", path, exc)
             summary.knowledge_models.skipped += 1
@@ -141,7 +131,7 @@ def _import_knowledge_models(
                     visibility="public",
                     status=doc["status"],
                     license=doc["license"],
-                    source=_normalize_source(doc["source"]),
+                    source=normalize_source(doc["source"]),
                     title=doc["title"],
                     description=doc["description"],
                     changelog=doc.get("changelog", []),
@@ -163,7 +153,7 @@ def _import_knowledge_models(
         else:
             existing.status = doc["status"]
             existing.license = doc["license"]
-            existing.source = _normalize_source(doc["source"])
+            existing.source = normalize_source(doc["source"])
             existing.title = doc["title"]
             existing.description = doc["description"]
             existing.changelog = doc.get("changelog", [])

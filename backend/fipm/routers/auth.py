@@ -149,7 +149,10 @@ def delete_me(
     # the ownership link is cleared.
     db.query(Fer).filter(Fer.owner_id == user.id).update({"owner_id": None})
     # Draft knowledge models are the user's own scratch work and go with the
-    # account; published ones are shared artifacts and are anonymised instead.
+    # account; published ones are shared artifacts and are anonymised instead
+    # -- spec 04-knowledge-model-editor.md §1: owner_id=NULL, visibility=
+    # "public", so every FIP that references them keeps resolving and they
+    # become read-only community content.
     # NOTE: KnowledgeModel.owner_id has no ondelete on the Fip FK, so any KM
     # authoring endpoint that deletes a KM referenced by FIPs must reassign
     # or refuse rather than delete it, same as here.
@@ -158,7 +161,7 @@ def delete_me(
     ).delete(synchronize_session=False)
     db.query(KnowledgeModel).filter(
         KnowledgeModel.owner_id == user.id, KnowledgeModel.status != "draft"
-    ).update({"owner_id": None})
+    ).update({"owner_id": None, "visibility": "public"})
     # FIPs (review finding 3): a private FIP with no session would become
     # unreadable by anyone once ownerless, so it is deleted outright. A
     # private FIP tied to a workshop session must stay reachable by the

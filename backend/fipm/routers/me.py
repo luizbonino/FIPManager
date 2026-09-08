@@ -8,7 +8,7 @@ from fipm.authz import require_user
 from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
-from fipm.schemas import KnowledgeModelSummary, ListOut, fip_out_dict, session_to_out
+from fipm.schemas import ListOut, fip_out_dict, km_summary_dict, session_to_out
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -55,7 +55,5 @@ def my_knowledge_models(
     db: Session = Depends(get_db), user: User = Depends(require_user)
 ) -> ListOut:
     rows = db.query(KnowledgeModel).filter(KnowledgeModel.owner_id == user.id).all()
-    items = [
-        KnowledgeModelSummary.model_validate(r).model_dump(mode="json", by_alias=True) for r in rows
-    ]
+    items = [km_summary_dict(r) for r in rows]
     return ListOut(items=items, total=len(items))
