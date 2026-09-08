@@ -24,9 +24,9 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] Deliverable: end-to-end demo with a colleague on a phone (automated phone-viewport run passed 8 Sep; a real phone and a real colleague still needed).
 
 ## Week 3 · 22–26 Sep · Workshop features and content
-- [ ] Comparison matrix (principle × group) with per-principle convergence view; export all FIPs of a session.
-- [ ] Knowledge model editor in the owner's workspace (texts, hide/show, reorder, add, FER type, publish new version with changelog). First candidate to move to v2 if week 2 slips.
-- [ ] RDF/Turtle + JSON-LD export following the FIP ontology.
+- [x] Comparison matrix (principle × group) with per-principle convergence view; export all FIPs of a session (done 8 Sep, docs/specs/03-matrix-and-rdf.md; verified in browser).
+- [ ] Knowledge model editor in the owner's workspace (texts, hide/show, reorder, add, FER type, publish new version with changelog). Spec done 8 Sep (docs/specs/04-knowledge-model-editor.md); build in progress.
+- [x] RDF/Turtle + JSON-LD export following the FIP ontology (done 8 Sep; FAIR-expert audited, fixes applied; extension vocabulary at https://w3id.org/fipm/ns# pending w3id registration).
 - [ ] Facilitators review pt-PT and pt-BR translations of the GO FAIR model.
 - [ ] Hosting decision (FAIR domain vs Fiocruz) taken by Fri 26 Sep.
 - [ ] Deliverable: dry run of the whole workshop exercise (30 min) with the three facilitators.
