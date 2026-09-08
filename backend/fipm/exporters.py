@@ -37,6 +37,23 @@ CSV_HEADER = [
 ]
 
 
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _csv_safe(value: Any) -> Any:
+    """Guard against CSV/spreadsheet formula injection: prefix any cell whose
+    first character is one of `=+-@\t\r` with a single quote, so spreadsheet
+    apps that open the export render it as text instead of evaluating it as
+    a formula. Applied to every header and data cell written to a CSV export."""
+    if isinstance(value, str) and value.startswith(_FORMULA_PREFIXES):
+        return "'" + value
+    return value
+
+
+def _write_csv_row(writer: Any, row: list[Any]) -> None:
+    writer.writerow([_csv_safe(cell) for cell in row])
+
+
 def resolve_lang(
     langmap: dict[str, str] | None, language: str, default_language: str = "en"
 ) -> str | None:
@@ -197,9 +214,9 @@ def build_export_csv(db: Session, fip: Fip, settings: Settings) -> str:
     doc = build_export_json(db, fip, settings)
     buf = io.StringIO()
     writer = csv.writer(buf, lineterminator="\r\n")
-    writer.writerow(CSV_HEADER)
+    _write_csv_row(writer, CSV_HEADER)
     for row in _fip_csv_rows(fip, doc):
-        writer.writerow(row)
+        _write_csv_row(writer, row)
     return "﻿" + buf.getvalue()
 
 
@@ -241,12 +258,12 @@ def build_session_export_csv(
 ) -> str:
     buf = io.StringIO()
     writer = csv.writer(buf, lineterminator="\r\n")
-    writer.writerow(SESSION_CSV_HEADER)
+    _write_csv_row(writer, SESSION_CSV_HEADER)
     for fip in fips:
         doc = build_export_json(db, fip, settings)
         fip_title = (fip.community or {}).get("name") if fip.community else None
         for row in _fip_csv_rows(fip, doc):
-            writer.writerow([session.id, fip_title or "", *row])
+            _write_csv_row(writer, [session.id, fip_title or "", *row])
     return "﻿" + buf.getvalue()
 
 

@@ -150,15 +150,30 @@ def delete_me(
     db.query(Fer).filter(Fer.owner_id == user.id).update({"owner_id": None})
     # Draft knowledge models are the user's own scratch work and go with the
     # account; published ones are shared artifacts and are anonymised instead.
+    # NOTE: KnowledgeModel.owner_id has no ondelete on the Fip FK, so any KM
+    # authoring endpoint that deletes a KM referenced by FIPs must reassign
+    # or refuse rather than delete it, same as here.
     db.query(KnowledgeModel).filter(
         KnowledgeModel.owner_id == user.id, KnowledgeModel.status == "draft"
     ).delete(synchronize_session=False)
     db.query(KnowledgeModel).filter(
         KnowledgeModel.owner_id == user.id, KnowledgeModel.status != "draft"
     ).update({"owner_id": None})
-    # FIPs are anonymised and forced to "link" visibility: a "private" FIP
-    # with no owner would otherwise become unreadable by anyone at all.
-    db.query(Fip).filter(Fip.owner_id == user.id).update({"owner_id": None, "visibility": "link"})
+    # FIPs (review finding 3): a private FIP with no session would become
+    # unreadable by anyone once ownerless, so it is deleted outright. A
+    # private FIP tied to a workshop session must stay reachable by the
+    # session owner/room, so it is anonymised and downgraded to "link"
+    # instead. Non-private FIPs keep their existing visibility and are
+    # simply anonymised.
+    db.query(Fip).filter(
+        Fip.owner_id == user.id, Fip.visibility == "private", Fip.session_id.is_(None)
+    ).delete(synchronize_session=False)
+    db.query(Fip).filter(
+        Fip.owner_id == user.id, Fip.visibility == "private", Fip.session_id.isnot(None)
+    ).update({"owner_id": None, "visibility": "link"})
+    db.query(Fip).filter(Fip.owner_id == user.id, Fip.visibility != "private").update(
+        {"owner_id": None}
+    )
 
     revoke_all_sessions(db, user.id)
     db.delete(user)

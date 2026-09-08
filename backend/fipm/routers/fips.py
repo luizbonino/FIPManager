@@ -27,6 +27,7 @@ from fipm.schemas import (
     FipCreateRequest,
     FipImportDoc,
     FipPatchRequest,
+    Language,
     Visibility,
     fip_out_dict,
 )
@@ -63,9 +64,19 @@ def _session_owner_has_access(fip: Fip, user: User | None, db: Session) -> bool:
 
 def _authorize_fip_write(fip: Fip, user: User | None, request: Request, db: Session) -> None:
     if fip.owner_id is not None:
-        # Owned (incl. claimed-out-of-session) FIPs are unaffected by their
-        # session's status (spec 02-core-flows.md §7 A4): owner/admin only.
-        if can_write_owned(fip.owner_id, user):
+        # Owned FIPs: owner/admin, or (review finding 2) the owner of the
+        # session the FIP was claimed out of, matching spec 02-core-flows.md
+        # A4's "facilitator ... keep write access" to FIPs in their session.
+        is_admin = user is not None and user.role == "admin"
+        is_session_owner = fip.session_id is not None and _session_owner_has_access(fip, user, db)
+        if can_write_owned(fip.owner_id, user) or is_session_owner:
+            # A claimed FIP that still carries its originating session_id
+            # stays frozen for its new owner once that session closes,
+            # unless the caller is the session owner or an admin.
+            if fip.session_id is not None and not (is_admin or is_session_owner):
+                session_row = db.get(WorkshopSession, fip.session_id)
+                if session_row is not None and session_row.status == "closed":
+                    raise HTTPException(status_code=409, detail="session_closed")
             return
         if not can_read(fip.owner_id, fip.visibility, user):
             raise HTTPException(status_code=404, detail="not_found")
@@ -78,14 +89,17 @@ def _authorize_fip_write(fip: Fip, user: User | None, request: Request, db: Sess
     if user is not None and user.role == "admin":
         return
 
+    # Check the edit token before the session's status (review finding 7):
+    # a caller without a valid token gets 403 edit_token_required rather
+    # than learning the session is closed.
+    check_edit_token(request, fip)
+
     # spec 02-core-flows.md §5.4: a closed session makes its anonymous FIPs
     # read-only for everyone else, regardless of edit-token validity.
     if fip.session_id is not None:
         session_row = db.get(WorkshopSession, fip.session_id)
         if session_row is not None and session_row.status == "closed":
             raise HTTPException(status_code=409, detail="session_closed")
-
-    check_edit_token(request, fip)
 
 
 def _get_readable_fip(fip_id: str, request: Request, db: Session, user: User | None) -> Fip:
@@ -210,6 +224,8 @@ def import_fip(
 
     fip_data = body.fip
     language = fip_data.get("language") or settings.default_language
+    if language not in get_args(Language):
+        raise HTTPException(status_code=400, detail="invalid_language")
     visibility = fip_data.get("visibility") or "private"
     if visibility not in get_args(Visibility):
         raise HTTPException(status_code=400, detail="invalid_visibility")
@@ -317,6 +333,12 @@ def claim_fip(
     if fip.owner_id is not None:
         raise HTTPException(status_code=409, detail="already_owned")
     check_edit_token(request, fip)
+    # Review finding 2: claiming is only for token holders, so no owner/admin
+    # exemption here (unlike _authorize_fip_write's ownerless-write path).
+    if fip.session_id is not None:
+        session_row = db.get(WorkshopSession, fip.session_id)
+        if session_row is not None and session_row.status == "closed":
+            raise HTTPException(status_code=409, detail="session_closed")
     fip.owner_id = user.id
     fip.edit_token_hash = None
     db.commit()

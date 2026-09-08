@@ -2,9 +2,14 @@
 when the user owns workshop sessions, FERs and knowledge models (the FKs had
 no ondelete). It closes+anonymises owned sessions, keeps owned FERs but clears
 ownership, deletes owned draft knowledge models but anonymises published
-ones, and anonymises owned FIPs while forcing their visibility to "link" so
-they stay reachable by URL (an orphaned "private" FIP would otherwise be
-readable by no one)."""
+ones.
+
+Review finding 3: owned FIPs are handled per (visibility, session_id): a
+private FIP with no session becomes unreadable by anyone once ownerless, so
+it is deleted outright; a private FIP tied to a workshop session must stay
+reachable by the session owner/room, so it is anonymised and downgraded to
+"link" instead; non-private FIPs keep their visibility and are simply
+anonymised."""
 
 from __future__ import annotations
 
@@ -33,12 +38,19 @@ def test_delete_account_anonymises_everything_without_error(client, db_session):
     assert session_resp.status_code == 201
     session_id = session_resp.json()["id"]
 
-    private_fip = client.post(
+    private_fip_no_session = client.post(
         "/api/fips",
         json={"questionnaireRef": {"id": "test-km", "version": "1.0.0"}, "visibility": "private"},
     )
-    assert private_fip.status_code == 201
-    fip_id = private_fip.json()["id"]
+    assert private_fip_no_session.status_code == 201
+    private_no_session_id = private_fip_no_session.json()["id"]
+
+    link_fip = client.post(
+        "/api/fips",
+        json={"questionnaireRef": {"id": "test-km", "version": "1.0.0"}, "visibility": "link"},
+    )
+    assert link_fip.status_code == 201
+    link_fip_id = link_fip.json()["id"]
 
     fer_resp = client.post(
         "/api/fers",
@@ -96,10 +108,15 @@ def test_delete_account_anonymises_everything_without_error(client, db_session):
     assert session_row.owner_id is None
     assert session_row.status == "closed"
 
-    fip_row = db_session.get(Fip, fip_id)
-    assert fip_row is not None
-    assert fip_row.owner_id is None
-    assert fip_row.visibility == "link"
+    # A private FIP with no session becomes unreadable by anyone once
+    # ownerless, so it is deleted rather than anonymised.
+    assert db_session.get(Fip, private_no_session_id) is None
+
+    # A non-private FIP is anonymised but keeps its visibility.
+    link_row = db_session.get(Fip, link_fip_id)
+    assert link_row is not None
+    assert link_row.owner_id is None
+    assert link_row.visibility == "link"
 
     fer_row = db_session.get(Fer, "https://example.org/fer/delme-owned")
     assert fer_row is not None
@@ -112,7 +129,35 @@ def test_delete_account_anonymises_everything_without_error(client, db_session):
     assert published_row.owner_id is None
 
 
-def test_anonymised_fip_stays_readable_via_link(client, client_factory):
+def test_private_fip_without_session_is_deleted_not_readable(client, client_factory):
+    reg = client.post(
+        "/api/auth/register",
+        json={
+            "email": "delme-deleted@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "DelMe3",
+        },
+    )
+    assert reg.status_code == 201
+    created = client.post(
+        "/api/fips",
+        json={"questionnaireRef": {"id": "test-km", "version": "1.0.0"}, "visibility": "private"},
+    )
+    fip_id = created.json()["id"]
+
+    delete = client.request(
+        "DELETE", "/api/auth/me", json={"currentPassword": "correcthorsebattery"}
+    )
+    assert delete.status_code == 204
+
+    anon = client_factory()
+    assert anon.get(f"/api/fips/{fip_id}").status_code == 404
+
+
+def test_private_session_fip_stays_readable_via_link_after_deletion(client, client_factory):
+    """A private FIP the user claimed inside their own session keeps its
+    session_id, so on account deletion it is anonymised + downgraded to
+    "link" rather than deleted, staying reachable by URL."""
     reg = client.post(
         "/api/auth/register",
         json={
@@ -122,11 +167,34 @@ def test_anonymised_fip_stays_readable_via_link(client, client_factory):
         },
     )
     assert reg.status_code == 201
-    created = client.post(
+    owner_id = reg.json()["id"]
+
+    session = client.post(
+        "/api/sessions",
+        json={
+            "title": "delme session",
+            "questionnaireRef": {"id": "test-km", "version": "1.0.0"},
+            "defaultLanguage": "en",
+        },
+    ).json()
+
+    participant = client_factory()
+    created = participant.post(
         "/api/fips",
-        json={"questionnaireRef": {"id": "test-km", "version": "1.0.0"}, "visibility": "private"},
+        json={
+            "questionnaireRef": {"id": "test-km", "version": "1.0.0"},
+            "sessionId": session["id"],
+            "joinCode": session["joinCode"],
+            "visibility": "private",
+        },
     )
-    fip_id = created.json()["id"]
+    assert created.status_code == 201
+    fip = created.json()
+    fip_id, edit_token = fip["id"], fip["editToken"]
+
+    claim = client.post(f"/api/fips/{fip_id}/claim", headers={"X-Edit-Token": edit_token})
+    assert claim.status_code == 200
+    assert claim.json()["ownerId"] == owner_id
 
     delete = client.request(
         "DELETE", "/api/auth/me", json={"currentPassword": "correcthorsebattery"}

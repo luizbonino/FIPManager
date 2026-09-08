@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from fipm.authz import get_readable_published_km, require_user
+from fipm.authz import can_read, get_readable_published_km, require_user
 from fipm.config import Settings, get_settings
 from fipm.db import get_db
 from fipm.exporters import build_session_export_csv, build_session_export_json
@@ -40,8 +40,12 @@ def _insert_session(db: Session, settings: Settings, **kwargs: Any) -> WorkshopS
 
 
 def _get_owned_session(session_id: str, db: Session, user: User) -> WorkshopSession:
+    """Owner-only session routes (spec 01-foundations.md §"owner or admin"):
+    the session's owner, or an admin, may access it."""
     row = db.get(WorkshopSession, session_id)
-    if row is None or row.owner_id != user.id:
+    if row is None:
+        raise HTTPException(status_code=404, detail="not_found")
+    if row.owner_id != user.id and user.role != "admin":
         raise HTTPException(status_code=404, detail="not_found")
     return row
 
@@ -72,6 +76,13 @@ def get_session_by_code(join_code: str, db: Session = Depends(get_db)) -> Sessio
         raise HTTPException(status_code=404, detail="not_found")
     owner = db.get(User, row.owner_id)
     km = db.get(KnowledgeModel, (row.questionnaire_id, row.questionnaire_version))
+    # Review finding 4: the join-by-code lookup is public and unauthenticated,
+    # so only surface the KM's title when it would itself be readable by an
+    # anonymous caller (published and public/link) — never leak a private
+    # KM's title through the session's public join code.
+    questionnaire_title: dict[str, str] = {}
+    if km is not None and km.status == "published" and can_read(km.owner_id, km.visibility, None):
+        questionnaire_title = km.title or {}
     return SessionPublicOut(
         id=row.id,
         title=row.title,
@@ -79,7 +90,7 @@ def get_session_by_code(join_code: str, db: Session = Depends(get_db)) -> Sessio
         questionnaire_ref={"id": row.questionnaire_id, "version": row.questionnaire_version},
         default_language=row.default_language,
         facilitator_name=owner.display_name if owner else "",
-        questionnaire_title=(km.title if km else {}) or {},
+        questionnaire_title=questionnaire_title,
     )
 
 
