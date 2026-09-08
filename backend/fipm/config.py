@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     admin_password: str | None = None
     default_language: str = "en"
     data_dir: str = str(_REPO_ROOT / "data")
-    static_dir: str = "./static"
+    static_dir: str = str(_REPO_ROOT / "frontend" / "dist")
     session_ttl_days: int = 14
     cookie_secure: bool = True
     allowed_origins: str = ""
