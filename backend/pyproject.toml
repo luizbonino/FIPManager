@@ -40,5 +40,11 @@ select = ["E", "F", "I", "UP", "B"]
 # FastAPI's Depends()/Query()/Body() are meant to be used as call-in-default-value.
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "fastapi.Header"]
 
+[tool.ruff.lint.per-file-ignores]
+# The spec 03-matrix-and-rdf.md §2.7 Turtle example is pasted verbatim as a
+# fixture string, so its line lengths (and the JSON request bodies around
+# it) aren't reformatted to stay byte-faithful to the spec text.
+"tests/test_rdf_export.py" = ["E501"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

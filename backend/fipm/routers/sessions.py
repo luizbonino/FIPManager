@@ -14,6 +14,7 @@ from fipm.exporters import build_session_export_csv, build_session_export_json
 from fipm.ids import join_code as gen_join_code
 from fipm.ids import short_id
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
+from fipm.rdf import session_graph, to_turtle
 from fipm.schemas import (
     SessionCreateRequest,
     SessionPatchRequest,
@@ -161,4 +162,19 @@ def export_session_csv(
         content=csv_text,
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{row.id}.csv"'},
+    )
+
+
+@router.get("/{session_id}/export.ttl")
+def export_session_ttl(
+    session_id: str, db: Session = Depends(get_db), user: User = Depends(require_user)
+) -> Response:
+    row = _get_owned_session(session_id, db, user)
+    settings = get_settings()
+    fips = db.query(Fip).filter(Fip.session_id == row.id).order_by(Fip.created_at).all()
+    g = session_graph(db, row, fips, settings)
+    return Response(
+        content=to_turtle(g),
+        media_type="text/turtle; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{row.id}.ttl"'},
     )

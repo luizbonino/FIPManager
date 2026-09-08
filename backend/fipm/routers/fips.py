@@ -22,6 +22,7 @@ from fipm.db import get_db
 from fipm.exporters import build_export_csv, build_export_json, reconstruct_answers_from_export
 from fipm.ids import hash_token, new_token, short_id
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
+from fipm.rdf import fip_graph, to_jsonld, to_turtle
 from fipm.schemas import (
     Answer,
     FipCreateRequest,
@@ -380,7 +381,35 @@ def export_fip_csv(
     )
 
 
-@router.get("/{fip_id}/export.ttl", status_code=501)
-def export_fip_ttl(fip_id: str) -> None:
-    # Week 3 (rdflib). Not implemented yet.
-    raise HTTPException(status_code=501, detail="not_implemented")
+@router.get("/{fip_id}/export.ttl")
+def export_fip_ttl(
+    fip_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> Response:
+    fip = _get_readable_fip(fip_id, request, db, user)
+    settings = get_settings()
+    g = fip_graph(db, fip, settings)
+    return Response(
+        content=to_turtle(g),
+        media_type="text/turtle; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{fip.id}.ttl"'},
+    )
+
+
+@router.get("/{fip_id}/export.jsonld")
+def export_fip_jsonld(
+    fip_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> Response:
+    fip = _get_readable_fip(fip_id, request, db, user)
+    settings = get_settings()
+    g = fip_graph(db, fip, settings)
+    return Response(
+        content=to_jsonld(g),
+        media_type="application/ld+json",
+        headers={"Content-Disposition": f'attachment; filename="{fip.id}.jsonld"'},
+    )
