@@ -235,5 +235,33 @@
     "questionnaire": "Questionnaire content: FIP mini-questionnaire v2.0.0 © 2023 Erik Schultes, Barbara Magagna, Jacintha Schultes / GO FAIR Foundation, CC BY-SA 4.0.",
     "ontology": "FER types and terms: FIP Ontology, CC0 1.0.",
     "answers": "This FIP's answers: {license}."
+  },
+  "matrix": {
+    "title": "Comparison matrix",
+    "subtitle": "{fips} FIPs · {questions} questions",
+    "question": "Question",
+    "convergence": "Convergence",
+    "convergenceHint": "Distinct resources declared as currently used, across the FIPs of this session.",
+    "agreed": "All groups agree",
+    "distinct": "{count} distinct",
+    "mostCommon": "{label} ({count})",
+    "groupAgreement": "{agreed} of {total} rows agree",
+    "legend": "Legend",
+    "unanswered": "Not answered",
+    "noFips": "No FIPs in this session yet.",
+    "scopeMetadata": "metadata",
+    "scopeData": "data",
+    "note": "Why",
+    "onlyCurrent": "Only currently used",
+    "hideUnanswered": "Hide unanswered rows",
+    "compact": "Compact",
+    "print": "Print (A3 landscape)",
+    "showNote": "Show reason"
+  },
+  "export": {
+    "ttl": "Turtle (RDF)",
+    "jsonld": "JSON-LD",
+    "rdfHint": "FIP ontology (w3id.org/fair/fip/terms/)",
+    "sessionTtl": "All FIPs as Turtle"
   }
 }

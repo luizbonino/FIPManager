@@ -16,10 +16,6 @@
       </div>
     </header>
     
-    <div v-if="isAuthenticated" class="user-info">
-      <span>{{ $t('common.welcome') }}, {{ user?.displayName }}!</span>
-    </div>
-    
     <main class="app-main">
       <router-view />
     </main>

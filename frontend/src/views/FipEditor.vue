@@ -61,7 +61,12 @@
       </div>
 
       <ShareBox v-if="store.fip.visibility !== 'private'" :url="shareUrl" />
-      <ExportButtons :json-url="fipExportJsonUrl(store.fip.id)" :csv-url="fipExportCsvUrl(store.fip.id)" />
+      <ExportButtons
+        :json-url="fipExportJsonUrl(store.fip.id)"
+        :csv-url="fipExportCsvUrl(store.fip.id)"
+        :ttl-url="fipExportTtlUrl(store.fip.id)"
+        :jsonld-url="fipExportJsonldUrl(store.fip.id)"
+      />
 
       <AttributionFooter :questionnaire-license="km.content.license" :fip-license="store.fip.license" />
     </template>
@@ -78,7 +83,7 @@ import { answeredCount as computeAnsweredCount } from '@/lib/progress'
 import { resolveLang } from '@/lib/lang'
 import { getToken } from '@/lib/editTokens'
 import { getFerTypes } from '@/api/ferTypes'
-import { fipExportCsvUrl, fipExportJsonUrl } from '@/api/fips'
+import { fipExportCsvUrl, fipExportJsonldUrl, fipExportJsonUrl, fipExportTtlUrl } from '@/api/fips'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import SaveIndicator from '@/components/SaveIndicator.vue'

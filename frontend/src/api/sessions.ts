@@ -36,3 +36,8 @@ export function sessionExportJsonUrl(id: string): string {
 export function sessionExportCsvUrl(id: string): string {
   return `/api/sessions/${id}/export.csv`
 }
+
+/** `GET /api/sessions/{id}/export.ttl` (spec 03 §2.5): one graph, every FIP of the session. */
+export function sessionExportTtlUrl(id: string): string {
+  return `/api/sessions/${id}/export.ttl`
+}

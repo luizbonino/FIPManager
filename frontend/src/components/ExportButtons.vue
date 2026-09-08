@@ -2,15 +2,17 @@
   <div class="export-buttons no-print">
     <a class="export-link" :href="jsonUrl">{{ $t('fip.exportJson') }}</a>
     <a class="export-link" :href="csvUrl">{{ $t('fip.exportCsv') }}</a>
+    <a class="export-link" :href="ttlUrl" :title="$t('export.rdfHint')">{{ $t('export.ttl') }}</a>
+    <a class="export-link" :href="jsonldUrl" :title="$t('export.rdfHint')">{{ $t('export.jsonld') }}</a>
   </div>
 </template>
 
 <script lang="ts" setup>
 /**
- * Plain `<a>` links to the export endpoints (spec 02 §2.4) —
+ * Plain `<a>` links to the export endpoints (spec 02 §2.4, spec 03 §3) —
  * `Content-Disposition: attachment` is already set server-side.
  */
-defineProps<{ jsonUrl: string; csvUrl: string }>()
+defineProps<{ jsonUrl: string; csvUrl: string; ttlUrl: string; jsonldUrl: string }>()
 </script>
 
 <style scoped>

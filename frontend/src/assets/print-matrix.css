@@ -1,0 +1,50 @@
+/* Print stylesheet for the comparison matrix (spec 03 §1.4), imported by
+   SessionMatrix.vue only. Target: 8 columns x 21 rows on one A3 sheet. */
+
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 10mm;
+  }
+
+  .app-header,
+  .app-nav,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .matrix-scroll {
+    overflow: visible;
+    border: none;
+  }
+
+  .matrix-table {
+    width: 100%;
+    font-size: 7pt;
+    table-layout: fixed;
+  }
+
+  .matrix-table thead {
+    display: table-header-group;
+  }
+
+  .matrix-table tbody {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .chip {
+    border: 1px solid #000 !important;
+    background-color: #f5f5f5 !important;
+    color: #000 !important;
+  }
+
+  .matrix-legend {
+    display: flex !important;
+  }
+}

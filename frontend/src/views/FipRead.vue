@@ -71,7 +71,12 @@
       </div>
 
       <div class="actions no-print">
-        <ExportButtons :json-url="fipExportJsonUrl(doc.fip.id)" :csv-url="fipExportCsvUrl(doc.fip.id)" />
+        <ExportButtons
+          :json-url="fipExportJsonUrl(doc.fip.id)"
+          :csv-url="fipExportCsvUrl(doc.fip.id)"
+          :ttl-url="fipExportTtlUrl(doc.fip.id)"
+          :jsonld-url="fipExportJsonldUrl(doc.fip.id)"
+        />
         <button type="button" class="btn btn-secondary" @click="printPage">{{ $t('fipRead.print') }}</button>
       </div>
 
@@ -84,7 +89,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ApiResponseError } from '@/api/client'
-import { fipExportCsvUrl, fipExportJsonUrl, getFipExport } from '@/api/fips'
+import { fipExportCsvUrl, fipExportJsonldUrl, fipExportJsonUrl, fipExportTtlUrl, getFipExport } from '@/api/fips'
 import { getKnowledgeModel } from '@/api/knowledgeModels'
 import StatusBadge from '@/components/StatusBadge.vue'
 import ExportButtons from '@/components/ExportButtons.vue'

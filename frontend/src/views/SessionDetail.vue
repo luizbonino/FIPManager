@@ -27,6 +27,7 @@
         </button>
         <a class="btn btn-secondary" :href="sessionExportJsonUrl(session.id)">{{ $t('fip.exportJson') }}</a>
         <a class="btn btn-secondary" :href="sessionExportCsvUrl(session.id)">{{ $t('fip.exportCsv') }}</a>
+        <a class="btn btn-secondary" :href="sessionExportTtlUrl(session.id)">{{ $t('export.sessionTtl') }}</a>
         <span class="export-all-label">{{ $t('sessionAdmin.exportAll') }}</span>
         <router-link :to="`/sessions/${session.id}/matrix`" class="btn btn-secondary">
           {{ $t('sessionAdmin.matrix') }}
@@ -41,7 +42,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/stores/session'
-import { sessionExportCsvUrl, sessionExportJsonUrl } from '@/api/sessions'
+import { sessionExportCsvUrl, sessionExportJsonUrl, sessionExportTtlUrl } from '@/api/sessions'
 import QrCode from '@/components/QrCode.vue'
 import SessionFipList from '@/components/SessionFipList.vue'
 
@@ -163,3 +164,5 @@ onUnmounted(() => {
   color: #fff;
 }
 </style>
+
+

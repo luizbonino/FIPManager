@@ -40,6 +40,16 @@ export function fipExportCsvUrl(id: string): string {
   return `/api/fips/${id}/export.csv`
 }
 
+/** `GET /api/fips/{id}/export.ttl` (spec 03 §2.5). */
+export function fipExportTtlUrl(id: string): string {
+  return `/api/fips/${id}/export.ttl`
+}
+
+/** `GET /api/fips/{id}/export.jsonld` (spec 03 §2.5). */
+export function fipExportJsonldUrl(id: string): string {
+  return `/api/fips/${id}/export.jsonld`
+}
+
 export function fipReadUrl(id: string): string {
   return `/fips/${id}`
 }
