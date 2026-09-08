@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Run with the backend environment (httpx is a backend dependency):
+#   uv run --project backend python scripts/load-test.py --join-code CODE
 """FIPManager load test tool.
 
 Simulates concurrent participants joining a session and submitting FIPs with
