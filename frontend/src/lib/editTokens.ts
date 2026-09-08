@@ -31,3 +31,29 @@ export function clearToken(fipId: string): void {
     // Nothing to do if storage is unavailable.
   }
 }
+
+/**
+ * Minimal addition beyond spec 02 §6.4's listed lib API: remembers which
+ * FIP a device started within a given session, so JoinSession.vue's
+ * "Continue your FIP" (§2.1 step 3) can find it without a server round
+ * trip (anonymous callers cannot list a session's FIPs). Keyed separately
+ * from the edit token itself so a claimed FIP (whose token is cleared,
+ * spec 02 §2.5) can still be recognised as "already started" here.
+ */
+const SESSION_FIP_PREFIX = 'fipm.sessionFip.'
+
+export function rememberSessionFip(sessionId: string, fipId: string): void {
+  try {
+    localStorage.setItem(SESSION_FIP_PREFIX + sessionId, fipId)
+  } catch {
+    // Storage unavailable: "Continue your FIP" simply won't appear next time.
+  }
+}
+
+export function getSessionFip(sessionId: string): string | null {
+  try {
+    return localStorage.getItem(SESSION_FIP_PREFIX + sessionId)
+  } catch {
+    return null
+  }
+}

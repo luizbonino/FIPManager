@@ -108,6 +108,118 @@
     "updated": "Atualizado",
     "status": "Estado",
     "active": "Ativo",
-    "inactive": "Inativo"
+    "inactive": "Inativo",
+    "delete": "Eliminar",
+    "deleteFipConfirm": "Eliminar este FIP? Esta ação não pode ser anulada.",
+    "copy": "Copiar",
+    "close": "Fechar",
+    "retry": "Tentar novamente",
+    "notFound": "Não encontrado"
+  },
+  "join": {
+    "sessionTitle": "Sessão de workshop",
+    "questionnaire": "Questionário",
+    "facilitator": "Facilitador",
+    "startFip": "Iniciar um FIP",
+    "continueFip": "Continuar o seu FIP",
+    "invalidCode": "Não reconhecemos esse código de acesso.",
+    "closed": "Esta sessão está fechada. Ainda pode consultar os FIPs que criou."
+  },
+  "community": {
+    "heading": "A sua comunidade",
+    "name": "Nome da comunidade",
+    "namePlaceholder": "p. ex. CONFOA 2026 grupo A",
+    "description": "Breve descrição",
+    "domain": "Domínio de investigação",
+    "domainPlaceholder": "p. ex. Saúde pública",
+    "dataSteward": "ORCID do gestor de dados",
+    "dataStewardPlaceholder": "0000-0002-1825-0097",
+    "orcidInvalid": "Isso não parece ser um ORCID iD."
+  },
+  "editor": {
+    "title": "Questionário",
+    "help": "Ajuda",
+    "ferType": "Tipo de recurso",
+    "addDeclaration": "Adicionar um recurso",
+    "removeDeclaration": "Remover",
+    "note": "Porquê? (opcional)",
+    "comment": "Notas sobre esta pergunta (opcional)",
+    "chooseFer": "Escolher um recurso",
+    "searchFer": "Pesquisar recursos",
+    "useFreeText": "Usar as minhas próprias palavras",
+    "freeTextPlaceholder": "Indique o recurso que a sua comunidade utiliza",
+    "useCatalogue": "Escolher do catálogo",
+    "noFerMatch": "Sem correspondência — utilize as suas próprias palavras.",
+    "replacementHint": "Adicione também um segundo recurso com o estado 'Planeado' para a substituição.",
+    "progress": "{answered} de {total} perguntas respondidas",
+    "readOnly": "Apenas leitura neste dispositivo.",
+    "claim": "Guardar este FIP na minha área de trabalho",
+    "claimed": "Guardado na sua área de trabalho.",
+    "preview": "Pré-visualizar / imprimir",
+    "notAnswered": "Sem resposta"
+  },
+  "save": {
+    "saved": "Guardado {time}",
+    "unsaved": "Alterações não guardadas",
+    "saving": "A guardar…",
+    "error": "Não guardado — a tentar novamente",
+    "failed": "Não guardado",
+    "retry": "Tentar novamente"
+  },
+  "declarationStatus": {
+    "current": "Em uso",
+    "planned": "Planeado",
+    "plannedDevelopment": "Em desenvolvimento (planeado)",
+    "plannedReplacement": "Substituição planeada",
+    "none": "Nenhum"
+  },
+  "share": {
+    "title": "Partilhar",
+    "copyLink": "Copiar link",
+    "copied": "Copiado",
+    "qrHint": "Digitalize para abrir este FIP"
+  },
+  "visibility": {
+    "label": "Quem pode ver este FIP",
+    "private": "Privado",
+    "link": "Qualquer pessoa com o link",
+    "public": "Público"
+  },
+  "sections": {
+    "F": "Localizável",
+    "A": "Acessível",
+    "I": "Interoperável",
+    "R": "Reutilizável"
+  },
+  "sessionAdmin": {
+    "newTitle": "Nova sessão de workshop",
+    "titleLabel": "Título da sessão",
+    "knowledgeModel": "Versão do questionário",
+    "defaultLanguage": "Idioma predefinido",
+    "create": "Criar sessão",
+    "joinCode": "Código de acesso",
+    "joinLink": "Link de acesso",
+    "fips": "FIPs nesta sessão",
+    "noFips": "Ainda não há FIPs — partilhe o código de acesso.",
+    "lastUpdate": "Última atualização",
+    "close": "Fechar sessão",
+    "closeConfirm": "Fechar a sessão? Os participantes deixarão de poder editar.",
+    "closed": "Fechada",
+    "exportAll": "Exportar tudo",
+    "matrix": "Matriz de comparação",
+    "matrixSoon": "A matriz de comparação chega na semana 3.",
+    "hideChrome": "Modo de projeção",
+    "reconnecting": "A reconectar…"
+  },
+  "fipRead": {
+    "notShared": "Este FIP não existe ou não está partilhado.",
+    "print": "Imprimir",
+    "questionnaire": "Responde ao questionário",
+    "license": "Licença"
+  },
+  "attribution": {
+    "questionnaire": "Conteúdo do questionário: FIP mini-questionnaire v2.0.0 © 2023 Erik Schultes, Barbara Magagna, Jacintha Schultes / GO FAIR Foundation, CC BY-SA 4.0.",
+    "ontology": "Tipos e termos de FER (FAIR Enabling Resource): FIP Ontology, CC0 1.0.",
+    "answers": "Respostas deste FIP: {license}."
   }
 }

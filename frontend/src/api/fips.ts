@@ -1,5 +1,5 @@
 import { del, get, patch, post } from './client'
-import type { FipCreateRequest, FipOut, FipPatchRequest } from '@/types/api'
+import type { FipCreateRequest, FipExportDoc, FipOut, FipPatchRequest } from '@/types/api'
 
 export function createFip(body: FipCreateRequest) {
   return post<FipOut>('/fips', body)
@@ -19,6 +19,16 @@ export function deleteFip(id: string, editToken?: string) {
 
 export function claimFip(id: string, editToken: string) {
   return post<FipOut>(`/fips/${id}/claim`, undefined, editToken)
+}
+
+/**
+ * Minimal addition beyond spec 02 §6.4's listed API: `FipRead.vue`'s single
+ * data source is this same export document (spec 02 §4.3), fetched (not
+ * just linked) so the read view needs no separate knowledge-model or FER
+ * requests.
+ */
+export function getFipExport(id: string) {
+  return get<FipExportDoc>(`/fips/${id}/export.json`)
 }
 
 /** Plain `<a href>` targets (spec 02 §2.4) — `Content-Disposition: attachment` already set server-side. */

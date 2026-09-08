@@ -21,6 +21,17 @@
   --color-code: #2a2a2a;
   --color-code-text: #f8f8f8;
 
+  /* Declaration status colours (spec 02 §4.3): five distinct hues, never
+     relied on alone — every badge also carries its text label. */
+  --color-status-current: #0a7d33;
+  --color-status-planned: #b45f06;
+  --color-status-planned-development: #6f42c1;
+  --color-status-planned-replacement: #b3261e;
+  --color-status-none: #6b7280;
+
+  --color-chip-bg: #eef2ff;
+  --color-chip-text: #3730a3;
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -102,6 +113,24 @@ button:disabled {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-md);
+}
+
+/* SessionDetail.vue's "Projector mode" toggle (spec 02 §4.2): collapses
+   the app chrome so the join code/QR fill the screen from the back of a room. */
+body.projector-mode .app-header,
+body.projector-mode .user-info {
+  display: none;
+}
+
+.stub-view {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.no-print {
+  /* Marker class for print.css (spec 02 §6.5); no visual effect on screen. */
 }
 
 .sr-only {

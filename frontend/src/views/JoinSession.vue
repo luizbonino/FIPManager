@@ -1,294 +1,301 @@
 <template>
   <div class="join-session-view">
-    <div v-if="success" class="success-message">
-      <h2>{{ $t('common.success') }}</h2>
-      <p>{{ $t('session.joinSuccess') }}</p>
-      <router-link to="/workspace" class="btn btn-primary">{{ $t('common.back') }}</router-link>
+    <div v-if="loading" class="loading">
+      <p>{{ $t('common.loading') }}</p>
     </div>
 
-    <div v-else class="join-session-form">
-      <h1>{{ $t('session.joinTitle') }}</h1>
-      
-      <form @submit.prevent="handleSubmit" class="form">
-        <div class="form-group">
-          <label for="joinCode">{{ $t('session.joinCodeLabel') }}</label>
-          <input
-            id="joinCode"
-            v-model="joinCode"
-            type="text"
-            :placeholder="$t('session.joinCodePlaceholder')"
-            required
-            @blur="validateJoinCode"
-          />
-          <span v-if="joinCodeError" class="error-message">{{ joinCodeError }}</span>
-        </div>
+    <div v-else-if="notFound" class="message-box">
+      <p>{{ $t('join.invalidCode') }}</p>
+    </div>
 
-        <div class="form-actions">
-          <button type="submit" :disabled="isLoading" class="btn btn-primary">
-            <span v-if="!isLoading">{{ $t('session.submitJoin') }}</span>
-            <span v-else>{{ $t('common.loading') }}</span>
-          </button>
-        </div>
+    <div v-else-if="session" class="join-content">
+      <header class="join-header">
+        <p class="eyebrow">{{ $t('join.sessionTitle') }}</p>
+        <h1>{{ session.title }}</h1>
+        <p class="questionnaire-title">{{ $t('join.questionnaire') }}: {{ questionnaireTitle }}</p>
+        <p class="facilitator">{{ $t('join.facilitator') }}: {{ session.facilitatorName }}</p>
+        <LanguageSwitcher />
+      </header>
 
-        <div v-if="error" class="form-error">{{ error }}</div>
-      </form>
-
-      <div class="session-info" v-if="sessionDetails">
-        <h3>{{ $t('session.sessionInfo') }}</h3>
-        <p><strong>{{ $t('common.name') }}:</strong> {{ sessionDetails.name }}</p>
-        <p><strong>{{ $t('common.id') }}:</strong> {{ sessionDetails.id }}</p>
-        <p><strong>{{ $t('common.status') }}:</strong> 
-          <span :class="sessionDetails.isActive ? 'status-active' : 'status-inactive'">
-            {{ sessionDetails.isActive ? $t('common.active') : $t('common.inactive') }}
-          </span>
-        </p>
+      <div v-if="session.status === 'closed'" class="message-box closed">
+        <p>{{ $t('join.closed') }}</p>
+        <router-link v-if="knownFipId" :to="`/fips/${knownFipId}`" class="btn btn-secondary">
+          {{ $t('common.view') }}
+        </router-link>
       </div>
+
+      <template v-else>
+        <router-link v-if="knownFipId" :to="`/fips/${knownFipId}/edit`" class="btn btn-primary continue-btn">
+          {{ $t('join.continueFip') }}
+        </router-link>
+
+        <form class="community-form" @submit.prevent="onSubmit">
+          <h2>{{ $t('community.heading') }}</h2>
+
+          <label class="field">
+            <span>{{ $t('community.name') }} *</span>
+            <input v-model="community.name" type="text" required :placeholder="$t('community.namePlaceholder')" />
+          </label>
+
+          <label class="field">
+            <span>{{ $t('community.description') }}</span>
+            <textarea v-model="community.description" rows="3" />
+          </label>
+
+          <label class="field">
+            <span>{{ $t('community.domain') }}</span>
+            <input v-model="community.domain" type="text" :placeholder="$t('community.domainPlaceholder')" />
+          </label>
+
+          <label class="field">
+            <span>{{ $t('community.dataSteward') }}</span>
+            <input
+              v-model="orcid"
+              type="text"
+              :placeholder="$t('community.dataStewardPlaceholder')"
+              @blur="validateOrcid"
+            />
+            <span v-if="orcidError" class="field-error">{{ $t('community.orcidInvalid') }}</span>
+          </label>
+
+          <p v-if="submitError" class="form-error">{{ submitError }}</p>
+
+          <button type="submit" class="btn btn-primary" :disabled="submitting">
+            {{ $t('join.startFip') }}
+          </button>
+        </form>
+      </template>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { get, post } from '@/api/client'
 import { useI18n } from 'vue-i18n'
+import { ApiResponseError } from '@/api/client'
+import { createFip } from '@/api/fips'
+import { getSessionFip, rememberSessionFip, setToken } from '@/lib/editTokens'
+import { resolveLang } from '@/lib/lang'
+import { SUPPORTED_LOCALES } from '@/i18n'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
+import { useSessionStore } from '@/stores/session'
+import type { SessionPublicOut } from '@/types/api'
 
-type Session = {
-  id: string
-  name: string
-  joinCode: string
-  isActive: boolean
-  createdAt: string
-}
-
-type Fip = {
-  id: string
-  title: string
-  sessionId: string
-}
-
+// Spec 02 §2.1: replaces the JoinSession scaffold.
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const sessionStore = useSessionStore()
 
-const joinCode = ref('')
-const joinCodeError = ref<string | null>(null)
-const error = ref<string | null>(null)
-const isLoading = ref(false)
-const success = ref(false)
-const sessionDetails = ref<Session | null>(null)
+const loading = ref(true)
+const notFound = ref(false)
+const submitting = ref(false)
+const submitError = ref<string | null>(null)
+const orcidError = ref(false)
 
-// Get joinCode from route params
-watch(() => route.params.joinCode, (newJoinCode) => {
-  if (newJoinCode && typeof newJoinCode === 'string') {
-    joinCode.value = newJoinCode.toUpperCase()
-    validateJoinCode()
-    fetchSessionDetails()
-  }
-}, { immediate: true })
+const community = ref({ name: '', description: '', domain: '' })
+const orcid = ref('')
 
-const validateJoinCode = () => {
-  if (!joinCode.value.trim()) {
-    joinCodeError.value = t('validation.required')
-    return false
-  }
-  if (joinCode.value.length < 6) {
-    joinCodeError.value = t('session.invalidJoinCode')
-    return false
-  }
-  joinCodeError.value = null
-  return true
+const session = computed<SessionPublicOut | null>(() => sessionStore.publicSession)
+
+const questionnaireTitle = computed(() =>
+  session.value ? resolveLang(session.value.questionnaireTitle, locale.value) ?? '' : ''
+)
+
+const knownFipId = computed(() => {
+  const s = session.value
+  return s ? getSessionFip(s.id) : null
+})
+
+const ORCID_PATTERN = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/
+
+function validateOrcid() {
+  orcidError.value = orcid.value.trim() !== '' && !ORCID_PATTERN.test(orcid.value.trim())
 }
 
-const fetchSessionDetails = async () => {
-  if (!joinCode.value) return
-
+async function load() {
+  loading.value = true
+  notFound.value = false
+  const joinCode = String(route.params.joinCode ?? '').toUpperCase()
   try {
-    const response = await get<Session>(`/sessions/code/${joinCode.value}`)
-    sessionDetails.value = response
-    
-    if (!response.isActive) {
-      error.value = t('session.sessionClosed')
+    await sessionStore.loadByCode(joinCode)
+    // §2.1 step 2: if no stored preference, adopt the session's default
+    // language before rendering its content; a stored preference or the
+    // switcher always wins.
+    let stored: string | null = null
+    try {
+      stored = localStorage.getItem('fip-language')
+    } catch {
+      stored = null
+    }
+    const defaultLang = sessionStore.publicSession?.defaultLanguage
+    if (!stored && defaultLang && (SUPPORTED_LOCALES as string[]).includes(defaultLang)) {
+      locale.value = defaultLang as (typeof SUPPORTED_LOCALES)[number]
     }
   } catch (err) {
-    sessionDetails.value = null
-    // Don't show error yet, let the join attempt handle it
-  }
-}
-
-const handleSubmit = async () => {
-  if (!validateJoinCode()) return
-
-  isLoading.value = true
-  error.value = null
-
-  try {
-    const response = await post<Fip>('/fips', {
-      sessionId: sessionDetails.value?.id || '',
-      joinCode: joinCode.value,
-    })
-
-    success.value = true
-    
-    // Redirect to the FIP detail page after a brief delay
-    setTimeout(() => {
-      router.push(`/fips/${response.id}`)
-    }, 2000)
-  } catch (err) {
-    error.value = t('session.invalidJoinCode')
-    if (err instanceof Error && err.message.includes('closed')) {
-      error.value = t('session.sessionClosed')
+    if (err instanceof ApiResponseError && err.status === 404) {
+      notFound.value = true
+    } else {
+      notFound.value = true
     }
   } finally {
-    isLoading.value = false
+    loading.value = false
   }
 }
 
-onMounted(() => {
-  if (joinCode.value) {
-    validateJoinCode()
+async function onSubmit() {
+  validateOrcid()
+  const s = session.value
+  if (!s) return
+  submitting.value = true
+  submitError.value = null
+  const joinCode = String(route.params.joinCode ?? '').toUpperCase()
+
+  try {
+    const created = await createFip({
+      questionnaireRef: s.questionnaireRef,
+      sessionId: s.id,
+      joinCode,
+      language: locale.value,
+      community: {
+        name: community.value.name,
+        description: community.value.description || null,
+        domain: community.value.domain || null,
+        links: [],
+        dataSteward: orcid.value.trim() ? { orcid: orcid.value.trim() } : null,
+      },
+      answers: [],
+    })
+    // The edit token is returned exactly once — store it before navigating (spec 02 §2.1).
+    if (created.editToken) {
+      setToken(created.id, created.editToken)
+    }
+    rememberSessionFip(s.id, created.id)
+    await router.replace(`/fips/${created.id}/edit`)
+  } catch (err) {
+    if (err instanceof ApiResponseError && err.status === 409) {
+      submitError.value = t('join.closed')
+    } else if (err instanceof ApiResponseError && err.status === 403) {
+      submitError.value = t('join.invalidCode')
+    } else {
+      submitError.value = t('errors.serverError')
+    }
+  } finally {
+    submitting.value = false
   }
-})
+}
+
+onMounted(load)
 </script>
 
 <style scoped>
 .join-session-view {
-  max-width: 500px;
-  margin: 2rem auto;
+  max-width: 640px;
+  margin: 0 auto;
   padding: 1rem;
 }
 
-.join-session-view h1 {
+.loading,
+.message-box {
   text-align: center;
+  padding: 2rem 1rem;
+}
+
+.message-box.closed {
+  background-color: var(--color-hover);
+  border-radius: var(--border-radius-md);
+}
+
+.join-header {
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
   margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.join-header h1 {
+  margin: 0;
   color: var(--color-primary);
 }
 
-.join-session-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.questionnaire-title,
+.facilitator {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
-.form {
+.continue-btn {
+  display: block;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.community-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.form-group {
+.field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
-.form-group label {
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.form-group input {
-  padding: 0.75rem;
+.field input,
+.field textarea {
+  min-height: 44px;
+  padding: 0.6rem 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background);
-  color: var(--color-text);
+  border-radius: var(--border-radius-sm);
   font-size: 1rem;
-  text-transform: uppercase;
+  font-family: inherit;
 }
 
-.form-group input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.error-message {
-  color: var(--color-error);
-  font-size: 0.875rem;
-}
-
+.field-error,
 .form-error {
   color: var(--color-error);
-  text-align: center;
-  padding: 0.5rem;
-  background-color: var(--color-error-bg);
-  border-radius: 4px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: center;
+  font-size: var(--font-size-sm);
 }
 
 .btn {
+  min-height: 44px;
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
-  background-color: var(--color-primary);
-  color: var(--color-primary-text);
+  border-radius: var(--border-radius-sm);
   font-size: 1rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-text);
 }
 
 .btn:disabled {
   opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.session-info {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-}
-
-.session-info h3 {
-  color: var(--color-primary);
-  margin-bottom: 0.75rem;
-  font-size: 1.125rem;
-}
-
-.session-info p {
-  margin: 0.5rem 0;
-  color: var(--color-text);
-}
-
-.session-info strong {
-  color: var(--color-secondary);
-}
-
-.status-active {
-  color: #22c55e;
-  font-weight: 500;
-}
-
-.status-inactive {
-  color: var(--color-error);
-  font-weight: 500;
-}
-
-.success-message {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-primary);
-}
-
-.success-message h2 {
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-}
-
-.success-message .btn {
-  margin-top: 1rem;
-}
-
-@media (max-width: 480px) {
-  .join-session-view {
-    margin: 1rem;
-    padding: 0;
-  }
 }
 </style>

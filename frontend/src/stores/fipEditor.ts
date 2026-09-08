@@ -48,7 +48,13 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
   let retryTimer: ReturnType<typeof setTimeout> | null = null
-  let retryAttempt = 0
+  /**
+   * Minimal addition beyond spec 02 §6.4's listed store API: exposed (with
+   * `retryExhausted` below) so `SaveIndicator` can distinguish the
+   * auto-retrying "Not saved — retrying" message (§2.3) from the terminal
+   * "Not saved" + manual Retry once the fixed backoff schedule is spent.
+   */
+  const retryAttempt = ref(0)
   let inFlight = false
   let pagehideCleanup: (() => void) | null = null
 
@@ -73,6 +79,9 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
   })
 
   const readOnly = computed(() => !canEdit.value)
+
+  /** True once the fixed backoff schedule (§2.3) has been exhausted at least once. */
+  const retryExhausted = computed(() => retryAttempt.value >= RETRY_DELAYS_MS.length)
 
   function clearTimers() {
     if (debounceTimer) {
@@ -116,7 +125,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
       fip.value = updated
       lastError.value = null
       lastSavedAt.value = new Date()
-      retryAttempt = 0
+      retryAttempt.value = 0
       saving.value = false
       inFlight = false
       // Mutations that arrived while this request was in flight are
@@ -142,8 +151,8 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
   }
 
   function scheduleRetry() {
-    const delay = RETRY_DELAYS_MS[Math.min(retryAttempt, RETRY_DELAYS_MS.length - 1)]
-    retryAttempt += 1
+    const delay = RETRY_DELAYS_MS[Math.min(retryAttempt.value, RETRY_DELAYS_MS.length - 1)]
+    retryAttempt.value += 1
     if (retryTimer) clearTimeout(retryTimer)
     retryTimer = setTimeout(() => {
       retryTimer = null
@@ -157,7 +166,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
       clearTimeout(retryTimer)
       retryTimer = null
     }
-    retryAttempt = 0
+    retryAttempt.value = 0
     lastError.value = null
     void performSave()
   }
@@ -345,6 +354,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     forcedReadOnly,
     canEdit,
     readOnly,
+    retryExhausted,
     load,
     setFip,
     setDeclaration,

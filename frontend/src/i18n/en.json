@@ -114,7 +114,20 @@
     "copy": "Copy",
     "close": "Close",
     "retry": "Retry",
-    "notFound": "Not found"
+    "notFound": "Not found",
+    "view": "View"
+  },
+  "home": {
+    "heading": "Build your Findable, Accessible, Interoperable, Reusable data plan",
+    "tagline": "FIP Manager helps a research community answer the GO FAIR FIP mini-questionnaire together, in a workshop or on their own.",
+    "joinLabel": "Have a join code from a workshop?",
+    "joinPlaceholder": "6-character code",
+    "joinButton": "Join"
+  },
+  "fipNew": {
+    "title": "New FIP",
+    "chooseQuestionnaire": "Choose a questionnaire",
+    "submit": "Create FIP"
   },
   "join": {
     "sessionTitle": "Workshop session",
@@ -153,6 +166,7 @@
     "replacementHint": "Also add a second resource with status 'Planned' for the replacement.",
     "progress": "{answered} of {total} questions answered",
     "readOnly": "Read-only on this device.",
+    "editRightsLost": "Edit rights lost on this device.",
     "claim": "Save this FIP to my workspace",
     "claimed": "Saved to your workspace.",
     "preview": "Preview / print",
