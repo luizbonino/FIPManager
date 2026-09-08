@@ -136,7 +136,8 @@
     "startFip": "Iniciar um FIP",
     "continueFip": "Continuar o seu FIP",
     "invalidCode": "Não reconhecemos esse código de acesso.",
-    "closed": "Esta sessão está fechada. Ainda pode consultar os FIPs que criou."
+    "closed": "Esta sessão está fechada. Ainda pode consultar os FIPs que criou.",
+    "questionnaireUnavailable": "O questionário desta sessão já não está disponível. Peça ao facilitador para verificar a sua visibilidade."
   },
   "community": {
     "heading": "A sua comunidade",
@@ -178,7 +179,8 @@
     "saving": "A guardar…",
     "error": "Não guardado — a tentar novamente",
     "failed": "Não guardado",
-    "retry": "Tentar novamente"
+    "retry": "Tentar novamente",
+    "conflict": "Não guardado — alterado noutro local"
   },
   "declarationStatus": {
     "current": "Em uso",
@@ -210,6 +212,8 @@
     "titleLabel": "Título da sessão",
     "knowledgeModel": "Versão do questionário",
     "defaultLanguage": "Idioma predefinido",
+    "privateModelNotice": "Este modelo é privado — tal como está, os participantes não conseguiriam abri-lo.",
+    "makeModelLinkVisible": "Tornar este modelo legível por link para que os participantes o possam abrir",
     "create": "Criar sessão",
     "joinCode": "Código de acesso",
     "joinLink": "Link de acesso",
@@ -312,6 +316,8 @@
     "moveDown": "Mover para baixo",
     "deleteQuestion": "Eliminar pergunta",
     "deleteQuestionConfirm": "Eliminar esta pergunta? Os FIPs existentes em versões publicadas não são afetados.",
+    "deleteSection": "Eliminar secção",
+    "deleteSectionConfirm": "Eliminar esta secção e todas as suas perguntas? Os FIPs existentes em versões publicadas não são afetados.",
     "deleteModel": "Eliminar modelo",
     "deleteModelConfirm": "Eliminar esta versão do modelo? Esta ação não pode ser anulada.",
     "inUse": "Esta versão é utilizada por FIPs e não pode ser eliminada.",
