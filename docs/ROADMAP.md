@@ -6,13 +6,13 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] Questionnaire: GO FAIR mini-questionnaire as-is, editable knowledge model (decided 8 Sep).
 - [x] Licence: MIT for the tool, CC0 default for exported FIPs (decided 8 Sep).
 - [ ] Shortlist hosting (FAIR domain vs Fiocruz) — see PLAN.md §9.
-- [ ] Repo scaffold: FastAPI + Vue 3 + Docker Compose, CI running tests and build.
-- [ ] Data model implemented (User, Questionnaire, FIP, FER, Session) with ownership and visibility fields, JSON import/export.
-- [ ] Accounts: register, sign in/out, argon2id hashing, cookie sessions, CSRF, roles user/admin, first admin from env.
+- [x] Repo scaffold: FastAPI + Vue 3 + Docker Compose, CI workflow for tests and build (done 8 Sep; CI runs once a GitHub remote exists).
+- [x] Data model implemented (User, Questionnaire, FIP, FER, Session) with ownership and visibility fields, JSON import/export (done 8 Sep, docs/specs/01-foundations.md).
+- [x] Accounts: register, sign in/out, argon2id hashing, cookie sessions, CSRF, roles user/admin, first admin from env (done 8 Sep; review fixes in progress).
 - [x] Languages: en, pt-PT, pt-BR at launch; browser locale default, English fallback (decided 8 Sep).
-- [ ] `data/knowledge-models/gofair-fip-mini-1.0.0.json`: the 21 GO FAIR questions in en, with pt-PT and pt-BR drafts.
-- [ ] `data/fers/seed.json`: ~60 typed FERs.
-- [ ] Deliverable: running skeleton where a user can register, sign in, create a FIP and read it back via API.
+- [x] `data/knowledge-models/gofair-fip-mini-1.0.0.json`: the 21 GO FAIR questions in en, with pt-PT and pt-BR drafts (done 8 Sep; 12 FER types in `data/fers/fer-types.json`; content is CC BY-SA 4.0, see PLAN §9.7).
+- [x] `data/fers/seed.json`: 69 typed FERs (done 8 Sep; needs a FAIR-expert spot check of IRIs).
+- [x] Deliverable: running skeleton where a user can register, sign in, create a FIP and read it back via API (done 8 Sep; 14/14 acceptance criteria verified, Docker image runs).
 
 ## Week 2 · 15–19 Sep · Core flows
 - [ ] Participant flow: join session by link, fill questionnaire, pick/enter FERs with status, save, get FIP URL.
