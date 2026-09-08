@@ -29,8 +29,33 @@
   --color-status-planned-replacement: #b3261e;
   --color-status-none: #6b7280;
 
+  /* Canonical bg/fg pairs for StatusBadge.vue and any other chip that
+     shows a declaration status (e.g. a matrix view) — explicit foreground
+     per status so contrast holds regardless of the underlying hue.
+     "Unanswered" is not a DeclarationStatus value; it is the "no
+     declaration at all" cell state used by matrix/list views. */
+  --status-current-bg: var(--color-status-current);
+  --status-current-fg: #ffffff;
+  --status-planned-bg: var(--color-status-planned);
+  --status-planned-fg: #ffffff;
+  --status-planned-development-bg: var(--color-status-planned-development);
+  --status-planned-development-fg: #ffffff;
+  --status-planned-replacement-bg: var(--color-status-planned-replacement);
+  --status-planned-replacement-fg: #ffffff;
+  --status-none-bg: var(--color-status-none);
+  --status-none-fg: #ffffff;
+  --status-unanswered-bg: #e5e7eb;
+  --status-unanswered-fg: #374151;
+
   --color-chip-bg: #eef2ff;
   --color-chip-text: #3730a3;
+
+  /* Question-id chip (QuestionCard.vue): kept separate from
+     --color-secondary/--color-secondary-text on purpose — index.html's
+     inline :root block overrides --color-secondary to a mid-tone slate
+     that, combined with --color-text-secondary, rendered unreadable. */
+  --color-id-chip-bg: #e2e8f0;
+  --color-id-chip-text: #1e293b;
 
   /* Spacing */
   --spacing-xs: 0.25rem;

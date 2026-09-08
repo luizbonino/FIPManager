@@ -30,13 +30,14 @@ const statusKey = computed(() => STATUS_KEYS[props.status])
   border-radius: 999px;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: #fff;
   white-space: nowrap;
 }
 
-.status-current { background-color: var(--color-status-current); }
-.status-planned { background-color: var(--color-status-planned); }
-.status-planned-development { background-color: var(--color-status-planned-development); }
-.status-planned-replacement { background-color: var(--color-status-planned-replacement); }
-.status-none { background-color: var(--color-status-none); }
+/* Each status pairs an explicit bg + fg (not a shared white text default)
+   so contrast stays correct even if a status's hue changes independently. */
+.status-current { background-color: var(--status-current-bg); color: var(--status-current-fg); }
+.status-planned { background-color: var(--status-planned-bg); color: var(--status-planned-fg); }
+.status-planned-development { background-color: var(--status-planned-development-bg); color: var(--status-planned-development-fg); }
+.status-planned-replacement { background-color: var(--status-planned-replacement-bg); color: var(--status-planned-replacement-fg); }
+.status-none { background-color: var(--status-none-bg); color: var(--status-none-fg); }
 </style>

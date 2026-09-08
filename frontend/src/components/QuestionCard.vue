@@ -118,8 +118,12 @@ function onCommentChange(event: Event) {
 .question-id {
   font-family: monospace;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  background-color: var(--color-secondary);
+  /* Explicit chip fg/bg pair (not --color-secondary/--color-text-secondary):
+     --color-secondary is overridden to a mid-tone slate by index.html's
+     inline :root block, which paired with the muted gray text made this
+     chip unreadable. --color-id-chip-* is dedicated to this chip only. */
+  color: var(--color-id-chip-text);
+  background-color: var(--color-id-chip-bg);
   padding: 0.15rem 0.4rem;
   border-radius: var(--border-radius-sm);
 }

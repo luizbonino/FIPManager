@@ -235,8 +235,8 @@ onMounted(load)
 .question-id {
   font-family: monospace;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  background-color: var(--color-secondary);
+  color: var(--color-id-chip-text);
+  background-color: var(--color-id-chip-bg);
   padding: 0.15rem 0.4rem;
   border-radius: var(--border-radius-sm);
 }
