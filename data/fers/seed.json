@@ -1,0 +1,560 @@
+[
+  {
+    "id": "https://www.doi.org/",
+    "label": { "en": "DOI (Digital Object Identifier)" },
+    "type": "identifier-service",
+    "homepage": "https://www.doi.org/",
+    "description": { "en": "The DOI System provides persistent, resolvable identifiers for digital objects, managed by registration agencies such as DataCite and Crossref." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.handle.net/",
+    "label": { "en": "Handle System" },
+    "type": "identifier-service",
+    "homepage": "https://www.handle.net/",
+    "description": { "en": "A general-purpose distributed system for assigning, managing and resolving persistent identifiers; the underlying technology for DOIs." },
+    "source": "seed"
+  },
+  {
+    "id": "https://purl.archive.org/",
+    "label": { "en": "PURL (Persistent URL)" },
+    "type": "identifier-service",
+    "homepage": "https://purl.archive.org/",
+    "description": { "en": "A redirection service, now operated by the Internet Archive, providing stable URLs that can be repointed as resource locations change." },
+    "source": "seed"
+  },
+  {
+    "id": "https://w3id.org/",
+    "label": { "en": "w3id.org" },
+    "type": "identifier-service",
+    "homepage": "https://w3id.org/",
+    "description": { "en": "A permanent URL redirection service for Linked Data and Semantic Web vocabularies, maintained by the W3C Permanent Identifier Community Group." },
+    "source": "seed"
+  },
+  {
+    "id": "https://arks.org/",
+    "label": { "en": "ARK (Archival Resource Key)" },
+    "type": "identifier-service",
+    "homepage": "https://arks.org/",
+    "description": { "en": "A persistent identifier scheme designed to support long-term access to information objects, widely used by libraries and archives." },
+    "source": "seed"
+  },
+  {
+    "id": "https://orcid.org/",
+    "label": { "en": "ORCID" },
+    "type": "identifier-service",
+    "homepage": "https://orcid.org/",
+    "description": { "en": "Provides a persistent, unique identifier for researchers to distinguish themselves and connect their research contributions." },
+    "source": "seed"
+  },
+  {
+    "id": "https://ror.org/",
+    "label": { "en": "ROR (Research Organization Registry)" },
+    "type": "identifier-service",
+    "homepage": "https://ror.org/",
+    "description": { "en": "A global, community-led registry providing persistent identifiers for research organizations." },
+    "source": "seed"
+  },
+  {
+    "id": "https://purl.org/dc/terms/",
+    "label": { "en": "DCMI Metadata Terms (Dublin Core)" },
+    "type": "metadata-schema",
+    "homepage": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/",
+    "aliases": ["Dublin Core", "DCMI Terms"],
+    "description": { "en": "A general-purpose metadata vocabulary of properties and classes for describing resources, maintained by the Dublin Core Metadata Initiative." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/vocab-dcat-3/",
+    "label": { "en": "DCAT (Data Catalog Vocabulary)" },
+    "type": "metadata-schema",
+    "homepage": "https://www.w3.org/TR/vocab-dcat-3/",
+    "aliases": ["DCAT2", "DCAT3"],
+    "description": { "en": "A W3C RDF vocabulary for describing data catalogs, datasets, distributions and services to enable interoperable data discovery." },
+    "source": "seed"
+  },
+  {
+    "id": "https://schema.org/",
+    "label": { "en": "schema.org" },
+    "type": "metadata-schema",
+    "homepage": "https://schema.org/",
+    "description": { "en": "A collaborative, cross-vendor vocabulary for structured data markup on web pages, widely used to describe datasets via schema:Dataset." },
+    "source": "seed"
+  },
+  {
+    "id": "https://schema.datacite.org/",
+    "label": { "en": "DataCite Metadata Schema" },
+    "type": "metadata-schema",
+    "homepage": "https://schema.datacite.org/",
+    "description": { "en": "A list of core metadata properties for accurate and consistent identification of research data and other outputs for citation and discovery." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.iso.org/standard/53798.html",
+    "label": { "en": "ISO 19115-1:2014 Geographic information — Metadata" },
+    "type": "metadata-schema",
+    "homepage": "https://www.iso.org/standard/53798.html",
+    "aliases": ["ISO 19115"],
+    "description": { "en": "Defines the schema for describing geographic information and services, including identification, extent, quality and distribution metadata." },
+    "source": "seed"
+  },
+  {
+    "id": "https://ddialliance.org/",
+    "label": { "en": "DDI (Data Documentation Initiative)" },
+    "type": "metadata-schema",
+    "homepage": "https://ddialliance.org/",
+    "description": { "en": "An international standard for describing data from the social, behavioral and economic sciences across the research data lifecycle." },
+    "source": "seed"
+  },
+  {
+    "id": "https://dwc.tdwg.org/",
+    "label": { "en": "Darwin Core" },
+    "type": "metadata-schema",
+    "homepage": "https://dwc.tdwg.org/",
+    "description": { "en": "A biodiversity data standard providing a stable, extensible vocabulary of terms for sharing information about biological diversity." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.fged.org/projects/miame",
+    "label": { "en": "MIAME (Minimum Information About a Microarray Experiment)" },
+    "type": "metadata-schema",
+    "homepage": "https://www.fged.org/projects/miame",
+    "description": { "en": "Specifies the minimum information required to unambiguously interpret and independently verify microarray experiment results." },
+    "source": "seed"
+  },
+  {
+    "id": "https://metadatacenter.org/",
+    "label": { "en": "CEDAR Metadata Templates" },
+    "type": "metadata-schema",
+    "homepage": "https://metadatacenter.org/",
+    "description": { "en": "The CEDAR Workbench lets researchers author, share and reuse metadata templates to produce structured, standards-compliant metadata." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.rd-alliance.org/groups/dmp-common-standards-wg/",
+    "label": { "en": "RDA DMP Common Standard (maDMP)" },
+    "type": "metadata-schema",
+    "homepage": "https://www.rd-alliance.org/groups/dmp-common-standards-wg/",
+    "aliases": ["RDA maDMP"],
+    "description": { "en": "A machine-actionable data management plan (maDMP) schema enabling DMPs to be exchanged and processed automatically by tools and systems." },
+    "source": "seed"
+  },
+  {
+    "id": "https://signposting.org/",
+    "label": { "en": "Signposting" },
+    "type": "metadata-data-linking-schema",
+    "homepage": "https://signposting.org/",
+    "description": { "en": "Adds typed HTTP Link headers and link relations that make the relationship between a resource, its metadata and related resources machine-discoverable." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.researchobject.org/ro-crate/",
+    "label": { "en": "RO-Crate" },
+    "type": "metadata-data-linking-schema",
+    "homepage": "https://www.researchobject.org/ro-crate/",
+    "description": { "en": "A lightweight method to package research data together with machine-readable JSON-LD metadata describing the data, its context and provenance." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/ns/dcat#Distribution",
+    "label": { "en": "DCAT Distribution" },
+    "type": "metadata-data-linking-schema",
+    "homepage": "https://www.w3.org/TR/vocab-dcat-3/#Class:Distribution",
+    "description": { "en": "The dcat:Distribution class links a dataset's metadata record to its actual accessible data files, formats and access URLs." },
+    "source": "seed"
+  },
+  {
+    "id": "https://commons.datacite.org/",
+    "label": { "en": "DataCite Commons" },
+    "type": "registry",
+    "homepage": "https://commons.datacite.org/",
+    "description": { "en": "A discovery service for exploring connections between research outputs, people, organizations and funders using DataCite and ORCID metadata." },
+    "source": "seed"
+  },
+  {
+    "id": "https://datasetsearch.research.google.com/",
+    "label": { "en": "Google Dataset Search" },
+    "type": "registry",
+    "homepage": "https://datasetsearch.research.google.com/",
+    "description": { "en": "A search engine for discovering datasets indexed from their schema.org and DCAT metadata across the web." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.re3data.org/",
+    "label": { "en": "re3data" },
+    "type": "registry",
+    "homepage": "https://www.re3data.org/",
+    "description": { "en": "A global registry of research data repositories covering a wide range of academic disciplines." },
+    "source": "seed"
+  },
+  {
+    "id": "https://fairsharing.org/",
+    "label": { "en": "FAIRsharing" },
+    "type": "registry",
+    "homepage": "https://fairsharing.org/",
+    "description": { "en": "A curated, searchable registry of standards, databases and data policies across scientific disciplines." },
+    "source": "seed"
+  },
+  {
+    "id": "https://b2find.eudat.eu/",
+    "label": { "en": "B2FIND" },
+    "type": "registry",
+    "homepage": "https://b2find.eudat.eu/",
+    "description": { "en": "A EUDAT metadata catalogue that harvests and indexes research data from EUDAT and other repositories for cross-disciplinary discovery." },
+    "source": "seed"
+  },
+  {
+    "id": "https://explore.openaire.eu/",
+    "label": { "en": "OpenAIRE Explore" },
+    "type": "registry",
+    "homepage": "https://explore.openaire.eu/",
+    "description": { "en": "An open discovery portal for publications, datasets, software and other research products linked across European infrastructures." },
+    "source": "seed"
+  },
+  {
+    "id": "https://zenodo.org/",
+    "label": { "en": "Zenodo" },
+    "type": "registry",
+    "homepage": "https://zenodo.org/",
+    "description": { "en": "A general-purpose open repository operated by CERN that lets researchers deposit and discover datasets, software and publications." },
+    "source": "seed"
+  },
+  {
+    "id": "https://dataverse.org/",
+    "label": { "en": "Dataverse" },
+    "type": "registry",
+    "homepage": "https://dataverse.org/",
+    "description": { "en": "An open-source repository platform for sharing, citing and preserving research data, deployed by institutions worldwide." },
+    "source": "seed"
+  },
+  {
+    "id": "https://dspace.org/",
+    "label": { "en": "DSpace" },
+    "type": "registry",
+    "homepage": "https://dspace.org/",
+    "description": { "en": "An open-source repository software platform used by institutions to manage and provide searchable access to digital collections." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.rfc-editor.org/rfc/rfc9110",
+    "label": { "en": "HTTPS" },
+    "type": "communication-protocol",
+    "homepage": "https://www.rfc-editor.org/rfc/rfc9110",
+    "description": { "en": "HTTP layered over TLS encryption; the standard secure protocol for transferring data and metadata over the Web." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.openarchives.org/pmh/",
+    "label": { "en": "OAI-PMH" },
+    "type": "communication-protocol",
+    "homepage": "https://www.openarchives.org/pmh/",
+    "description": { "en": "The Open Archives Initiative Protocol for Metadata Harvesting provides an application-independent framework for harvesting metadata between repositories." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/sparql11-protocol/",
+    "label": { "en": "SPARQL Protocol" },
+    "type": "communication-protocol",
+    "homepage": "https://www.w3.org/TR/sparql11-protocol/",
+    "description": { "en": "Defines how SPARQL queries and updates are transmitted to a SPARQL processing service over HTTP." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.rfc-editor.org/rfc/rfc959",
+    "label": { "en": "FTP / SFTP" },
+    "type": "communication-protocol",
+    "homepage": "https://www.rfc-editor.org/rfc/rfc959",
+    "aliases": ["FTP", "SFTP"],
+    "description": { "en": "FTP and its secure variant SFTP are standard protocols for transferring files between a client and a server over a network." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.rfc-editor.org/rfc/rfc6749",
+    "label": { "en": "OAuth 2.0" },
+    "type": "authentication-authorization-service",
+    "homepage": "https://www.rfc-editor.org/rfc/rfc6749",
+    "description": { "en": "An authorization framework enabling applications to obtain limited access to a user's resources without exposing their credentials." },
+    "source": "seed"
+  },
+  {
+    "id": "https://openid.net/specs/openid-connect-core-1_0.html",
+    "label": { "en": "OpenID Connect" },
+    "type": "authentication-authorization-service",
+    "homepage": "https://openid.net/specs/openid-connect-core-1_0.html",
+    "description": { "en": "An identity layer built on top of OAuth 2.0 that lets clients verify user identity and obtain basic profile information." },
+    "source": "seed"
+  },
+  {
+    "id": "https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf",
+    "label": { "en": "SAML 2.0" },
+    "type": "authentication-authorization-service",
+    "homepage": "https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf",
+    "description": { "en": "An XML-based OASIS standard for exchanging authentication and authorization data between identity and service providers." },
+    "source": "seed"
+  },
+  {
+    "id": "https://edugain.org/",
+    "label": { "en": "eduGAIN" },
+    "type": "authentication-authorization-service",
+    "homepage": "https://edugain.org/",
+    "description": { "en": "An international interfederation service that interconnects research and education identity federations for federated access." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.shibboleth.net/",
+    "label": { "en": "Shibboleth" },
+    "type": "authentication-authorization-service",
+    "homepage": "https://www.shibboleth.net/",
+    "description": { "en": "An open-source federated identity and access management system implementing SAML-based single sign-on for web applications." },
+    "source": "seed"
+  },
+  {
+    "id": "https://orcid.org/oauth/authorize",
+    "label": { "en": "ORCID Sign In" },
+    "type": "authentication-authorization-service",
+    "homepage": "https://info.orcid.org/documentation/",
+    "aliases": ["ORCID login", "ORCID OAuth"],
+    "description": { "en": "Lets researchers authenticate to third-party systems using their ORCID iD via OAuth 2.0, linking actions to their persistent identifier." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.coretrustseal.org/",
+    "label": { "en": "CoreTrustSeal" },
+    "type": "metadata-preservation-policy",
+    "homepage": "https://www.coretrustseal.org/",
+    "description": { "en": "A community-based certification for trustworthy data repositories, assessing their policies for long-term data and metadata preservation." },
+    "source": "seed"
+  },
+  {
+    "id": "https://support.dataverse.harvard.edu/harvard-dataverse-preservation-policy",
+    "label": { "en": "Dataverse Preservation Policy" },
+    "type": "metadata-preservation-policy",
+    "homepage": "https://support.dataverse.harvard.edu/harvard-dataverse-preservation-policy",
+    "description": { "en": "Harvard Dataverse's published policy describing how deposited data and metadata are curated and preserved for the long term." },
+    "source": "seed"
+  },
+  {
+    "id": "https://about.zenodo.org/policies/",
+    "label": { "en": "Zenodo Preservation Policy" },
+    "type": "metadata-preservation-policy",
+    "homepage": "https://about.zenodo.org/policies/",
+    "description": { "en": "Zenodo's general policies, including its commitment to preserve deposited content and metadata for the lifetime of the CERN data centre." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/rdf11-concepts/",
+    "label": { "en": "RDF 1.1" },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.w3.org/TR/rdf11-concepts/",
+    "description": { "en": "The W3C data model and abstract syntax for representing information as subject-predicate-object triples on the Web." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/owl2-overview/",
+    "label": { "en": "OWL 2" },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.w3.org/TR/owl2-overview/",
+    "description": { "en": "The W3C Web Ontology Language for representing rich, machine-interpretable knowledge via classes, properties and axioms." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/skos-reference/",
+    "label": { "en": "SKOS" },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.w3.org/TR/skos-reference/",
+    "description": { "en": "The Simple Knowledge Organization System, a W3C model for expressing controlled vocabularies, thesauri and taxonomies as machine-readable RDF." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/json-ld11/",
+    "label": { "en": "JSON-LD" },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.w3.org/TR/json-ld11/",
+    "description": { "en": "A W3C standard for expressing Linked Data using JSON syntax, allowing data to carry semantic context." },
+    "source": "seed"
+  },
+  {
+    "id": "https://json-schema.org/",
+    "label": { "en": "JSON Schema" },
+    "type": "knowledge-representation-language",
+    "homepage": "https://json-schema.org/",
+    "description": { "en": "A vocabulary for annotating and validating the structure, content and semantics of JSON documents." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/xmlschema11-1/",
+    "label": { "en": "XML Schema (XSD)" },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.w3.org/TR/xmlschema11-1/",
+    "description": { "en": "Defines the structure, content and semantics of XML documents through a machine-processable schema language." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/shacl/",
+    "label": { "en": "SHACL" },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.w3.org/TR/shacl/",
+    "description": { "en": "The Shapes Constraint Language, a W3C language for validating RDF graphs against a set of conditions expressed as shapes." },
+    "source": "seed"
+  },
+  {
+    "id": "https://id.nlm.nih.gov/mesh/",
+    "label": { "en": "MeSH (Medical Subject Headings)" },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.nlm.nih.gov/mesh/meshhome.html",
+    "description": { "en": "The U.S. National Library of Medicine's controlled vocabulary thesaurus used for indexing biomedical literature." },
+    "source": "seed"
+  },
+  {
+    "id": "https://icd.who.int/en",
+    "label": { "en": "ICD-11" },
+    "type": "structured-vocabulary",
+    "homepage": "https://icd.who.int/en",
+    "description": { "en": "The World Health Organization's international classification of diseases and related health conditions." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.snomed.org/",
+    "label": { "en": "SNOMED CT" },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.snomed.org/",
+    "description": { "en": "A comprehensive, multilingual clinical healthcare terminology used for recording and exchanging clinical data." },
+    "source": "seed"
+  },
+  {
+    "id": "https://agrovoc.fao.org/",
+    "label": { "en": "AGROVOC" },
+    "type": "structured-vocabulary",
+    "homepage": "https://agrovoc.fao.org/",
+    "description": { "en": "FAO's multilingual controlled vocabulary covering agriculture, forestry, fisheries, food and related domains." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.eionet.europa.eu/gemet/en/about/",
+    "label": { "en": "GEMET" },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.eionet.europa.eu/gemet/en/about/",
+    "description": { "en": "The GEneral Multilingual Environmental Thesaurus, a controlled vocabulary of environmental terminology maintained by the European Environment Agency." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.nlm.nih.gov/research/umls/index.html",
+    "label": { "en": "UMLS (Unified Medical Language System)" },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.nlm.nih.gov/research/umls/index.html",
+    "description": { "en": "Integrates and distributes key biomedical terminologies and standards to enable interoperability among health information systems." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.dbpedia.org/",
+    "label": { "en": "DBpedia" },
+    "type": "semantic-model",
+    "homepage": "https://www.dbpedia.org/",
+    "description": { "en": "A crowd-sourced community effort providing a structured, Linked Data knowledge graph extracted from Wikipedia." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.wikidata.org/",
+    "label": { "en": "Wikidata" },
+    "type": "semantic-model",
+    "homepage": "https://www.wikidata.org/",
+    "description": { "en": "A free, collaborative knowledge base providing structured Linked Data usable across the Wikimedia projects and beyond." },
+    "source": "seed"
+  },
+  {
+    "id": "http://xmlns.com/foaf/spec/",
+    "label": { "en": "FOAF (Friend of a Friend)" },
+    "type": "semantic-model",
+    "homepage": "http://xmlns.com/foaf/spec/",
+    "description": { "en": "An RDF vocabulary and ontology for describing people, their attributes and their social connections." },
+    "source": "seed"
+  },
+  {
+    "id": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "label": { "en": "CC0 1.0" },
+    "type": "data-usage-license",
+    "homepage": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "description": { "en": "A public domain dedication that waives all copyright and related rights to a work, allowing unrestricted reuse." },
+    "source": "seed"
+  },
+  {
+    "id": "https://creativecommons.org/licenses/by/4.0/",
+    "label": { "en": "CC BY 4.0" },
+    "type": "data-usage-license",
+    "homepage": "https://creativecommons.org/licenses/by/4.0/",
+    "description": { "en": "Permits unrestricted reuse and redistribution of a work provided that appropriate credit is given to the creator." },
+    "source": "seed"
+  },
+  {
+    "id": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "label": { "en": "CC BY-SA 4.0" },
+    "type": "data-usage-license",
+    "homepage": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "description": { "en": "Permits reuse and adaptation with attribution, provided derivative works are shared under the same licence." },
+    "source": "seed"
+  },
+  {
+    "id": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "label": { "en": "CC BY-NC 4.0" },
+    "type": "data-usage-license",
+    "homepage": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "description": { "en": "Permits reuse and adaptation with attribution for non-commercial purposes only." },
+    "source": "seed"
+  },
+  {
+    "id": "https://opendatacommons.org/licenses/by/",
+    "label": { "en": "ODC-BY (Open Data Commons Attribution License)" },
+    "type": "data-usage-license",
+    "homepage": "https://opendatacommons.org/licenses/by/",
+    "description": { "en": "Allows free reuse of a database provided that attribution is given to its creator." },
+    "source": "seed"
+  },
+  {
+    "id": "https://opendatacommons.org/licenses/odbl/",
+    "label": { "en": "ODbL (Open Database License)" },
+    "type": "data-usage-license",
+    "homepage": "https://opendatacommons.org/licenses/odbl/",
+    "description": { "en": "A share-alike licence for databases requiring attribution and that derivative databases remain open." },
+    "source": "seed"
+  },
+  {
+    "id": "https://opensource.org/license/mit/",
+    "label": { "en": "MIT License" },
+    "type": "data-usage-license",
+    "homepage": "https://opensource.org/license/mit/",
+    "description": { "en": "A short, permissive software licence allowing reuse with minimal restrictions, requiring only preservation of the copyright notice." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.apache.org/licenses/LICENSE-2.0",
+    "label": { "en": "Apache License 2.0" },
+    "type": "data-usage-license",
+    "homepage": "https://www.apache.org/licenses/LICENSE-2.0",
+    "description": { "en": "A permissive licence that additionally grants an express patent licence from contributors to users." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/prov-o/",
+    "label": { "en": "PROV-O" },
+    "type": "provenance-model",
+    "homepage": "https://www.w3.org/TR/prov-o/",
+    "description": { "en": "The W3C OWL ontology for representing and interchanging provenance information generated in different systems and contexts." },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/prov-dm/",
+    "label": { "en": "PROV-DM" },
+    "type": "provenance-model",
+    "homepage": "https://www.w3.org/TR/prov-dm/",
+    "description": { "en": "The W3C conceptual data model for provenance, defining the core entities, activities and agents used to describe a resource's history." },
+    "source": "seed"
+  },
+  {
+    "id": "https://openprovenance.org/opm/",
+    "label": { "en": "OPM (Open Provenance Model)" },
+    "type": "provenance-model",
+    "homepage": "https://openprovenance.org/opm/",
+    "description": { "en": "An earlier community model and interchange format for representing the provenance of process and data, precursor to PROV." },
+    "source": "seed"
+  }
+]

@@ -1,0 +1,23 @@
+This file covers ONLY the questionnaire content files in this directory
+(data/knowledge-models/), not the FIP Manager software, which is MIT
+licensed — see /LICENSE.
+
+GO FAIR FIP mini-questionnaire (question wording and structure)
+Copyright Erik Schultes, Barbara Magagna and Jacintha Schultes, GO FAIR
+Foundation, in cooperation with CODATA. v1: 2020; v2.0.0: November 2023.
+Licensed under CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+
+Files here derived from the mini-questionnaire (including
+gofair-fip-mini-1.0.0.json) reproduce it unchanged except for
+translation, and are distributed under CC BY-SA 4.0 with the
+attribution below. The pt-PT and pt-BR translations are derivative
+works of the English original and are likewise CC BY-SA 4.0.
+
+Required attribution:
+  "FIP mini-questionnaire v2.0.0 (c) 2023 Erik Schultes, Barbara
+  Magagna, Jacintha Schultes / GO FAIR Foundation, CC BY-SA 4.0."
+
+FIP Ontology (term keys, IRIs, labels, definitions)
+Copyright Erik Schultes, Tobias Kuhn and Barbara Magagna. Dedicated to
+the public domain under CC0 1.0 Universal:
+https://creativecommons.org/publicdomain/zero/1.0/
