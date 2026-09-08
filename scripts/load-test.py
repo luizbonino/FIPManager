@@ -67,7 +67,7 @@ class LatencyStats:
 @dataclass
 class SessionInfo:
     id: str
-    questionnaire_ref: str
+    questionnaire_ref: dict
 
 
 async def get_session(client: httpx.AsyncClient, base_url: str, join_code: str) -> SessionInfo:
@@ -79,13 +79,15 @@ async def get_session(client: httpx.AsyncClient, base_url: str, join_code: str) 
         data = resp.json()
         latency = time.perf_counter() - start
         session_latencies.add(latency, resp.status_code)
-        return SessionInfo(id=str(data["id"]), questionnaire_ref=str(data.get("questionnaireRef", "")))
+        # questionnaireRef is a {id, version} object, not a scalar -- must be
+        # passed through as-is (not stringified) for FIP create to validate.
+        return SessionInfo(id=str(data["id"]), questionnaire_ref=data.get("questionnaireRef") or {})
     except httpx.HTTPStatusError as e:
         session_latencies.add(time.perf_counter() - start, e.response.status_code)
         raise
 
 
-async def create_fip(client: httpx.AsyncClient, base_url: str, session: SessionInfo, join_code: str, group_idx: int) -> Optional[str]:
+async def create_fip(client: httpx.AsyncClient, base_url: str, session: SessionInfo, join_code: str, group_idx: int) -> Optional[tuple[str, str]]:
     url = f"{base_url.rstrip('/')}/api/fips"
     payload = {
         "sessionId": session.id,
@@ -101,15 +103,38 @@ async def create_fip(client: httpx.AsyncClient, base_url: str, session: SessionI
         latency = time.perf_counter() - start
         fip_create_latencies.add(latency, resp.status_code)
         data = resp.json()
-        return str(data.get("editToken"))
+        return str(data.get("id")), str(data.get("editToken"))
     except httpx.HTTPStatusError as e:
         fip_create_latencies.add(time.perf_counter() - start, e.response.status_code)
         return None
 
 
-async def patch_fip(client: httpx.AsyncClient, base_url: str, edit_token: str, answer_idx: int) -> bool:
-    url = f"{base_url.rstrip('/')}/api/fips"
-    payload = {"answers": {f"q{answer_idx}": f"answer_{answer_idx}" * answer_idx}}
+async def get_question_ids(client: httpx.AsyncClient, base_url: str, questionnaire_ref: dict) -> List[str]:
+    km_id = questionnaire_ref.get("id")
+    version = questionnaire_ref.get("version")
+    url = f"{base_url.rstrip('/')}/api/knowledge-models/{km_id}/{version}"
+    resp = await client.get(url)
+    resp.raise_for_status()
+    content = resp.json().get("content", {})
+    return [
+        q["id"]
+        for section in content.get("sections", [])
+        for q in section.get("questions", [])
+    ]
+
+
+async def patch_fip(
+    client: httpx.AsyncClient,
+    base_url: str,
+    fip_id: str,
+    edit_token: str,
+    answers: List[dict],
+) -> bool:
+    url = f"{base_url.rstrip('/')}/api/fips/{fip_id}"
+    # PATCH replaces the whole answers list (FipPatchRequest.answers is a
+    # list[Answer], not the free-form {questionId: value} map this used to
+    # send, which always 422'd) -- the caller sends the accumulated set.
+    payload = {"answers": answers}
     start = time.perf_counter()
     try:
         resp = await client.patch(
@@ -126,11 +151,15 @@ async def patch_fip(client: httpx.AsyncClient, base_url: str, edit_token: str, a
         return False
 
 
-async def get_export(client: httpx.AsyncClient, base_url: str) -> bool:
-    url = f"{base_url.rstrip('/')}/api/export.json"
+async def get_export(client: httpx.AsyncClient, base_url: str, fip_id: str, edit_token: str) -> bool:
+    # Participants (anonymous, session-scoped FIPs) can only reach the
+    # per-FIP export endpoint, authorized via their edit token -- there is
+    # no unscoped /api/export.json, and the session-level export.json is
+    # facilitator-only (requires a logged-in owner cookie).
+    url = f"{base_url.rstrip('/')}/api/fips/{fip_id}/export.json"
     start = time.perf_counter()
     try:
-        resp = await client.get(url, headers={"Origin": base_url})
+        resp = await client.get(url, headers={"Origin": base_url, "X-Edit-Token": edit_token})
         resp.raise_for_status()
         latency = time.perf_counter() - start
         export_latencies.add(latency, resp.status_code)
@@ -140,18 +169,31 @@ async def get_export(client: httpx.AsyncClient, base_url: str) -> bool:
         return False
 
 
-async def run_user(client: httpx.AsyncClient, base_url: str, session: SessionInfo, join_code: str, group_idx: int) -> bool:
-    edit_token = await create_fip(client, base_url, session, join_code, group_idx)
-    if not edit_token:
+async def run_user(
+    client: httpx.AsyncClient,
+    base_url: str,
+    session: SessionInfo,
+    join_code: str,
+    group_idx: int,
+    question_ids: List[str],
+) -> bool:
+    created = await create_fip(client, base_url, session, join_code, group_idx)
+    if not created:
         return False
+    fip_id, edit_token = created
 
-    for i in range(1, 11):
-        if not await patch_fip(client, base_url, edit_token, i):
+    answers: List[dict] = []
+    n = min(10, len(question_ids))
+    for i in range(1, n + 1):
+        answers.append(
+            {"questionId": question_ids[i - 1], "comment": f"answer_{i}" * i}
+        )
+        if not await patch_fip(client, base_url, fip_id, edit_token, answers):
             return False
         # Small stagger within user to avoid thundering herd
         await asyncio.sleep(0.05)
 
-    return await get_export(client, base_url)
+    return await get_export(client, base_url, fip_id, edit_token)
 
 
 async def run_test(base_url: str, join_code: str, num_users: int, p95_ms: int) -> bool:
@@ -165,12 +207,15 @@ async def run_test(base_url: str, join_code: str, num_users: int, p95_ms: int) -
     async with httpx.AsyncClient(timeout=30.0) as client:
         # Fetch session once for all users
         session = await get_session(client, base_url, join_code)
+        question_ids = await get_question_ids(client, base_url, session.questionnaire_ref)
 
         tasks = []
         for i in range(num_users):
             # Stagger user starts slightly
             await asyncio.sleep(0.1)
-            task = asyncio.create_task(run_user(client, base_url, session, join_code, i + 1))
+            task = asyncio.create_task(
+                run_user(client, base_url, session, join_code, i + 1, question_ids)
+            )
             tasks.append(task)
 
         results = await asyncio.gather(*tasks, return_exceptions=True)

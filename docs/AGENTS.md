@@ -46,6 +46,7 @@ Translations run in parallel with steps 2–3 whenever user-facing text changes.
 ## Lessons from the first day (8 Sep 2026)
 
 - Mistral Vibe scaffolded the frontend (21 files) but needed two runs, and its Haiku driver burned more tokens polling than driving; the tightened `vibe-runner` rules (single foreground call, chunks of ≤12 files, nested key counts) address that. Net saving was small; use Vibe for genuinely mechanical bulk (fixtures, boilerplate, first-draft translations), not for anything with cross-file contracts.
+- Second Vibe data point: the tightened driver ran cleanly (6 tool calls) and the backup script was fine, but the load-test script it wrote invented three API endpoints/shapes and had to be fixed by a Sonnet verifier. Rule confirmed: give Vibe self-contained scripts and fixtures, never anything that must match a contract it cannot see.
 - Sonnet builders reliably delivered spec-driven backend and frontend work when given exact acceptance criteria and file ownership boundaries; running two builders concurrently on disjoint file sets worked well.
 - Opus reviewers found real, verified security issues after every build round (KM authz gate, CSV formula injection, closed-session bypass via claim). Never skip the reviewer for anything touching auth, tokens or exports.
 - A browser walkthrough at phone width (Playwright, driven by a Sonnet agent) caught two visual defects unit tests cannot: an unreadable badge and an oversized header.

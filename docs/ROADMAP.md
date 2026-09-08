@@ -32,12 +32,12 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] Deliverable: dry run of the whole workshop exercise (30 min) with the three facilitators.
 
 ## Week 4 · 29 Sep–3 Oct · Hardening and deployment
-- [ ] Deploy to the chosen domain with HTTPS; backup script for the SQLite file; base URL from env so a later move to Fiocruz keeps FIP IDs.
+- [ ] Deploy to the chosen domain with HTTPS; base URL from env so a later move to Fiocruz keeps FIP IDs. Backup script done 8 Sep (`scripts/backup-db.sh`).
 - [ ] Admin pages: list users, reset password, promote user FER to global catalogue.
 - [ ] Privacy notice on sign-up and join pages; login rate limiting checked.
 - [ ] Register the `fipm` w3id (https://w3id.org/fipm/ns#) used by the RDF export's extension vocabulary; publish a terms page.
 - [ ] Offline fallback tested: container on laptop + hotspot.
-- [ ] Bug fixing from dry run; loading/latency check with ~40 concurrent users.
+- [ ] Bug fixing from dry run. Load check done 8 Sep: 40 and 80 simulated participants, 0 errors, p95 < 10 ms on writes, SQLite in WAL mode (`scripts/load-test.py`).
 - [ ] Slides and facilitator script referencing the tool; printed questionnaire fallback.
 - [ ] Fri 3 Oct: code freeze, tag `v1.0-confoa`.
 
