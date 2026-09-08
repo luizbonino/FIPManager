@@ -6,7 +6,9 @@ export type ApiError = {
 type ApiRequestOptions = {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   path: string
-  body?: Record<string, unknown> | FormData
+  // `object` (not `Record<string, unknown>`) so a plain DTO interface can be
+  // passed straight through without an index-signature cast at every call site.
+  body?: object | FormData
   headers?: Record<string, string>
   editToken?: string
 }
@@ -143,15 +145,15 @@ export function get<T>(path: string, editToken?: string) {
   return apiRequest<T>({ method: 'GET', path, editToken })
 }
 
-export function post<T>(path: string, body?: Record<string, unknown>, editToken?: string) {
+export function post<T>(path: string, body?: object, editToken?: string) {
   return apiRequest<T>({ method: 'POST', path, body, editToken })
 }
 
-export function patch<T>(path: string, body?: Record<string, unknown>, editToken?: string) {
+export function patch<T>(path: string, body?: object, editToken?: string) {
   return apiRequest<T>({ method: 'PATCH', path, body, editToken })
 }
 
-export function put<T>(path: string, body?: Record<string, unknown>, editToken?: string) {
+export function put<T>(path: string, body?: object, editToken?: string) {
   return apiRequest<T>({ method: 'PUT', path, body, editToken })
 }
 

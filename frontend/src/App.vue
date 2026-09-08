@@ -10,13 +10,7 @@
           <router-link v-if="isAuthenticated" to="/workspace" class="nav-link">{{ $t('nav.workspace') }}</router-link>
           <button v-if="isAuthenticated" @click="handleLogout" class="nav-link logout-btn">{{ $t('nav.logout') }}</button>
         </nav>
-        <div class="language-switcher">
-          <select v-model="currentLocale" @change="changeLanguage" class="language-select">
-            <option v-for="locale in locales" :key="locale" :value="locale">
-              {{ $t(`languages.${locale}`) }}
-            </option>
-          </select>
-        </div>
+        <LanguageSwitcher />
       </div>
     </header>
     
@@ -31,30 +25,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useI18n } from 'vue-i18n'
-import { SUPPORTED_LOCALES, type Locale } from '@/i18n'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
-const { locale } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 
-const currentLocale = ref<Locale>(locale.value as Locale)
-const locales = SUPPORTED_LOCALES
-
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const user = computed(() => authStore.user)
-
-watch(locale, (newLocale) => {
-  currentLocale.value = newLocale as Locale
-})
-
-const changeLanguage = () => {
-  locale.value = currentLocale.value
-  localStorage.setItem('fip-language', currentLocale.value)
-}
 
 const handleLogout = async () => {
   try {
@@ -136,27 +116,6 @@ const handleLogout = async () => {
   border: none;
   cursor: pointer;
   font: inherit;
-}
-
-.language-switcher {
-  display: flex;
-  align-items: center;
-}
-
-.language-select {
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background);
-  color: var(--color-text);
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.language-select:hover,
-.language-select:focus {
-  outline: none;
-  border-color: var(--color-primary);
 }
 
 .user-info {

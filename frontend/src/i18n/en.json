@@ -108,6 +108,118 @@
     "updated": "Updated",
     "status": "Status",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "delete": "Delete",
+    "deleteFipConfirm": "Delete this FIP? This cannot be undone.",
+    "copy": "Copy",
+    "close": "Close",
+    "retry": "Retry",
+    "notFound": "Not found"
+  },
+  "join": {
+    "sessionTitle": "Workshop session",
+    "questionnaire": "Questionnaire",
+    "facilitator": "Facilitator",
+    "startFip": "Start a FIP",
+    "continueFip": "Continue your FIP",
+    "invalidCode": "We don't know that join code.",
+    "closed": "This session is closed. You can still read the FIPs you created."
+  },
+  "community": {
+    "heading": "Your community",
+    "name": "Community name",
+    "namePlaceholder": "e.g. CONFOA 2026 group A",
+    "description": "Short description",
+    "domain": "Research domain",
+    "domainPlaceholder": "e.g. Public health",
+    "dataSteward": "Data steward ORCID",
+    "dataStewardPlaceholder": "0000-0002-1825-0097",
+    "orcidInvalid": "That does not look like an ORCID iD."
+  },
+  "editor": {
+    "title": "Questionnaire",
+    "help": "Help",
+    "ferType": "Resource type",
+    "addDeclaration": "Add a resource",
+    "removeDeclaration": "Remove",
+    "note": "Why? (optional)",
+    "comment": "Notes on this question (optional)",
+    "chooseFer": "Choose a resource",
+    "searchFer": "Search resources",
+    "useFreeText": "Use my own wording",
+    "freeTextPlaceholder": "Name the resource your community uses",
+    "useCatalogue": "Pick from the catalogue",
+    "noFerMatch": "No match — use your own wording.",
+    "replacementHint": "Also add a second resource with status 'Planned' for the replacement.",
+    "progress": "{answered} of {total} questions answered",
+    "readOnly": "Read-only on this device.",
+    "claim": "Save this FIP to my workspace",
+    "claimed": "Saved to your workspace.",
+    "preview": "Preview / print",
+    "notAnswered": "Not answered"
+  },
+  "save": {
+    "saved": "Saved {time}",
+    "unsaved": "Unsaved changes",
+    "saving": "Saving…",
+    "error": "Not saved — retrying",
+    "failed": "Not saved",
+    "retry": "Retry"
+  },
+  "declarationStatus": {
+    "current": "Currently used",
+    "planned": "Planned",
+    "plannedDevelopment": "To be developed",
+    "plannedReplacement": "To be replaced",
+    "none": "No choice yet"
+  },
+  "share": {
+    "title": "Share",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "qrHint": "Scan to open this FIP"
+  },
+  "visibility": {
+    "label": "Who can see this FIP",
+    "private": "Private",
+    "link": "Anyone with the link",
+    "public": "Public"
+  },
+  "sections": {
+    "F": "Findable",
+    "A": "Accessible",
+    "I": "Interoperable",
+    "R": "Reusable"
+  },
+  "sessionAdmin": {
+    "newTitle": "New workshop session",
+    "titleLabel": "Session title",
+    "knowledgeModel": "Questionnaire version",
+    "defaultLanguage": "Default language",
+    "create": "Create session",
+    "joinCode": "Join code",
+    "joinLink": "Join link",
+    "fips": "FIPs in this session",
+    "noFips": "No FIPs yet — share the join code.",
+    "lastUpdate": "Last update",
+    "close": "Close session",
+    "closeConfirm": "Close the session? Participants will no longer be able to edit.",
+    "closed": "Closed",
+    "exportAll": "Export all",
+    "matrix": "Comparison matrix",
+    "matrixSoon": "The comparison matrix arrives in week 3.",
+    "hideChrome": "Projector mode",
+    "reconnecting": "Reconnecting…"
+  },
+  "fipRead": {
+    "notShared": "This FIP does not exist or is not shared.",
+    "print": "Print",
+    "questionnaire": "Answers the questionnaire",
+    "license": "Licence"
+  },
+  "attribution": {
+    "questionnaire": "Questionnaire content: FIP mini-questionnaire v2.0.0 © 2023 Erik Schultes, Barbara Magagna, Jacintha Schultes / GO FAIR Foundation, CC BY-SA 4.0.",
+    "ontology": "FER types and terms: FIP Ontology, CC0 1.0.",
+    "answers": "This FIP's answers: {license}."
   }
 }
