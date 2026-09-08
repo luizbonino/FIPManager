@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import secrets
+
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -9,7 +11,7 @@ from fipm.auth import get_session_user
 from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.ids import hash_token
-from fipm.models import Fip, User
+from fipm.models import Fip, KnowledgeModel, User
 
 
 def require_user(request: Request, db: Session = Depends(get_db)) -> User:
@@ -51,9 +53,24 @@ def can_write_owned(owner_id: str | None, user: User | None) -> bool:
 def check_edit_token(request: Request, fip: Fip) -> None:
     """Raise 403 edit_token_required unless X-Edit-Token matches the FIP's hash."""
     token = request.headers.get("X-Edit-Token")
-    if not token or fip.edit_token_hash is None or hash_token(token) != fip.edit_token_hash:
+    if (
+        not token
+        or fip.edit_token_hash is None
+        or not secrets.compare_digest(hash_token(token), fip.edit_token_hash)
+    ):
         raise HTTPException(status_code=403, detail="edit_token_required")
 
 
 def not_found() -> HTTPException:
     return HTTPException(status_code=404, detail="not_found")
+
+
+def get_readable_published_km(
+    db: Session, km_id: str, version: str, user: User | None
+) -> KnowledgeModel:
+    """404 unless the referenced knowledge model exists, is `status="published"`,
+    and is readable by `user` per `can_read` (owner/admin, or public/link)."""
+    km = db.get(KnowledgeModel, (km_id, version))
+    if km is None or km.status != "published" or not can_read(km.owner_id, km.visibility, user):
+        raise HTTPException(status_code=404, detail="questionnaire_not_found")
+    return km

@@ -53,7 +53,9 @@ class KnowledgeModel(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     version: Mapped[str] = mapped_column(String, primary_key=True)
-    owner_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    owner_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     visibility: Mapped[str] = mapped_column(String, nullable=False, default="public")
     status: Mapped[str] = mapped_column(String, nullable=False, default="published")
     license: Mapped[str] = mapped_column(String, nullable=False)
@@ -115,7 +117,9 @@ class Fer(Base):
     label_search: Mapped[str] = mapped_column(String, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
     homepage: Mapped[str | None] = mapped_column(String, nullable=True)
-    owner_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    owner_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     source: Mapped[str] = mapped_column(String, nullable=False, default="seed")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
@@ -130,7 +134,11 @@ class WorkshopSession(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     join_code: Mapped[str] = mapped_column(String(6), nullable=False)
-    owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    # Nullable (not NOT NULL as originally spec'd): an account deletion closes
+    # and anonymises the facilitator's sessions rather than blocking on FK.
+    owner_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     questionnaire_id: Mapped[str] = mapped_column(String, nullable=False)
     questionnaire_version: Mapped[str] = mapped_column(String, nullable=False)
     default_language: Mapped[str] = mapped_column(String, nullable=False)

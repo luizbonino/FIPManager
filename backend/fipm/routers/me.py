@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from fipm.authz import require_user
@@ -22,7 +23,12 @@ def my_fips(
 ) -> ListOut:
     query = db.query(Fip).filter(Fip.owner_id == user.id)
     if q:
-        query = query.filter(Fip.title.ilike(f"%{q}%"))
+        # `title` is only populated from community.name (set on create/patch);
+        # older/blank rows still have it unset, so also match the JSON column.
+        like = f"%{q}%"
+        query = query.filter(
+            or_(Fip.title.ilike(like), Fip.community["name"].as_string().ilike(like))
+        )
     total = query.count()
     rows = query.order_by(Fip.updated_at.desc()).offset(offset).limit(limit).all()
     items = [fip_out_dict(r) for r in rows]

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
@@ -13,6 +13,12 @@ from fipm.config import DECLARATION_STATUSES
 
 class CamelModel(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+
+# Visibility and session-status values (spec 01-foundations.md §2/§5/§6). Plain
+# `Literal`s, not DB-native enums: the columns stay `String` per the spec.
+Visibility = Literal["private", "link", "public"]
+SessionStatus = Literal["open", "closed"]
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +205,7 @@ class FipCreateRequest(CamelModel):
     language: str | None = None
     community: Community | None = None
     answers: list[Answer] = Field(default_factory=list)
-    visibility: str | None = None
+    visibility: Visibility | None = None
     session_id: str | None = None
     join_code: str | None = None
     related_dmps: list[RelatedDmp] = Field(default_factory=list)
@@ -212,7 +218,7 @@ class FipPatchRequest(CamelModel):
     related_dmps: list[RelatedDmp] | None = None
     language: str | None = None
     license: str | None = None
-    visibility: str | None = None
+    visibility: Visibility | None = None
 
 
 class FipOut(CamelModel):
@@ -257,7 +263,7 @@ class SessionCreateRequest(CamelModel):
 
 class SessionPatchRequest(CamelModel):
     title: str | None = None
-    status: str | None = None
+    status: SessionStatus | None = None
     default_language: str | None = None
 
 

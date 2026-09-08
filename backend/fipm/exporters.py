@@ -60,6 +60,14 @@ def fip_url(fip: Fip, settings: Settings) -> str:
     return f"{settings.base_url}/fips/{fip.id}"
 
 
+def _iso_utc(value: datetime) -> str:
+    """isoformat() ending in "Z": attach UTC to naive datetimes first (SQLite
+    round-trips DateTime(timezone=True) values as naive)."""
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    return value.isoformat().replace("+00:00", "Z")
+
+
 def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, Any]:
     km = db.get(KnowledgeModel, (fip.questionnaire_id, fip.questionnaire_version))
     content = km.content if km else {"sections": [], "title": {}, "source": None}
@@ -124,8 +132,8 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
             "language": fip.language,
             "license": fip.license,
             "visibility": fip.visibility,
-            "createdAt": fip.created_at.isoformat(),
-            "updatedAt": fip.updated_at.isoformat(),
+            "createdAt": _iso_utc(fip.created_at),
+            "updatedAt": _iso_utc(fip.updated_at),
             "community": fip.community,
             "relatedDMPs": fip.related_dmps or [],
         },

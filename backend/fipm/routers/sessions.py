@@ -6,12 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from fipm.authz import require_user
+from fipm.authz import get_readable_published_km, require_user
 from fipm.config import Settings, get_settings
 from fipm.db import get_db
 from fipm.ids import join_code as gen_join_code
 from fipm.ids import short_id
-from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
+from fipm.models import Fip, User, WorkshopSession
 from fipm.schemas import (
     SessionCreateRequest,
     SessionPatchRequest,
@@ -49,9 +49,7 @@ def create_session(
     body: SessionCreateRequest, db: Session = Depends(get_db), user: User = Depends(require_user)
 ) -> dict[str, Any]:
     settings = get_settings()
-    km = db.get(KnowledgeModel, (body.questionnaire_ref.id, body.questionnaire_ref.version))
-    if km is None:
-        raise HTTPException(status_code=404, detail="questionnaire_not_found")
+    get_readable_published_km(db, body.questionnaire_ref.id, body.questionnaire_ref.version, user)
     row = _insert_session(
         db,
         settings,

@@ -17,6 +17,12 @@ uv run python -m fipm import-data
 uv run python -m fipm serve   # http://localhost:8000
 ```
 
+`FIPM_DB_PATH` and `FIPM_DATA_DIR` default to `<repo-root>/fipm.db` and
+`<repo-root>/data` (resolved from `backend/fipm/config.py`'s own location, not
+the process's working directory), so `import-data` and `serve` find the real
+`data/` whether you run them from the repo root or from `backend/`. Override
+either in `.env` if you need a different location.
+
 Tests: `cd backend && uv run pytest`. Lint: `uv run ruff check . && uv run ruff format --check .`
 
 Frontend (Node 20):

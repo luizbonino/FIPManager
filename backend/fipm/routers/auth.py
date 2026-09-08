@@ -22,7 +22,7 @@ from fipm.authz import require_user
 from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.ids import hash_token, new_user_id
-from fipm.models import AuthSession, Fip, User
+from fipm.models import AuthSession, Fer, Fip, KnowledgeModel, User, WorkshopSession
 from fipm.schemas import (
     DeleteAccountRequest,
     LoginRequest,
@@ -139,7 +139,27 @@ def delete_me(
     settings = get_settings()
     if not verify_password(user.password_hash, body.current_password):
         raise HTTPException(status_code=401, detail="invalid_credentials")
-    db.query(Fip).filter(Fip.owner_id == user.id).update({"owner_id": None})
+
+    # Sessions the user facilitated: close and anonymise rather than cascade
+    # (their FIPs and edit tokens must keep working for anonymous holders).
+    db.query(WorkshopSession).filter(WorkshopSession.owner_id == user.id).update(
+        {"owner_id": None, "status": "closed"}
+    )
+    # User-contributed FERs stay (they may be referenced by other FIPs); only
+    # the ownership link is cleared.
+    db.query(Fer).filter(Fer.owner_id == user.id).update({"owner_id": None})
+    # Draft knowledge models are the user's own scratch work and go with the
+    # account; published ones are shared artifacts and are anonymised instead.
+    db.query(KnowledgeModel).filter(
+        KnowledgeModel.owner_id == user.id, KnowledgeModel.status == "draft"
+    ).delete(synchronize_session=False)
+    db.query(KnowledgeModel).filter(
+        KnowledgeModel.owner_id == user.id, KnowledgeModel.status != "draft"
+    ).update({"owner_id": None})
+    # FIPs are anonymised and forced to "link" visibility: a "private" FIP
+    # with no owner would otherwise become unreadable by anyone at all.
+    db.query(Fip).filter(Fip.owner_id == user.id).update({"owner_id": None, "visibility": "link"})
+
     revoke_all_sessions(db, user.id)
     db.delete(user)
     db.commit()
