@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ApiResponseError } from '@/api/client'
@@ -171,6 +171,12 @@ async function load() {
 }
 
 onMounted(load)
+
+// Fork / New version (and any other in-app link) push to another
+// `id`/`version` on this same route (`KnowledgeModelRead`), reusing the
+// component instance rather than remounting it — without this, the
+// previously loaded model stays on screen.
+watch(() => [route.params.id, route.params.version], load)
 </script>
 
 <style scoped>

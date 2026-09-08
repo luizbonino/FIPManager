@@ -200,4 +200,87 @@ describe('KnowledgeModelEditor.vue', () => {
     expect(wrapper.text()).toContain('This draft changed elsewhere. Reload to see the newer version.')
     expect(wrapper.find('.reload-btn').exists()).toBe(true)
   })
+
+  it('a 409 conflict marks the store saveState "conflict" (not "saved") so SaveIndicator shows "Not saved — changed elsewhere"', async () => {
+    const { wrapper, pinia } = await mountEditor(fixtureContent())
+    setActivePinia(pinia)
+    const store = useKmEditorStore()
+
+    // Simulate the store's own `save()` 409 branch (stores/kmEditor.ts):
+    // dirty stays true and `conflict` is set, so `saveState` must resolve
+    // to 'conflict' rather than falling through to 'saved'.
+    store.dirty = true
+    store.conflict = true
+    await flushPromises()
+
+    expect(store.saveState).toBe('conflict')
+    const indicator = wrapper.get('.save-indicator')
+    expect(indicator.classes()).toContain('state-conflict')
+    expect(indicator.classes()).not.toContain('state-saved')
+    expect(indicator.text()).toContain('Not saved — changed elsewhere')
+  })
+
+  it('Fork / New version pushing to another id/version on the same route reloads the new model, not the old one', async () => {
+    const contentA = fixtureContent()
+    contentA.status = 'published'
+    const contentB = fixtureContent()
+    contentB.id = 'other-model'
+    contentB.version = '2.0.0'
+    contentB.title = { en: 'Other model title' }
+    contentB.status = 'draft'
+
+    const pinia = createPinia()
+    setActivePinia(pinia)
+
+    getKnowledgeModelMock.mockImplementation(async (id: string) =>
+      makeModel(id === contentA.id ? contentA : contentB)
+    )
+    getFerTypesMock.mockResolvedValue({ items: [], total: 0 })
+
+    const router: Router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'Home', component: { template: '<div/>' } },
+        { path: '/knowledge-models', name: 'KnowledgeModelList', component: { template: '<div/>' } },
+        {
+          path: '/knowledge-models/:id/:version/edit',
+          name: 'KnowledgeModelEditor',
+          component: KnowledgeModelEditor,
+          props: true,
+        },
+      ],
+    })
+    await router.push(`/knowledge-models/${contentA.id}/${contentA.version}/edit`)
+    await router.isReady()
+
+    const wrapper = mount(KnowledgeModelEditor, {
+      global: { plugins: [pinia, makeI18n('en'), router] },
+    })
+    // The route-watch fix routes through an extra `await store.flush()`
+    // hop before `init()` on a subsequent navigation, one microtask
+    // deeper than the cold `onMounted(init)` start — settle() below waits
+    // out however many ticks either path needs.
+    async function settle() {
+      for (let i = 0; i < 10; i += 1) {
+        await Promise.resolve()
+        await wrapper.vm.$nextTick()
+      }
+    }
+    await settle()
+
+    // Model A is published: read-only banner shown, ref-chip matches A.
+    expect(wrapper.get('.ref-chip').text()).toBe(`${contentA.id}@${contentA.version}`)
+    expect(wrapper.find('.readonly-banner').exists()).toBe(true)
+
+    // Simulate the Fork/New version handlers: `router.push` to another
+    // id/version while the `KnowledgeModelEditor` component instance is
+    // reused (same route record) — this is the bug's exact trigger.
+    await router.push(`/knowledge-models/${contentB.id}/${contentB.version}/edit`)
+    await settle()
+
+    expect(wrapper.get('.ref-chip').text()).toBe(`${contentB.id}@${contentB.version}`)
+    expect(wrapper.get('h1').text()).toBe('Other model title')
+    // Model B is a draft: the read-only banner from A must be gone.
+    expect(wrapper.find('.readonly-banner').exists()).toBe(false)
+  })
 })

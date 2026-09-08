@@ -112,7 +112,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useKmEditorStore } from '@/stores/kmEditor'
@@ -220,6 +220,19 @@ async function init() {
 }
 
 onMounted(init)
+
+// Fork / New version push to another `id`/`version` on this same route
+// (`KnowledgeModelEditor`), so the component instance is reused rather
+// than remounted — without this, `onMounted` never fires again and the
+// previous model stays on screen. Flush any pending edit on the old
+// model first, then reset and load the new one.
+watch(
+  () => [route.params.id, route.params.version],
+  async () => {
+    await store.flush()
+    await init()
+  }
+)
 
 onBeforeUnmount(() => {
   void store.flush()

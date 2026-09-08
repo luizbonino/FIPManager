@@ -136,7 +136,8 @@
     "startFip": "Start a FIP",
     "continueFip": "Continue your FIP",
     "invalidCode": "We don't know that join code.",
-    "closed": "This session is closed. You can still read the FIPs you created."
+    "closed": "This session is closed. You can still read the FIPs you created.",
+    "questionnaireUnavailable": "This session's questionnaire is no longer available. Ask the facilitator to check its visibility."
   },
   "community": {
     "heading": "Your community",
@@ -178,7 +179,8 @@
     "saving": "Saving…",
     "error": "Not saved — retrying",
     "failed": "Not saved",
-    "retry": "Retry"
+    "retry": "Retry",
+    "conflict": "Not saved — changed elsewhere"
   },
   "declarationStatus": {
     "current": "Currently used",
@@ -210,6 +212,8 @@
     "titleLabel": "Session title",
     "knowledgeModel": "Questionnaire version",
     "defaultLanguage": "Default language",
+    "privateModelNotice": "This model is private — as things stand, participants would not be able to open it.",
+    "makeModelLinkVisible": "Make this model readable by link so participants can open it",
     "create": "Create session",
     "joinCode": "Join code",
     "joinLink": "Join link",
@@ -312,6 +316,8 @@
     "moveDown": "Move down",
     "deleteQuestion": "Delete question",
     "deleteQuestionConfirm": "Delete this question? Existing FIPs on published versions are not affected.",
+    "deleteSection": "Delete section",
+    "deleteSectionConfirm": "Delete this section and all its questions? Existing FIPs on published versions are not affected.",
     "deleteModel": "Delete model",
     "deleteModelConfirm": "Delete this model version? This cannot be undone.",
     "inUse": "This version is used by FIPs and cannot be deleted.",

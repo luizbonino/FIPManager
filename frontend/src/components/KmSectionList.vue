@@ -24,7 +24,7 @@
             @down="applyOp((c) => moveSection(c, section.id, 'down'))"
           />
           <button type="button" class="ghost-btn danger" :disabled="readOnly" @click="onDeleteSection(section.id)">
-            {{ $t('km.deleteQuestion') }}
+            {{ $t('km.deleteSection') }}
           </button>
         </div>
       </summary>
@@ -180,7 +180,7 @@ function onSplit(questionId: string) {
 }
 
 function onDeleteSection(sectionId: string) {
-  if (!confirm(t('km.deleteModelConfirm'))) return
+  if (!confirm(t('km.deleteSectionConfirm'))) return
   applyOp((c) => deleteSection(c, sectionId))
   if (openSectionId.value === sectionId) openSectionId.value = null
 }

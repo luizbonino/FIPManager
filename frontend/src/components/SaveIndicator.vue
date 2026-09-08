@@ -5,6 +5,7 @@
       <template v-if="state === 'saved'">{{ $t('save.saved', { time: savedTimeLabel }) }}</template>
       <template v-else-if="state === 'saving'">{{ $t('save.saving') }}</template>
       <template v-else-if="state === 'unsaved'">{{ $t('save.unsaved') }}</template>
+      <template v-else-if="state === 'conflict'">{{ $t('save.conflict') }}</template>
       <template v-else>{{ retriesExhausted ? $t('save.failed') : $t('save.error') }}</template>
     </span>
     <button v-if="state === 'error' && retriesExhausted" type="button" class="retry-btn" @click="$emit('retry')">
@@ -15,12 +16,15 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { SaveState } from '@/stores/fipEditor'
+import type { SaveState } from '@/stores/kmEditor'
 
 /**
- * Always-visible save state (spec 02 §2.3): `saved | unsaved | saving | error`.
- * `retriesExhausted` distinguishes the auto-retrying "Not saved — retrying"
- * message from the terminal "Not saved" + manual Retry button.
+ * Always-visible save state (spec 02 §2.3): `saved | unsaved | saving |
+ * error`, plus `kmEditor`'s `conflict` (a 409: someone else's edit landed
+ * first — Reload, not Retry, is the way out). `kmEditor`'s `SaveState` is
+ * a superset of `fipEditor`'s, so either store's `saveState` is assignable
+ * here. `retriesExhausted` distinguishes the auto-retrying "Not saved —
+ * retrying" message from the terminal "Not saved" + manual Retry button.
  */
 const props = defineProps<{
   state: SaveState
@@ -66,7 +70,8 @@ const savedTimeLabel = computed(() => {
   background-color: var(--color-status-planned);
 }
 
-.state-error .dot {
+.state-error .dot,
+.state-conflict .dot {
   background-color: var(--color-error);
 }
 

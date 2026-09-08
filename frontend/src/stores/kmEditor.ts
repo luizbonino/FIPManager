@@ -25,7 +25,8 @@ import type { KnowledgeModelContent, KnowledgeModelOut } from '@/types/api'
 /** Idle debounce before an autosave `PUT .../content` (spec 04 §5: "an 2 s idle debounce"). */
 export const AUTOSAVE_DEBOUNCE_MS = 2000
 
-export type SaveState = 'saved' | 'saving' | 'unsaved' | 'error'
+/** `'conflict'` is distinct from `'error'`: a 409 means the draft was edited elsewhere, not a failed request — Reload, not Retry, is the way out. */
+export type SaveState = 'saved' | 'saving' | 'unsaved' | 'error' | 'conflict'
 
 export const useKmEditorStore = defineStore('kmEditor', () => {
   const model = ref<KnowledgeModelOut | null>(null)
@@ -50,6 +51,7 @@ export const useKmEditorStore = defineStore('kmEditor', () => {
   let inFlight = false
 
   const saveState = computed<SaveState>(() => {
+    if (conflict.value) return 'conflict'
     if (saveError.value) return 'error'
     if (saving.value) return 'saving'
     if (dirty.value) return 'unsaved'
@@ -199,7 +201,10 @@ export const useKmEditorStore = defineStore('kmEditor', () => {
         conflictEtag.value = (err.data as { etag?: string }).etag ?? null
         // The draft holds this failed write locally; a fresh PUT is not
         // retried automatically — the user must Reload first (spec §5, no
-        // silent merge).
+        // silent merge). Put `dirty` back so `saveState` (-> 'conflict',
+        // since `conflict.value` is now true) never falls through to
+        // 'saved' — this write did NOT land.
+        dirty.value = true
       } else if (err instanceof ApiResponseError && err.status === 403) {
         applyForbiddenState(err)
       } else {

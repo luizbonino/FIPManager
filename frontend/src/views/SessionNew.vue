@@ -27,6 +27,14 @@
         </select>
       </label>
 
+      <div v-if="isSelectedKmPrivate" class="private-model-notice">
+        <p>{{ $t('sessionAdmin.privateModelNotice') }}</p>
+        <label class="checkbox-field">
+          <input v-model="makeModelLinkVisible" type="checkbox" />
+          <span>{{ $t('sessionAdmin.makeModelLinkVisible') }}</span>
+        </label>
+      </div>
+
       <p v-if="submitError" class="form-error">{{ submitError }}</p>
 
       <button type="submit" class="btn btn-primary" :disabled="submitting || !kmKey">
@@ -40,7 +48,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { listKnowledgeModels } from '@/api/knowledgeModels'
+import { listKnowledgeModels, patchKnowledgeModel } from '@/api/knowledgeModels'
 import { createSession } from '@/api/sessions'
 import { resolveLang } from '@/lib/lang'
 import { SUPPORTED_LOCALES } from '@/i18n'
@@ -58,6 +66,15 @@ const defaultLanguage = ref(locale.value)
 const knowledgeModels = ref<KnowledgeModelSummary[]>([])
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
+// Defaults to checked (spec 02 §4.1): a private model picked here would
+// otherwise 404 for every participant (`questionnaire_not_found`), since
+// `GET /fips/{joinCode}` reads it as them, not as the session's owner.
+const makeModelLinkVisible = ref(true)
+
+const selectedKm = computed(() =>
+  knowledgeModels.value.find((km) => `${km.id}@${km.version}` === kmKey.value) ?? null
+)
+const isSelectedKmPrivate = computed(() => selectedKm.value?.visibility === 'private')
 
 const groupedKms = computed(() => {
   const userId = authStore.user?.id ?? null
@@ -79,6 +96,10 @@ async function onSubmit() {
   submitting.value = true
   submitError.value = null
   try {
+    if (isSelectedKmPrivate.value && makeModelLinkVisible.value) {
+      await patchKnowledgeModel(id, version, { visibility: 'link' })
+      if (selectedKm.value) selectedKm.value.visibility = 'link'
+    }
     const created = await createSession({
       title: title.value,
       questionnaireRef: { id, version },
@@ -130,6 +151,27 @@ onMounted(async () => {
 .form-error {
   color: var(--color-error);
   font-size: var(--font-size-sm);
+}
+
+.private-model-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-hover);
+  font-size: var(--font-size-sm);
+}
+
+.private-model-notice p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn {

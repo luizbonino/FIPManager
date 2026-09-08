@@ -174,15 +174,35 @@ async function onSubmit() {
     rememberSessionFip(s.id, created.id)
     await router.replace(`/fips/${created.id}/edit`)
   } catch (err) {
-    if (err instanceof ApiResponseError && err.status === 409) {
-      submitError.value = t('join.closed')
-    } else if (err instanceof ApiResponseError && err.status === 403) {
-      submitError.value = t('join.invalidCode')
-    } else {
-      submitError.value = t('errors.serverError')
-    }
+    submitError.value = createFipErrorMessage(err)
   } finally {
     submitting.value = false
+  }
+}
+
+/**
+ * `POST /api/fips` (spec 02 §2.1) can fail with several distinct
+ * `detail`s — mapped by detail first, since `session_closed` and
+ * `questionnaire_not_found` both need their own copy rather than falling
+ * into a generic "server error" message (the session's questionnaire can
+ * go private again after the session was created, and the join code can
+ * race a session's own deletion/closure).
+ */
+function createFipErrorMessage(err: unknown): string {
+  if (!(err instanceof ApiResponseError)) return t('errors.serverError')
+  switch (err.data.detail) {
+    case 'session_not_found':
+      return t('join.invalidCode')
+    case 'session_closed':
+      return t('join.closed')
+    case 'questionnaire_not_found':
+      return t('join.questionnaireUnavailable')
+    case 'invalid_join_code':
+      return t('join.invalidCode')
+    default:
+      if (err.status === 409) return t('join.closed')
+      if (err.status === 403) return t('join.invalidCode')
+      return t('errors.serverError')
   }
 }
 

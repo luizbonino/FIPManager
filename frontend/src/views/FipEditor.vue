@@ -74,7 +74,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFipEditorStore } from '@/stores/fipEditor'
@@ -190,6 +190,18 @@ async function init() {
 }
 
 onMounted(init)
+
+// Navigating between two FIPs while already on this route (same route
+// record, different `:id`) reuses the component instance instead of
+// remounting it — flush any pending edit on the old FIP first, then
+// reset and load the new one.
+watch(
+  () => route.params.id,
+  async () => {
+    await store.flush()
+    await init()
+  }
+)
 
 onBeforeUnmount(() => {
   void store.flush()
