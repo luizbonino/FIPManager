@@ -10,6 +10,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from fipm.authz import can_read, can_write_owned, optional_user, require_user
@@ -42,7 +43,9 @@ from fipm.schemas import (
 
 router = APIRouter(prefix="/knowledge-models", tags=["knowledge-models"])
 
-IMPORT_MAX_BYTES = 2 * 1024 * 1024
+# spec 04 §1: MODEL_ID_PATTERN is `^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])$`, so a
+# valid id is at most 1 + 62 + 1 = 64 characters.
+MODEL_ID_MAX_LEN = 64
 
 
 # ---------------------------------------------------------------------------
@@ -52,6 +55,18 @@ IMPORT_MAX_BYTES = 2 * 1024 * 1024
 
 def _etag(sha256: str) -> str:
     return f'"{sha256}"'
+
+
+def _commit_or_id_taken(db: Session, row: KnowledgeModel) -> None:
+    """Review finding 13: `_id_in_use`'s pre-insert check is TOCTOU-racy (two
+    concurrent requests can both pass it for the same id/version before
+    either commits). Catch the resulting IntegrityError here instead of
+    letting it surface as an unhandled 500."""
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="model_id_taken") from exc
 
 
 def _km_out(row: KnowledgeModel) -> dict[str, Any]:
@@ -67,13 +82,28 @@ def _id_in_use(db: Session, km_id: str) -> bool:
 
 
 def _default_model_id(db: Session, base: str, *, suffix: str | None) -> str:
-    """spec 04 §1: `<base>[-suffix]`, then `-2`, `-3`, ... appended."""
-    candidate = f"{base}-{suffix}" if suffix else base
+    """spec 04 §1: `<base>[-suffix]`, then `-2`, `-3`, ... appended.
+
+    Review finding 10: `base` may itself be close to MODEL_ID_MAX_LEN (a
+    fork's default id starts from the source's own, already-validated, up to
+    64-char id), so appending `-<suffix>[-<n>]` can overflow the pattern's
+    max length. Trim `base` (never the suffix/counter, which is what makes
+    the id unique) so the composed candidate always fits.
+    """
+
+    def _candidate(n: int | None) -> str:
+        tail = f"-{suffix}" if suffix else ""
+        if n is not None:
+            tail += f"-{n}"
+        max_base_len = max(MODEL_ID_MAX_LEN - len(tail), 1)
+        return f"{base[:max_base_len]}{tail}"[:MODEL_ID_MAX_LEN]
+
+    candidate = _candidate(None)
     if not _id_in_use(db, candidate):
         return candidate
     n = 2
     while True:
-        candidate = f"{base}-{suffix}-{n}" if suffix else f"{base}-{n}"
+        candidate = _candidate(n)
         if not _id_in_use(db, candidate):
             return candidate
         n += 1
@@ -112,12 +142,28 @@ def _get_owned_km_or_404(db: Session, km_id: str, version: str, user: User) -> K
     return row
 
 
+def _is_canonical_semver_part(part: str) -> bool:
+    """Digits only, no leading zero unless the part is exactly "0" (review
+    finding 9): "01.0.0" must not parse as 1.0.0."""
+    return part.isdigit() and (part == "0" or part[0] != "0")
+
+
 def _parse_semver(version: str) -> tuple[int, int, int]:
     parts = version.split(".")
-    if len(parts) != 3 or not all(p.isdigit() for p in parts):
+    if len(parts) != 3 or not all(_is_canonical_semver_part(p) for p in parts):
         raise HTTPException(status_code=400, detail="invalid_version")
     a, b, c = parts
     return int(a), int(b), int(c)
+
+
+def _semver_sort_key(version: str) -> tuple[int, int, int]:
+    """Like `_parse_semver`, but for read-path sorting: a malformed/legacy
+    version must not 500 the whole `list_versions` response, so it sorts
+    last instead."""
+    try:
+        return _parse_semver(version)
+    except HTTPException:
+        return (-1, -1, -1)
 
 
 def _bump_semver(version: str, bump: str) -> str:
@@ -174,6 +220,8 @@ def list_versions(
     visible = [r for r in rows if can_read(r.owner_id, r.visibility, user)]
     if not visible:
         raise HTTPException(status_code=404, detail="not_found")
+    # Review finding 9: newest version first, not insertion/pk order.
+    visible.sort(key=lambda r: _semver_sort_key(r.version), reverse=True)
     items = [
         KnowledgeModelVersionEntry(
             version=r.version, status=r.status, changelog=r.changelog or []
@@ -278,7 +326,7 @@ def create_knowledge_model(
         content_sha256=content_sha256(content),
     )
     db.add(row)
-    db.commit()
+    _commit_or_id_taken(db, row)
     db.refresh(row)
     return _km_out(row)
 
@@ -289,11 +337,18 @@ async def import_knowledge_model(
 ) -> Any:
     settings = get_settings()
     raw = await request.body()
-    if len(raw) > IMPORT_MAX_BYTES:
+    # The BodySizeLimitMiddleware (fipm.main) already rejects an oversized
+    # body under /api/ before/while it is read; this is a fallback in case
+    # that middleware is ever bypassed or misconfigured (review finding 3).
+    if len(raw) > settings.max_body_bytes:
         raise HTTPException(status_code=413, detail="payload_too_large")
     try:
         payload = json.loads(raw)
-    except json.JSONDecodeError as exc:
+    except (ValueError, RecursionError) as exc:
+        # ValueError covers json.JSONDecodeError; RecursionError is raised by
+        # the stdlib json decoder on deeply nested input, which is not a
+        # ValueError (review finding 2) -- both are a malformed request body,
+        # not a server error.
         raise HTTPException(status_code=400, detail="invalid_json") from exc
     try:
         body = KnowledgeModelImportRequest.model_validate(payload)
@@ -304,22 +359,34 @@ async def import_knowledge_model(
     if not isinstance(document, dict):
         raise HTTPException(status_code=400, detail="invalid_document")
 
-    title = document.get("title") if isinstance(document.get("title"), dict) else {}
-    description = (
-        document.get("description")
-        if isinstance(document.get("description"), dict)
-        else deepcopy(title)
-    )
-    sections = document.get("sections") if isinstance(document.get("sections"), list) else []
+    # Review finding 4: pass the document's own title/description/sections
+    # through unchanged (only filling in an *absent* key), instead of
+    # silently coercing a wrong-typed value to an empty default -- so
+    # `validate_content` catches the type mismatch and reports 400
+    # `invalid_content` instead of quietly creating an empty model. `title`
+    # is coerced to a dict only for the id-slug fallback below, which must
+    # not crash on a wrong-typed title.
+    title = document.get("title")
+    if title is None:
+        title = {}
+    title_for_slug = title if isinstance(title, dict) else {}
+    description = document.get("description")
+    if description is None:
+        description = deepcopy(title)
+    sections = document.get("sections")
+    if sections is None:
+        sections = []
+    changelog = document.get("changelog")
+    if changelog is None:
+        changelog = []
     license_ = document.get("license") or "CC0-1.0"
     source_val = document.get("source") if document.get("source") is not None else "FIP Manager"
-    changelog = document.get("changelog") if isinstance(document.get("changelog"), list) else []
 
     if body.id:
         _validate_caller_id(db, body.id)
         km_id = body.id
     else:
-        km_id = _default_model_id(db, _slug_base(title), suffix=None)
+        km_id = _default_model_id(db, _slug_base(title_for_slug), suffix=None)
 
     content = {
         "id": km_id,
@@ -332,7 +399,23 @@ async def import_knowledge_model(
         "changelog": changelog,
         "sections": sections,
     }
+    # Review finding 6: round-tripping an exported fork (whose document
+    # carries `attribution`/`forkedFrom` inside `content`) through import
+    # must keep them, not silently drop them.
+    if "attribution" in document:
+        content["attribution"] = document["attribution"]
+    if "forkedFrom" in document:
+        content["forkedFrom"] = document["forkedFrom"]
+
     errors = validate_content(content, settings=settings)
+    if not isinstance(changelog, list):
+        # validate_content (km_content.py) has no opinion on `changelog`
+        # (spec 04 §3.3 doesn't list it), so a wrong-typed value is checked
+        # here directly -- same finding-4 rationale, applied to the one
+        # content field validate_content doesn't cover.
+        errors.append(
+            {"path": "changelog", "code": "missing_key", "message": "changelog must be a list"}
+        )
     if errors:
         return _invalid_content_response(errors)
 
@@ -351,7 +434,7 @@ async def import_knowledge_model(
         content_sha256=content_sha256(content),
     )
     db.add(row)
-    db.commit()
+    _commit_or_id_taken(db, row)
     db.refresh(row)
     return _km_out(row)
 
@@ -389,6 +472,10 @@ def fork_knowledge_model(
         content["attribution"] = FORK_CC_BY_SA_ATTRIBUTION
     # else: licence and content["source"] (already deep-copied) pass through
     # unchanged, per spec 04 §1.
+    # Review finding 5: content.license must mirror the row's final licence
+    # in both branches -- the deep-copied source content could otherwise
+    # carry a stale/differently-formatted licence string.
+    content["license"] = license_
 
     if body.new_id:
         _validate_caller_id(db, body.new_id)
@@ -396,7 +483,10 @@ def fork_knowledge_model(
     else:
         new_id = _default_model_id(db, source.id, suffix="fork")
 
-    new_version = source.version
+    # Review finding 11 / spec 04 §1: all three ways a user model starts
+    # (fork, scratch, import) create it at version "1.0.0", not the source's
+    # version -- the fork request has no way to ask for anything else.
+    new_version = "1.0.0"
     content["id"] = new_id
     content["version"] = new_version
     content["status"] = "draft"
@@ -420,7 +510,7 @@ def fork_knowledge_model(
         content_sha256=content_sha256(content),
     )
     db.add(row)
-    db.commit()
+    _commit_or_id_taken(db, row)
     db.refresh(row)
     return _km_out(row)
 
@@ -488,7 +578,16 @@ def patch_knowledge_model(
 
     db.commit()
     db.refresh(row)
-    return _km_out(row)
+    response = JSONResponse(status_code=200, content=_km_out(row))
+    if content_changed:
+        # Review finding 7: title/description live inside `content` (they're
+        # mirrored into it above), so a metadata PATCH that touches either
+        # one does legitimately change content_sha256 -- surface the new
+        # ETag rather than silently recomputing it with no way for the
+        # caller to learn the new value (e.g. before a subsequent PUT
+        # .../content, which requires If-Match).
+        response.headers["ETag"] = _etag(row.content_sha256)
+    return response
 
 
 @router.put("/{km_id}/{version}/content")
@@ -552,6 +651,7 @@ def publish_knowledge_model(
     km_id: str,
     version: str,
     body: KnowledgeModelPublishRequest,
+    if_match: str | None = Header(default=None, alias="If-Match"),
     db: Session = Depends(get_db),
     user: User = Depends(require_user),
 ) -> Any:
@@ -559,6 +659,16 @@ def publish_knowledge_model(
     row = _get_owned_km_or_404(db, km_id, version, user)
     if row.status != "draft":
         raise HTTPException(status_code=409, detail="model_published")
+    # Review finding 13: If-Match is optional here (unlike PUT .../content,
+    # where it's required) -- a caller that has an ETag from a prior GET/PUT
+    # can still catch "someone else edited this draft after I loaded it, and
+    # I'm about to publish over their change" before it becomes irreversible.
+    if if_match is not None:
+        current_etag = _etag(row.content_sha256)
+        if if_match != current_etag:
+            return JSONResponse(
+                status_code=409, content={"detail": "content_conflict", "etag": current_etag}
+            )
     if not body.notes or not body.notes.strip():
         raise HTTPException(status_code=400, detail="changelog_notes_required")
 
@@ -605,12 +715,27 @@ def new_knowledge_model_version(
     if existing_draft is not None:
         raise HTTPException(status_code=409, detail="draft_exists")
 
+    # Review finding 9: bump from the highest version this model id already
+    # has (not necessarily `row.version` -- new-version can be called again
+    # on an older published version once its own successor is deleted, or
+    # while other published versions coexist), so the default bump can't
+    # collide with one of them.
+    version_rows = db.query(KnowledgeModel.version).filter(KnowledgeModel.id == km_id).all()
+    existing_versions = [v for (v,) in version_rows]
+
     if body.version:
         new_version = body.version
         if _parse_semver(new_version) <= _parse_semver(row.version):
             raise HTTPException(status_code=400, detail="version_not_greater")
     else:
-        new_version = _bump_semver(row.version, body.bump or "minor")
+        highest = max(existing_versions, key=_parse_semver)
+        new_version = _bump_semver(highest, body.bump or "minor")
+
+    # Review finding 1: check the (id, new_version) collision up front and
+    # return 409 `version_exists` instead of letting it fall through to an
+    # unhandled IntegrityError (500) at commit time.
+    if new_version in existing_versions:
+        raise HTTPException(status_code=409, detail="version_exists")
 
     content = deepcopy(row.content or {})
     content["version"] = new_version

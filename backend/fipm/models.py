@@ -4,7 +4,16 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, String
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Index,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -60,6 +69,12 @@ class KnowledgeModel(Base):
     status: Mapped[str] = mapped_column(String, nullable=False, default="published")
     license: Mapped[str] = mapped_column(String, nullable=False)
     source: Mapped[str] = mapped_column(String, nullable=False)
+    # Review finding 12: `isSystem` (KnowledgeModelSummary) must be true only
+    # for the rows the importer loads from data/knowledge-models/*.json, not
+    # merely `owner_id IS NULL` -- account deletion (routers/auth.py) also
+    # sets owner_id=NULL on an anonymised ex-user's published models, which
+    # are community content, not built-in system models.
+    is_system: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     title: Mapped[dict] = mapped_column(JSON, nullable=False)
     description: Mapped[dict] = mapped_column(JSON, nullable=False)
     changelog: Mapped[list] = mapped_column(JSON, nullable=False, default=list)

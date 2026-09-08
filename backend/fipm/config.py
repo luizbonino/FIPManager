@@ -50,6 +50,12 @@ class Settings(BaseSettings):
     allowed_origins: str = ""
     registration_open: bool = True
     env: str = "development"
+    # Review finding 3: hard cap on the request body of any POST/PUT/PATCH
+    # under /api/, enforced by fipm.main.BodySizeLimitMiddleware before the
+    # body is read (a Content-Length over the cap is rejected outright; a
+    # chunked/unbounded body is rejected as soon as the running total crosses
+    # the cap). 2 MiB matches the pre-existing import-specific check.
+    max_body_bytes: int = 2 * 1024 * 1024
 
     @property
     def allowed_origins_list(self) -> list[str]:

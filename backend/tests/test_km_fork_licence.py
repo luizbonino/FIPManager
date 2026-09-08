@@ -87,3 +87,88 @@ def test_fork_of_cc0_model_does_not_force_cc_by_sa(client):
     body = r.json()
     assert body["license"] == "CC0-1.0"
     assert "attribution" not in body["content"]
+
+
+def _make_km(db_session, *, id_, version, license_, content_license, status="published"):
+    from fipm.models import KnowledgeModel
+
+    km = KnowledgeModel(
+        id=id_,
+        version=version,
+        owner_id=None,
+        visibility="public",
+        status=status,
+        license=license_,
+        source="test",
+        title={"en": id_},
+        description={"en": id_},
+        changelog=[],
+        content={
+            "id": id_,
+            "version": version,
+            "status": status,
+            "license": content_license,
+            "title": {"en": id_},
+            "description": {"en": id_},
+            "sections": [],
+        },
+        content_sha256="x",
+    )
+    db_session.add(km)
+    db_session.commit()
+    return km
+
+
+def test_fork_content_license_mirrors_row_license_for_cc_by_sa(client, db_session):
+    """Review finding 5: content.license must be set to the row's final
+    licence even when the source row's own `content.license` field is stale
+    (e.g. from data predating this fix) -- not just the row's `license`
+    column, which already gets overridden to "CC-BY-SA-4.0" here."""
+    _make_km(
+        db_session,
+        id_="fork-license-stale-ccbysa",
+        version="1.0.0",
+        license_="CC-BY-SA-3.0",
+        content_license="totally-different-stale-value",
+    )
+    _register(client, "fork-licence-stale-ccbysa@example.com")
+    r = client.post("/api/knowledge-models/fork-license-stale-ccbysa/1.0.0/fork", json={})
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["license"] == "CC-BY-SA-4.0"
+    assert body["content"]["license"] == "CC-BY-SA-4.0"
+
+
+def test_fork_content_license_mirrors_row_license_for_other_licences(client, db_session):
+    _make_km(
+        db_session,
+        id_="fork-license-stale-mit",
+        version="1.0.0",
+        license_="MIT",
+        content_license="CC0-1.0",
+    )
+    _register(client, "fork-licence-stale-mit@example.com")
+    r = client.post("/api/knowledge-models/fork-license-stale-mit/1.0.0/fork", json={})
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["license"] == "MIT"
+    assert body["content"]["license"] == "MIT"
+
+
+def test_fork_always_starts_at_version_1_0_0(client, db_session):
+    """Review finding 11 / spec 04 §1: all three ways a user model starts
+    (fork, scratch, import) create version "1.0.0", regardless of the
+    source's own version."""
+    _make_km(
+        db_session,
+        id_="fork-source-high-version",
+        version="2.3.1",
+        license_="CC0-1.0",
+        content_license="CC0-1.0",
+    )
+    _register(client, "fork-high-version@example.com")
+    r = client.post("/api/knowledge-models/fork-source-high-version/2.3.1/fork", json={})
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["version"] == "1.0.0"
+    assert body["content"]["version"] == "1.0.0"

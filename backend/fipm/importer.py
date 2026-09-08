@@ -129,6 +129,7 @@ def _import_knowledge_models(
                     version=doc["version"],
                     owner_id=None,
                     visibility="public",
+                    is_system=True,
                     status=doc["status"],
                     license=doc["license"],
                     source=normalize_source(doc["source"]),
@@ -151,6 +152,7 @@ def _import_knowledge_models(
             )
             summary.knowledge_models.skipped += 1
         else:
+            existing.is_system = True
             existing.status = doc["status"]
             existing.license = doc["license"]
             existing.source = normalize_source(doc["source"])

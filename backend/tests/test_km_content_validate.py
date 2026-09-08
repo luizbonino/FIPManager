@@ -109,6 +109,62 @@ def test_301_questions_too_many(settings):
     assert hit is not None, errors
 
 
+def test_empty_fer_type_taxonomy_skips_the_rule_and_warns_once(monkeypatch, caplog, tmp_path):
+    """Review finding 8: a missing/empty data/fers/fer-types.json must not
+    fail every model that sets a ferType -- the rule is skipped instead
+    (silently, per-question), with a single warning logged regardless of how
+    many `validate_content` calls hit the empty taxonomy."""
+    import logging
+
+    import fipm.km_content as km_content
+
+    empty_settings = Settings(data_dir=str(tmp_path))
+    monkeypatch.setattr(km_content, "_fer_type_warning_logged", False)
+
+    doc = _base_doc()
+    doc["sections"][0]["questions"][0]["ferType"] = "identifier-service"
+
+    with caplog.at_level(logging.WARNING, logger="fipm.km_content"):
+        errors1 = km_content.validate_content(doc, settings=empty_settings)
+        errors2 = km_content.validate_content(doc, settings=empty_settings)
+
+    assert _find(errors1, "sections[0].questions[0].ferType", "unknown_fer_type") is None
+    assert _find(errors2, "sections[0].questions[0].ferType", "unknown_fer_type") is None
+    fer_taxonomy_warnings = [r for r in caplog.records if "FER type taxonomy" in r.message]
+    assert len(fer_taxonomy_warnings) == 1
+
+
+def test_validation_stops_early_once_max_errors_reached(monkeypatch, settings):
+    """Review finding 14: an oversized document must not make
+    `validate_content` do unbounded work -- once MAX_ERRORS errors have
+    accumulated, it stops visiting further sections instead of building an
+    ever-larger error list that gets truncated only at the very end."""
+    import fipm.km_content as km_content
+
+    call_count = 0
+    original_check_langmap = km_content._check_langmap
+
+    def counting_check_langmap(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        return original_check_langmap(*args, **kwargs)
+
+    monkeypatch.setattr(km_content, "_check_langmap", counting_check_langmap)
+
+    # Each of 10,000 sections is missing both its `id` and its `title`, so
+    # every section that actually gets processed contributes two errors.
+    doc = {
+        "title": {"en": "T"},
+        "description": {"en": "D"},
+        "sections": [{"questions": []} for _ in range(10_000)],
+    }
+    errors = km_content.validate_content(doc, settings=settings)
+    assert len(errors) == km_content.MAX_ERRORS
+    # Without the early exit this would be ~10,000 (one call per section);
+    # MAX_ERRORS=50 errors at 2 per section is reached after ~25 sections.
+    assert call_count < 100, call_count
+
+
 def test_publishing_requires_a_visible_question(settings):
     doc = _base_doc()
     doc["sections"][0]["questions"][0]["hidden"] = True

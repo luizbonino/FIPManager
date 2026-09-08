@@ -17,11 +17,15 @@ logger = logging.getLogger(__name__)
 # v2: workshop_sessions.owner_id, fers.owner_id and knowledge_models.owner_id
 # gained ondelete="SET NULL", and workshop_sessions.owner_id became nullable,
 # so DELETE /api/auth/me no longer raises IntegrityError (see routers/auth.py).
+# v3 (review finding 12): knowledge_models gained is_system (bool, NOT NULL,
+# default False), set True only by the importer for data/knowledge-models/
+# rows -- an account-deletion-anonymised published model (owner_id set to
+# NULL too, see routers/auth.py) is community content, not a system model.
 # No Alembic migrations in v1: init_db() only calls create_all(), which adds
 # missing tables but never alters columns/constraints on existing ones. An
 # existing dev DB's on-disk FK/NOT NULL definitions predate this change, so
 # delete the sqlite file (FIPM_DB_PATH) and rerun `import-data` to pick it up.
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 settings = get_settings()
 

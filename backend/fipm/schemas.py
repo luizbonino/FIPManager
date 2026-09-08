@@ -407,7 +407,7 @@ def km_summary_dict(row: Any) -> dict[str, Any]:
         created_at=row.created_at,
         updated_at=row.updated_at,
         owner_id=row.owner_id,
-        is_system=row.owner_id is None,
+        is_system=row.is_system,
         question_count=question_count,
         forked_from=content.get("forkedFrom"),
     )

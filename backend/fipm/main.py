@@ -6,10 +6,13 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.datastructures import Headers
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from fipm.auth import csrf_middleware
 from fipm.config import get_settings
@@ -17,6 +20,68 @@ from fipm.importer import run_import
 from fipm.routers import auth, fer_types, fers, fips, health, knowledge_models, me, sessions
 
 logger = logging.getLogger(__name__)
+
+_BODY_LIMITED_METHODS = {"POST", "PUT", "PATCH"}
+
+
+class PayloadTooLarge(HTTPException):
+    """Raised by `BodySizeLimitMiddleware` when a streamed (chunked) request
+    body under /api/ crosses `settings.max_body_bytes` (review finding 3).
+    Must subclass HTTPException: FastAPI's request-body parsing
+    (`fastapi.routing.get_request_handler`) re-raises HTTPException as-is
+    but rewrites any other exception raised while reading the body into a
+    generic 400 "There was an error parsing the body", which would mask
+    this 413."""
+
+    def __init__(self) -> None:
+        super().__init__(status_code=413, detail="payload_too_large")
+
+
+class BodySizeLimitMiddleware:
+    """Rejects an oversized POST/PUT/PATCH body under /api/ with 413
+    `payload_too_large` -- before the body is read when `Content-Length`
+    already exceeds the cap, or as soon as the running total crosses it for
+    a chunked/unbounded body (review finding 3). Pure ASGI (not
+    `BaseHTTPMiddleware`) so it never buffers the body itself; it only
+    counts bytes as the app underneath reads them."""
+
+    def __init__(self, app: ASGIApp, max_bytes: int) -> None:
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if (
+            scope["type"] != "http"
+            or scope["method"] not in _BODY_LIMITED_METHODS
+            or not scope["path"].startswith("/api/")
+        ):
+            await self.app(scope, receive, send)
+            return
+
+        content_length = Headers(scope=scope).get("content-length")
+        if content_length is not None:
+            try:
+                too_big = int(content_length) > self.max_bytes
+            except ValueError:
+                too_big = False
+            if too_big:
+                response = JSONResponse(status_code=413, content={"detail": "payload_too_large"})
+                await response(scope, receive, send)
+                return
+
+        max_bytes = self.max_bytes
+        total = 0
+
+        async def limited_receive() -> dict[str, Any]:
+            nonlocal total
+            message = await receive()
+            if message["type"] == "http.request":
+                total += len(message.get("body", b""))
+                if total > max_bytes:
+                    raise PayloadTooLarge
+            return message
+
+        await self.app(scope, limited_receive, send)
 
 
 @asynccontextmanager
@@ -33,6 +98,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="FIP Manager", lifespan=lifespan)
 
+app.add_middleware(BodySizeLimitMiddleware, max_bytes=get_settings().max_body_bytes)
 app.middleware("http")(csrf_middleware)
 
 app.include_router(health.router, prefix="/api")

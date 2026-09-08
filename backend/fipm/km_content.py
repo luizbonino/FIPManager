@@ -12,12 +12,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 import secrets
 from typing import Any, TypedDict
 
 from fipm.config import Settings, get_settings
 from fipm.fer_types import allowed_fer_type_keys
+
+logger = logging.getLogger(__name__)
+
+# Review finding 8: log the "taxonomy missing, skipping ferType validation"
+# warning once per process, not once per validate_content() call.
+_fer_type_warning_logged = False
 
 # Question/section id pattern (spec 04 §2 "add question", §3.3 rule 2).
 ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
@@ -128,11 +135,33 @@ def validate_content(
         _err(errors, "sections", "too_many", f"more than {MAX_SECTIONS} sections")
 
     fer_types = allowed_fer_type_keys(settings)
+    skip_fer_type_check = not fer_types
+    if skip_fer_type_check:
+        # Review finding 8: an empty taxonomy (data/fers/fer-types.json
+        # missing, e.g. data/ not checked out yet) must not fail every
+        # model that happens to set a ferType -- skip the rule instead,
+        # once, with a warning.
+        global _fer_type_warning_logged
+        if not _fer_type_warning_logged:
+            logger.warning(
+                "FER type taxonomy is empty (data/fers/fer-types.json missing or "
+                "unreadable); skipping ferType validation"
+            )
+            _fer_type_warning_logged = True
+
     section_ids: set[Any] = set()
     question_ids: set[Any] = set()
     total_questions = 0
 
     for s_idx, section in enumerate(sections):
+        if len(errors) >= MAX_ERRORS:
+            # Review finding 14: an oversized/adversarial document must not
+            # make validate_content do unbounded work building an error list
+            # that gets truncated anyway -- stop as soon as we've collected
+            # enough to answer "invalid" (counts below, e.g. total_questions,
+            # become approximate from this point on; that's fine, the
+            # document is already conclusively invalid).
+            break
         s_path = f"sections[{s_idx}]"
         if not isinstance(section, dict):
             _err(errors, s_path, "missing_key", "section must be an object")
@@ -156,6 +185,8 @@ def validate_content(
             questions = []
 
         for q_idx, question in enumerate(questions):
+            if len(errors) >= MAX_ERRORS:
+                break
             q_path = f"{s_path}.questions[{q_idx}]"
             total_questions += 1
             if not isinstance(question, dict):
@@ -179,7 +210,7 @@ def validate_content(
                 _check_langmap(question.get("help"), f"{q_path}.help", errors)
 
             fer_type = question.get("ferType")
-            if fer_type is not None and fer_type not in fer_types:
+            if not skip_fer_type_check and fer_type is not None and fer_type not in fer_types:
                 _err(
                     errors,
                     f"{q_path}.ferType",
