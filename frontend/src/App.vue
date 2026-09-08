@@ -32,7 +32,6 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
-const user = computed(() => authStore.user)
 
 const handleLogout = async () => {
   try {

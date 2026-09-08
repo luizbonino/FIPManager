@@ -32,3 +32,7 @@ frontend/dist/
 
 # Vibe / agents scratch
 .vibe/
+
+# SQLite sidecar files
+*.db-shm
+*.db-wal
