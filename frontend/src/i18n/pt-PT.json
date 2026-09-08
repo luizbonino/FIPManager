@@ -114,7 +114,20 @@
     "copy": "Copiar",
     "close": "Fechar",
     "retry": "Tentar novamente",
-    "notFound": "Não encontrado"
+    "notFound": "Não encontrado",
+    "view": "Ver"
+  },
+  "home": {
+    "heading": "Construa o seu plano de dados Localizável, Acessível, Interoperável e Reutilizável",
+    "tagline": "O Gestor de FIP ajuda uma comunidade de investigação a responder, em conjunto, ao GO FAIR FIP mini-questionnaire, num workshop ou de forma autónoma.",
+    "joinLabel": "Tem um código de acesso de um workshop?",
+    "joinPlaceholder": "Código de 6 caracteres",
+    "joinButton": "Participar"
+  },
+  "fipNew": {
+    "title": "Novo FIP",
+    "chooseQuestionnaire": "Escolher um questionário",
+    "submit": "Criar FIP"
   },
   "join": {
     "sessionTitle": "Sessão de workshop",
@@ -156,7 +169,8 @@
     "claim": "Guardar este FIP na minha área de trabalho",
     "claimed": "Guardado na sua área de trabalho.",
     "preview": "Pré-visualizar / imprimir",
-    "notAnswered": "Sem resposta"
+    "notAnswered": "Sem resposta",
+    "editRightsLost": "Direitos de edição perdidos neste dispositivo."
   },
   "save": {
     "saved": "Guardado {time}",
