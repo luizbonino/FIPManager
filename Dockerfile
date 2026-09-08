@@ -23,6 +23,8 @@ COPY data/ /app/data/
 
 COPY --from=frontend-build /app/frontend/dist /app/static
 
+RUN mkdir -p /data
+
 ENV FIPM_DATA_DIR=/app/data \
     FIPM_STATIC_DIR=/app/static \
     PATH="/app/backend/.venv/bin:${PATH}"
