@@ -201,7 +201,7 @@ and JSON-LD are the same triples.
 @prefix fipmx: <https://fipm.example.org/ns#> .     @prefix this: <https://fipm.example.org/fips/7Q2M8XKD#> .
 <https://fipm.example.org/fips/7Q2M8XKD> a fip:FAIR-Implementation-Profile ;
     dcterms:title "CONFOA 2026 grupo A"@pt-BR ; dcterms:language "pt-BR" ; dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:created "2026-10-06T09:12:03Z"^^xsd:dateTime ; dcterms:modified "2026-10-06T09:41:55Z"^^xsd:dateTime ;
+    dcterms:created "2026-10-06T09:12:03+00:00"^^xsd:dateTime ; dcterms:modified "2026-10-06T09:41:55+00:00"^^xsd:dateTime ;   # rdflib normalises Z to +00:00
     dcterms:conformsTo <https://fipm.example.org/knowledge-models/gofair-fip-mini/1.0.0> ; fip:declared-by this:community ;
     fipmx:has-declaration this:decl-F1-data-0 , this:decl-I2-metadata-0 ;
     prov:wasDerivedFrom <https://fiodmp.fiocruz.br/KQU5N0C> .
@@ -298,3 +298,15 @@ this:answer-I2-metadata a fipmx:Answer ; fip:refers-to-question fip:FIP-Question
 3. Convergence counts only `current`. Facilitators may want a second number for "current + planned" (direction of travel) — one field in
    `Convergence` and one legend line.
 4. Should `{base}/ns` serve a small vocabulary document (HTML plus Turtle) so `fipmx:` IRIs resolve? Cheap, but one more artefact to sync.
+
+
+## 6. Audit corrections (8 Sep 2026)
+
+The FAIR-expert audit of the first implementation led to these changes, now normative for `fipm/rdf.py`:
+- The extension vocabulary lives at a fixed IRI, `https://w3id.org/fipm/ns#` (env `FIPM_EXT_NS`), independent of the deployment base URL; only instance IRIs follow `FIPM_BASE_URL`. **Action for week 4: register the `fipm` w3id** (pull request to w3id.org) pointing at a page that documents the terms.
+- `fip:refers-to-question` and `fip:declared-by` only on declaration nodes (their asserted domains); Answer/comment nodes use `fipmx:refers-to-question`; the FIP links to its community with `fipmx:declared-by-community`.
+- `fip:has-research-domain` and `fip:has-data-steward` are object properties: emit IRIs (ORCID, or a minted `{fip}#data-steward` foaf:Person), and `dcterms:subject` for free-text domains.
+- No-choice declarations keep their text as `fip:considerations`.
+- FERs are typed `fip:Available-FAIR-Enabling-Resource` or `fip:FAIR-Enabling-Resource-to-be-Developed` according to the declaration status.
+- Related DMPs are typed `dcso:DMP` (RDA DMP Common Standard).
+- Product gap recorded for v2: a `planned-replacement` declaration should be able to name its successor FER (`successorFerId` / `successorFreeText`) so `fip:declares-planned-use-of` can be emitted honestly.

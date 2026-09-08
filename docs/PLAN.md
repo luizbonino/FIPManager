@@ -85,6 +85,7 @@ The declaration statuses mirror the FIP ontology one-to-one: `current` → `fip:
 - Prefill from DMP once FioDMP exposes JSON (mapping table in §6).
 - FER lookup in the nanopublication network (Nanopub Query) and publish FIPs as nanopublications (Python `nanopub` library).
 - FIP migration between knowledge-model versions (DSW-style), with a diff view of changed questions.
+- Successor FER on `planned-replacement` declarations, so RDF can state both the replacement and the planned use (audit finding, 8 Sep).
 - Sign-in with ORCID and Login Único Fiocruz next to email/password; email verification and self-service password reset once SMTP is configured.
 - Team workspaces: share a session, FIP or knowledge model with named collaborators; public gallery of FIPs.
 

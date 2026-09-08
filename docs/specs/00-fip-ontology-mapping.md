@@ -16,7 +16,7 @@ Ontology creators: Erik Schultes (0000-0001-8888-635X), Tobias Kuhn (0000-0002-1
 ## 2. Declaration-status enum (recommended, one-to-one with the ontology)
 
 All four properties are `rdf:Property`, subject = a `fip:FIP-Declaration`, object = a FER.
-No domain/range axioms are asserted in the ontology (verified: none of the terms carry `rdfs:domain`/`rdfs:range`).
+Correction (8 Sep, RDF audit): the ontology DOES assert `rdfs:domain`/`rdfs:range` on several properties — `declares-*` (domain `fip:FIP-Declaration`), `declared-by` (domain `fip:FAIR-Declaration`), `refers-to-question` (domain `fip:FIP-Declaration`), `refers-to-principle`, `has-research-domain` and `has-data-steward` (object properties: IRIs, not literals), and `has-declaration-index` (range `npx:NanopubIndex`, i.e. a nanopublication index, not an integer). Exports must respect these; see docs/specs/03-matrix-and-rdf.md and the extension terms in `fipmx:`.
 
 | FIP Manager `status` | RDF emitted on the declaration | Ontology definition |
 |---|---|---|
@@ -102,11 +102,11 @@ ex:fip/K7QX2 a fip:FAIR-Implementation-Profile ;
   dct:title "FIP of the CONFOA 2026 group A"@en ;
   dct:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
   fip:declared-by ex:community/confoa-group-a ;
-  fip:has-declaration-index ex:fip/K7QX2/declarations .
+  # fip:has-declaration-index is NOT used: its range is npx:NanopubIndex (a nanopub index), not a list of declarations.
 
 ex:community/confoa-group-a a fip:FAIR-Implementation-Community ;
   dct:title "CONFOA 2026 workshop, group A"@en ;
-  fip:has-research-domain "Public health"@en ;
+  dct:subject "Public health"@en ;   # fip:has-research-domain is an object property; use it only with an IRI
   fip:has-data-steward <https://orcid.org/0000-0002-1825-0097> .
 
 # status = current
