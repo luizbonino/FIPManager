@@ -23,7 +23,7 @@
               <span class="visibility-chip">{{ $t(`visibility.${fip.visibility}`) }}</span>
             </div>
             <span class="questionnaire-ref">{{ fip.questionnaireId }} v{{ fip.questionnaireVersion }}</span>
-            <ProgressBar :answered="answeredCount(fip.answers)" :total="21" />
+            <ProgressBar :answered="answeredCount(fip.answers)" :total="questionCountFor(fip)" />
             <span class="updated">{{ $t('common.updated') }}: {{ formatDate(fip.updatedAt) }}</span>
             <div class="fip-row-actions">
               <router-link :to="`/fips/${fip.id}/edit`">{{ $t('fip.edit') }}</router-link>
@@ -57,11 +57,37 @@
       </section>
 
       <section class="workspace-section">
-        <h2>{{ $t('workspace.myKnowledgeModels') }}</h2>
-        <div v-if="myKnowledgeModels.length > 0" class="items-grid">
-          <div v-for="km in myKnowledgeModels" :key="`${km.id}@${km.version}`" class="item-card">
-            <h3>{{ resolveLang(km.title, locale) ?? km.id }}</h3>
-            <p class="item-meta">v{{ km.version }} · {{ km.status }}</p>
+        <div class="section-head">
+          <h2>{{ $t('workspace.myKnowledgeModels') }}</h2>
+          <router-link to="/knowledge-models/new" class="btn btn-primary">{{ $t('km.new') }}</router-link>
+        </div>
+        <div v-if="myKnowledgeModels.length > 0" class="fip-rows">
+          <div v-for="model in myKnowledgeModels" :key="`${model.id}@${model.version}`" class="fip-row">
+            <div class="fip-row-main">
+              <span class="fip-name">{{ resolveLang(model.title, locale) ?? model.id }}</span>
+              <span class="visibility-chip">{{ $t(`km.${model.status}`) }}</span>
+            </div>
+            <span class="questionnaire-ref">{{ model.id }} v{{ model.version }} · {{ $t('km.questions', { count: model.questionCount }) }}</span>
+            <p v-if="model.forkedFrom" class="item-meta">
+              {{ $t('km.forkOf', { id: model.forkedFrom.id, version: model.forkedFrom.version }) }}
+            </p>
+            <div class="fip-row-actions">
+              <router-link :to="`/knowledge-models/${model.id}/${model.version}`">{{ $t('common.view') }}</router-link>
+              <router-link v-if="model.status === 'draft'" :to="`/knowledge-models/${model.id}/${model.version}/edit`">
+                {{ $t('km.edit') }}
+              </router-link>
+              <a :href="kmExportJsonUrl(model.id, model.version)">{{ $t('km.export') }}</a>
+              <button type="button" class="link-btn" @click="onForkKm(model)">{{ $t('km.fork') }}</button>
+              <button
+                v-if="model.status === 'published'"
+                type="button"
+                class="link-btn"
+                @click="onNewVersion(model)"
+              >
+                {{ $t('km.newVersion') }}
+              </button>
+              <button type="button" class="delete-link" @click="onDeleteKm(model)">{{ $t('common.delete') }}</button>
+            </div>
           </div>
         </div>
         <div v-else class="empty-state">
@@ -75,21 +101,39 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { myFips as apiMyFips, myKnowledgeModels as apiMyKms, mySessions as apiMySessions } from '@/api/me'
 import { deleteFip, fipExportCsvUrl, fipExportJsonUrl } from '@/api/fips'
-import { answeredCount } from '@/lib/progress'
+import {
+  deleteKnowledgeModel,
+  forkKnowledgeModel,
+  kmExportJsonUrl,
+  listKnowledgeModels,
+  newKnowledgeModelVersion,
+} from '@/api/knowledgeModels'
+import { answeredCount, TOTAL_QUESTIONS } from '@/lib/progress'
 import { resolveLang } from '@/lib/lang'
 import ProgressBar from '@/components/ProgressBar.vue'
 import type { FipOut, KnowledgeModelSummary, SessionOut } from '@/types/api'
 
 // Spec 02 §3: three lists from GET /api/me/{fips,sessions,knowledge-models}.
 const { locale, t } = useI18n()
+const router = useRouter()
 
 const myFips = ref<FipOut[]>([])
 const mySessions = ref<SessionOut[]>([])
 const myKnowledgeModels = ref<KnowledgeModelSummary[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
+
+// spec 04 §4: FIP-row progress denominator = the referenced knowledge
+// model's `questionCount` (non-hidden), read from every readable model's
+// summary rather than fetching each FIP's full model document.
+const questionCountByModel = ref<Record<string, number>>({})
+
+function questionCountFor(fip: FipOut): number {
+  return questionCountByModel.value[`${fip.questionnaireId}@${fip.questionnaireVersion}`] ?? TOTAL_QUESTIONS
+}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString()
@@ -101,18 +145,44 @@ async function onDeleteFip(id: string) {
   myFips.value = myFips.value.filter((f) => f.id !== id)
 }
 
+async function onForkKm(model: KnowledgeModelSummary) {
+  const created = await forkKnowledgeModel(model.id, model.version)
+  await router.push(`/knowledge-models/${created.id}/${created.version}/edit`)
+}
+
+async function onNewVersion(model: KnowledgeModelSummary) {
+  const created = await newKnowledgeModelVersion(model.id, model.version)
+  await router.push(`/knowledge-models/${created.id}/${created.version}/edit`)
+}
+
+async function onDeleteKm(model: KnowledgeModelSummary) {
+  if (!confirm(t('km.deleteModelConfirm'))) return
+  try {
+    await deleteKnowledgeModel(model.id, model.version)
+    myKnowledgeModels.value = myKnowledgeModels.value.filter(
+      (m) => !(m.id === model.id && m.version === model.version)
+    )
+  } catch {
+    alert(t('km.inUse'))
+  }
+}
+
 async function fetchData() {
   isLoading.value = true
   error.value = null
   try {
-    const [fipsResponse, sessionsResponse, kmResponse] = await Promise.all([
+    const [fipsResponse, sessionsResponse, kmResponse, allModelsResponse] = await Promise.all([
       apiMyFips(),
       apiMySessions(),
       apiMyKms(),
+      listKnowledgeModels().catch(() => ({ items: [], total: 0 })),
     ])
     myFips.value = fipsResponse.items
     mySessions.value = sessionsResponse.items
     myKnowledgeModels.value = kmResponse.items
+    questionCountByModel.value = Object.fromEntries(
+      allModelsResponse.items.map((m) => [`${m.id}@${m.version}`, m.questionCount])
+    )
   } catch {
     error.value = 'error'
   } finally {
@@ -211,7 +281,8 @@ onMounted(fetchData)
 }
 
 .fip-row-actions a,
-.delete-link {
+.delete-link,
+.link-btn {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -221,6 +292,15 @@ onMounted(fetchData)
   background: none;
   border: none;
   color: var(--color-error);
+  cursor: pointer;
+  padding: 0;
+  font-size: var(--font-size-sm);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--color-link);
   cursor: pointer;
   padding: 0;
   font-size: var(--font-size-sm);

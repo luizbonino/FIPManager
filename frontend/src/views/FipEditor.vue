@@ -21,7 +21,7 @@
           />
         </div>
         <div class="header-row">
-          <ProgressBar :answered="answeredCount" :total="21" />
+          <ProgressBar :answered="answeredCount" :total="totalQuestions" />
           <LanguageSwitcher @changed="onLocaleChanged" />
         </div>
         <p v-if="store.readOnly" class="readonly-banner">{{ readOnlyMessage }}</p>
@@ -79,7 +79,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useFipEditorStore } from '@/stores/fipEditor'
 import { useAuthStore } from '@/stores/auth'
-import { answeredCount as computeAnsweredCount } from '@/lib/progress'
+import { answeredCount as computeAnsweredCount, visibleQuestionCount } from '@/lib/progress'
 import { resolveLang } from '@/lib/lang'
 import { getToken } from '@/lib/editTokens'
 import { getFerTypes } from '@/api/ferTypes'
@@ -106,6 +106,9 @@ const ferTypes = ref<Record<string, FerType>>({})
 const claimed = ref(false)
 
 const answeredCount = computed(() => computeAnsweredCount(store.fip?.answers))
+// Spec 04 §4: the denominator is the loaded model's non-hidden question
+// count, not the hardcoded 21 — falls back to 21 only while `km` hasn't loaded yet.
+const totalQuestions = computed(() => visibleQuestionCount(km.value))
 
 const isOwner = computed(
   () => !!store.fip?.ownerId && !!authStore.user && store.fip.ownerId === authStore.user.id

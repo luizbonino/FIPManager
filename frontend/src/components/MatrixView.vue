@@ -6,14 +6,14 @@
           <th scope="col" class="sticky-col question-head">{{ $t('matrix.question') }}</th>
           <th v-for="column in matrix.columns" :key="column.fipId" scope="col" class="fip-head">
             <router-link :to="column.url" class="fip-name" :title="column.fullLabel">{{ column.label }}</router-link>
-            <ProgressBar :answered="column.answeredCount" :total="TOTAL_QUESTIONS" />
+            <ProgressBar :answered="column.answeredCount" :total="matrix.questionCount" />
           </th>
           <th scope="col" class="convergence-head">{{ $t('matrix.convergence') }}</th>
         </tr>
       </thead>
       <tbody v-for="group in matrix.groups" :key="group.sectionId">
         <tr class="group-head-row">
-          <th scope="rowgroup" class="sticky-col group-title" :colspan="1">{{ $t(`sections.${group.sectionId}`) }}</th>
+          <th scope="rowgroup" class="sticky-col group-title" :colspan="1">{{ group.title ?? $t('matrix.otherGroup') }}</th>
           <td :colspan="matrix.columns.length" class="group-fill"></td>
           <td class="group-convergence">
             <ConvergenceBadge :group="{ agreed: group.rowsAgreed, total: group.rowsWithData }" compact />
@@ -42,7 +42,6 @@
 
 <script lang="ts" setup>
 import type { Matrix } from '@/lib/matrix'
-import { TOTAL_QUESTIONS } from '@/lib/progress'
 import MatrixCell from './MatrixCell.vue'
 import ConvergenceBadge from './ConvergenceBadge.vue'
 import ProgressBar from './ProgressBar.vue'

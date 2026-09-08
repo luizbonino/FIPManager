@@ -5,19 +5,24 @@
     <section v-if="!selectedKm" class="km-choice">
       <h2>{{ $t('fipNew.chooseQuestionnaire') }}</h2>
       <p v-if="loadingKms">{{ $t('common.loading') }}</p>
-      <ul v-else class="km-list">
-        <li v-for="km in knowledgeModels" :key="`${km.id}@${km.version}`">
-          <label class="km-option">
-            <input
-              type="radio"
-              name="km"
-              :value="`${km.id}@${km.version}`"
-              v-model="selectedKmKey"
-            />
-            <span>{{ resolveLang(km.title, locale) ?? km.id }} (v{{ km.version }})</span>
-          </label>
-        </li>
-      </ul>
+      <template v-else>
+        <div v-for="group in groupedKms" :key="group.key" class="km-group">
+          <h3 v-if="group.items.length > 0" class="km-group-title">{{ $t(group.labelKey) }}</h3>
+          <ul class="km-list">
+            <li v-for="km in group.items" :key="`${km.id}@${km.version}`">
+              <label class="km-option">
+                <input
+                  type="radio"
+                  name="km"
+                  :value="`${km.id}@${km.version}`"
+                  v-model="selectedKmKey"
+                />
+                <span>{{ resolveLang(km.title, locale) ?? km.id }} (v{{ km.version }})</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </template>
     </section>
 
     <form v-else class="community-form" @submit.prevent="onSubmit">
@@ -66,11 +71,15 @@ import { useI18n } from 'vue-i18n'
 import { listKnowledgeModels } from '@/api/knowledgeModels'
 import { createFip } from '@/api/fips'
 import { resolveLang } from '@/lib/lang'
+import { useAuthStore } from '@/stores/auth'
 import type { KnowledgeModelSummary } from '@/types/api'
 
-// Spec 02 §3: GET /api/knowledge-models?status=published -> radio list, then the §2.1 community form.
+// Spec 02 §3 / spec 04 §4: GET /api/knowledge-models?status=published ->
+// radio list grouped System/Mine/Public via `isSystem`/`ownerId`, then the
+// §2.1 community form.
 const router = useRouter()
 const { locale, t } = useI18n()
+const authStore = useAuthStore()
 
 const knowledgeModels = ref<KnowledgeModelSummary[]>([])
 const loadingKms = ref(true)
@@ -87,6 +96,20 @@ const selectedKm = computed(() =>
     ? knowledgeModels.value.find((km) => `${km.id}@${km.version}` === selectedKmKey.value)
     : null
 )
+
+const groupedKms = computed(() => {
+  const userId = authStore.user?.id ?? null
+  const system = knowledgeModels.value.filter((km) => km.isSystem)
+  const mine = knowledgeModels.value.filter((km) => !km.isSystem && userId !== null && km.ownerId === userId)
+  const publicOnes = knowledgeModels.value.filter(
+    (km) => !km.isSystem && (userId === null || km.ownerId !== userId)
+  )
+  return [
+    { key: 'system', labelKey: 'km.system', items: system },
+    { key: 'mine', labelKey: 'km.mine', items: mine },
+    { key: 'public', labelKey: 'km.public', items: publicOnes },
+  ]
+})
 
 const ORCID_PATTERN = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/
 
@@ -139,6 +162,18 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.km-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.km-group-title {
+  margin: 0.5rem 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
 .km-list {

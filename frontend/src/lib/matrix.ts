@@ -55,12 +55,24 @@ export interface MatrixRow {
   text: string
   cells: MatrixCell[]
   convergence: Convergence
+  /**
+   * `principle?.[0] ?? 'Other'` (spec 04 §4): the FAIR-letter group derived
+   * from the row's own `principle` code (independent of which section it
+   * lives in), for a future per-principle convergence view; every row with
+   * `principle === null` collects under `'Other'`.
+   */
+  principleGroup: string
 }
 
-/** One per knowledge-model section: F, A, I, R. */
+/** One per knowledge-model section — not necessarily F/A/I/R once custom models exist (spec 04). */
 export interface MatrixGroup {
   sectionId: string
-  title: string
+  /**
+   * The section's resolved title, or `null` when its `title` LangMap
+   * resolves to nothing (spec 04 §4) — the renderer falls back to the
+   * `matrix.otherGroup` ("Other") label in that case.
+   */
+  title: string | null
   rows: MatrixRow[]
   rowsWithData: number
   rowsAgreed: number
@@ -221,11 +233,17 @@ export function buildMatrix(
         text: resolveLang(question.text, locale) ?? question.id,
         cells,
         convergence: buildConvergence(cells),
+        // Spec 04 §4: the FAIR-letter group derived from the principle
+        // code itself, not the section — every untagged row is 'Other'.
+        principleGroup: question.principle?.[0] ?? 'Other',
       }
     })
     return {
       sectionId: section.id,
-      title: resolveLang(section.title, locale) ?? section.id,
+      // Spec 04 §4: `null` (not the internal section id) when the title
+      // resolves to nothing, so the renderer can show the translated
+      // `matrix.otherGroup` label instead of a raw id.
+      title: resolveLang(section.title, locale),
       rows,
       rowsWithData: rows.filter((r) => r.cells.some((c) => !c.unanswered)).length,
       rowsAgreed: rows.filter((r) => r.convergence.agreed).length,

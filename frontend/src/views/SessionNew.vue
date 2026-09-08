@@ -12,9 +12,11 @@
         <span>{{ $t('sessionAdmin.knowledgeModel') }} *</span>
         <select v-model="kmKey" required>
           <option value="" disabled>{{ $t('fipNew.chooseQuestionnaire') }}</option>
-          <option v-for="km in knowledgeModels" :key="`${km.id}@${km.version}`" :value="`${km.id}@${km.version}`">
-            {{ resolveLang(km.title, locale) ?? km.id }} (v{{ km.version }})
-          </option>
+          <optgroup v-for="group in groupedKms" :key="group.key" :label="$t(group.labelKey)">
+            <option v-for="km in group.items" :key="`${km.id}@${km.version}`" :value="`${km.id}@${km.version}`">
+              {{ resolveLang(km.title, locale) ?? km.id }} (v{{ km.version }})
+            </option>
+          </optgroup>
         </select>
       </label>
 
@@ -35,18 +37,20 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { listKnowledgeModels } from '@/api/knowledgeModels'
 import { createSession } from '@/api/sessions'
 import { resolveLang } from '@/lib/lang'
 import { SUPPORTED_LOCALES } from '@/i18n'
+import { useAuthStore } from '@/stores/auth'
 import type { KnowledgeModelSummary } from '@/types/api'
 
-// Spec 02 §4.1.
+// Spec 02 §4.1 / spec 04 §4: options grouped System/Mine/Public via `isSystem`/`ownerId`.
 const router = useRouter()
 const { locale, t } = useI18n()
+const authStore = useAuthStore()
 
 const title = ref('')
 const kmKey = ref('')
@@ -54,6 +58,20 @@ const defaultLanguage = ref(locale.value)
 const knowledgeModels = ref<KnowledgeModelSummary[]>([])
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
+
+const groupedKms = computed(() => {
+  const userId = authStore.user?.id ?? null
+  const system = knowledgeModels.value.filter((km) => km.isSystem)
+  const mine = knowledgeModels.value.filter((km) => !km.isSystem && userId !== null && km.ownerId === userId)
+  const publicOnes = knowledgeModels.value.filter(
+    (km) => !km.isSystem && (userId === null || km.ownerId !== userId)
+  )
+  return [
+    { key: 'system', labelKey: 'km.system', items: system },
+    { key: 'mine', labelKey: 'km.mine', items: mine },
+    { key: 'public', labelKey: 'km.public', items: publicOnes },
+  ]
+})
 
 async function onSubmit() {
   if (!kmKey.value) return

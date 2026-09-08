@@ -10,8 +10,13 @@ import FipNew from '@/views/FipNew.vue'
 import SessionNew from '@/views/SessionNew.vue'
 import SessionDetail from '@/views/SessionDetail.vue'
 import SessionMatrix from '@/views/SessionMatrix.vue'
+import KnowledgeModelList from '@/views/KnowledgeModelList.vue'
+import KnowledgeModelNew from '@/views/KnowledgeModelNew.vue'
+import KnowledgeModelRead from '@/views/KnowledgeModelRead.vue'
+import KnowledgeModelEditor from '@/views/KnowledgeModelEditor.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useFipEditorStore } from '@/stores/fipEditor'
+import { useKmEditorStore } from '@/stores/kmEditor'
 
 // Spec 02 §6.1. Route `name` = component name throughout.
 const routes: RouteRecordRaw[] = [
@@ -90,6 +95,36 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    // Anonymous sees public + system models (spec 04 §5).
+    path: '/knowledge-models',
+    name: 'KnowledgeModelList',
+    component: KnowledgeModelList,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/knowledge-models/new',
+    name: 'KnowledgeModelNew',
+    component: KnowledgeModelNew,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/knowledge-models/:id/:version',
+    name: 'KnowledgeModelRead',
+    component: KnowledgeModelRead,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    // Ownership and `status === "draft"` are checked inside the view
+    // (spec 04 §5), which renders `common.notFound` on 404 and a
+    // read-only banner on a published version.
+    path: '/knowledge-models/:id/:version/edit',
+    name: 'KnowledgeModelEditor',
+    component: KnowledgeModelEditor,
+    meta: { requiresAuth: true },
+    props: true,
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
@@ -117,6 +152,12 @@ router.beforeEach(async (to, from) => {
   if (from.name === 'FipEditor' && to.name !== 'FipEditor') {
     const fipEditorStore = useFipEditorStore()
     await fipEditorStore.flush()
+  }
+
+  // Same guard for the knowledge-model editor's 2s idle debounce (spec 04 §5).
+  if (from.name === 'KnowledgeModelEditor' && to.name !== 'KnowledgeModelEditor') {
+    const kmEditorStore = useKmEditorStore()
+    await kmEditorStore.flush()
   }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

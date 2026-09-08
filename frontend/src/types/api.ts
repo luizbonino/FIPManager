@@ -121,6 +121,8 @@ export interface KnowledgeModelQuestion {
   ferType: string | null
   required: boolean
   allowMultiple: boolean
+  /** spec 04 §2: present (`true`) only while hidden; absent/undefined otherwise, never stored `false`. */
+  hidden?: boolean
 }
 
 export interface KnowledgeModelSection {
@@ -129,16 +131,33 @@ export interface KnowledgeModelSection {
   questions: KnowledgeModelQuestion[]
 }
 
+/** spec 04 §1: recorded on a fork, `{id, version}` of the source model/version. */
+export interface KnowledgeModelForkedFrom {
+  id: string
+  version: string
+}
+
 export interface KnowledgeModelContent {
   id: string
   version: string
   status: string
   license: string
-  source: string
+  /**
+   * Unlike the top-level `KnowledgeModelOut.source` (always a plain
+   * string), `content` is stored server-side as an opaque JSON blob passed
+   * through verbatim (spec 01 §3) — the GO FAIR system model's own
+   * `content.source` is `{name, url}`, not a string. Never rendered
+   * directly by this feature; kept loosely typed rather than assumed.
+   */
+  source?: string | { name?: string; url?: string } | null
   title: LangMap
   description: LangMap
   changelog: Array<Record<string, unknown>>
   sections: KnowledgeModelSection[]
+  /** spec 04 §1: set on a fork, never user-editable. */
+  forkedFrom?: KnowledgeModelForkedFrom | null
+  /** spec 04 §1/spec 00 §6: the GO FAIR CC-BY-SA credit line, set automatically on such a fork. */
+  attribution?: string | null
 }
 
 export interface KnowledgeModelOut {
@@ -155,6 +174,13 @@ export interface KnowledgeModelOut {
   content: KnowledgeModelContent
   createdAt: string
   updatedAt: string
+  /**
+   * Not part of the JSON body: `GET`/`PUT .../content` (spec 04 §3 #3, #9)
+   * also return the `ETag` response header carrying `content_sha256`;
+   * `api/knowledgeModels.ts` reads it and stashes it here for the caller,
+   * since `apiRequest<T>` only returns the parsed body.
+   */
+  etag?: string | null
 }
 
 export interface KnowledgeModelSummary {
@@ -167,6 +193,12 @@ export interface KnowledgeModelSummary {
   description: LangMap
   createdAt: string
   updatedAt: string
+  /** spec 04 §3 #1 additions. */
+  ownerId: string | null
+  isSystem: boolean
+  /** Non-hidden question count, server-computed. */
+  questionCount: number
+  forkedFrom: KnowledgeModelForkedFrom | null
 }
 
 export interface KnowledgeModelVersionEntry {
