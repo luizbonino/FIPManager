@@ -33,22 +33,24 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 
 ## Week 4 · 29 Sep–3 Oct · Hardening and deployment
 - [ ] Deploy to the chosen domain with HTTPS; base URL from env so a later move to Fiocruz keeps FIP IDs. Backup script done 8 Sep (`scripts/backup-db.sh`).
-- [ ] Admin pages: list users, reset password, promote user FER to global catalogue.
-- [ ] Privacy notice on sign-up and join pages; login rate limiting checked.
+- [x] Admin pages: list users, reset password (temporary, must change at next login), promote/merge user FERs (done 9 Sep, docs/specs/05-v1-completion.md).
+- [x] Privacy notice (/privacy, four languages, consent at registration, retention stated) and rate limiting on login/feedback (done 9 Sep). Contact address and hosting organisation come from FIPM_CONTACT_EMAIL / FIPM_HOSTING_ORG — set them at deployment.
 - [ ] Register the `fipm` w3id (https://w3id.org/fipm/ns#) used by the RDF export's extension vocabulary; publish a terms page.
 - [ ] Offline fallback tested: container on laptop + hotspot.
 - [ ] Bug fixing from dry run. Load check done 8 Sep: 40 and 80 simulated participants, 0 errors, p95 < 10 ms on writes, SQLite in WAL mode (`scripts/load-test.py`).
-- [ ] Slides and facilitator script referencing the tool; printed questionnaire fallback.
+- [ ] Slides referencing the tool. Facilitator script and handout drafted (docs/workshop/); printed questionnaire available at /knowledge-models/{id}/{version}/print (done 9 Sep).
 - [ ] Fri 3 Oct: code freeze, tag `v1.0-confoa`.
 
 ## 6 Oct · Workshop
 - Collect FIPs, export session, gather feedback (short form in the tool or paper).
 
 ## Oct–Dec 2026 · v2 – Integration
-- [ ] Write the FioDMP API contract (OpenAPI) + DMP→FIP mapping; meeting with ICTIC.
-- [ ] `relatedDMPs` and per-answer `dmpEvidence` (works by URL today).
-- [ ] `GET /api/fips/{id}` and `/fips/{id}/embed` for FioDMP to display FIPs.
-- [ ] Prefill from FioDMP JSON once available.
+- [ ] Feedback form (in editor and session page, aggregated per session) — built 9 Sep, ahead of schedule; decide with facilitators whether to use it on 6 Oct.
+- [ ] Successor FER on planned-replacement declarations — built 9 Sep; RDF emits both replacement and planned use.
+- [ ] Meeting with ICTIC. Contract and OpenAPI drafted 9 Sep: docs/integration/fiodmp-api-contract.md, fiodmp-openapi.yaml.
+- [x] `relatedDMPs` and per-answer `dmpEvidence` (done 9 Sep, docs/specs/06-dmp-linkage.md; exported in JSON, CSV and RDF).
+- [x] `GET /api/fips/{id}` (with summary and embedUrl) and `/fips/{id}/embed` HTML view with configurable frame-ancestors (done 9 Sep).
+- [ ] Prefill from FioDMP JSON once available (endpoint stub returns 501 with the contract pointer).
 - [x] Spanish (es) translation (draft done 9 Sep: 288 UI keys, 21 questions, FER types; pending native review).
 - [ ] FER lookup via Nanopub Query; publish FIPs as nanopublications.
 - [ ] FIP migration between knowledge-model versions (DSW-style).
