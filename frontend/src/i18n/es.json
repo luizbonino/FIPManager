@@ -413,7 +413,9 @@
     "allowFreeText": "Permitir que los participantes usen sus propias palabras",
     "defaultDeclarationStatus": "Estado predeterminado para los recursos de selección rápida",
     "compactDeclarations": "Declaraciones compactas (ocultar el estado tras «Más»)",
-    "unusedInlineFers": "Recursos sin usar (no sugeridos por ninguna pregunta)"
+    "unusedInlineFers": "Recursos sin usar (no sugeridos por ninguna pregunta)",
+    "unownedDrafts": "Borradores por revisar",
+    "unownedDraftHint": "Borradores importados sin propietario todavía. Editar uno lo reclama como suyo."
   },
   "admin": {
     "title": "Administración",

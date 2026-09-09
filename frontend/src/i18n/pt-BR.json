@@ -413,7 +413,9 @@
     "allowFreeText": "Permitir que os participantes usem suas próprias palavras",
     "defaultDeclarationStatus": "Status padrão para recursos de seleção rápida",
     "compactDeclarations": "Declarações compactas (ocultar o status atrás de \"Mais\")",
-    "unusedInlineFers": "Recursos não utilizados (não sugeridos por nenhuma pergunta)"
+    "unusedInlineFers": "Recursos não utilizados (não sugeridos por nenhuma pergunta)",
+    "unownedDrafts": "Rascunhos para revisar",
+    "unownedDraftHint": "Rascunhos importados que ainda não têm proprietário. Editar um deles o torna seu."
   },
   "admin": {
     "title": "Administração",
