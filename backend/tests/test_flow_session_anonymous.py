@@ -16,6 +16,7 @@ def test_full_anonymous_session_flow(client, client_factory):
             "email": "flow-facilitator@example.com",
             "password": "correcthorsebattery",
             "displayName": "Facilitator",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert reg.status_code == 201
@@ -99,6 +100,7 @@ def test_full_anonymous_session_flow(client, client_factory):
             "email": "flow-claimant@example.com",
             "password": "correcthorsebattery",
             "displayName": "Claimant",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert claimant_reg.status_code == 201
@@ -128,6 +130,7 @@ def test_full_anonymous_session_flow(client, client_factory):
             "email": "flow-second-claimant@example.com",
             "password": "correcthorsebattery",
             "displayName": "Second",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     already = second_claimant.post(

@@ -10,7 +10,12 @@ from fipm.exporters import CSV_HEADER
 def _register(client, email: str) -> str:
     r = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "U"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "U",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r.status_code == 201, r.text
     return r.json()["id"]

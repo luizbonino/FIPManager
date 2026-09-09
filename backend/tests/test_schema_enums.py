@@ -13,6 +13,7 @@ def test_create_fip_rejects_invalid_visibility(client):
             "email": "enum-create@example.com",
             "password": "correcthorsebattery",
             "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     r = client.post(
@@ -32,6 +33,7 @@ def test_patch_fip_rejects_invalid_visibility(client):
             "email": "enum-patch@example.com",
             "password": "correcthorsebattery",
             "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(
@@ -49,6 +51,7 @@ def test_patch_session_rejects_invalid_status(client):
             "email": "enum-session@example.com",
             "password": "correcthorsebattery",
             "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = client.post(

@@ -14,7 +14,12 @@ from __future__ import annotations
 def _register(client, email):
     r = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "Importer"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "Importer",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r.status_code == 201
 

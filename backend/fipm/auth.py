@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from fipm.config import Settings, get_settings
+from fipm.db import SessionLocal
 from fipm.ids import hash_token, new_token
 from fipm.models import AuthSession, User
 
@@ -89,6 +90,9 @@ LOGIN_LIMIT_PER_IP = 30
 LOGIN_WINDOW_SECONDS = 15 * 60
 REGISTER_LIMIT_PER_IP = 5
 REGISTER_WINDOW_SECONDS = 60 * 60
+# spec 05-v1-completion.md §4: POST /api/feedback, 5 per hour per client IP.
+FEEDBACK_LIMIT_PER_IP = 5
+FEEDBACK_WINDOW_SECONDS = 60 * 60
 
 
 def client_ip(request: Request) -> str:
@@ -130,6 +134,18 @@ def check_register_rate_limit(request: Request) -> None:
     if limited:
         _raise_rate_limited(retry)
     _rate_limiter.record(f"register-ip:{ip}", REGISTER_WINDOW_SECONDS)
+
+
+def check_feedback_rate_limit(request: Request) -> None:
+    """5 per hour per client IP (spec 05-v1-completion.md §4), checked and
+    recorded like `check_register_rate_limit`."""
+    ip = client_ip(request)
+    limited, retry = _rate_limiter.is_limited(
+        f"feedback-ip:{ip}", FEEDBACK_LIMIT_PER_IP, FEEDBACK_WINDOW_SECONDS
+    )
+    if limited:
+        _raise_rate_limited(retry)
+    _rate_limiter.record(f"feedback-ip:{ip}", FEEDBACK_WINDOW_SECONDS)
 
 
 # ---------------------------------------------------------------------------
@@ -227,4 +243,35 @@ async def csrf_middleware(request: Request, call_next):
         origin = request.headers.get("origin") or request.headers.get("referer")
         if not origin or not _origin_allowed(origin, settings):
             return JSONResponse(status_code=403, content={"detail": "csrf_failed"})
+    return await call_next(request)
+
+
+# ---------------------------------------------------------------------------
+# must_change_password enforcement (spec 05-v1-completion.md §1)
+# ---------------------------------------------------------------------------
+
+_PASSWORD_CHANGE_EXEMPT_PATHS = {"/api/auth/password", "/api/auth/logout"}
+
+
+async def password_change_middleware(request: Request, call_next):
+    """A signed-in user with `must_change_password` gets 403
+    `password_change_required` on any non-GET `/api/*` request except
+    changing the password or logging out; GET stays open so the SPA still
+    renders (`GET /api/auth/me` included).
+
+    Implemented as middleware rather than inside `require_user`: several
+    write routes that must also be covered -- notably `PATCH`/`DELETE
+    /api/fips/{id}` -- authorize through `optional_user` (anonymous
+    edit-token writers are allowed there too), so a check living only in
+    `require_user` would miss them."""
+    if request.method != "GET" and request.url.path.startswith("/api/"):
+        if request.url.path not in _PASSWORD_CHANGE_EXEMPT_PATHS:
+            settings = get_settings()
+            db = SessionLocal()
+            try:
+                user = get_session_user(request, db, settings)
+            finally:
+                db.close()
+            if user is not None and user.must_change_password:
+                return JSONResponse(status_code=403, content={"detail": "password_change_required"})
     return await call_next(request)

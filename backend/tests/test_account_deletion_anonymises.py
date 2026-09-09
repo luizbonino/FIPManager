@@ -29,6 +29,7 @@ def test_delete_account_anonymises_everything_without_error(client, db_session):
             "email": "delme-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "DelMe",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     user_id = reg.json()["id"]
@@ -151,6 +152,7 @@ def test_delete_account_ac12_published_model_referenced_by_fip_survives_readable
             "email": "delme-ac12@example.com",
             "password": "correcthorsebattery",
             "displayName": "DelMe4",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert reg.status_code == 201, reg.text
@@ -199,6 +201,7 @@ def test_private_fip_without_session_is_deleted_not_readable(client, client_fact
             "email": "delme-deleted@example.com",
             "password": "correcthorsebattery",
             "displayName": "DelMe3",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert reg.status_code == 201
@@ -227,6 +230,7 @@ def test_private_session_fip_stays_readable_via_link_after_deletion(client, clie
             "email": "delme-readable@example.com",
             "password": "correcthorsebattery",
             "displayName": "DelMe2",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert reg.status_code == 201

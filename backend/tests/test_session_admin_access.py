@@ -16,6 +16,7 @@ def test_admin_can_access_session_they_do_not_own(client, client_factory, db_ses
             "email": "sessadmin-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "Owner",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(
@@ -34,6 +35,7 @@ def test_admin_can_access_session_they_do_not_own(client, client_factory, db_ses
             "email": "sessadmin-admin@example.com",
             "password": "correcthorsebattery",
             "displayName": "Admin",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     admin_id = reg.json()["id"]
@@ -55,6 +57,7 @@ def test_admin_can_access_session_they_do_not_own(client, client_factory, db_ses
             "email": "sessadmin-stranger@example.com",
             "password": "correcthorsebattery",
             "displayName": "Stranger",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert stranger.get(f"/api/sessions/{session['id']}").status_code == 404

@@ -39,3 +39,15 @@ def hash_token(token: str) -> str:
 def new_user_id() -> str:
     """26-char hex user id."""
     return secrets.token_hex(13)
+
+
+def new_feedback_id() -> str:
+    """26-char hex feedback id (spec 05-v1-completion.md §4)."""
+    return secrets.token_hex(13)
+
+
+def temp_password() -> str:
+    """12 Crockford base32 chars via secrets.choice (spec 05-v1-completion.md
+    §1): no I/L/O/U, so it can be dictated over the phone. An admin-issued
+    temporary password shown once in the response body."""
+    return "".join(secrets.choice(_ALPHABET) for _ in range(12))

@@ -50,6 +50,7 @@ def test_real_questionnaire_csv_export_smoke(client, db_session, settings):
             "email": "real-smoke@example.com",
             "password": "correcthorsebattery",
             "displayName": "Smoke",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     answers = [

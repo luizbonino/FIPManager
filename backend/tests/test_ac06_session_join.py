@@ -13,6 +13,7 @@ def _make_session(client_factory, owner_email):
             "email": owner_email,
             "password": "correcthorsebattery",
             "displayName": "Facilitator",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     r = owner.post(

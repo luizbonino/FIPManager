@@ -34,6 +34,14 @@ class HealthOut(CamelModel):
     version: str
     schema_version: int
     time: datetime
+    # spec 05-v1-completion.md §2/§4: additive, so the pre-v1-completion
+    # frontend (which only reads status/version/schemaVersion/time) keeps
+    # working unchanged.
+    contact_email: str = ""
+    hosting_org: str = ""
+    feedback_enabled: bool = True
+    privacy_version: str | None = None
+    languages: list[str] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -46,6 +54,10 @@ class RegisterRequest(CamelModel):
     password: str = Field(min_length=10, max_length=128)
     display_name: str
     language: str | None = None
+    # spec 05-v1-completion.md §2: required, non-empty -- an absent value is
+    # pydantic's own 422; a value that doesn't match the current privacy
+    # notice version is a router-level 400 privacy_version_mismatch.
+    privacy_accepted_version: str = Field(min_length=1)
 
 
 class LoginRequest(CamelModel):
@@ -70,6 +82,8 @@ class UserOut(CamelModel):
     language: str
     created_at: datetime
     updated_at: datetime
+    must_change_password: bool = False
+    privacy_accepted_version: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -221,6 +235,12 @@ class Declaration(CamelModel):
     status: str
     note: dict[str, str] | None = None
     dmp_evidence: DmpEvidence | None = None
+    # spec 05-v1-completion.md §5 (closes spec 03 §6): the resource that will
+    # replace this one, only meaningful (and only allowed) when
+    # status == "planned-replacement". No DB change -- lives in the `answers`
+    # JSON like every other declaration field.
+    successor_fer_id: str | None = None
+    successor_free_text: str | None = None
 
     @model_validator(mode="after")
     def _fer_xor(self) -> Declaration:
@@ -228,6 +248,18 @@ class Declaration(CamelModel):
         has_text = bool(self.fer_free_text)
         if has_id == has_text:
             raise ValueError("exactly one of ferId or ferFreeText must be set")
+        return self
+
+    @model_validator(mode="after")
+    def _successor_rules(self) -> Declaration:
+        has_id = bool(self.successor_fer_id)
+        has_text = bool(self.successor_free_text)
+        if has_id and has_text:
+            raise ValueError("at most one of successorFerId or successorFreeText may be set")
+        if (has_id or has_text) and self.status != "planned-replacement":
+            raise ValueError(
+                "successorFerId/successorFreeText require status == 'planned-replacement'"
+            )
         return self
 
     @field_validator("status")
@@ -503,6 +535,92 @@ def km_summary_dict(row: Any) -> dict[str, Any]:
         forked_from=content.get("forkedFrom"),
     )
     return summary.model_dump(mode="json", by_alias=True)
+
+
+# ---------------------------------------------------------------------------
+# Admin (spec 05-v1-completion.md §1)
+# ---------------------------------------------------------------------------
+
+
+class AdminUserOut(CamelModel):
+    id: str
+    email: str
+    display_name: str
+    role: str
+    language: str
+    created_at: datetime
+    must_change_password: bool
+    privacy_accepted_version: str | None
+    fip_count: int
+    session_count: int
+    knowledge_model_count: int
+
+
+class AdminResetPasswordOut(CamelModel):
+    temporary_password: str
+
+
+class AdminFerOut(CamelModel):
+    id: str
+    label: dict[str, str]
+    type: str
+    homepage: str | None
+    source: str
+    owner_email: str | None
+    usage_count: int
+
+
+class AdminFerMergeRequest(CamelModel):
+    target_fer_id: str
+
+
+class AdminFerMergeOut(CamelModel):
+    repointed_declarations: int
+    repointed_fips: int
+
+
+# ---------------------------------------------------------------------------
+# Privacy notice (spec 05-v1-completion.md §2)
+# ---------------------------------------------------------------------------
+
+
+class PrivacyOut(CamelModel):
+    version: str
+    date: str
+    lang: str
+    markdown: str
+
+
+# ---------------------------------------------------------------------------
+# Feedback (spec 05-v1-completion.md §4)
+# ---------------------------------------------------------------------------
+
+
+class FeedbackCreateRequest(CamelModel):
+    q1: int = Field(ge=1, le=5)
+    q2: int = Field(ge=1, le=5)
+    q3: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=2000)
+    session_id: str | None = None
+    fip_id: str | None = None
+    language: str | None = None
+
+
+class FeedbackQuestionStat(CamelModel):
+    key: str
+    mean: float | None
+    counts: dict[str, int]
+
+
+class FeedbackCommentOut(CamelModel):
+    text: str
+    created_at: datetime
+
+
+class FeedbackSummaryOut(CamelModel):
+    responses: int
+    questions: list[FeedbackQuestionStat]
+    comments: list[FeedbackCommentOut]
 
 
 def session_to_out(row: Any, base_url: str) -> SessionOut:

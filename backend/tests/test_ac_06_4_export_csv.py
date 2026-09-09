@@ -1,6 +1,9 @@
-"""AC5 (spec 06-dmp-linkage.md §5): CSV_HEADER has 24 entries ending
-dmp_url, dmp_section, dmp_question, the first 21 unchanged and in order, and
-the evidence-carrying declaration's row holds the normalised URL, C and C.3."""
+"""AC5 (spec 06-dmp-linkage.md §5): CSV_HEADER's first 24 entries end
+dmp_url, dmp_section, dmp_question (the first 21 unchanged and in order),
+and the evidence-carrying declaration's row holds the normalised URL, C and
+C.3. spec 05-v1-completion.md §5 later appends two more columns
+(successor_fer_id, successor_fer_label), so CSV_HEADER is now 26 long --
+see test_ac_05_13_successor_csv_json.py for those."""
 
 from __future__ import annotations
 
@@ -31,10 +34,10 @@ _ORIGINAL_21 = [
 ]
 
 
-def test_csv_header_24_columns_first_21_unchanged():
-    assert len(CSV_HEADER) == 24
+def test_csv_header_first_24_columns_unchanged():
+    assert len(CSV_HEADER) == 26
     assert CSV_HEADER[:21] == _ORIGINAL_21
-    assert CSV_HEADER[21:] == ["dmp_url", "dmp_section", "dmp_question"]
+    assert CSV_HEADER[21:24] == ["dmp_url", "dmp_section", "dmp_question"]
 
 
 def test_evidence_row_holds_normalised_url_section_and_question(client):
@@ -44,6 +47,7 @@ def test_evidence_row_holds_normalised_url_section_and_question(client):
             "email": "dmp-ac5-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "DMP",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(

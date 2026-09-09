@@ -13,6 +13,7 @@ def _make_anonymous_fip(client, client_factory):
             "email": "ac9-facilitator@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(
@@ -45,6 +46,7 @@ def test_claim_flow(client, client_factory):
             "email": "ac9-claimant@example.com",
             "password": "correcthorsebattery",
             "displayName": "Claimant",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     claimed = claimant.post(f"/api/fips/{fip_id}/claim", headers={"X-Edit-Token": token})
@@ -67,6 +69,7 @@ def test_claim_flow(client, client_factory):
             "email": "ac9-second@example.com",
             "password": "correcthorsebattery",
             "displayName": "Second",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     already = second_claimant.post(f"/api/fips/{fip_id}/claim", headers={"X-Edit-Token": token})

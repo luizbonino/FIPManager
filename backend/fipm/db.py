@@ -6,7 +6,7 @@ import logging
 from collections.abc import Generator
 from datetime import UTC, datetime
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from fipm.config import get_settings
@@ -25,7 +25,21 @@ logger = logging.getLogger(__name__)
 # missing tables but never alters columns/constraints on existing ones. An
 # existing dev DB's on-disk FK/NOT NULL definitions predate this change, so
 # delete the sqlite file (FIPM_DB_PATH) and rerun `import-data` to pick it up.
-SCHEMA_VERSION = 3
+# v4 (spec 05-v1-completion.md §1): `users` gains `must_change_password`
+# (Boolean, NOT NULL, default False) and `privacy_accepted_version` (String,
+# nullable); one new table `feedback`. Unlike v2/v3, this *is* handled
+# losslessly on an existing DB: `init_db()` now also calls `_ensure_columns()`
+# (below), which runs `PRAGMA table_info(<table>)` for each expected column
+# and issues `ALTER TABLE ... ADD COLUMN` when it's missing -- idempotent,
+# logged, and run after `create_all()` (which adds the new `feedback` table
+# but never alters an existing table's columns) and before the
+# schema_version reconciliation.
+SCHEMA_VERSION = 4
+
+_EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
+    ("users", "must_change_password", "BOOLEAN NOT NULL DEFAULT 0"),
+    ("users", "privacy_accepted_version", "VARCHAR"),
+)
 
 settings = get_settings()
 
@@ -55,11 +69,25 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
+def _ensure_columns() -> None:
+    """Idempotently add any `_EXPECTED_COLUMNS` entry missing from its table
+    -- SQLite's `ALTER TABLE ... ADD COLUMN`, since `create_all()` never
+    alters columns on a table that already exists (see the v4 note above)."""
+    with engine.begin() as conn:
+        for table, column, ddl in _EXPECTED_COLUMNS:
+            existing = {row[1] for row in conn.execute(text(f"PRAGMA table_info({table})"))}
+            if column not in existing:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))
+                logger.info("added column %s.%s", table, column)
+
+
 def init_db() -> None:
-    """Create tables if missing and reconcile schema_version (no migrations in v1)."""
+    """Create tables if missing, add missing columns to existing tables, and
+    reconcile schema_version (no Alembic migrations in v1)."""
     from fipm.models import SchemaVersionRow
 
     Base.metadata.create_all(bind=engine)
+    _ensure_columns()
     with SessionLocal() as db:
         row = db.get(SchemaVersionRow, 1)
         if row is None:

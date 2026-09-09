@@ -507,6 +507,28 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
                 if predicate is not None and fer_iri is not None:
                     g.add((decl_iri, predicate, fer_iri))
 
+                # spec 05-v1-completion.md §5 (supersedes the "does not
+                # auto-emit" sentence of spec 03 §2.3): a planned-replacement
+                # declaration with a successor also emits
+                # fip:declares-planned-use-of <successor>, on the same
+                # declaration node as fip:declares-planned-replacement-of,
+                # and types the successor fip:Available-FAIR-Enabling-
+                # Resource (status="current"). Nothing extra when no
+                # successor is set.
+                if status == "planned-replacement":
+                    successor_fer_id = decl.get("successorFerId")
+                    successor_free_text = decl.get("successorFreeText")
+                    if successor_fer_id or successor_free_text:
+                        successor_decl = {
+                            "ferId": successor_fer_id,
+                            "ferFreeText": successor_free_text,
+                        }
+                        successor_iri = _emit_fer(
+                            g, db, settings, successor_decl, fer_type_key, language, "current"
+                        )
+                        if successor_iri is not None:
+                            g.add((decl_iri, FIP["declares-planned-use-of"], successor_iri))
+
             for note_lang, note_text in (decl.get("note") or {}).items():
                 if note_text:
                     g.add((decl_iri, FIP.considerations, Literal(note_text, lang=note_lang)))

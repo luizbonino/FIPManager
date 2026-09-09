@@ -11,7 +11,12 @@ def _facilitator_and_session(client_factory, email):
     facilitator = client_factory()
     facilitator.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "F"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     session = facilitator.post(
         "/api/sessions",
@@ -50,6 +55,7 @@ def test_claim_rejected_when_session_already_closed(client_factory):
             "email": "claimclosed-claimant1@example.com",
             "password": "correcthorsebattery",
             "displayName": "C",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     claim = claimant.post(f"/api/fips/{fip_id}/claim", headers={"X-Edit-Token": edit_token})
@@ -95,6 +101,7 @@ def test_claim_rejected_even_for_admin_or_session_owner(client_factory, db_sessi
             "email": "claimclosed-admin@example.com",
             "password": "correcthorsebattery",
             "displayName": "Admin",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     admin_id = reg.json()["id"]
@@ -129,6 +136,7 @@ def test_claimed_fip_frozen_once_its_session_closes(client_factory, db_session):
             "email": "claimclosed-claimant2@example.com",
             "password": "correcthorsebattery",
             "displayName": "C",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     claim = claimant.post(f"/api/fips/{fip_id}/claim", headers={"X-Edit-Token": edit_token})
@@ -164,6 +172,7 @@ def test_claimed_fip_frozen_once_its_session_closes(client_factory, db_session):
             "email": "claimclosed-admin2@example.com",
             "password": "correcthorsebattery",
             "displayName": "Admin",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     admin_id = reg.json()["id"]

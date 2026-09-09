@@ -15,6 +15,7 @@ def test_owned_fip_creation(client):
             "email": "ac5-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "AC5",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert r.status_code == 201

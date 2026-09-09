@@ -12,7 +12,12 @@ from __future__ import annotations
 def _create_fip(client, email):
     client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "D"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "D",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     created = client.post(
         "/api/fips", json={"questionnaireRef": {"id": "test-km", "version": "1.0.0"}}

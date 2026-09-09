@@ -15,6 +15,7 @@ def test_missing_token_is_403_not_409_even_when_session_closed(client_factory):
             "email": "order-facilitator@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = facilitator.post(

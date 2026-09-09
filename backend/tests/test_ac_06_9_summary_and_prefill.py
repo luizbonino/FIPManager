@@ -51,6 +51,7 @@ def test_embed_url_and_summary_on_get(client, real_km_loaded):
             "email": "dmp-ac10-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     answers = [
@@ -99,6 +100,7 @@ def _create_anonymous_session_fip(client, client_factory):
             "email": next(_OWNER_EMAILS),
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(

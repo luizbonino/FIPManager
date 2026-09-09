@@ -13,6 +13,7 @@ def test_create_fip_rejects_unknown_question_id(client):
             "email": "qid-create@example.com",
             "password": "correcthorsebattery",
             "displayName": "Q",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     r = client.post(
@@ -38,6 +39,7 @@ def test_create_fip_accepts_known_question_id(client):
             "email": "qid-create-ok@example.com",
             "password": "correcthorsebattery",
             "displayName": "Q",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     r = client.post(
@@ -62,6 +64,7 @@ def test_patch_fip_rejects_unknown_question_id(client):
             "email": "qid-patch@example.com",
             "password": "correcthorsebattery",
             "displayName": "Q",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(

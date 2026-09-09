@@ -23,6 +23,7 @@ from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.ids import hash_token, new_user_id
 from fipm.models import AuthSession, Fer, Fip, KnowledgeModel, User, WorkshopSession
+from fipm.privacy import current_privacy_version
 from fipm.schemas import (
     DeleteAccountRequest,
     LoginRequest,
@@ -43,6 +44,14 @@ def register(
         raise HTTPException(status_code=403, detail="registration_closed")
     check_register_rate_limit(request)
 
+    # spec 05-v1-completion.md §2: a value that doesn't match the current
+    # privacy notice version is a stale tab, not a client bug -- 400 so the
+    # frontend re-fetches GET /api/privacy and re-asks, rather than the
+    # generic 422 pydantic already gives for a missing field.
+    current_version = current_privacy_version(settings)
+    if body.privacy_accepted_version != current_version:
+        raise HTTPException(status_code=400, detail="privacy_version_mismatch")
+
     email = body.email.strip().lower()
     existing = db.query(User).filter(User.email == email).one_or_none()
     if existing is not None:
@@ -55,6 +64,7 @@ def register(
         display_name=body.display_name,
         role="user",
         language=body.language or settings.default_language,
+        privacy_accepted_version=body.privacy_accepted_version,
     )
     db.add(user)
     db.commit()
@@ -117,6 +127,10 @@ def change_password(
     if not verify_password(user.password_hash, body.current_password):
         raise HTTPException(status_code=401, detail="invalid_credentials")
     user.password_hash = hash_password(body.new_password)
+    # spec 05-v1-completion.md §1: a successful password change clears the
+    # flag an admin reset-password sets, so the next request stops getting
+    # 403 password_change_required.
+    user.must_change_password = False
     db.commit()
 
     # Revoke every other session, keeping the one used for this request alive.

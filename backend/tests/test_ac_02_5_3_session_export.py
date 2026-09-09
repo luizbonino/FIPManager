@@ -10,7 +10,12 @@ def _make_session_with_fips(client_factory, owner_email):
     owner = client_factory()
     owner.post(
         "/api/auth/register",
-        json={"email": owner_email, "password": "correcthorsebattery", "displayName": "F"},
+        json={
+            "email": owner_email,
+            "password": "correcthorsebattery",
+            "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     session = owner.post(
         "/api/sessions",
@@ -85,6 +90,7 @@ def test_session_export_json_owner_ok_other_user_404_anon_401(client_factory):
             "email": "sessexp-other@example.com",
             "password": "correcthorsebattery",
             "displayName": "O",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert other_user.get(f"/api/sessions/{session['id']}/export.json").status_code == 404

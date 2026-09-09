@@ -40,6 +40,11 @@ CSV_HEADER = [
     "dmp_url",
     "dmp_section",
     "dmp_question",
+    # spec 05-v1-completion.md §5 (per the 9 Sep 2026 reconciliation note,
+    # appended after the DMP columns spec 06 already added): 26 columns
+    # total, the first 24 unchanged.
+    "successor_fer_id",
+    "successor_fer_label",
 ]
 
 
@@ -128,6 +133,28 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
                             }
                         else:
                             fer_obj = {"id": fer_id, "label": None, "type": None, "homepage": None}
+                    # spec 05-v1-completion.md §5: enriched exactly like
+                    # `fer` above, from the declaration's successorFerId.
+                    successor_obj = None
+                    successor_fer_id = decl.get("successorFerId")
+                    if successor_fer_id:
+                        successor_row = db.get(Fer, successor_fer_id)
+                        if successor_row:
+                            successor_obj = {
+                                "id": successor_row.id,
+                                "label": resolve_lang(
+                                    successor_row.label, language, default_language
+                                ),
+                                "type": successor_row.type,
+                                "homepage": successor_row.homepage,
+                            }
+                        else:
+                            successor_obj = {
+                                "id": successor_fer_id,
+                                "label": None,
+                                "type": None,
+                                "homepage": None,
+                            }
                     declarations.append(
                         {
                             "fer": fer_obj,
@@ -137,6 +164,8 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
                             "dmpEvidence": resolve_dmp_evidence_for_export(
                                 decl.get("dmpEvidence"), related_dmps
                             ),
+                            "successor": successor_obj,
+                            "successorFreeText": decl.get("successorFreeText"),
                         }
                     )
             out_answers.append(
@@ -205,11 +234,15 @@ def _fip_csv_rows(fip: Fip, doc: dict[str, Any]) -> list[list[Any]]:
         ]
         declarations = answer["declarations"]
         if not declarations:
-            rows.append(base + ["", "", "", "", "", "", answer["comment"] or "", "", "", ""])
+            rows.append(
+                base + ["", "", "", "", "", "", answer["comment"] or "", "", "", "", "", ""]
+            )
         else:
             for idx, decl in enumerate(declarations):
                 fer = decl.get("fer") or {}
                 dmp_evidence = decl.get("dmpEvidence") or {}
+                successor = decl.get("successor") or {}
+                successor_label = successor.get("label") or decl.get("successorFreeText") or ""
                 rows.append(
                     base
                     + [
@@ -223,6 +256,8 @@ def _fip_csv_rows(fip: Fip, doc: dict[str, Any]) -> list[list[Any]]:
                         dmp_evidence.get("dmpUrl") or "",
                         dmp_evidence.get("section") or "",
                         dmp_evidence.get("questionRef") or "",
+                        successor.get("id") or "",
+                        successor_label,
                     ]
                 )
     return rows
@@ -322,6 +357,8 @@ def reconstruct_answers_from_export(
         for decl in answer.get("declarations", []):
             fer_obj = decl.get("fer")
             fer_id = fer_obj.get("id") if fer_obj else None
+            successor_obj = decl.get("successor")
+            successor_fer_id = successor_obj.get("id") if successor_obj else None
             note_text = decl.get("note")
             declarations.append(
                 {
@@ -330,6 +367,11 @@ def reconstruct_answers_from_export(
                     "status": decl.get("status"),
                     "note": {language: note_text} if note_text else None,
                     "dmpEvidence": _reconstruct_dmp_evidence(decl.get("dmpEvidence"), url_to_index),
+                    # spec 05-v1-completion.md §5: inverse of the "successor"
+                    # enrichment above, so POST /fips/import round-trips both
+                    # successor fields.
+                    "successorFerId": successor_fer_id,
+                    "successorFreeText": decl.get("successorFreeText"),
                 }
             )
         answers.append(

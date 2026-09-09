@@ -14,6 +14,7 @@ def test_search_matches_community_name_set_on_create(client):
             "email": "mefips-search@example.com",
             "password": "correcthorsebattery",
             "displayName": "S",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(
@@ -49,6 +50,7 @@ def test_search_matches_community_name_set_on_patch(client):
             "email": "mefips-search-patch@example.com",
             "password": "correcthorsebattery",
             "displayName": "S",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(

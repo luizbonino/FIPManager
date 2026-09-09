@@ -14,10 +14,23 @@ from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import Headers
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-from fipm.auth import csrf_middleware
+from fipm.auth import csrf_middleware, password_change_middleware
 from fipm.config import get_settings
 from fipm.importer import run_import
-from fipm.routers import auth, embed, fer_types, fers, fips, health, knowledge_models, me, sessions
+from fipm.routers import (
+    admin,
+    auth,
+    embed,
+    feedback,
+    fer_types,
+    fers,
+    fips,
+    health,
+    knowledge_models,
+    me,
+    privacy,
+    sessions,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +113,7 @@ app = FastAPI(title="FIP Manager", lifespan=lifespan)
 
 app.add_middleware(BodySizeLimitMiddleware, max_bytes=get_settings().max_body_bytes)
 app.middleware("http")(csrf_middleware)
+app.middleware("http")(password_change_middleware)
 
 app.include_router(health.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
@@ -109,6 +123,9 @@ app.include_router(fers.router, prefix="/api")
 app.include_router(fer_types.router, prefix="/api")
 app.include_router(fips.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
+app.include_router(privacy.router, prefix="/api")
+app.include_router(feedback.router, prefix="/api")
 # spec 06-dmp-linkage.md §3: GET /fips/{id}/embed lives outside /api, so it
 # must be included here -- before the SPA catch-all below -- or the
 # catch-all swallows it.

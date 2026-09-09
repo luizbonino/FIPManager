@@ -11,7 +11,12 @@ def _make_session(client_factory, owner_email):
     owner = client_factory()
     owner.post(
         "/api/auth/register",
-        json={"email": owner_email, "password": "correcthorsebattery", "displayName": "F"},
+        json={
+            "email": owner_email,
+            "password": "correcthorsebattery",
+            "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     r = owner.post(
         "/api/sessions",

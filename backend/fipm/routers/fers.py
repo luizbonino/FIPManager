@@ -25,11 +25,15 @@ def list_fers(
     db: Session = Depends(get_db),
     user: User | None = Depends(optional_user),
 ) -> ListOut:
+    # spec 05-v1-completion.md §1: a promoted FER (source="user-promoted") is
+    # catalogue content, globally visible like a seed FER.
     query = db.query(Fer)
     if user is not None:
-        query = query.filter((Fer.source == "seed") | (Fer.owner_id == user.id))
+        query = query.filter(
+            (Fer.source.in_(("seed", "user-promoted"))) | (Fer.owner_id == user.id)
+        )
     else:
-        query = query.filter(Fer.source == "seed")
+        query = query.filter(Fer.source.in_(("seed", "user-promoted")))
     if type:
         query = query.filter(Fer.type == type)
     if source:

@@ -8,14 +8,24 @@ from __future__ import annotations
 def test_csrf_rejected_without_origin_and_with_foreign_origin(raw_client, settings):
     no_origin = raw_client.post(
         "/api/auth/register",
-        json={"email": "ac12-a@example.com", "password": "correcthorsebattery", "displayName": "A"},
+        json={
+            "email": "ac12-a@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "A",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert no_origin.status_code == 403
     assert no_origin.json()["detail"] == "csrf_failed"
 
     foreign_origin = raw_client.post(
         "/api/auth/register",
-        json={"email": "ac12-b@example.com", "password": "correcthorsebattery", "displayName": "B"},
+        json={
+            "email": "ac12-b@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "B",
+            "privacyAcceptedVersion": "test-v1",
+        },
         headers={"origin": "https://evil.example.com"},
     )
     assert foreign_origin.status_code == 403
@@ -23,7 +33,12 @@ def test_csrf_rejected_without_origin_and_with_foreign_origin(raw_client, settin
 
     same_origin = raw_client.post(
         "/api/auth/register",
-        json={"email": "ac12-c@example.com", "password": "correcthorsebattery", "displayName": "C"},
+        json={
+            "email": "ac12-c@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "C",
+            "privacyAcceptedVersion": "test-v1",
+        },
         headers={"origin": settings.base_url},
     )
     assert same_origin.status_code == 201

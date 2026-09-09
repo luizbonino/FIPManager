@@ -13,6 +13,7 @@ def test_private_fip_visibility(client, client_factory):
             "email": "ac8-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "Owner",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = owner.post(
@@ -28,6 +29,7 @@ def test_private_fip_visibility(client, client_factory):
             "email": "ac8-other@example.com",
             "password": "correcthorsebattery",
             "displayName": "Other",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert other.get(f"/api/fips/{fip_id}").status_code == 404
@@ -56,6 +58,7 @@ def test_knowledge_models_listing_hides_other_users_private_models(
             "email": "ac8-km-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "KMOwner",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     owner_id = owner.get("/api/auth/me").json()["id"]
@@ -84,6 +87,7 @@ def test_knowledge_models_listing_hides_other_users_private_models(
             "email": "ac8-km-other@example.com",
             "password": "correcthorsebattery",
             "displayName": "Other2",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     listing = other.get("/api/knowledge-models")

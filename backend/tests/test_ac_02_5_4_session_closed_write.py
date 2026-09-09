@@ -15,6 +15,7 @@ def test_closed_session_rejects_anonymous_writes_but_not_owner_or_reads(client, 
             "email": "closed-facilitator@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = facilitator.post(

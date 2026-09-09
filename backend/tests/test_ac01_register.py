@@ -10,7 +10,12 @@ def test_register_sets_cookie_and_hashes_password(client):
     email = "ac1-user@example.com"
     r = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "AC1 User"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "AC1 User",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r.status_code == 201
     assert "fipm_session" in r.cookies
@@ -29,12 +34,22 @@ def test_register_duplicate_email_any_case_returns_409(client):
     email = "ac1-dup@example.com"
     r1 = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "First"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "First",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r1.status_code == 201
 
     r2 = client.post(
         "/api/auth/register",
-        json={"email": email.upper(), "password": "correcthorsebattery", "displayName": "Second"},
+        json={
+            "email": email.upper(),
+            "password": "correcthorsebattery",
+            "displayName": "Second",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r2.status_code == 409

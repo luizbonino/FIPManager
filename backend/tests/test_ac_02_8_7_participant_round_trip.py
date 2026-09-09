@@ -50,6 +50,7 @@ def test_21_sequential_patches_then_csv_has_22_lines(client, client_factory, db_
             "email": "roundtrip-facilitator@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = facilitator.post(

@@ -13,6 +13,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -38,6 +39,15 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_now, onupdate=_now
     )
+    # v4 (spec 05-v1-completion.md §1): set True by POST /admin/users/{id}/
+    # reset-password, cleared by POST /auth/password on success. Enforced by
+    # fipm.auth.password_change_middleware, not a per-route dependency (see
+    # its docstring for why).
+    must_change_password: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # v4 (spec 05-v1-completion.md §2): the data/i18n/privacy/*.md version the
+    # user accepted at registration; None for accounts created before this
+    # change existed.
+    privacy_accepted_version: Mapped[str | None] = mapped_column(String, nullable=True)
 
     __table_args__ = (Index("ix_users_email", "email", unique=True),)
 
@@ -168,6 +178,31 @@ class WorkshopSession(Base):
         Index("ix_sessions_join_code", "join_code", unique=True),
         Index("ix_sessions_owner_created", "owner_id", "created_at"),
     )
+
+
+class Feedback(Base):
+    """v4 (spec 05-v1-completion.md §4): anonymous by construction -- no
+    user_id, no IP, no edit token stored. `session_id`/`fip_id` are set NULL
+    (not cascaded) when the referenced row is deleted, so previously
+    collected feedback stays readable via the GET routes."""
+
+    __tablename__ = "feedback"
+
+    id: Mapped[str] = mapped_column(String(26), primary_key=True)
+    session_id: Mapped[str | None] = mapped_column(
+        ForeignKey("workshop_sessions.id", ondelete="SET NULL"), nullable=True
+    )
+    fip_id: Mapped[str | None] = mapped_column(
+        ForeignKey("fips.id", ondelete="SET NULL"), nullable=True
+    )
+    q1: Mapped[int] = mapped_column(Integer, nullable=False)
+    q2: Mapped[int] = mapped_column(Integer, nullable=False)
+    q3: Mapped[int] = mapped_column(Integer, nullable=False)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    language: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    __table_args__ = (Index("ix_feedback_session_id", "session_id"),)
 
 
 class SchemaVersionRow(Base):

@@ -16,7 +16,12 @@ _EMAILS = (f"dmp-ac4-user-{i}@example.com" for i in itertools.count())
 def _register(client) -> None:
     client.post(
         "/api/auth/register",
-        json={"email": next(_EMAILS), "password": "correcthorsebattery", "displayName": "DMP"},
+        json={
+            "email": next(_EMAILS),
+            "password": "correcthorsebattery",
+            "displayName": "DMP",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
 
 

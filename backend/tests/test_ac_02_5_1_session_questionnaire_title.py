@@ -19,6 +19,7 @@ def test_session_by_code_includes_questionnaire_title(client):
             "email": "qtitle-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = client.post(
@@ -53,6 +54,7 @@ def test_session_by_code_omits_title_for_private_questionnaire(client, db_sessio
             "email": "qtitle-private-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "PrivOwner",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     owner_id = reg.json()["id"]

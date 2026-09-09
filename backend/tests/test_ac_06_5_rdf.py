@@ -17,6 +17,7 @@ def test_declaration_with_evidence_emits_dmp_evidence_and_typed_dmp_node(client)
             "email": "dmp-ac6-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "DMP",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(
@@ -77,6 +78,7 @@ def test_fip_without_evidence_emits_none_of_the_three_predicates(client):
             "email": "dmp-ac6-noevidence@example.com",
             "password": "correcthorsebattery",
             "displayName": "DMP",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(

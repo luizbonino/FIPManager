@@ -13,6 +13,7 @@ def test_session_default_language_rejects_unknown_value(client):
             "email": "lang-session@example.com",
             "password": "correcthorsebattery",
             "displayName": "L",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     bad = client.post(
@@ -61,6 +62,7 @@ def test_session_default_language_accepts_es(client):
             "email": "lang-session-es@example.com",
             "password": "correcthorsebattery",
             "displayName": "L",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     good = client.post(
@@ -82,6 +84,7 @@ def test_fip_language_rejects_unknown_value_on_create_and_patch(client):
             "email": "lang-fip@example.com",
             "password": "correcthorsebattery",
             "displayName": "L",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     bad = client.post(
@@ -117,6 +120,7 @@ def test_fip_language_accepts_es_on_create(client):
             "email": "lang-fip-es@example.com",
             "password": "correcthorsebattery",
             "displayName": "L",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     good = client.post(

@@ -13,6 +13,7 @@ def test_session_owner_can_read_and_export_without_edit_token(client, client_fac
             "email": "sessread-facilitator@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = facilitator.post(
@@ -56,6 +57,7 @@ def test_session_owner_can_read_and_export_without_edit_token(client, client_fac
             "email": "sessread-stranger@example.com",
             "password": "correcthorsebattery",
             "displayName": "S",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert stranger.get(f"/api/fips/{fip_id}").status_code == 404

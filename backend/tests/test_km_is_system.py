@@ -13,7 +13,12 @@ from fipm.models import KnowledgeModel
 def _register(client, email: str) -> str:
     r = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "U"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "U",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r.status_code == 201, r.text
     return r.json()["id"]
@@ -59,6 +64,7 @@ def test_anonymised_published_model_stays_is_system_false_after_account_deletion
             "email": "is-system-anon-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "AnonMe",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert reg.status_code == 201, reg.text

@@ -63,6 +63,14 @@ class Settings(BaseSettings):
     # list for GET /fips/{id}/embed. `'self'` is always prepended unless the
     # value is exactly `*`; empty means `'self'` only.
     embed_allowed_origins: str = "https://fiodmp.fiocruz.br"
+    # spec 05-v1-completion.md §4: POST /api/feedback is 403 feedback_disabled
+    # when False; both GET feedback routes keep working either way.
+    feedback_enabled: bool = True
+    # spec 05-v1-completion.md §2: substituted into the privacy notice
+    # markdown for {{CONTACT_EMAIL}} / {{HOSTING_ORG}} and echoed by
+    # GET /api/health.
+    contact_email: str = "contact@example.org"
+    hosting_org: str = "the FIP Manager operators"
 
     @property
     def allowed_origins_list(self) -> list[str]:

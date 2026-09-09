@@ -16,7 +16,12 @@ _XSS_NAME = "<img src=x onerror=alert(1)>"
 def _create_fip(client, *, visibility: str, community_name: str = "Embed group"):
     client.post(
         "/api/auth/register",
-        json={"email": next(_EMAILS), "password": "correcthorsebattery", "displayName": "E"},
+        json={
+            "email": next(_EMAILS),
+            "password": "correcthorsebattery",
+            "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     created = client.post(
         "/api/fips",

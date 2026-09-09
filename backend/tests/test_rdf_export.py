@@ -128,6 +128,7 @@ def test_ac1_export_ttl_200_parses_and_types_fip(client, real_km_loaded):
             "email": "rdf-ac1@example.com",
             "password": "correcthorsebattery",
             "displayName": "U",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(
@@ -384,6 +385,7 @@ def test_ac7_session_export_ttl_auth(client_factory, real_km_loaded):
             "email": "rdf-ac7-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "O",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(
@@ -417,6 +419,7 @@ def test_ac7_session_export_ttl_auth(client_factory, real_km_loaded):
             "email": "rdf-ac7-other@example.com",
             "password": "correcthorsebattery",
             "displayName": "N",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     assert other.get(f"/api/sessions/{session['id']}/export.ttl").status_code == 404
@@ -431,6 +434,7 @@ def test_ac7_session_export_ttl_auth(client_factory, real_km_loaded):
             "email": "rdf-ac7-admin@example.com",
             "password": "correcthorsebattery",
             "displayName": "A",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     admin_id = reg.json()["id"]
@@ -451,6 +455,7 @@ def test_ac7_private_fip_export_ttl_owner_edit_token_and_non_owner(client_factor
             "email": "rdf-ac7-fac@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = facilitator.post(
@@ -497,6 +502,7 @@ def test_ac8_jsonld_same_triple_count_and_isomorphic_to_turtle(client, real_km_l
             "email": "rdf-ac8@example.com",
             "password": "correcthorsebattery",
             "displayName": "U",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(

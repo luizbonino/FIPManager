@@ -14,7 +14,12 @@ _EMAILS = (f"dmp-ac9-user-{i}@example.com" for i in itertools.count())
 def _create_fip(client, *, visibility: str):
     client.post(
         "/api/auth/register",
-        json={"email": next(_EMAILS), "password": "correcthorsebattery", "displayName": "E"},
+        json={
+            "email": next(_EMAILS),
+            "password": "correcthorsebattery",
+            "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     created = client.post(
         "/api/fips",

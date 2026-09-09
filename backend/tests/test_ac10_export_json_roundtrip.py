@@ -12,6 +12,7 @@ def test_export_json_language_fallback_and_import_roundtrip(client):
             "email": "ac10-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "AC10",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
 

@@ -62,6 +62,7 @@ def test_embed_content(client, real_km_loaded, question_ids):
             "email": "dmp-ac8-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     answers = [
@@ -114,6 +115,7 @@ def test_lang_query_param_switches_fixed_labels_and_falls_back(client, real_km_l
             "email": "dmp-ac8-lang@example.com",
             "password": "correcthorsebattery",
             "displayName": "E",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(

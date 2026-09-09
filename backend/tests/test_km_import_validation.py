@@ -20,7 +20,12 @@ REAL_KM_PATH = REAL_DATA_DIR / "knowledge-models" / "gofair-fip-mini-1.0.0.json"
 def _register(client, email: str) -> str:
     r = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": "U"},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": "U",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r.status_code == 201, r.text
     return r.json()["id"]

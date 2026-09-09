@@ -16,6 +16,7 @@ def _create_fip(client) -> str:
             "email": next(_EMAILS),
             "password": "correcthorsebattery",
             "displayName": "DMP",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(
@@ -119,6 +120,7 @@ def test_post_fips_also_normalises(client):
             "email": "dmp-ac1-create@example.com",
             "password": "correcthorsebattery",
             "displayName": "DMP",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(

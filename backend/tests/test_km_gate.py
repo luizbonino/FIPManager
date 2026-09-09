@@ -12,7 +12,12 @@ from fipm.models import KnowledgeModel
 def _register(client, email, display_name="U"):
     r = client.post(
         "/api/auth/register",
-        json={"email": email, "password": "correcthorsebattery", "displayName": display_name},
+        json={
+            "email": email,
+            "password": "correcthorsebattery",
+            "displayName": display_name,
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r.status_code == 201
     return r.json()["id"]

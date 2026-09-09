@@ -5,7 +5,13 @@ from __future__ import annotations
 
 def _register(client, email, password):
     r = client.post(
-        "/api/auth/register", json={"email": email, "password": password, "displayName": "AC2"}
+        "/api/auth/register",
+        json={
+            "email": email,
+            "password": password,
+            "displayName": "AC2",
+            "privacyAcceptedVersion": "test-v1",
+        },
     )
     assert r.status_code == 201
     client.post("/api/auth/logout")

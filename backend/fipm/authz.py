@@ -29,6 +29,17 @@ def require_admin(request: Request, db: Session = Depends(get_db)) -> User:
     return user
 
 
+def require_admin_404(request: Request, db: Session = Depends(get_db)) -> User:
+    """Like `require_admin`, but 404s for both anonymous and signed-in
+    non-admin callers (spec 05-v1-completion.md §1), so `/api/admin/*` never
+    confirms its own existence -- spec 01 §5's leak rule."""
+    settings = get_settings()
+    user = get_session_user(request, db, settings)
+    if user is None or user.role != "admin":
+        raise not_found()
+    return user
+
+
 def optional_user(request: Request, db: Session = Depends(get_db)) -> User | None:
     settings = get_settings()
     return get_session_user(request, db, settings)

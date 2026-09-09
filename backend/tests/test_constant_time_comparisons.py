@@ -15,6 +15,7 @@ def test_edit_token_of_different_length_is_rejected_not_erroring(client, client_
             "email": "ctc-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(
@@ -62,6 +63,7 @@ def test_join_code_of_different_length_is_rejected_not_erroring(client, client_f
             "email": "ctc-join-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(

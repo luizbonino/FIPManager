@@ -11,6 +11,7 @@ def test_create_fer_rejects_unknown_type(client):
             "email": "fertype-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "FT",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
 

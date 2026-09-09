@@ -12,6 +12,7 @@ def _make_anonymous_fip(client, client_factory):
             "email": "ac7-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(

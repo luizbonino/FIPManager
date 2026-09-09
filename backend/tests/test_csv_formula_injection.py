@@ -18,6 +18,7 @@ def test_fip_export_csv_escapes_formula_injection(client):
             "email": "csvinj-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "CSVInj",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(
@@ -52,6 +53,7 @@ def test_session_export_csv_escapes_formula_injection(client_factory):
             "email": "csvinj-owner@example.com",
             "password": "correcthorsebattery",
             "displayName": "F",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     session = owner.post(

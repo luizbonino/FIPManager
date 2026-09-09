@@ -24,6 +24,7 @@ def test_fip_creation_rejects_old_planned_use_status(client):
             "email": "status-user@example.com",
             "password": "correcthorsebattery",
             "displayName": "S",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     r = client.post(

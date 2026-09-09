@@ -13,6 +13,7 @@ def test_export_json_timestamps_end_in_z(client):
             "email": "export-tz@example.com",
             "password": "correcthorsebattery",
             "displayName": "TZ",
+            "privacyAcceptedVersion": "test-v1",
         },
     )
     created = client.post(
