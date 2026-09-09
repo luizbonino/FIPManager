@@ -96,6 +96,56 @@ def _iso_utc(value: datetime) -> str:
     return value.isoformat().replace("+00:00", "Z")
 
 
+def _enrich_fer_ref(
+    db: Session, fer_id: str | None, language: str, default_language: str
+) -> dict[str, Any] | None:
+    """The `{id, label, type, homepage}` shape both `fer` and `successor`
+    use, resolved off the `Fer` table row when it still exists (spec
+    05-v1-completion.md §5)."""
+    if not fer_id:
+        return None
+    fer_row = db.get(Fer, fer_id)
+    if fer_row:
+        return {
+            "id": fer_row.id,
+            "label": resolve_lang(fer_row.label, language, default_language),
+            "type": fer_row.type,
+            "homepage": fer_row.homepage,
+        }
+    return {"id": fer_id, "label": None, "type": None, "homepage": None}
+
+
+def _enrich_declarations(
+    db: Session,
+    declarations: list[dict[str, Any]],
+    language: str,
+    default_language: str,
+    related_dmps: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Shared by the per-question `answers` loop and `orphanedAnswers`
+    (spec 07-mail-and-migration.md §6): both export declarations the same
+    way -- `fer`/`successor` resolved off the `Fer` table, `dmpEvidence`
+    resolved against the FIP's `relatedDMPs`."""
+    out: list[dict[str, Any]] = []
+    for decl in declarations or []:
+        out.append(
+            {
+                "fer": _enrich_fer_ref(db, decl.get("ferId"), language, default_language),
+                "ferFreeText": decl.get("ferFreeText"),
+                "status": decl.get("status"),
+                "note": resolve_lang(decl.get("note"), language, default_language),
+                "dmpEvidence": resolve_dmp_evidence_for_export(
+                    decl.get("dmpEvidence"), related_dmps
+                ),
+                "successor": _enrich_fer_ref(
+                    db, decl.get("successorFerId"), language, default_language
+                ),
+                "successorFreeText": decl.get("successorFreeText"),
+            }
+        )
+    return out
+
+
 def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, Any]:
     km = db.get(KnowledgeModel, (fip.questionnaire_id, fip.questionnaire_version))
     content = km.content if km else {"sections": [], "title": {}, "source": None}
@@ -119,55 +169,9 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
             comment = None
             if stored:
                 comment = stored.get("comment")
-                for decl in stored.get("declarations", []):
-                    fer_obj = None
-                    fer_id = decl.get("ferId")
-                    if fer_id:
-                        fer_row = db.get(Fer, fer_id)
-                        if fer_row:
-                            fer_obj = {
-                                "id": fer_row.id,
-                                "label": resolve_lang(fer_row.label, language, default_language),
-                                "type": fer_row.type,
-                                "homepage": fer_row.homepage,
-                            }
-                        else:
-                            fer_obj = {"id": fer_id, "label": None, "type": None, "homepage": None}
-                    # spec 05-v1-completion.md §5: enriched exactly like
-                    # `fer` above, from the declaration's successorFerId.
-                    successor_obj = None
-                    successor_fer_id = decl.get("successorFerId")
-                    if successor_fer_id:
-                        successor_row = db.get(Fer, successor_fer_id)
-                        if successor_row:
-                            successor_obj = {
-                                "id": successor_row.id,
-                                "label": resolve_lang(
-                                    successor_row.label, language, default_language
-                                ),
-                                "type": successor_row.type,
-                                "homepage": successor_row.homepage,
-                            }
-                        else:
-                            successor_obj = {
-                                "id": successor_fer_id,
-                                "label": None,
-                                "type": None,
-                                "homepage": None,
-                            }
-                    declarations.append(
-                        {
-                            "fer": fer_obj,
-                            "ferFreeText": decl.get("ferFreeText"),
-                            "status": decl.get("status"),
-                            "note": resolve_lang(decl.get("note"), language, default_language),
-                            "dmpEvidence": resolve_dmp_evidence_for_export(
-                                decl.get("dmpEvidence"), related_dmps
-                            ),
-                            "successor": successor_obj,
-                            "successorFreeText": decl.get("successorFreeText"),
-                        }
-                    )
+                declarations = _enrich_declarations(
+                    db, stored.get("declarations", []), language, default_language, related_dmps
+                )
             out_answers.append(
                 {
                     "sectionId": section["id"],
@@ -182,8 +186,26 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
                 }
             )
 
+    # spec 07-mail-and-migration.md §6: exportVersion 2 -- `fip.migratedFrom`
+    # and a top-level `orphanedAnswers` array, FER-enriched like `answers`.
+    # Readers of exportVersion 1 are unaffected: both fields are additive.
+    out_orphaned: list[dict[str, Any]] = []
+    for entry in fip.orphaned_answers or []:
+        out_orphaned.append(
+            {
+                "questionId": entry.get("questionId"),
+                "questionText": entry.get("questionText") or {},
+                "declarations": _enrich_declarations(
+                    db, entry.get("declarations", []), language, default_language, related_dmps
+                ),
+                "comment": entry.get("comment"),
+                "fromVersion": entry.get("fromVersion"),
+                "at": entry.get("at"),
+            }
+        )
+
     return {
-        "exportVersion": 1,
+        "exportVersion": 2,
         "generatedAt": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "tool": {"name": "FIP Manager", "baseUrl": settings.base_url},
         "fip": {
@@ -196,6 +218,7 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
             "updatedAt": _iso_utc(fip.updated_at),
             "community": fip.community,
             "relatedDMPs": fip.related_dmps or [],
+            "migratedFrom": fip.migrated_from,
         },
         "questionnaireRef": {
             "id": fip.questionnaire_id,
@@ -204,6 +227,7 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
             "source": content.get("source"),
         },
         "answers": out_answers,
+        "orphanedAnswers": out_orphaned,
     }
 
 
@@ -344,6 +368,37 @@ def _reconstruct_dmp_evidence(
     }
 
 
+def _reconstruct_declarations(
+    export_declarations: list[dict[str, Any]], language: str, url_to_index: dict[str, int]
+) -> list[dict[str, Any]]:
+    """Inverse of `_enrich_declarations`, shared by `reconstruct_answers_
+    from_export` and `reconstruct_orphaned_answers_from_export` (spec
+    07-mail-and-migration.md §6: "import must accept both versions" and
+    preserve `orphanedAnswers` the same way it already preserves `answers`)."""
+    declarations = []
+    for decl in export_declarations or []:
+        fer_obj = decl.get("fer")
+        fer_id = fer_obj.get("id") if fer_obj else None
+        successor_obj = decl.get("successor")
+        successor_fer_id = successor_obj.get("id") if successor_obj else None
+        note_text = decl.get("note")
+        declarations.append(
+            {
+                "ferId": fer_id,
+                "ferFreeText": decl.get("ferFreeText"),
+                "status": decl.get("status"),
+                "note": {language: note_text} if note_text else None,
+                "dmpEvidence": _reconstruct_dmp_evidence(decl.get("dmpEvidence"), url_to_index),
+                # spec 05-v1-completion.md §5: inverse of the "successor"
+                # enrichment above, so POST /fips/import round-trips both
+                # successor fields.
+                "successorFerId": successor_fer_id,
+                "successorFreeText": decl.get("successorFreeText"),
+            }
+        )
+    return declarations
+
+
 def reconstruct_answers_from_export(
     export_answers: list[dict[str, Any]],
     language: str,
@@ -353,32 +408,40 @@ def reconstruct_answers_from_export(
     url_to_index = {d["url"]: i for i, d in enumerate(related_dmps or [])}
     answers: list[dict[str, Any]] = []
     for answer in export_answers:
-        declarations = []
-        for decl in answer.get("declarations", []):
-            fer_obj = decl.get("fer")
-            fer_id = fer_obj.get("id") if fer_obj else None
-            successor_obj = decl.get("successor")
-            successor_fer_id = successor_obj.get("id") if successor_obj else None
-            note_text = decl.get("note")
-            declarations.append(
-                {
-                    "ferId": fer_id,
-                    "ferFreeText": decl.get("ferFreeText"),
-                    "status": decl.get("status"),
-                    "note": {language: note_text} if note_text else None,
-                    "dmpEvidence": _reconstruct_dmp_evidence(decl.get("dmpEvidence"), url_to_index),
-                    # spec 05-v1-completion.md §5: inverse of the "successor"
-                    # enrichment above, so POST /fips/import round-trips both
-                    # successor fields.
-                    "successorFerId": successor_fer_id,
-                    "successorFreeText": decl.get("successorFreeText"),
-                }
-            )
         answers.append(
             {
                 "questionId": answer["questionId"],
-                "declarations": declarations,
+                "declarations": _reconstruct_declarations(
+                    answer.get("declarations", []), language, url_to_index
+                ),
                 "comment": answer.get("comment"),
             }
         )
     return answers
+
+
+def reconstruct_orphaned_answers_from_export(
+    export_orphaned: list[dict[str, Any]],
+    language: str,
+    related_dmps: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Inverse of `build_export_json`'s `orphanedAnswers` enrichment (spec
+    07-mail-and-migration.md §6): POST /fips/import preserves the §4.4
+    shape verbatim (`questionId`, `questionText`, `fromVersion`, `at`),
+    reconstructing only `declarations` the same way `answers` are."""
+    url_to_index = {d["url"]: i for i, d in enumerate(related_dmps or [])}
+    orphaned: list[dict[str, Any]] = []
+    for entry in export_orphaned or []:
+        orphaned.append(
+            {
+                "questionId": entry.get("questionId"),
+                "questionText": entry.get("questionText") or {},
+                "declarations": _reconstruct_declarations(
+                    entry.get("declarations", []), language, url_to_index
+                ),
+                "comment": entry.get("comment"),
+                "fromVersion": entry.get("fromVersion"),
+                "at": entry.get("at"),
+            }
+        )
+    return orphaned

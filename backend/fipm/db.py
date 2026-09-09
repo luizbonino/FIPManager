@@ -58,7 +58,13 @@ logger = logging.getLogger(__name__)
 # PRAGMA-table_info-then-ALTER race; `_ensure_columns()` catches SQLite's
 # "duplicate column name" OperationalError for that one statement and treats
 # it as "someone else already added it", not a startup failure.
-SCHEMA_VERSION = 4
+# v5 (spec 07-mail-and-migration.md §0): one new table (`email_tokens`,
+# created by `create_all()` below, no `_ensure_columns()` entry needed) and
+# three nullable, additive columns -- `users.email_verified_at`,
+# `fips.migrated_from`, `fips.orphaned_answers`. All nullable, so a NULL
+# default for a pre-existing row is the correct "not verified / never
+# migrated" value with no data loss.
+SCHEMA_VERSION = 5
 
 _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("users", "must_change_password", "BOOLEAN NOT NULL DEFAULT 0"),
@@ -66,6 +72,9 @@ _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("knowledge_models", "is_system", "BOOLEAN NOT NULL DEFAULT 0"),
     ("knowledge_models", "changelog", "JSON NOT NULL DEFAULT '[]'"),
     ("knowledge_models", "content_sha256", "VARCHAR NOT NULL DEFAULT ''"),
+    ("users", "email_verified_at", "DATETIME"),
+    ("fips", "migrated_from", "JSON"),
+    ("fips", "orphaned_answers", "JSON"),
 )
 
 settings = get_settings()

@@ -17,6 +17,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from fipm.auth import csrf_middleware, password_change_middleware
 from fipm.config import get_settings
 from fipm.importer import run_import
+from fipm.mail import warn_if_console_in_production
 from fipm.routers import (
     admin,
     auth,
@@ -101,6 +102,8 @@ class BodySizeLimitMiddleware:
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     settings.check_production_safety()
+    settings.check_mail_safety()
+    warn_if_console_in_production(settings)
     try:
         summary = run_import()
         summary.print_report()

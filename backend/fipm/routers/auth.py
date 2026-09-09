@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+import logging
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
@@ -8,12 +11,18 @@ from fipm.auth import (
     COOKIE_NAME,
     check_login_rate_limit,
     check_register_rate_limit,
+    check_resend_rate_limit,
     clear_session_cookie,
     create_auth_session,
     dummy_verify,
     hash_password,
+    issue_email_token,
     needs_rehash,
+    password_reset_over_limit,
     record_login_failure,
+    record_password_reset_attempt,
+    record_resend_attempt,
+    resolve_email_token,
     revoke_all_sessions,
     set_session_cookie,
     verify_password,
@@ -22,22 +31,75 @@ from fipm.authz import require_user
 from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.ids import hash_token, new_user_id
+from fipm.mail import queue_mail, render_mail
 from fipm.models import AuthSession, Fer, Fip, KnowledgeModel, User, WorkshopSession
 from fipm.privacy import current_privacy_version
 from fipm.schemas import (
     DeleteAccountRequest,
     LoginRequest,
     PasswordChangeRequest,
+    PasswordResetConfirmRequest,
+    PasswordResetRequestRequest,
     RegisterRequest,
     UserOut,
+    VerifyEmailRequest,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+logger = logging.getLogger(__name__)
+
+# spec 07-mail-and-migration.md §1: `{appName}` placeholder for every
+# rendered mail template.
+APP_NAME = "FIP Manager"
+
+
+def _mail_link(settings, path: str, token: str) -> str:
+    return f"{settings.base_url}{path}?token={token}"
+
+
+def _queue_verify_email_mail(
+    background_tasks: BackgroundTasks, db: Session, settings, user: User
+) -> None:
+    token = issue_email_token(db, user, "verify_email", user.email, settings.mail_token_ttl_hours)
+    link = _mail_link(settings, "/verify", token)
+    subject, text = render_mail(
+        "verify-email",
+        user.language,
+        {
+            "appName": APP_NAME,
+            "displayName": user.display_name,
+            "link": link,
+            "baseUrl": settings.base_url,
+            "expiresHours": str(settings.mail_token_ttl_hours),
+        },
+    )
+    queue_mail(background_tasks, user.email, subject, text)
+
+
+def _queue_password_changed_mail(background_tasks: BackgroundTasks, settings, user: User) -> None:
+    """spec 07 §1: sent after a self-service reset confirm and after an
+    admin reset-password (routers/admin.py)."""
+    subject, text = render_mail(
+        "password-changed",
+        user.language,
+        {
+            "appName": APP_NAME,
+            "displayName": user.display_name,
+            "baseUrl": settings.base_url,
+            "contactEmail": settings.contact_email,
+            "expiresHours": "0",
+        },
+    )
+    queue_mail(background_tasks, user.email, subject, text)
 
 
 @router.post("/register", response_model=UserOut, status_code=201)
 def register(
-    body: RegisterRequest, request: Request, response: Response, db: Session = Depends(get_db)
+    body: RegisterRequest,
+    request: Request,
+    response: Response,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
 ) -> UserOut:
     settings = get_settings()
     if not settings.registration_open:
@@ -69,6 +131,11 @@ def register(
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    # spec 07-mail-and-migration.md §2: after the user row commits, issue a
+    # verify_email token and queue the mail; the response is unchanged
+    # (201 + cookie).
+    _queue_verify_email_mail(background_tasks, db, settings, user)
 
     _, token = create_auth_session(db, user, settings)
     set_session_cookie(response, token, settings)
@@ -112,9 +179,113 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)) 
     clear_session_cookie(response, settings)
 
 
-@router.get("/me", response_model=UserOut)
-def get_me(user: User = Depends(require_user)) -> UserOut:
+@router.get("/me")
+def get_me(user: User = Depends(require_user)) -> dict:
+    """`UserOut` plus `verificationRequired` (spec 07 §2): the
+    `FIPM_REQUIRE_EMAIL_VERIFICATION` setting, a sibling field so the SPA
+    knows whether to nag an unverified account -- not per-user state."""
+    settings = get_settings()
+    data = UserOut.model_validate(user).model_dump(mode="json", by_alias=True)
+    data["verificationRequired"] = settings.require_email_verification
+    return data
+
+
+@router.post("/verify-email", response_model=UserOut)
+def verify_email(body: VerifyEmailRequest, db: Session = Depends(get_db)) -> UserOut:
+    """spec 07 §2: no auth -- the token is the credential. Success sets
+    `email_verified_at`/`used_at`; a replay of the same token is 400
+    `invalid_token` by design (already used)."""
+    row, user = resolve_email_token(db, body.token, "verify_email")
+    now = datetime.now(UTC)
+    user.email_verified_at = now
+    row.used_at = now
+    db.commit()
+    db.refresh(user)
     return UserOut.model_validate(user)
+
+
+@router.post("/verify-email/resend", status_code=202)
+def resend_verification(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_user),
+) -> None:
+    """spec 07 §2: 202 always, even when already verified (no state leak,
+    no mail then). 3/hour per user id, 10/hour per client ip -> 429 with
+    Retry-After."""
+    check_resend_rate_limit(request, user.id)
+    record_resend_attempt(request, user.id)
+    if user.email_verified_at is None:
+        settings = get_settings()
+        _queue_verify_email_mail(background_tasks, db, settings, user)
+    return None
+
+
+@router.post("/password-reset/request", status_code=202)
+def request_password_reset(
+    body: PasswordResetRequestRequest,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+) -> None:
+    """spec 07 §3: always 202, empty body, whether the address exists, is
+    malformed or is already mid-reset -- byte-identical either way. Only on
+    a match: issue a password_reset token and queue the mail. Rate limit
+    3/hour per lowercased email, 10/hour per ip; over-limit also returns
+    202 (a 429 keyed on an email is itself an enumeration oracle) and the
+    mail is dropped and logged."""
+    settings = get_settings()
+    email = body.email.strip().lower()
+    over_limit = password_reset_over_limit(request, email)
+    record_password_reset_attempt(request, email)
+    if over_limit:
+        logger.info("password-reset request for %s over rate limit; mail dropped", email)
+        return None
+    user = db.query(User).filter(User.email == email).one_or_none()
+    if user is not None:
+        token = issue_email_token(
+            db, user, "password_reset", user.email, settings.reset_token_ttl_hours
+        )
+        link = _mail_link(settings, "/reset-password", token)
+        subject, text = render_mail(
+            "password-reset",
+            user.language,
+            {
+                "appName": APP_NAME,
+                "displayName": user.display_name,
+                "link": link,
+                "baseUrl": settings.base_url,
+                "expiresHours": str(settings.reset_token_ttl_hours),
+            },
+        )
+        queue_mail(background_tasks, user.email, subject, text)
+    return None
+
+
+@router.post("/password-reset/confirm", status_code=204)
+def confirm_password_reset(
+    body: PasswordResetConfirmRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+) -> None:
+    """spec 07 §3, one transaction: argon2id rehash, `used_at` set, every
+    `auth_sessions` row of that user deleted (the caller's too), and
+    `email_verified_at` set if it was null (completing a reset proves
+    control of the mailbox). A password-changed notice is queued
+    afterwards (spec §1)."""
+    row, user = resolve_email_token(db, body.token, "password_reset")
+    now = datetime.now(UTC)
+    user.password_hash = hash_password(body.new_password)
+    row.used_at = now
+    if user.email_verified_at is None:
+        user.email_verified_at = now
+    db.commit()
+    revoke_all_sessions(db, user.id)
+
+    settings = get_settings()
+    _queue_password_changed_mail(background_tasks, settings, user)
+    return None
 
 
 @router.post("/password", status_code=204)

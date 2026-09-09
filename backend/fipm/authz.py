@@ -76,6 +76,23 @@ def not_found() -> HTTPException:
     return HTTPException(status_code=404, detail="not_found")
 
 
+def check_email_verification_gate(user: User | None, visibility: str | None) -> None:
+    """spec 07-mail-and-migration.md §2 gate rule: while
+    `FIPM_REQUIRE_EMAIL_VERIFICATION=true`, a signed-in but unverified user
+    gets 403 `email_verification_required` from any write that would set
+    `visibility="public"` on a FIP or knowledge model -- everything else
+    (private/link, sign-in, sessions) stays open. A no-op when the setting
+    is off (default), the caller is anonymous (no account to verify), or
+    `visibility` isn't `"public"`."""
+    if visibility != "public" or user is None:
+        return
+    settings = get_settings()
+    if not settings.require_email_verification:
+        return
+    if user.email_verified_at is None:
+        raise HTTPException(status_code=403, detail="email_verification_required")
+
+
 def get_readable_published_km(
     db: Session, km_id: str, version: str, user: User | None
 ) -> KnowledgeModel:

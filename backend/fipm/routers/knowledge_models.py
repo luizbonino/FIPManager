@@ -13,7 +13,13 @@ from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from fipm.authz import can_read, can_write_owned, optional_user, require_user
+from fipm.authz import (
+    can_read,
+    can_write_owned,
+    check_email_verification_gate,
+    optional_user,
+    require_user,
+)
 from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.km_content import (
@@ -529,6 +535,9 @@ def patch_knowledge_model(
     user: User = Depends(require_user),
 ) -> Any:
     row = _get_readable_km_or_404(db, km_id, version, user)
+
+    if body.visibility is not None:
+        check_email_verification_gate(user, body.visibility)
 
     if row.owner_id is None:
         # spec 04 §7 A2: system models take admin writes for visibility only.

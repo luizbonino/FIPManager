@@ -1,0 +1,40 @@
+{
+  "id": "migration-fixture",
+  "version": "1.0.0",
+  "status": "published",
+  "title": {"en": "Migration fixture questionnaire"},
+  "sections": [
+    {
+      "id": "findable",
+      "title": {"en": "Findable"},
+      "questions": [
+        {
+          "id": "F1-metadata",
+          "text": {"en": "What identifiers do you use?"},
+          "ferType": "identifier-service"
+        },
+        {
+          "id": "F2",
+          "text": {"en": "Which metadata schema do you use?"},
+          "ferType": "metadata-schema"
+        },
+        {
+          "id": "F3",
+          "text": {"en": "Some F3 question"},
+          "ferType": "metadata-schema"
+        }
+      ]
+    },
+    {
+      "id": "accessible",
+      "title": {"en": "Accessible"},
+      "questions": [
+        {
+          "id": "A2",
+          "text": {"en": "Some A2 question"},
+          "ferType": "identifier-service"
+        }
+      ]
+    }
+  ]
+}

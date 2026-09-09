@@ -75,6 +75,25 @@ class DeleteAccountRequest(CamelModel):
     current_password: str
 
 
+# ---------------------------------------------------------------------------
+# Mail-backed account flows (spec 07-mail-and-migration.md §2/§3)
+# ---------------------------------------------------------------------------
+
+
+class VerifyEmailRequest(CamelModel):
+    token: str
+
+
+class PasswordResetRequestRequest(CamelModel):
+    email: str
+
+
+class PasswordResetConfirmRequest(CamelModel):
+    token: str
+    # spec §3: reuses RegisterRequest's 10-128 char validator.
+    new_password: str = Field(min_length=10, max_length=128)
+
+
 class UserOut(CamelModel):
     id: str
     email: str
@@ -85,6 +104,10 @@ class UserOut(CamelModel):
     updated_at: datetime
     must_change_password: bool = False
     privacy_accepted_version: str | None = None
+    # spec 07-mail-and-migration.md §2: null until POST /api/auth/verify-email
+    # (or a password-reset confirm, which also proves control of the mailbox)
+    # succeeds.
+    email_verified_at: datetime | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -387,6 +410,9 @@ class FipOut(CamelModel):
     # spec 06-dmp-linkage.md §3.1: two cheap additions for FioDMP.
     embed_url: str
     summary: FipSummary
+    # spec 07-mail-and-migration.md §0/§4.3: the version migrated *from* on
+    # the last migration, or null.
+    migrated_from: dict[str, Any] | None = None
 
 
 class PrefillFromDmpRequest(CamelModel):
@@ -395,8 +421,29 @@ class PrefillFromDmpRequest(CamelModel):
     dmp_url: str
 
 
+class MigrateDecisions(CamelModel):
+    """Body of `POST /api/fips/{id}/migrate`'s `decisions` (spec 07 §4.3):
+    `{oldQuestionId -> chosen target ids}` for a `split` item, `{oldQuestionId
+    -> chosen target id}` for a `removed` item. Untyped inner values aren't
+    needed here -- `fipm.migration.apply_migration` validates every key/value
+    against the recomputed diff and raises `unknown_decision`/
+    `invalid_decision`, not pydantic."""
+
+    split_copies: dict[str, list[str]] | None = None
+    orphan_reassign: dict[str, str] | None = None
+
+
+class MigrateRequest(CamelModel):
+    to: str
+    decisions: MigrateDecisions | None = None
+
+
 class FipImportDoc(CamelModel):
-    """Body of POST /api/fips/import: the §3.1 export document, verbatim."""
+    """Body of POST /api/fips/import: the §3.1 export document, verbatim.
+    spec 07-mail-and-migration.md §6: `exportVersion` 1 or 2 are both
+    accepted; `orphanedAnswers` is absent on a v1 document (default `[]`)
+    and preserved verbatim (declarations reconstructed like `answers`) on a
+    v2 one. `fip.migratedFrom` lives inside the untyped `fip` dict already."""
 
     export_version: int
     generated_at: datetime | None = None
@@ -404,6 +451,7 @@ class FipImportDoc(CamelModel):
     fip: dict[str, Any]
     questionnaire_ref: QuestionnaireRef
     answers: list[dict[str, Any]]
+    orphaned_answers: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -553,6 +601,7 @@ def fip_to_out(
         edit_token=edit_token,
         embed_url=f"{settings.base_url}/fips/{fip.id}/embed",
         summary=_fip_summary(answers, total_questions, known_question_ids),
+        migrated_from=fip.migrated_from,
     )
 
 

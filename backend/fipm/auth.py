@@ -17,7 +17,7 @@ from starlette.responses import JSONResponse
 from fipm.config import Settings, get_settings
 from fipm.db import SessionLocal
 from fipm.ids import hash_token, new_token
-from fipm.models import AuthSession, User
+from fipm.models import AuthSession, EmailToken, User
 
 COOKIE_NAME = "fipm_session"
 _LAST_SEEN_REFRESH_INTERVAL = timedelta(minutes=5)
@@ -171,6 +171,114 @@ def record_feedback_attempt(ip: str) -> None:
     insert, not before the work is attempted -- pairs with
     `check_feedback_rate_limit`."""
     _rate_limiter.record(f"feedback-ip:{ip}", FEEDBACK_WINDOW_SECONDS)
+
+
+# spec 07-mail-and-migration.md §2/§3: verification resend and password-reset
+# rate limits.
+RESEND_LIMIT_PER_USER = 3
+RESEND_LIMIT_PER_IP = 10
+RESEND_WINDOW_SECONDS = 60 * 60
+PASSWORD_RESET_LIMIT_PER_EMAIL = 3
+PASSWORD_RESET_LIMIT_PER_IP = 10
+PASSWORD_RESET_WINDOW_SECONDS = 60 * 60
+
+
+def check_resend_rate_limit(request: Request, user_id: str) -> None:
+    """spec §2: 3/hour per user id, 10/hour per client ip -> 429 Retry-After."""
+    ip = client_ip(request)
+    limited_user, retry1 = _rate_limiter.is_limited(
+        f"resend-user:{user_id}", RESEND_LIMIT_PER_USER, RESEND_WINDOW_SECONDS
+    )
+    limited_ip, retry2 = _rate_limiter.is_limited(
+        f"resend-ip:{ip}", RESEND_LIMIT_PER_IP, RESEND_WINDOW_SECONDS
+    )
+    if limited_user or limited_ip:
+        _raise_rate_limited(max(retry1, retry2))
+
+
+def record_resend_attempt(request: Request, user_id: str) -> None:
+    ip = client_ip(request)
+    _rate_limiter.record(f"resend-user:{user_id}", RESEND_WINDOW_SECONDS)
+    _rate_limiter.record(f"resend-ip:{ip}", RESEND_WINDOW_SECONDS)
+
+
+def password_reset_over_limit(request: Request, email_lower: str) -> bool:
+    """spec §3: 3/hour per lowercased email, 10/hour per ip -- over-limit
+    still returns 202 (a 429 keyed on an email is itself an enumeration
+    oracle), so this returns a bool for the caller to silently drop the mail
+    on, rather than raising."""
+    ip = client_ip(request)
+    limited_email, _ = _rate_limiter.is_limited(
+        f"pwreset-email:{email_lower}",
+        PASSWORD_RESET_LIMIT_PER_EMAIL,
+        PASSWORD_RESET_WINDOW_SECONDS,
+    )
+    limited_ip, _ = _rate_limiter.is_limited(
+        f"pwreset-ip:{ip}", PASSWORD_RESET_LIMIT_PER_IP, PASSWORD_RESET_WINDOW_SECONDS
+    )
+    return limited_email or limited_ip
+
+
+def record_password_reset_attempt(request: Request, email_lower: str) -> None:
+    ip = client_ip(request)
+    _rate_limiter.record(f"pwreset-email:{email_lower}", PASSWORD_RESET_WINDOW_SECONDS)
+    _rate_limiter.record(f"pwreset-ip:{ip}", PASSWORD_RESET_WINDOW_SECONDS)
+
+
+# ---------------------------------------------------------------------------
+# Email tokens (spec 07-mail-and-migration.md §0/§2/§3): verify_email and
+# password_reset, sharing one table. Only the sha256 hex of the plaintext
+# token is ever stored; the plaintext lives in the mail and nowhere else.
+# ---------------------------------------------------------------------------
+
+
+def issue_email_token(db: Session, user: User, purpose: str, email: str, ttl_hours: int) -> str:
+    """Delete the user's earlier unused tokens of this purpose (spec §2:
+    "issuing a new token of a purpose deletes that user's earlier unused
+    ones of the same purpose"), then create and return the new plaintext
+    token (only its hash is persisted)."""
+    now = datetime.now(UTC)
+    db.execute(
+        delete(EmailToken).where(
+            EmailToken.user_id == user.id,
+            EmailToken.purpose == purpose,
+            EmailToken.used_at.is_(None),
+        )
+    )
+    token = new_token()
+    db.add(
+        EmailToken(
+            id=hash_token(token),
+            user_id=user.id,
+            purpose=purpose,
+            email=email,
+            created_at=now,
+            expires_at=now + timedelta(hours=ttl_hours),
+            used_at=None,
+        )
+    )
+    db.commit()
+    return token
+
+
+def resolve_email_token(db: Session, token: str, purpose: str) -> tuple[EmailToken, User]:
+    """400 `invalid_token` (unknown id, wrong purpose, already used, or the
+    stored `email` no longer matches the user's current address -- spec §2)
+    raised as HTTPException; 410 `token_expired` when only expiry fails, so
+    the UI can distinguish "dead" from "offer a new link". Returns the row
+    and its user on success; the caller marks it used."""
+    row = db.get(EmailToken, hash_token(token))
+    if row is None or row.purpose != purpose or row.used_at is not None:
+        raise HTTPException(status_code=400, detail="invalid_token")
+    user = db.get(User, row.user_id)
+    if user is None or user.email != row.email:
+        raise HTTPException(status_code=400, detail="invalid_token")
+    expires_at = row.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=UTC)
+    if expires_at < datetime.now(UTC):
+        raise HTTPException(status_code=410, detail="token_expired")
+    return row, user
 
 
 # ---------------------------------------------------------------------------

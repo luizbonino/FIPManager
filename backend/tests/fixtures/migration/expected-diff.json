@@ -1,0 +1,91 @@
+{
+  "diffVersion": 1,
+  "from": {"id": "migration-fixture", "version": "1.0.0"},
+  "to": {
+    "id": "migration-fixture",
+    "version": "1.1.0",
+    "changelog": [
+      {"version": "1.1.0", "date": "2026-11-02", "notes": "F2 split, A2 removed, F3 hidden, R1.3-data added"}
+    ]
+  },
+  "counts": {
+    "unchanged": 1,
+    "added": 1,
+    "removed": 1,
+    "hidden": 1,
+    "split": 1,
+    "textChanged": 1,
+    "ferTypeChanged": 0,
+    "answersKept": 3,
+    "answersOrphaned": 1,
+    "decisionsRequired": 2
+  },
+  "items": [
+    {
+      "status": "unchanged",
+      "oldQuestionId": "F1-metadata",
+      "newQuestionId": "F1-metadata",
+      "oldText": "What identifiers do you use?",
+      "newText": "What identifiers do you use? (edited)",
+      "oldFerType": "identifier-service",
+      "newFerType": "identifier-service",
+      "flags": ["text-changed"],
+      "answered": true,
+      "declarationCount": 1,
+      "decision": null
+    },
+    {
+      "status": "hidden",
+      "oldQuestionId": "F3",
+      "newQuestionId": "F3",
+      "oldText": "Some F3 question",
+      "newText": "Some F3 question",
+      "oldFerType": "metadata-schema",
+      "newFerType": "metadata-schema",
+      "flags": [],
+      "answered": true,
+      "declarationCount": 1,
+      "decision": null
+    },
+    {
+      "status": "added",
+      "oldQuestionId": null,
+      "newQuestionId": "R1.3-data",
+      "newText": "A newly added question",
+      "newFerType": "identifier-service",
+      "flags": [],
+      "answered": false,
+      "declarationCount": 0,
+      "decision": null
+    },
+    {
+      "status": "split",
+      "oldQuestionId": "F2",
+      "newQuestionId": null,
+      "oldText": "Which metadata schema do you use?",
+      "flags": [],
+      "answered": true,
+      "declarationCount": 1,
+      "splitInto": ["F2-metadata", "F2-data"],
+      "decision": {
+        "kind": "splitCopies",
+        "options": ["F2-metadata", "F2-data"],
+        "default": ["F2-metadata", "F2-data"]
+      }
+    },
+    {
+      "status": "removed",
+      "oldQuestionId": "A2",
+      "newQuestionId": null,
+      "oldText": "Some A2 question",
+      "flags": [],
+      "answered": true,
+      "declarationCount": 1,
+      "decision": {
+        "kind": "orphanReassign",
+        "options": ["R1.3-data"],
+        "default": null
+      }
+    }
+  ]
+}

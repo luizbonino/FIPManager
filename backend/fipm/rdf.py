@@ -367,6 +367,18 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
     )
     g.add((fip_iri, DCTERMS.conformsTo, km_iri))
 
+    # spec 07-mail-and-migration.md §6: `fipmx:migrated-from` points at the
+    # version migrated *from* on the last migration -- `dcterms:conformsTo`
+    # above already points at the current version, so this is the only new
+    # triple; `prov:wasRevisionOf` is deliberately never emitted (a FIP has
+    # one IRI and no per-state IRI exists).
+    migrated_from = fip.migrated_from
+    if migrated_from:
+        migrated_from_iri = URIRef(
+            f"{settings.base_url}/knowledge-models/{migrated_from['id']}/{migrated_from['version']}"
+        )
+        g.add((fip_iri, fipmx["migrated-from"], migrated_from_iri))
+
     community_iri = URIRef(f"{fip_iri}#community")
     # audit finding 3: `fip:declared-by` has domain fip:FAIR-Declaration, not
     # the FIP itself -- use the fipmx extension property here. Each
@@ -606,10 +618,36 @@ def session_graph(
     return g
 
 
-def to_turtle(g: Graph) -> str:
+def orphaned_answer_comment_lines(fip: Fip) -> list[str]:
+    """spec 07-mail-and-migration.md §6: orphaned answers become Turtle
+    comment lines in the prepended header block, not triples -- so they
+    appear in neither the graph nor the JSON-LD. One line per declaration
+    (`# orphaned answer <questionId>: <resource> (<status>)`); a
+    comment-only orphaned answer (no declarations) still gets one line
+    naming the question."""
+    lines: list[str] = []
+    for entry in fip.orphaned_answers or []:
+        qid = entry.get("questionId")
+        declarations = entry.get("declarations") or []
+        if not declarations:
+            lines.append(f"# orphaned answer {qid}")
+            continue
+        for decl in declarations:
+            resource = decl.get("ferId") or decl.get("ferFreeText") or "?"
+            status = decl.get("status") or "?"
+            lines.append(f"# orphaned answer {qid}: {resource} ({status})")
+    return lines
+
+
+def to_turtle(g: Graph, extra_comment_lines: list[str] | None = None) -> str:
     """Turtle serialisation with the CC0 ontology-credit comment header
-    (spec 03 §2.3: "a Turtle comment header, not a triple")."""
-    return TURTLE_HEADER + g.serialize(format="turtle")
+    (spec 03 §2.3: "a Turtle comment header, not a triple"), plus any
+    `extra_comment_lines` (spec 07 §6: orphaned-answer comments) appended to
+    that same header block."""
+    header = TURTLE_HEADER
+    for line in extra_comment_lines or []:
+        header += f"{line}\n"
+    return header + g.serialize(format="turtle")
 
 
 def _jsonld_context(g: Graph) -> dict[str, Any]:
@@ -642,6 +680,9 @@ def _jsonld_context(g: Graph) -> dict[str, Any]:
         "dmpSection": {"@id": "fipmx:dmp-section"},
         "license": {"@id": "dcterms:license", "@type": "@id"},
         "conformsTo": {"@id": "dcterms:conformsTo", "@type": "@id"},
+        # spec 07-mail-and-migration.md §6: the one new fipmx term this spec
+        # adds to spec 03 §2.1's closed term list.
+        "migratedFrom": {"@id": "fipmx:migrated-from", "@type": "@id"},
         "declaredBy": {"@id": "fip:declared-by", "@type": "@id"},
         "declaredByCommunity": {"@id": "fipmx:declared-by-community", "@type": "@id"},
         "hasDeclaration": {"@id": "fipmx:has-declaration", "@type": "@id"},

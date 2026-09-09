@@ -10,14 +10,16 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from fipm.auth import hash_password, revoke_all_sessions
 from fipm.authz import require_admin_404
+from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.ids import temp_password
+from fipm.mail import queue_mail, render_mail
 from fipm.models import Fer, Fip, KnowledgeModel, User, WorkshopSession
 from fipm.schemas import (
     AdminFerMergeOut,
@@ -94,6 +96,7 @@ def list_users(
 @router.post("/users/{user_id}/reset-password", response_model=AdminResetPasswordOut)
 def reset_password(
     user_id: str,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin_404),
 ) -> AdminResetPasswordOut:
@@ -110,6 +113,22 @@ def reset_password(
     # Every pre-existing session of this user, gone -- the plaintext appears
     # in this response body and in no log line.
     revoke_all_sessions(db, user.id)
+
+    # spec 07-mail-and-migration.md §1: the password-changed notice also
+    # goes out after an admin reset, same as a self-service reset confirm.
+    settings = get_settings()
+    subject, text = render_mail(
+        "password-changed",
+        user.language,
+        {
+            "appName": "FIP Manager",
+            "displayName": user.display_name,
+            "baseUrl": settings.base_url,
+            "contactEmail": settings.contact_email,
+            "expiresHours": "0",
+        },
+    )
+    queue_mail(background_tasks, user.email, subject, text)
     return AdminResetPasswordOut(temporary_password=plaintext)
 
 

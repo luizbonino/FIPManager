@@ -1,0 +1,22 @@
+[
+  {
+    "questionId": "F1-metadata",
+    "declarations": [{"ferId": "https://w3id.org/np/doi", "status": "current"}],
+    "comment": null
+  },
+  {
+    "questionId": "F2",
+    "declarations": [{"ferId": "https://w3id.org/np/dcat", "status": "current"}],
+    "comment": null
+  },
+  {
+    "questionId": "F3",
+    "declarations": [{"ferId": "https://w3id.org/np/dcat", "status": "current"}],
+    "comment": null
+  },
+  {
+    "questionId": "A2",
+    "declarations": [{"ferId": "https://w3id.org/np/orcid", "status": "current"}],
+    "comment": "kept for provenance"
+  }
+]

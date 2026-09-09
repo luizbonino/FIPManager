@@ -3,9 +3,10 @@ from __future__ import annotations
 import copy
 import json
 import secrets
+from datetime import UTC, datetime
 from typing import Any, get_args
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
@@ -15,6 +16,7 @@ from fipm.authz import (
     can_read,
     can_write_owned,
     check_edit_token,
+    check_email_verification_gate,
     get_readable_published_km,
     optional_user,
     require_user,
@@ -22,16 +24,30 @@ from fipm.authz import (
 from fipm.config import Settings, get_settings
 from fipm.db import get_db
 from fipm.dmp import apply_dmp_evidence, normalise_legacy_dmp_evidence, normalise_related_dmps
-from fipm.exporters import build_export_csv, build_export_json, reconstruct_answers_from_export
+from fipm.exporters import (
+    build_export_csv,
+    build_export_json,
+    reconstruct_answers_from_export,
+    reconstruct_orphaned_answers_from_export,
+)
 from fipm.ids import hash_token, new_token, short_id
+from fipm.migration import (
+    MigrationError,
+    apply_migration,
+    changelog_between,
+    compute_diff,
+    semver_gt,
+    semver_key,
+)
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
-from fipm.rdf import fip_graph, to_jsonld, to_turtle
+from fipm.rdf import fip_graph, orphaned_answer_comment_lines, to_jsonld, to_turtle
 from fipm.schemas import (
     Answer,
     FipCreateRequest,
     FipImportDoc,
     FipPatchRequest,
     Language,
+    MigrateRequest,
     PrefillFromDmpRequest,
     Visibility,
     fip_out_dict,
@@ -233,13 +249,15 @@ def create_fip(
         return _out_for_km(fip, km, edit_token=edit_token)
 
     if user is not None:
+        visibility = body.visibility or "private"
+        check_email_verification_gate(user, visibility)
         fip = _insert_fip(
             db,
             settings,
             owner_id=user.id,
             session_id=None,
             edit_token_hash=None,
-            visibility=body.visibility or "private",
+            visibility=visibility,
             **common,
         )
         return _out_for_km(fip, km)
@@ -252,6 +270,10 @@ def import_fip(
     body: FipImportDoc, db: Session = Depends(get_db), user: User = Depends(require_user)
 ) -> dict[str, Any]:
     settings = get_settings()
+    # spec 07-mail-and-migration.md §6: `exportVersion` 1 or 2 both import;
+    # anything else is a document this backend doesn't understand.
+    if body.export_version not in (1, 2):
+        raise HTTPException(status_code=400, detail="unsupported_export_version")
     km = get_readable_published_km(
         db, body.questionnaire_ref.id, body.questionnaire_ref.version, user
     )
@@ -278,6 +300,17 @@ def import_fip(
     answer_dicts = [a.model_dump(mode="json", by_alias=True) for a in answers]
     apply_dmp_evidence(answer_dicts, related_dmps)
 
+    # spec 07 §6: `orphanedAnswers` is absent on a v1 document (empty list
+    # default) and preserved verbatim -- declarations reconstructed the same
+    # way as `answers` -- on a v2 one. Not re-validated against `km`'s
+    # question ids: an orphaned answer's questionId is, by definition, one
+    # the *current* questionnaire version may no longer have.
+    orphaned_answers = reconstruct_orphaned_answers_from_export(
+        body.orphaned_answers, language, related_dmps
+    )
+    apply_dmp_evidence(orphaned_answers, related_dmps)
+    migrated_from = fip_data.get("migratedFrom")
+
     fip = _insert_fip(
         db,
         settings,
@@ -291,6 +324,8 @@ def import_fip(
         community=community,
         related_dmps=related_dmps,
         answers=answer_dicts,
+        orphaned_answers=orphaned_answers,
+        migrated_from=migrated_from,
         language=language,
         license=fip_data.get("license") or "CC0-1.0",
     )
@@ -322,6 +357,9 @@ def patch_fip(
         raise HTTPException(status_code=404, detail="not_found")
     _authorize_fip_write(fip, user, request, db)
     settings = get_settings()
+
+    if body.visibility is not None:
+        check_email_verification_gate(user, body.visibility)
 
     if body.community is not None:
         community = body.community.model_dump(mode="json", by_alias=True)
@@ -424,6 +462,175 @@ def claim_fip(
     return _out_for_km(fip, km)
 
 
+# ---------------------------------------------------------------------------
+# Migration between knowledge-model versions (spec 07-mail-and-migration.md §4)
+# ---------------------------------------------------------------------------
+
+
+def _get_fip_for_migration(fip_id: str, request: Request, db: Session, user: User | None) -> Fip:
+    """spec §4.3: "Authorization is exactly PATCH /api/fips/{id}" for all
+    three migration endpoints -- unreadable -> 404, readable but not
+    writable -> 403, via the same `_authorize_fip_write` PATCH/DELETE use."""
+    fip = db.get(Fip, fip_id)
+    if fip is None:
+        raise HTTPException(status_code=404, detail="not_found")
+    _authorize_fip_write(fip, user, request, db)
+    return fip
+
+
+def _migration_target_rows(db: Session, fip: Fip, user: User | None) -> list[KnowledgeModel]:
+    """Published, readable, semver-greater versions of the FIP's own model
+    id, ascending (spec §4.3). Same id only in v2 (spec §4)."""
+    rows = (
+        db.query(KnowledgeModel)
+        .filter(
+            KnowledgeModel.id == fip.questionnaire_id,
+            KnowledgeModel.status == "published",
+        )
+        .all()
+    )
+    current_key = semver_key(fip.questionnaire_version)
+    candidates = [
+        row
+        for row in rows
+        if can_read(row.owner_id, row.visibility, user) and semver_key(row.version) > current_key
+    ]
+    candidates.sort(key=lambda row: semver_key(row.version))
+    return candidates
+
+
+def _iso_utc(value: datetime) -> str:
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    return value.isoformat().replace("+00:00", "Z")
+
+
+def _get_migration_target_km(
+    db: Session, fip: Fip, to_version: str, user: User | None
+) -> KnowledgeModel:
+    """404 `target_not_found` unless `to_version` names a published, readable
+    version of the FIP's own model id (spec §4.3)."""
+    target = db.get(KnowledgeModel, (fip.questionnaire_id, to_version))
+    if (
+        target is None
+        or target.status != "published"
+        or not can_read(target.owner_id, target.visibility, user)
+    ):
+        raise HTTPException(status_code=404, detail="target_not_found")
+    return target
+
+
+def _compute_migration_diff(db: Session, fip: Fip, target: KnowledgeModel) -> dict[str, Any]:
+    current_km = _km_for_fip(db, fip)
+    current_content = current_km.content if current_km is not None else {}
+    return compute_diff(
+        {"id": fip.questionnaire_id, "version": fip.questionnaire_version},
+        {
+            "id": target.id,
+            "version": target.version,
+            "changelog": changelog_between(
+                target.changelog or [], fip.questionnaire_version, target.version
+            ),
+        },
+        current_content,
+        target.content or {},
+        fip.answers or [],
+    )
+
+
+@router.get("/{fip_id}/migration-targets")
+def get_migration_targets(
+    fip_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> dict[str, Any]:
+    fip = _get_fip_for_migration(fip_id, request, db, user)
+    targets = _migration_target_rows(db, fip, user)
+    items = [
+        {
+            "id": row.id,
+            "version": row.version,
+            "title": row.title,
+            "changelog": changelog_between(
+                row.changelog or [], fip.questionnaire_version, row.version
+            ),
+            # No separate `published_at` column exists (spec 04's
+            # KnowledgeModel row has no such field): `updated_at` at publish
+            # time is the closest available proxy and is what this returns.
+            "publishedAt": _iso_utc(row.updated_at),
+        }
+        for row in targets
+    ]
+    return {
+        "current": {"id": fip.questionnaire_id, "version": fip.questionnaire_version},
+        "items": items,
+        "total": len(items),
+    }
+
+
+@router.get("/{fip_id}/migration-preview")
+def get_migration_preview(
+    fip_id: str,
+    request: Request,
+    to: str = Query(...),
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> dict[str, Any]:
+    fip = _get_fip_for_migration(fip_id, request, db, user)
+    target = _get_migration_target_km(db, fip, to, user)
+    if not semver_gt(to, fip.questionnaire_version):
+        raise HTTPException(status_code=400, detail="version_not_greater")
+    return _compute_migration_diff(db, fip, target)
+
+
+@router.post("/{fip_id}/migrate")
+def migrate_fip(
+    fip_id: str,
+    body: MigrateRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> dict[str, Any]:
+    fip = _get_fip_for_migration(fip_id, request, db, user)
+
+    # spec §4: session FIPs are pinned to their session's questionnaire_version.
+    if fip.session_id is not None:
+        session_row = db.get(WorkshopSession, fip.session_id)
+        if session_row is not None and body.to != session_row.questionnaire_version:
+            raise HTTPException(status_code=409, detail="session_version_pinned")
+
+    target = _get_migration_target_km(db, fip, body.to, user)
+    if body.to == fip.questionnaire_version:
+        raise HTTPException(status_code=409, detail="already_on_version")
+    if not semver_gt(body.to, fip.questionnaire_version):
+        raise HTTPException(status_code=400, detail="version_not_greater")
+
+    diff = _compute_migration_diff(db, fip, target)
+    decisions = body.decisions.model_dump(mode="json", by_alias=True) if body.decisions else None
+    try:
+        new_answers, orphaned = apply_migration(
+            diff, fip.answers or [], decisions, fip.questionnaire_version
+        )
+    except MigrationError as exc:
+        raise HTTPException(status_code=400, detail=exc.code) from exc
+
+    now = datetime.now(UTC)
+    fip.migrated_from = {
+        "id": fip.questionnaire_id,
+        "version": fip.questionnaire_version,
+        "at": _iso_utc(now),
+    }
+    fip.questionnaire_id = target.id
+    fip.questionnaire_version = target.version
+    fip.answers = new_answers
+    fip.orphaned_answers = [*(fip.orphaned_answers or []), *orphaned]
+    fip.updated_at = now
+    db.commit()
+    db.refresh(fip)
+    return _out_for_km(fip, target)
+
+
 @router.post("/{fip_id}/prefill-from-dmp")
 def prefill_from_dmp(
     fip_id: str,
@@ -507,8 +714,9 @@ def export_fip_ttl(
     fip = _get_readable_fip(fip_id, request, db, user)
     settings = get_settings()
     g = fip_graph(db, fip, settings)
+    comments = orphaned_answer_comment_lines(fip)
     return Response(
-        content=to_turtle(g),
+        content=to_turtle(g, comments),
         media_type="text/turtle; charset=utf-8",
         headers={"Content-Disposition": f'attachment; filename="{fip.id}.ttl"'},
     )

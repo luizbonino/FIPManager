@@ -79,7 +79,10 @@ def test_session_export_json_owner_ok_other_user_404_anon_401(client_factory):
     # ordered by createdAt
     assert [f["fip"]["id"] for f in doc["fips"]] == [fips[0]["id"], fips[1]["id"]]
     for entry in doc["fips"]:
-        assert entry["exportVersion"] == 1
+        # spec 07-mail-and-migration.md §6: exportVersion 2 for each FIP's
+        # own document (the session wrapper's own exportVersion, above,
+        # stays 1 -- unaffected by that spec).
+        assert entry["exportVersion"] == 2
         assert entry["questionnaireRef"]["id"] == "test-km"
         assert len(entry["answers"]) == 2  # test-km fixture has 2 questions
 

@@ -1,0 +1,13 @@
+Subject: Confirm your email address — {appName}
+
+Hi {displayName},
+
+Thanks for creating an {appName} account. Please confirm this email
+address by opening the link below:
+
+{link}
+
+This link expires in {expiresHours} hours. If you did not create this
+account, you can ignore this message.
+
+— {appName}

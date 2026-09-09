@@ -48,6 +48,12 @@ class User(Base):
     # user accepted at registration; None for accounts created before this
     # change existed.
     privacy_accepted_version: Mapped[str | None] = mapped_column(String, nullable=True)
+    # v5 (spec 07-mail-and-migration.md §0): set by a successful
+    # POST /api/auth/verify-email or password-reset/confirm; cleared when the
+    # account email changes.
+    email_verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     __table_args__ = (Index("ix_users_email", "email", unique=True),)
 
@@ -123,6 +129,13 @@ class Fip(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_now, onupdate=_now
     )
+    # v5 (spec 07-mail-and-migration.md §0/§4.3): `{"id","version","at"}` --
+    # the version migrated *from* on the last migration; None until a FIP is
+    # migrated at least once.
+    migrated_from: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # v5 (spec 07 §4.4): append-only list of answers orphaned by a migration
+    # (§4.4 shape); never re-injected into `answers`.
+    orphaned_answers: Mapped[list | None] = mapped_column(JSON, nullable=True, default=list)
 
     __table_args__ = (
         ForeignKeyConstraint(
@@ -203,6 +216,29 @@ class Feedback(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     __table_args__ = (Index("ix_feedback_session_id", "session_id"),)
+
+
+class EmailToken(Base):
+    """v5 (spec 07-mail-and-migration.md §0): a verify_email or password_reset
+    token. `id` is the sha256 hex of the plaintext token (the plaintext is
+    never stored -- it lives only in the mail sent to the user). `email` is
+    the address the token was issued for, so a since-changed account email
+    invalidates any outstanding token of that purpose (spec §2)."""
+
+    __tablename__ = "email_tokens"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    purpose: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        Index("ix_email_tokens_user_purpose", "user_id", "purpose"),
+        Index("ix_email_tokens_expires_at", "expires_at"),
+    )
 
 
 class SchemaVersionRow(Base):

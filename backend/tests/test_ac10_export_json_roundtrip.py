@@ -57,7 +57,9 @@ def test_export_json_language_fallback_and_import_roundtrip(client):
     assert export.headers["content-disposition"].startswith("attachment")
     doc = export.json()
 
-    assert doc["exportVersion"] == 1
+    # spec 07-mail-and-migration.md §6: exportVersion 2 (readers of 1 stay
+    # unaffected; POST /api/fips/import accepts both).
+    assert doc["exportVersion"] == 2
     # KM title has no pt-PT -> falls back to pt-BR.
     assert doc["questionnaireRef"]["title"] == "Modelo de conhecimento de teste"
 

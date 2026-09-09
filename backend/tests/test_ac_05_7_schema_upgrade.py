@@ -44,6 +44,9 @@ def _build_v3_db(db_path: str) -> None:
             updated_at DATETIME
         );
         CREATE UNIQUE INDEX ix_users_email ON users(email);
+        CREATE TABLE fips (
+            id VARCHAR NOT NULL PRIMARY KEY
+        );
         CREATE TABLE schema_version (
             id INTEGER PRIMARY KEY,
             version INTEGER NOT NULL,
@@ -134,6 +137,9 @@ CREATE TABLE users (
     updated_at DATETIME
 );
 CREATE UNIQUE INDEX ix_users_email ON users(email);
+CREATE TABLE fips (
+    id VARCHAR NOT NULL PRIMARY KEY
+);
 CREATE TABLE schema_version (
     id INTEGER PRIMARY KEY,
     version INTEGER NOT NULL,
@@ -334,6 +340,9 @@ def test_ensure_columns_swallows_concurrent_duplicate_column(tmp_path):
             version VARCHAR NOT NULL,
             PRIMARY KEY (id, version)
         );
+        CREATE TABLE fips (
+            id VARCHAR NOT NULL PRIMARY KEY
+        );
         """
     )
     conn.commit()
@@ -357,11 +366,14 @@ def test_ensure_columns_swallows_concurrent_duplicate_column(tmp_path):
     race_engine.dispose()
 
     conn2 = _sqlite3.connect(str(db_path))
-    user_cols = {row[1] for row in conn2.execute("PRAGMA table_info(users)")}
-    km_cols = {row[1] for row in conn2.execute("PRAGMA table_info(knowledge_models)")}
+    cols_by_table = {
+        table: {row[1] for row in conn2.execute(f"PRAGMA table_info({table})")}
+        for table in ("users", "knowledge_models", "fips")
+    }
     conn2.close()
 
     for table, column, _ddl in _EXPECTED_COLUMNS:
-        cols = user_cols if table == "users" else km_cols
-        assert column in cols, f"{table}.{column} missing after the raced _ensure_columns run"
+        assert column in cols_by_table[table], (
+            f"{table}.{column} missing after the raced _ensure_columns run"
+        )
     assert raced["done"]  # the race was actually exercised

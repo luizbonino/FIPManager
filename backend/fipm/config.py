@@ -78,6 +78,34 @@ class Settings(BaseSettings):
     # own rate-limit bucket.
     trust_proxy: bool = False
 
+    # spec 07-mail-and-migration.md §1: mail backend. `console` (default)
+    # logs one INFO record on `fipm.mail`; `smtp` dispatches via
+    # `smtplib.SMTP`/`SMTP_SSL`. Both features are off/invisible by default
+    # (§0): console mail and FIPM_REQUIRE_EMAIL_VERIFICATION=false.
+    mail_backend: str = "console"
+    mail_from: str = "FIP Manager <no-reply@localhost>"
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_tls: str = "starttls"
+    smtp_timeout: int = 10
+    # spec 07 §2: the email-verification gate. Off by default -- nothing here
+    # runs during CONFOA (spec §9 A1).
+    require_email_verification: bool = False
+    mail_token_ttl_hours: int = 24
+    reset_token_ttl_hours: int = 1
+
+    def check_mail_safety(self) -> None:
+        """Refuse to start with an unusable mail configuration (spec 07 §1):
+        an unknown FIPM_MAIL_BACKEND, or `smtp` with no FIPM_SMTP_HOST."""
+        if self.mail_backend not in ("console", "smtp"):
+            raise RuntimeError(
+                f"FIPM_MAIL_BACKEND must be 'console' or 'smtp', got {self.mail_backend!r}"
+            )
+        if self.mail_backend == "smtp" and not self.smtp_host:
+            raise RuntimeError("FIPM_SMTP_HOST is required when FIPM_MAIL_BACKEND=smtp")
+
     @property
     def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
