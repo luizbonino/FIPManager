@@ -66,8 +66,17 @@
         </select>
       </div>
 
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input v-model="privacyAccepted" type="checkbox" required />
+          <span>{{ $t('privacy.accept') }}</span>
+        </label>
+        <router-link to="/privacy" target="_blank" class="privacy-inline-link">{{ $t('privacy.link') }}</router-link>
+        <span v-if="privacyError" class="error-message">{{ $t('privacy.required') }}</span>
+      </div>
+
       <div class="form-actions">
-        <button type="submit" :disabled="isLoading" class="btn btn-primary">
+        <button type="submit" :disabled="isLoading || !canSubmit" class="btn btn-primary">
           <span v-if="!isLoading">{{ $t('auth.submitRegister') }}</span>
           <span v-else>{{ $t('common.loading') }}</span>
         </button>
@@ -83,19 +92,22 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import { SUPPORTED_LOCALES, type Locale } from '@/i18n'
+import { getPrivacyNotice, type PrivacyNotice } from '@/api/privacy'
 
-const { t } = useI18n()
+const { t, locale: uiLocale } = useI18n()
 
 const displayName = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const language = ref<Locale>('en')
+const privacyAccepted = ref(false)
+const privacyError = ref(false)
 
 const displayNameError = ref<string | null>(null)
 const emailError = ref<string | null>(null)
@@ -108,6 +120,21 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const locales = SUPPORTED_LOCALES
+
+// spec 05 §2: the version sent as `privacyAcceptedVersion` comes from
+// `GET /api/privacy` itself, not typed by hand, so a stale tab can never
+// submit a version the server no longer recognises.
+const privacyNotice = ref<PrivacyNotice | null>(null)
+
+const canSubmit = computed(() => privacyAccepted.value && privacyNotice.value !== null)
+
+onMounted(async () => {
+  try {
+    privacyNotice.value = await getPrivacyNotice(uiLocale.value)
+  } catch {
+    privacyNotice.value = null
+  }
+})
 
 const validateDisplayName = () => {
   if (!displayName.value.trim()) {
@@ -172,13 +199,20 @@ const validateAll = () => {
 }
 
 const handleSubmit = async () => {
-  if (!validateAll()) return
+  privacyError.value = !privacyAccepted.value
+  if (!validateAll() || !canSubmit.value) return
 
   isLoading.value = true
   error.value = null
 
   try {
-    await authStore.register(email.value, password.value, displayName.value, language.value)
+    await authStore.register(
+      email.value,
+      password.value,
+      displayName.value,
+      language.value,
+      privacyNotice.value?.version
+    )
     const redirect = route.query.redirect as string || '/workspace'
     await router.push(redirect)
   } catch (err) {
@@ -238,6 +272,31 @@ const handleSubmit = async () => {
 .error-message {
   color: var(--color-error);
   font-size: 0.875rem;
+}
+
+.checkbox-group {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: normal;
+  min-height: 44px;
+}
+
+.checkbox-label input[type='checkbox'] {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.privacy-inline-link {
+  color: var(--color-link);
+  font-size: 0.9rem;
 }
 
 .form-error {

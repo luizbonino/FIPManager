@@ -51,6 +51,7 @@ async function mountJoin() {
     routes: [
       { path: '/join/:joinCode', name: 'JoinSession', component: JoinSession, props: true },
       { path: '/fips/:id/edit', name: 'FipEditor', component: { template: '<div/>' } },
+      { path: '/privacy', name: 'Privacy', component: { template: '<div/>' } },
     ],
   })
   await router.push('/join/ABC123')

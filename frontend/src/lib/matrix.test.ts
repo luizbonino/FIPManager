@@ -199,3 +199,57 @@ describe('buildMatrix — convergence', () => {
     expect(groupF.rowsAgreed).toBe(2) // F1-data and F2
   })
 })
+
+// Criterion 17 (docs/specs/05-v1-completion.md §8): `buildMatrix` resolves
+// `successorLabel` for a `planned-replacement` chip and leaves it `null`
+// for every other status.
+describe('buildMatrix — successor', () => {
+  it('resolves a catalogued successorFerId to its FER label, only for planned-replacement', () => {
+    const fipWithSuccessor = makeFip({
+      id: 'fip-successor',
+      createdAt: '2026-09-04T00:00:00Z',
+      answers: [
+        {
+          questionId: 'F1-metadata',
+          declarations: [
+            { ferId: 'doi-service', status: 'planned-replacement', successorFerId: 'handle-service' },
+          ],
+        },
+      ],
+    })
+    const matrix = buildMatrix([fipWithSuccessor], km, fers, ferTypes, 'en')
+    const row = matrix.groups[0].rows.find((r) => r.questionId === 'F1-metadata')!
+    expect(row.cells[0].chips[0].successorLabel).toBe('Handle')
+  })
+
+  it('falls back to successorFreeText when the successor is not catalogued', () => {
+    const fipWithSuccessor = makeFip({
+      id: 'fip-successor-2',
+      createdAt: '2026-09-05T00:00:00Z',
+      answers: [
+        {
+          questionId: 'F1-metadata',
+          declarations: [
+            { ferId: 'doi-service', status: 'planned-replacement', successorFreeText: 'Our own registry' },
+          ],
+        },
+      ],
+    })
+    const matrix = buildMatrix([fipWithSuccessor], km, fers, ferTypes, 'en')
+    const row = matrix.groups[0].rows.find((r) => r.questionId === 'F1-metadata')!
+    expect(row.cells[0].chips[0].successorLabel).toBe('Our own registry')
+  })
+
+  it('is null for any status other than planned-replacement, even with a successor field set', () => {
+    const fipCurrent = makeFip({
+      id: 'fip-current',
+      createdAt: '2026-09-06T00:00:00Z',
+      answers: [
+        { questionId: 'F1-metadata', declarations: [{ ferId: 'doi-service', status: 'current' }] },
+      ],
+    })
+    const matrix = buildMatrix([fipCurrent], km, fers, ferTypes, 'en')
+    const row = matrix.groups[0].rows.find((r) => r.questionId === 'F1-metadata')!
+    expect(row.cells[0].chips[0].successorLabel).toBeNull()
+  })
+})

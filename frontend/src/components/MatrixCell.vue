@@ -9,14 +9,17 @@
           :class="`status-${chip.status}`"
           :title="chipTitle(chip)"
           :aria-label="chipTitle(chip)"
-          @click="chip.note ? toggleNote(chip.key) : undefined"
+          @click="chip.note || chip.successorLabel ? toggleNote(chip.key) : undefined"
         >
           <span class="chip-label">{{ chip.label || statusFullText(chip.status) }}</span>
           <span class="chip-status">{{ statusText(chip.status) }}</span>
-          <span v-if="chip.note" class="chip-note-marker" aria-hidden="true">&#9679;</span>
+          <span v-if="chip.note || chip.successorLabel" class="chip-note-marker" aria-hidden="true">&#9679;</span>
         </button>
         <p v-if="chip.note && expanded.has(chip.key)" class="chip-note">
           <span class="sr-only">{{ $t('matrix.note') }}: </span>{{ chip.note }}
+        </p>
+        <p v-if="chip.successorLabel && expanded.has(chip.key)" class="chip-successor">
+          {{ $t('matrix.successor', { label: chip.successorLabel }) }}
         </p>
       </span>
     </template>
@@ -75,8 +78,10 @@ function statusText(status: DeclarationStatus): string {
 
 function chipTitle(chip: MatrixChip): string {
   const label = chip.label || statusFullText(chip.status)
-  const base = `${label} — ${statusFullText(chip.status)}`
-  return chip.note ? `${base}: ${chip.note}` : base
+  let title = `${label} — ${statusFullText(chip.status)}`
+  if (chip.note) title += `: ${chip.note}`
+  if (chip.successorLabel) title += ` — ${t('matrix.successor', { label: chip.successorLabel })}`
+  return title
 }
 </script>
 
@@ -149,6 +154,13 @@ function chipTitle(chip: MatrixChip): string {
   margin: 0.15rem 0 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+  max-width: 14rem;
+}
+
+.chip-successor {
+  margin: 0.15rem 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-status-planned-replacement);
   max-width: 14rem;
 }
 

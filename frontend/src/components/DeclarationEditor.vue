@@ -26,6 +26,18 @@
       {{ $t('editor.removeDeclaration') }}
     </button>
 
+    <div v-if="showSuccessor" class="successor-row">
+      <label class="successor-label">{{ $t('editor.successor') }}</label>
+      <FerPicker
+        :options="options"
+        :fer-id="declaration.successorFerId ?? null"
+        :fer-free-text="declaration.successorFreeText ?? null"
+        :disabled="readOnly"
+        @change="onSuccessorChange"
+      />
+      <p class="successor-hint">{{ $t('editor.successorHint') }}</p>
+    </div>
+
     <details v-if="hasRelatedDmps" class="evidence">
       <summary>{{ $t('dmp.evidence') }}</summary>
       <div class="evidence-body">
@@ -113,6 +125,19 @@ function onFerChange(payload: { ferId: string | null; ferFreeText: string | null
 
 function onStatusChange(status: DeclarationStatus) {
   store.setDeclaration(props.questionId, props.index, { status })
+}
+
+// spec 05 §5: the second picker exists only for a planned-replacement
+// declaration; `store.setDeclaration` itself clears both successor fields
+// the moment the merged status stops being 'planned-replacement', so no
+// 422 can ever be saved regardless of ordering between this and the status change.
+const showSuccessor = computed(() => props.declaration.status === 'planned-replacement')
+
+function onSuccessorChange(payload: { ferId: string | null; ferFreeText: string | null }) {
+  store.setDeclaration(props.questionId, props.index, {
+    successorFerId: payload.ferId,
+    successorFreeText: payload.ferFreeText,
+  })
 }
 
 function onNoteChange(event: Event) {
@@ -233,6 +258,29 @@ function onQuestionRefChange(event: Event) {
   background: none;
   color: var(--color-error);
   font-size: var(--font-size-sm);
+}
+
+.successor-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.6rem;
+  border: 1px solid var(--color-status-planned-replacement);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-background);
+}
+
+.successor-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-status-planned-replacement);
+}
+
+.successor-hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 .evidence {

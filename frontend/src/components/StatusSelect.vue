@@ -9,7 +9,6 @@
     >
       <option v-for="s in STATUSES" :key="s" :value="s">{{ $t(`declarationStatus.${STATUS_KEYS[s]}`) }}</option>
     </select>
-    <p v-if="modelValue === 'planned-replacement'" class="hint">{{ $t('editor.replacementHint') }}</p>
   </div>
 </template>
 
@@ -45,11 +44,5 @@ function onChange(event: Event) {
   color: var(--color-text);
   font-size: var(--font-size-md);
   width: 100%;
-}
-
-.hint {
-  margin: 0.35rem 0 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-status-planned-development);
 }
 </style>

@@ -19,7 +19,7 @@
       <h1>{{ session.title }}</h1>
 
       <h2>{{ $t('sessionAdmin.fips') }}</h2>
-      <SessionFipList :fips="store.fips" :reconnecting="store.reconnecting" />
+      <SessionFipList :fips="store.fips" :reconnecting="store.reconnecting" :can-open="true" />
 
       <div class="actions">
         <button v-if="session.status !== 'closed'" type="button" class="btn btn-danger" @click="onClose">
@@ -32,7 +32,16 @@
         <router-link :to="`/sessions/${session.id}/matrix`" class="btn btn-secondary">
           {{ $t('sessionAdmin.matrix') }}
         </router-link>
+        <router-link
+          :to="`/knowledge-models/${session.questionnaireId}/${session.questionnaireVersion}/print`"
+          class="btn btn-secondary"
+        >
+          {{ $t('print.questionnaire') }}
+        </router-link>
       </div>
+
+      <FeedbackForm :session-id="session.id" />
+      <FeedbackSummary :session-id="session.id" />
     </template>
   </div>
 </template>
@@ -45,6 +54,8 @@ import { useSessionStore } from '@/stores/session'
 import { sessionExportCsvUrl, sessionExportJsonUrl, sessionExportTtlUrl } from '@/api/sessions'
 import QrCode from '@/components/QrCode.vue'
 import SessionFipList from '@/components/SessionFipList.vue'
+import FeedbackForm from '@/components/FeedbackForm.vue'
+import FeedbackSummary from '@/components/FeedbackSummary.vue'
 
 // Spec 02 §4.2.
 const route = useRoute()

@@ -8,6 +8,7 @@
     "login": "Login",
     "register": "Register",
     "workspace": "Workspace",
+    "admin": "Admin",
     "logout": "Logout"
   },
   "auth": {
@@ -165,14 +166,16 @@
     "freeTextPlaceholder": "Name the resource your community uses",
     "useCatalogue": "Pick from the catalogue",
     "noFerMatch": "No match — use your own wording.",
-    "replacementHint": "Also add a second resource with status 'Planned' for the replacement.",
     "progress": "{answered} of {total} questions answered",
     "readOnly": "Read-only on this device.",
     "editRightsLost": "Edit rights lost on this device.",
     "claim": "Save this FIP to my workspace",
     "claimed": "Saved to your workspace.",
     "preview": "Preview / print",
-    "notAnswered": "Not answered"
+    "notAnswered": "Not answered",
+    "successor": "Replaced by",
+    "successorHint": "Name the resource that will replace it.",
+    "facilitatorBanner": "You are editing as the facilitator."
   },
   "save": {
     "saved": "Saved {time}",
@@ -251,7 +254,8 @@
     "matrix": "Comparison matrix",
     "matrixSoon": "The comparison matrix arrives in week 3.",
     "hideChrome": "Projector mode",
-    "reconnecting": "Reconnecting…"
+    "reconnecting": "Reconnecting…",
+    "open": "Open"
   },
   "fipRead": {
     "notShared": "This FIP does not exist or is not shared.",
@@ -285,7 +289,8 @@
     "compact": "Compact",
     "print": "Print (A3 landscape)",
     "showNote": "Show reason",
-    "otherGroup": "Other"
+    "otherGroup": "Other",
+    "successor": "→ replaced by {label}"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -361,5 +366,74 @@
     "idTaken": "That identifier is already in use.",
     "importFailed": "This file is not a valid knowledge model.",
     "noModels": "No models yet."
+  },
+  "admin": {
+    "title": "Administration",
+    "users": "Users",
+    "search": "Search users",
+    "role": "Role",
+    "created": "Created",
+    "fips": "FIPs",
+    "sessions": "Sessions",
+    "models": "Models",
+    "resetPassword": "Reset password",
+    "resetConfirm": "Reset this user's password? Their current password and all their sign-ins stop working.",
+    "tempPassword": "Temporary password",
+    "tempPasswordOnce": "Copy it now — it is shown only once. The user must change it at next sign-in.",
+    "pendingFers": "Resources awaiting promotion",
+    "noPendingFers": "No user-contributed resources.",
+    "usage": "Used in {count} declarations",
+    "promote": "Promote to catalogue",
+    "promoteConfirm": "Add this resource to the global catalogue?",
+    "owner": "Contributed by",
+    "merge": "Merge into…",
+    "mergeConfirm": "Merge into {label}? Declarations are re-pointed and this resource is deleted. This cannot be undone.",
+    "mergeDone": "{declarations} declarations in {fips} FIPs re-pointed."
+  },
+  "password": {
+    "mustChangeTitle": "Choose a new password",
+    "mustChangeHint": "An administrator set a temporary password for your account. Choose your own to continue.",
+    "current": "Current password",
+    "new": "New password",
+    "submit": "Change password",
+    "changed": "Password changed."
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "version": "Version {version}, {date}",
+    "link": "Privacy notice",
+    "accept": "I have read the privacy notice.",
+    "required": "Please read and accept the privacy notice.",
+    "joinNotice": "Your answers are stored by this tool and shared with the workshop facilitator. See the {link}."
+  },
+  "print": {
+    "questionnaire": "Print questionnaire",
+    "handoutTitle": "FIP questionnaire — paper fallback",
+    "group": "Group / table",
+    "date": "Date",
+    "resource": "Resource",
+    "declarationsPerQuestion": "Resources per question",
+    "ferType": "Resource type",
+    "footerTool": "Filled-in sheets are typed into FIP Manager after the session.",
+    "instructions": "Tick one status per resource. Leave a block empty if your community has none."
+  },
+  "feedback": {
+    "title": "Two minutes of feedback?",
+    "intro": "Anonymous. It helps us improve the tool and the workshop.",
+    "q1": "The questionnaire was easy to understand.",
+    "q2": "The tool was easy to use on my device.",
+    "q3": "I understand better now what a FAIR Implementation Profile is.",
+    "comment": "What should we change? (optional)",
+    "scaleLow": "Strongly disagree",
+    "scaleHigh": "Strongly agree",
+    "submit": "Send feedback",
+    "thanks": "Thank you.",
+    "error": "Feedback could not be sent.",
+    "summaryTitle": "Feedback",
+    "responses": "{count} responses",
+    "mean": "Average {mean}",
+    "noResponses": "No feedback yet.",
+    "comments": "Comments",
+    "exportCsv": "Export feedback (CSV)"
   }
 }

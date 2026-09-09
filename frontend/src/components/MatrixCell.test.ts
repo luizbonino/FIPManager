@@ -25,11 +25,11 @@ describe('MatrixCell', () => {
       unanswered: false,
       comment: null,
       chips: [
-        { key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: null },
-        { key: 'b', label: 'Handle', iri: 'b', freeText: false, status: 'planned', note: null },
-        { key: 'c', label: 'Custom vocab', iri: null, freeText: true, status: 'planned-development', note: null },
-        { key: 'd', label: 'Old system', iri: 'd', freeText: false, status: 'planned-replacement', note: null },
-        { key: 'e', label: '', iri: null, freeText: false, status: 'none', note: null },
+        { key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: null, successorLabel: null },
+        { key: 'b', label: 'Handle', iri: 'b', freeText: false, status: 'planned', note: null, successorLabel: null },
+        { key: 'c', label: 'Custom vocab', iri: null, freeText: true, status: 'planned-development', note: null, successorLabel: null },
+        { key: 'd', label: 'Old system', iri: 'd', freeText: false, status: 'planned-replacement', note: null, successorLabel: 'New system' },
+        { key: 'e', label: '', iri: null, freeText: false, status: 'none', note: null, successorLabel: null },
       ],
     }
     const wrapper = mountCell(cell)
@@ -67,7 +67,7 @@ describe('MatrixCell', () => {
       fipId: 'fip-1',
       unanswered: false,
       comment: null,
-      chips: [{ key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: null }],
+      chips: [{ key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: null, successorLabel: null }],
     }
     const wrapper = mountCell(cell, true)
     const button = wrapper.get('button.chip')
@@ -81,7 +81,17 @@ describe('MatrixCell', () => {
       fipId: 'fip-1',
       unanswered: false,
       comment: null,
-      chips: [{ key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: 'Because it is standard' }],
+      chips: [
+        {
+          key: 'a',
+          label: 'DOI',
+          iri: 'a',
+          freeText: false,
+          status: 'current',
+          note: 'Because it is standard',
+          successorLabel: null,
+        },
+      ],
     }
     const wrapper = mountCell(cell)
     expect(wrapper.find('.chip-note').exists()).toBe(false)
@@ -90,5 +100,45 @@ describe('MatrixCell', () => {
     expect(wrapper.get('.chip-note').text()).toContain('Because it is standard')
     await wrapper.get('button.chip').trigger('click')
     expect(wrapper.find('.chip-note').exists()).toBe(false)
+  })
+
+  // Criterion 17 (docs/specs/05-v1-completion.md §8): the successor label
+  // lands in the chip's title/aria-label and, on click, under the chip.
+  it('puts a successor label in the chip title and reveals it on click', async () => {
+    const cell: MatrixCellType = {
+      fipId: 'fip-1',
+      unanswered: false,
+      comment: null,
+      chips: [
+        {
+          key: 'a',
+          label: 'Old system',
+          iri: 'a',
+          freeText: false,
+          status: 'planned-replacement',
+          note: null,
+          successorLabel: 'New system',
+        },
+      ],
+    }
+    const wrapper = mountCell(cell)
+    const button = wrapper.get('button.chip')
+    expect(button.attributes('title')).toContain('New system')
+    expect(wrapper.find('.chip-successor').exists()).toBe(false)
+    await button.trigger('click')
+    expect(wrapper.get('.chip-successor').text()).toContain('New system')
+  })
+
+  it('a chip with neither note nor successor label is not clickable to expand anything', async () => {
+    const cell: MatrixCellType = {
+      fipId: 'fip-1',
+      unanswered: false,
+      comment: null,
+      chips: [{ key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: null, successorLabel: null }],
+    }
+    const wrapper = mountCell(cell)
+    await wrapper.get('button.chip').trigger('click')
+    expect(wrapper.find('.chip-note').exists()).toBe(false)
+    expect(wrapper.find('.chip-successor').exists()).toBe(false)
   })
 })

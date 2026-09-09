@@ -73,6 +73,9 @@
                 <li v-for="(decl, i) in answer.declarations" :key="i" class="declaration">
                   <span class="declaration-label">{{ decl.fer?.label || decl.ferFreeText || decl.fer?.id }}</span>
                   <StatusBadge :status="decl.status" />
+                  <span v-if="decl.successor || decl.successorFreeText" class="declaration-successor">
+                    {{ $t('matrix.successor', { label: decl.successor?.label || decl.successorFreeText }) }}
+                  </span>
                   <span v-if="decl.note" class="declaration-note">{{ decl.note }}</span>
                   <span v-if="decl.dmpEvidence" class="declaration-evidence">
                     {{ $t('dmp.evidence') }}:
@@ -352,6 +355,11 @@ onMounted(load)
 
 .declaration-note {
   color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.declaration-successor {
+  color: var(--color-status-planned-replacement);
   font-size: var(--font-size-xs);
 }
 

@@ -25,6 +25,9 @@
 
         <div class="actions no-print">
           <a class="btn btn-secondary" :href="kmExportJsonUrl(model.id, model.version)">{{ $t('km.export') }}</a>
+          <router-link :to="`/knowledge-models/${model.id}/${model.version}/print`" class="btn btn-secondary">
+            {{ $t('print.questionnaire') }}
+          </router-link>
           <button type="button" class="btn btn-secondary" @click="onFork">{{ $t('km.fork') }}</button>
           <button
             v-if="isOwner && model.status === 'published'"

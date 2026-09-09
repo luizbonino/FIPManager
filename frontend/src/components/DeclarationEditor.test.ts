@@ -37,7 +37,16 @@ function mountEditor(fip: FipOut, declaration: Declaration = { status: 'current'
   setActivePinia(pinia)
   setToken(fip.id, 'test-edit-token')
   const store = useFipEditorStore()
-  store.setFip(fip)
+  // In real usage the `declaration` prop always comes from the store itself
+  // (QuestionCard iterates `store.fip.answers[...].declarations`), so the
+  // store is seeded with the same declaration here too — otherwise
+  // `store.setDeclaration` would merge onto a freshly-defaulted `{status:
+  // 'current'}` base instead of the one the component was mounted with.
+  const seeded: FipOut = {
+    ...fip,
+    answers: fip.answers.length > 0 ? fip.answers : [{ questionId: 'F1-metadata', declarations: [declaration], comment: null }],
+  }
+  store.setFip(seeded)
 
   const wrapper = mount(DeclarationEditor, {
     props: { questionId: 'F1-metadata', index: 0, declaration, options: [] },
@@ -86,5 +95,65 @@ describe('DeclarationEditor.vue — DMP evidence', () => {
       section: null,
       questionRef: null,
     })
+  })
+})
+
+// Criterion 17 (docs/specs/05-v1-completion.md §8): the second FerPicker
+// exists only while status is planned-replacement, and both successor
+// fields are cleared the moment the status changes away from it.
+describe('DeclarationEditor.vue — successor FER', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('renders no second picker for a current declaration', () => {
+    const { wrapper } = mountEditor(makeFip(), { status: 'current' })
+    expect(wrapper.find('.successor-row').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain(en.editor.successor)
+  })
+
+  it('renders the second picker, labelled editor.successor, only for planned-replacement', () => {
+    const { wrapper } = mountEditor(makeFip(), { status: 'planned-replacement' })
+    const successorRow = wrapper.get('.successor-row')
+    expect(successorRow.text()).toContain(en.editor.successor)
+    expect(successorRow.text()).toContain(en.editor.successorHint)
+  })
+
+  it('writes successorFerId/successorFreeText via the store when the second picker changes', async () => {
+    const { wrapper, store } = mountEditor(makeFip(), { status: 'planned-replacement' })
+    const successorRow = wrapper.get('.successor-row')
+    // No catalogue options in this fixture — switch the picker to free text first.
+    await successorRow.get('.toggle-mode').trigger('click')
+    await successorRow.get('.fer-input').setValue('Our own registry')
+
+    expect(store.fip?.answers[0]?.declarations[0]?.successorFreeText).toBe('Our own registry')
+    expect(store.fip?.answers[0]?.declarations[0]?.successorFerId).toBeNull()
+  })
+
+  // The `declaration` prop always comes from the store in real usage
+  // (QuestionCard re-renders it from `store.fip.answers`), so this checks
+  // the picker's own reactive show/hide the same way a parent update would
+  // drive it — a fresh `declaration` prop with a different status.
+  it('hides the second picker once the declaration prop is no longer planned-replacement', async () => {
+    const { wrapper } = mountEditor(makeFip(), { status: 'planned-replacement' })
+    expect(wrapper.find('.successor-row').exists()).toBe(true)
+
+    await wrapper.setProps({ declaration: { status: 'current' } })
+    expect(wrapper.find('.successor-row').exists()).toBe(false)
+  })
+
+  it('store.setDeclaration clears both successor fields once a status change moves the merged declaration away from planned-replacement', async () => {
+    const { wrapper, store } = mountEditor(makeFip(), {
+      status: 'planned-replacement',
+      successorFreeText: 'Our own registry',
+    })
+
+    const statusSelect = wrapper.get('select')
+    await statusSelect.setValue('current')
+
+    const declaration = store.fip?.answers[0]?.declarations[0]
+    expect(declaration?.status).toBe('current')
+    expect(declaration?.successorFerId ?? null).toBeNull()
+    expect(declaration?.successorFreeText ?? null).toBeNull()
   })
 })

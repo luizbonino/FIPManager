@@ -9,16 +9,19 @@
             <router-link v-if="!isAuthenticated" to="/login" class="nav-link">{{ $t('nav.login') }}</router-link>
             <router-link v-if="!isAuthenticated" to="/register" class="nav-link">{{ $t('nav.register') }}</router-link>
             <router-link v-if="isAuthenticated" to="/workspace" class="nav-link">{{ $t('nav.workspace') }}</router-link>
+            <router-link v-if="isAdmin" to="/admin" class="nav-link">{{ $t('nav.admin') }}</router-link>
             <button v-if="isAuthenticated" @click="handleLogout" class="nav-link logout-btn">{{ $t('nav.logout') }}</button>
           </nav>
           <LanguageSwitcher />
         </div>
       </div>
     </header>
-    
+
     <main class="app-main">
       <router-view />
     </main>
+
+    <SiteFooter />
   </div>
 </template>
 
@@ -27,11 +30,15 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
+import SiteFooter from '@/components/SiteFooter.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+// spec 05 §1: the "Admin" nav link — and only that link — reflects role;
+// the /admin route itself still renders `common.notFound` for anyone else.
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 
 const handleLogout = async () => {
   try {

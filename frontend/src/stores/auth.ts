@@ -10,6 +10,9 @@ export type User = {
   language: string
   createdAt: string
   updatedAt: string
+  /** spec 05 §1: forces `/account/password` until cleared by a successful `POST /api/auth/password`. */
+  mustChangePassword: boolean
+  privacyAcceptedVersion: string | null
 }
 
 type AuthState = {
@@ -67,7 +70,8 @@ export const useAuthStore = defineStore('auth', () => {
     email: string,
     password: string,
     displayName: string,
-    language?: string
+    language?: string,
+    privacyAcceptedVersion?: string
   ) {
     state.value.isLoading = true
     state.value.error = null
@@ -78,6 +82,9 @@ export const useAuthStore = defineStore('auth', () => {
         password,
         displayName,
         language: language || 'en',
+        // spec 05 §2: required, non-empty; a mismatch against the current
+        // notice version -> `400 privacy_version_mismatch`.
+        privacyAcceptedVersion,
       })
       state.value.me = response
       await restoreSession()
@@ -88,6 +95,12 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       state.value.isLoading = false
     }
+  }
+
+  /** `POST /api/auth/password` (spec 01 §3, spec 05 §1): clears `mustChangePassword` on success. */
+  async function changePassword(currentPassword: string, newPassword: string) {
+    await post<void>('/auth/password', { currentPassword, newPassword })
+    await restoreSession()
   }
 
   async function logout() {
@@ -111,6 +124,7 @@ export const useAuthStore = defineStore('auth', () => {
     restoreSession,
     login,
     register,
+    changePassword,
     logout,
   }
 })

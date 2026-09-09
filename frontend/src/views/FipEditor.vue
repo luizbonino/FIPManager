@@ -25,6 +25,7 @@
           <LanguageSwitcher @changed="onLocaleChanged" />
         </div>
         <p v-if="store.readOnly" class="readonly-banner">{{ readOnlyMessage }}</p>
+        <p v-if="store.facilitatorWrite" class="facilitator-banner">{{ $t('editor.facilitatorBanner') }}</p>
         <div v-if="isOwner" class="owner-row no-print">
           <VisibilitySelect v-model="visibilityModel" />
           <button type="button" class="delete-btn" @click="onDelete">{{ $t('common.delete') }}</button>
@@ -81,6 +82,11 @@
         :jsonld-url="fipExportJsonldUrl(store.fip.id)"
       />
 
+      <FeedbackForm
+        v-if="answeredCount > 0 && store.saveState === 'saved'"
+        :fip-id="store.fip.id"
+      />
+
       <AttributionFooter :questionnaire-license="km.content.license" :fip-license="store.fip.license" />
     </template>
   </div>
@@ -103,6 +109,7 @@ import SaveIndicator from '@/components/SaveIndicator.vue'
 import QuestionCard from '@/components/QuestionCard.vue'
 import ShareBox from '@/components/ShareBox.vue'
 import ExportButtons from '@/components/ExportButtons.vue'
+import FeedbackForm from '@/components/FeedbackForm.vue'
 import AttributionFooter from '@/components/AttributionFooter.vue'
 import VisibilitySelect from '@/components/VisibilitySelect.vue'
 import DmpLinkList from '@/components/DmpLinkList.vue'
@@ -271,6 +278,15 @@ onBeforeUnmount(() => {
   padding: 0.5rem 0.75rem;
   background-color: var(--color-error-bg);
   color: var(--color-error);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.facilitator-banner {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-user-info);
+  color: var(--color-user-info-text);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
 }

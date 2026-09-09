@@ -14,6 +14,10 @@ import KnowledgeModelList from '@/views/KnowledgeModelList.vue'
 import KnowledgeModelNew from '@/views/KnowledgeModelNew.vue'
 import KnowledgeModelRead from '@/views/KnowledgeModelRead.vue'
 import KnowledgeModelEditor from '@/views/KnowledgeModelEditor.vue'
+import KnowledgeModelPrint from '@/views/KnowledgeModelPrint.vue'
+import Admin from '@/views/Admin.vue'
+import ChangePassword from '@/views/ChangePassword.vue'
+import Privacy from '@/views/Privacy.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useFipEditorStore } from '@/stores/fipEditor'
 import { useKmEditorStore } from '@/stores/kmEditor'
@@ -44,6 +48,29 @@ const routes: RouteRecordRaw[] = [
     component: JoinSession,
     meta: { requiresAuth: false },
     props: true,
+  },
+  {
+    // spec 05 §2: public — participants have no account (A2).
+    path: '/privacy',
+    name: 'Privacy',
+    component: Privacy,
+    meta: { requiresAuth: false },
+  },
+  {
+    // spec 05 §1: the view itself renders `common.notFound` for a
+    // signed-in non-admin and calls no `/api/admin/*` route.
+    path: '/admin',
+    name: 'Admin',
+    component: Admin,
+    meta: { requiresAuth: true },
+  },
+  {
+    // spec 05 §1: reached either voluntarily or via the `mustChangePassword`
+    // redirect below; `requiresAuth` so an anonymous visit bounces to /login first.
+    path: '/account/password',
+    name: 'ChangePassword',
+    component: ChangePassword,
+    meta: { requiresAuth: true },
   },
   {
     path: '/fips/:id',
@@ -125,6 +152,15 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    // spec 05 §3: the paper-fallback questionnaire; 404 renders
+    // `common.notFound` from inside the view itself, like KnowledgeModelRead.
+    path: '/knowledge-models/:id/:version/print',
+    name: 'KnowledgeModelPrint',
+    component: KnowledgeModelPrint,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },
@@ -158,6 +194,13 @@ router.beforeEach(async (to, from) => {
   if (from.name === 'KnowledgeModelEditor' && to.name !== 'KnowledgeModelEditor') {
     const kmEditorStore = useKmEditorStore()
     await kmEditorStore.flush()
+  }
+
+  // spec 05 §1: an admin-set temporary password forces every authenticated
+  // navigation except ChangePassword itself to /account/password, until a
+  // successful `POST /api/auth/password` clears the flag.
+  if (authStore.isAuthenticated && authStore.user?.mustChangePassword && to.name !== 'ChangePassword') {
+    return { path: '/account/password', query: { redirect: to.fullPath } }
   }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

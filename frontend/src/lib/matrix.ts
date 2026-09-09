@@ -26,6 +26,12 @@ export interface MatrixChip {
   freeText: boolean
   status: DeclarationStatus
   note: string | null
+  /**
+   * spec 05 §5: the resolved successor label, exactly like `label` — a
+   * catalogued `successorFerId`'s FER label, else `successorFreeText`, else
+   * `null`. Always `null` unless `status === 'planned-replacement'`.
+   */
+  successorLabel: string | null
 }
 
 export interface MatrixCell {
@@ -111,8 +117,19 @@ function truncateLabel(name: string): string {
   return `${name.slice(0, LABEL_MAX_LENGTH)}…`
 }
 
+function buildSuccessorLabel(declaration: Declaration, fers: Map<string, FerOut>, locale: string): string | null {
+  if (declaration.status !== 'planned-replacement') return null
+  if (declaration.successorFerId) {
+    const fer = fers.get(declaration.successorFerId)
+    return (fer && resolveLang(fer.label, locale)) || declaration.successorFerId
+  }
+  if (declaration.successorFreeText) return declaration.successorFreeText
+  return null
+}
+
 function buildChip(declaration: Declaration, fers: Map<string, FerOut>, locale: string): MatrixChip {
   const note = resolveLang(declaration.note, locale)
+  const successorLabel = buildSuccessorLabel(declaration, fers, locale)
   if (declaration.ferId) {
     const fer = fers.get(declaration.ferId)
     const label = (fer && resolveLang(fer.label, locale)) || declaration.ferId
@@ -123,6 +140,7 @@ function buildChip(declaration: Declaration, fers: Map<string, FerOut>, locale: 
       freeText: false,
       status: declaration.status,
       note,
+      successorLabel,
     }
   }
   if (declaration.ferFreeText) {
@@ -133,6 +151,7 @@ function buildChip(declaration: Declaration, fers: Map<string, FerOut>, locale: 
       freeText: false,
       status: declaration.status,
       note,
+      successorLabel,
     }
   }
   // No resource on record at all (e.g. a bare `none` declaration).
@@ -143,6 +162,7 @@ function buildChip(declaration: Declaration, fers: Map<string, FerOut>, locale: 
     freeText: false,
     status: declaration.status,
     note,
+    successorLabel,
   }
 }
 

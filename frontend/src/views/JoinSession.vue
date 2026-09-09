@@ -60,6 +60,12 @@
 
           <p v-if="submitError" class="form-error">{{ submitError }}</p>
 
+          <i18n-t keypath="privacy.joinNotice" tag="p" class="privacy-notice">
+            <template #link>
+              <router-link to="/privacy" target="_blank">{{ $t('privacy.link') }}</router-link>
+            </template>
+          </i18n-t>
+
           <button type="submit" class="btn btn-primary" :disabled="submitting">
             {{ $t('join.startFip') }}
           </button>
@@ -290,6 +296,12 @@ onMounted(load)
 .form-error {
   color: var(--color-error);
   font-size: var(--font-size-sm);
+}
+
+.privacy-notice {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 .btn {

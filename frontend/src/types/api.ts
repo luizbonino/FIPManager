@@ -40,6 +40,14 @@ export interface Declaration {
   status: DeclarationStatus
   note?: LangMap | null
   dmpEvidence?: DmpEvidence | null
+  /**
+   * The resource that will replace this one (spec 05 §5): at most one of
+   * the two set, and both `null`/absent unless `status ===
+   * 'planned-replacement'` — enforced client-side by
+   * `stores/fipEditor.setDeclaration` and server-side by `_successor_rules`.
+   */
+  successorFerId?: string | null
+  successorFreeText?: string | null
 }
 
 export interface Answer {
@@ -322,6 +330,9 @@ export interface FipExportDeclaration {
   status: DeclarationStatus
   note: string | null
   dmpEvidence: FipExportDmpEvidence | null
+  /** spec 05 §5: enriched exactly like `fer`, `null` unless a successor is set. */
+  successor: FipExportFer | null
+  successorFreeText: string | null
 }
 
 export interface FipExportAnswer {
@@ -363,6 +374,35 @@ export interface FipExportDoc {
   fip: FipExportFip
   questionnaireRef: FipExportQuestionnaireRef
   answers: FipExportAnswer[]
+}
+
+// ---------------------------------------------------------------------------
+// Admin (spec 05 §1)
+// ---------------------------------------------------------------------------
+
+export interface AdminUserOut {
+  id: string
+  email: string
+  displayName: string
+  role: 'user' | 'admin'
+  language: string
+  createdAt: string
+  mustChangePassword: boolean
+  privacyAcceptedVersion: string | null
+  fipCount: number
+  sessionCount: number
+  knowledgeModelCount: number
+}
+
+/** `FerOut` plus the two admin-only fields (spec 05 §1). */
+export interface AdminFerOut extends FerOut {
+  ownerEmail: string | null
+  usageCount: number
+}
+
+export interface AdminMergeResult {
+  repointedDeclarations: number
+  repointedFips: number
 }
 
 /** `GET /api/sessions/{id}/export.json` (spec 02 §5.3). */

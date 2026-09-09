@@ -13,7 +13,10 @@
         </div>
         <ProgressBar :answered="answeredCount(fip.answers)" :total="21" />
         <span class="updated">{{ $t('sessionAdmin.lastUpdate') }}: {{ relativeTime(fip.updatedAt) }}</span>
-        <router-link :to="`/fips/${fip.id}`" class="view-link">{{ $t('common.view') }}</router-link>
+        <span class="row-links">
+          <router-link :to="`/fips/${fip.id}`" class="view-link">{{ $t('common.view') }}</router-link>
+          <router-link v-if="canOpen" :to="`/fips/${fip.id}/edit`" class="open-link">{{ $t('sessionAdmin.open') }}</router-link>
+        </span>
       </li>
     </ul>
   </div>
@@ -33,7 +36,7 @@ const { locale } = useI18n()
  * `answered / 21` bar, `updatedAt` as relative time, visibility, View link;
  * sorted by `createdAt`.
  */
-const props = defineProps<{ fips: FipOut[]; reconnecting?: boolean }>()
+const props = defineProps<{ fips: FipOut[]; reconnecting?: boolean; canOpen?: boolean }>()
 
 const sorted = computed(() => [...props.fips].sort((a, b) => a.createdAt.localeCompare(b.createdAt)))
 
@@ -119,7 +122,13 @@ function relativeTime(iso: string): string {
   color: var(--color-text-secondary);
 }
 
-.view-link {
+.row-links {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.view-link,
+.open-link {
   align-self: start;
   min-height: 44px;
   display: inline-flex;

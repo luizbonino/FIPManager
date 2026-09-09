@@ -4,6 +4,7 @@ import { ApiResponseError } from '@/api/client'
 import { listFers } from '@/api/fers'
 import { claimFip, deleteFip as apiDeleteFip, getFip, patchFip } from '@/api/fips'
 import { getKnowledgeModel } from '@/api/knowledgeModels'
+import { getSession } from '@/api/sessions'
 import { answeredCount } from '@/lib/progress'
 import { clearToken, getToken } from '@/lib/editTokens'
 import { useAuthStore } from '@/stores/auth'
@@ -47,6 +48,14 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
   const notFound = ref(false)
   /** Set on a 403 or 409 `session_closed` save response (spec 02 §2.3): forces read-only. */
   const forcedReadOnly = ref(false)
+  /**
+   * spec 05 §6: true once `load()` has confirmed, via a one-off
+   * `GET /api/sessions/{sessionId}` probe, that the signed-in caller is
+   * that session's owner (facilitator) editing a FIP they don't own —
+   * that endpoint is itself owner/admin-only and 404s otherwise, so its
+   * success *is* the permission check.
+   */
+  const facilitatorWrite = ref(false)
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
   let retryTimer: ReturnType<typeof setTimeout> | null = null
@@ -69,15 +78,17 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
   })
 
   /**
-   * `canEdit` (spec 02 §2.2): a stored edit token for this FIP, or
-   * ownership. A device without either sees the read-only view even for a
-   * `link`-visible FIP — "second device is read-only".
+   * `canEdit` (spec 02 §2.2): a stored edit token for this FIP, ownership,
+   * or the facilitator-write probe (spec 05 §6). A device without any of
+   * these sees the read-only view even for a `link`-visible FIP —
+   * "second device is read-only".
    */
   const canEdit = computed(() => {
     if (!fip.value || forcedReadOnly.value) return false
     const auth = useAuthStore()
     if (fip.value.ownerId && auth.user && fip.value.ownerId === auth.user.id) return true
-    return !!getToken(fip.value.id)
+    if (getToken(fip.value.id)) return true
+    return facilitatorWrite.value
   })
 
   const readOnly = computed(() => !canEdit.value)
@@ -220,6 +231,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     loading.value = true
     notFound.value = false
     forcedReadOnly.value = false
+    facilitatorWrite.value = false
     lastError.value = null
     dirty.value = false
     fip.value = null
@@ -239,6 +251,20 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
       km.value = kmResult
       fers.value = Object.fromEntries(fersResult.items.map((f) => [f.id, f]))
       attachPagehideFlush()
+
+      // spec 05 §6: a facilitator opening a session member's FIP with no
+      // stored token of their own — probe once whether they own that
+      // session; `GET /api/sessions/{id}` is owner/admin-only and 404s for
+      // anyone else, so its success alone grants `facilitatorWrite`.
+      const auth = useAuthStore()
+      if (loaded.sessionId && auth.isAuthenticated && !getToken(loaded.id) && loaded.ownerId !== auth.user?.id) {
+        try {
+          await getSession(loaded.sessionId)
+          facilitatorWrite.value = true
+        } catch {
+          facilitatorWrite.value = false
+        }
+      }
     } catch (err) {
       if (err instanceof ApiResponseError && err.status === 404) {
         notFound.value = true
@@ -281,6 +307,14 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     const existing = answer.declarations[index]
     const base: Declaration = existing ?? { status: 'current' }
     const merged: Declaration = { ...base, ...patch }
+    // spec 05 §5: a status change (from this or any other field patch) that
+    // leaves the merged declaration anywhere but planned-replacement clears
+    // both successor fields, so no 422 (`successor_requires_planned_replacement`)
+    // can ever reach the server.
+    if (merged.status !== 'planned-replacement') {
+      merged.successorFerId = null
+      merged.successorFreeText = null
+    }
     const declarations = [...answer.declarations]
     declarations[index] = merged
     answer.declarations = declarations
@@ -378,6 +412,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     loading,
     notFound,
     forcedReadOnly,
+    facilitatorWrite,
     canEdit,
     readOnly,
     retryExhausted,
