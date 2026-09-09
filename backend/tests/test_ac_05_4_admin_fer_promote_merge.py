@@ -52,7 +52,7 @@ def test_promote_makes_fer_globally_visible_and_is_idempotent_guarded(client_fac
     assert created.status_code == 201
     fer_id = created.json()["id"]
 
-    anon_before = client_factory().get("/api/fers")
+    anon_before = client_factory().get("/api/fers?limit=500")
     assert not any(f["id"] == fer_id for f in anon_before.json()["items"])
 
     promoted = admin.post(f"/api/admin/fers/{fer_id}/promote")
@@ -60,7 +60,7 @@ def test_promote_makes_fer_globally_visible_and_is_idempotent_guarded(client_fac
     body = promoted.json()
     assert body["source"] == "user-promoted"
 
-    anon_after = client_factory().get("/api/fers")
+    anon_after = client_factory().get("/api/fers?limit=500")
     assert any(f["id"] == fer_id for f in anon_after.json()["items"])
 
     second_promote = admin.post(f"/api/admin/fers/{fer_id}/promote")
