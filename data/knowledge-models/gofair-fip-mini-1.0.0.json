@@ -23,7 +23,7 @@
     {
       "version": "1.0.0",
       "date": "2026-09-08",
-      "notes": "Initial import of the GO FAIR FIP questionnaire, unchanged. English wording is verbatim from the FIP mini-questionnaire v2.0.0; pt-PT and pt-BR drafts pending facilitator review. The questionnaire's 22nd row (R1.3, “Who is the community, and what are their domain-relevant community standards?”) is not a question — it is answered by the FIP itself — and is carried by the FIP's community field instead, which is how the count is exactly 21. es draft added 9 Sep 2026, pending review."
+      "notes": "Initial import of the GO FAIR FIP questionnaire, unchanged. English wording is verbatim from the FIP mini-questionnaire v2.0.0; pt-PT and pt-BR drafts pending facilitator review. The questionnaire's 22nd row (R1.3, “Who is the community, and what are their domain-relevant community standards?”) is not a question — it is answered by the FIP itself — and is carried by the FIP's community field instead, which is how the count is exactly 21. es draft added 9 Sep 2026, pending review. pt-BR question texts aligned with the CONFOA 2026 didactic version (9 Sep 2026)."
     }
   ],
   "sections": [
@@ -32,7 +32,7 @@
       "title": {
         "en": "F – Findable",
         "pt-PT": "F – Localizável",
-        "pt-BR": "F – Localizável",
+        "pt-BR": "F – Encontrável",
         "es": "F – Localizable"
       },
       "questions": [
@@ -43,7 +43,7 @@
           "text": {
             "en": "What globally unique, persistent, resolvable identifiers do you use for metadata records?",
             "pt-PT": "Que identificadores globalmente únicos, persistentes e resolúveis utiliza para os registos de metadados?",
-            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis você usa para os registros de metadados?",
+            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis são utilizados para os registros de metadados?",
             "es": "¿Qué identificadores globalmente únicos, persistentes y resolubles utiliza para los registros de metadatos?"
           },
           "help": {
@@ -63,7 +63,7 @@
           "text": {
             "en": "What globally unique, persistent, resolvable identifiers do you use for datasets?",
             "pt-PT": "Que identificadores globalmente únicos, persistentes e resolúveis utiliza para os conjuntos de dados?",
-            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis você usa para os conjuntos de dados?",
+            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis são utilizados para os conjuntos de dados?",
             "es": "¿Qué identificadores globalmente únicos, persistentes y resolubles utiliza para los conjuntos de datos?"
           },
           "help": {
@@ -83,7 +83,7 @@
           "text": {
             "en": "Which metadata schemas do you use for findability?",
             "pt-PT": "Que esquemas de metadados utiliza para efeitos de localizabilidade?",
-            "pt-BR": "Quais esquemas de metadados você usa para a localizabilidade?",
+            "pt-BR": "Quais esquemas de metadados são utilizados para promover a encontrabilidade dos dados?",
             "es": "¿Qué esquemas de metadatos utiliza para la localizabilidad?"
           },
           "help": {
@@ -103,7 +103,7 @@
           "text": {
             "en": "What is the technology that links the persistent identifiers of your data to the metadata description?",
             "pt-PT": "Qual é a tecnologia que liga os identificadores persistentes dos seus dados à descrição em metadados?",
-            "pt-BR": "Qual tecnologia liga os identificadores persistentes dos seus dados à descrição de metadados?",
+            "pt-BR": "Qual tecnologia ou mecanismo é utilizado para vincular os identificadores dos dados às respectivas descrições de metadados?",
             "es": "¿Cuál es la tecnología que vincula los identificadores persistentes de sus datos con la descripción en metadatos?"
           },
           "help": {
@@ -123,7 +123,7 @@
           "text": {
             "en": "In which search engines are your metadata records indexed?",
             "pt-PT": "Em que motores de busca estão indexados os seus registos de metadados?",
-            "pt-BR": "Em quais mecanismos de busca os seus registros de metadados estão indexados?",
+            "pt-BR": "Em quais mecanismos, serviços ou sistemas de busca os registros de metadados são indexados?",
             "es": "¿En qué motores de búsqueda están indexados sus registros de metadatos?"
           },
           "help": {
@@ -143,7 +143,7 @@
           "text": {
             "en": "In which search engines are your datasets indexed?",
             "pt-PT": "Em que motores de busca estão indexados os seus conjuntos de dados?",
-            "pt-BR": "Em quais mecanismos de busca os seus conjuntos de dados estão indexados?",
+            "pt-BR": "Em quais mecanismos, serviços ou sistemas de busca os conjuntos de dados são indexados?",
             "es": "¿En qué motores de búsqueda están indexados sus conjuntos de datos?"
           },
           "help": {
@@ -174,7 +174,7 @@
           "text": {
             "en": "Which standardized communication protocol do you use for metadata records?",
             "pt-PT": "Que protocolo de comunicação normalizado utiliza para os registos de metadados?",
-            "pt-BR": "Qual protocolo de comunicação padronizado você usa para os registros de metadados?",
+            "pt-BR": "Qual protocolo de comunicação padronizado é utilizado para acessar os registros de metadados?",
             "es": "¿Qué protocolo de comunicación normalizado utiliza para los registros de metadatos?"
           },
           "help": {
@@ -194,7 +194,7 @@
           "text": {
             "en": "Which standardized communication protocol do you use for datasets?",
             "pt-PT": "Que protocolo de comunicação normalizado utiliza para os conjuntos de dados?",
-            "pt-BR": "Qual protocolo de comunicação padronizado você usa para os conjuntos de dados?",
+            "pt-BR": "Qual protocolo de comunicação padronizado é utilizado para acessar os conjuntos de dados?",
             "es": "¿Qué protocolo de comunicación normalizado utiliza para los conjuntos de datos?"
           },
           "help": {
@@ -214,7 +214,7 @@
           "text": {
             "en": "Which authentication & authorisation technique do you use for metadata records?",
             "pt-PT": "Que técnica de autenticação e autorização utiliza para os registos de metadados?",
-            "pt-BR": "Qual técnica de autenticação e autorização você usa para os registros de metadados?",
+            "pt-BR": "Qual técnica ou mecanismo de autenticação e autorização é utilizado para acessar os registros de metadados?",
             "es": "¿Qué técnica de autenticación y autorización utiliza para los registros de metadatos?"
           },
           "help": {
@@ -234,7 +234,7 @@
           "text": {
             "en": "Which authentication & authorisation technique do you use for datasets?",
             "pt-PT": "Que técnica de autenticação e autorização utiliza para os conjuntos de dados?",
-            "pt-BR": "Qual técnica de autenticação e autorização você usa para os conjuntos de dados?",
+            "pt-BR": "Qual técnica ou mecanismo de autenticação e autorização é utilizado para acessar os conjuntos de dados?",
             "es": "¿Qué técnica de autenticación y autorización utiliza para los conjuntos de datos?"
           },
           "help": {
@@ -254,7 +254,7 @@
           "text": {
             "en": "What is your metadata preservation policy?",
             "pt-PT": "Qual é a sua política de preservação de metadados?",
-            "pt-BR": "Qual é a sua política de preservação de metadados?",
+            "pt-BR": "Qual plano ou política de preservação e disponibilidade de longo prazo dos metadados é utilizado?",
             "es": "¿Cuál es su política de preservación de metadatos?"
           },
           "help": {
@@ -285,7 +285,7 @@
           "text": {
             "en": "Which knowledge representation languages (allowing machine interoperation) do you use for metadata records?",
             "pt-PT": "Que linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) utiliza para os registos de metadados?",
-            "pt-BR": "Quais linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) você usa para os registros de metadados?",
+            "pt-BR": "Quais linguagens de representação do conhecimento são utilizadas nos registros de metadados?",
             "es": "¿Qué lenguajes de representación del conocimiento (que permiten la interoperación entre máquinas) utiliza para los registros de metadatos?"
           },
           "help": {
@@ -305,7 +305,7 @@
           "text": {
             "en": "Which knowledge representation languages (allowing machine interoperation) do you use for datasets?",
             "pt-PT": "Que linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) utiliza para os conjuntos de dados?",
-            "pt-BR": "Quais linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) você usa para os conjuntos de dados?",
+            "pt-BR": "Quais linguagens ou formatos de representação são utilizados nos conjuntos de dados?",
             "es": "¿Qué lenguajes de representación del conocimiento (que permiten la interoperación entre máquinas) utiliza para los conjuntos de datos?"
           },
           "help": {
@@ -325,7 +325,7 @@
           "text": {
             "en": "Which structured vocabularies do you use to annotate your metadata records?",
             "pt-PT": "Que vocabulários estruturados utiliza para anotar os seus registos de metadados?",
-            "pt-BR": "Quais vocabulários estruturados você usa para anotar os seus registros de metadados?",
+            "pt-BR": "Quais vocabulários estruturados são utilizados para anotar ou descrever os registros de metadados?",
             "es": "¿Qué vocabularios estructurados utiliza para anotar sus registros de metadatos?"
           },
           "help": {
@@ -345,7 +345,7 @@
           "text": {
             "en": "Which structured vocabularies do you use to encode your datasets?",
             "pt-PT": "Que vocabulários estruturados utiliza para codificar os seus conjuntos de dados?",
-            "pt-BR": "Quais vocabulários estruturados você usa para codificar os seus conjuntos de dados?",
+            "pt-BR": "Quais vocabulários estruturados são utilizados para codificar ou descrever os conjuntos de dados?",
             "es": "¿Qué vocabularios estructurados utiliza para codificar sus conjuntos de datos?"
           },
           "help": {
@@ -365,7 +365,7 @@
           "text": {
             "en": "Which models, schema(s) do you use for your metadata records?",
             "pt-PT": "Que modelos ou esquemas utiliza para os seus registos de metadados?",
-            "pt-BR": "Quais modelos ou esquemas você usa para os seus registros de metadados?",
+            "pt-BR": "Quais modelos ou esquemas são utilizados nos registros de metadados?",
             "es": "¿Qué modelos o esquemas utiliza para sus registros de metadatos?"
           },
           "help": {
@@ -385,7 +385,7 @@
           "text": {
             "en": "Which models, schema(s) do you use for your datasets?",
             "pt-PT": "Que modelos ou esquemas utiliza para os seus conjuntos de dados?",
-            "pt-BR": "Quais modelos ou esquemas você usa para os seus conjuntos de dados?",
+            "pt-BR": "Quais modelos, esquemas ou padrões são utilizados nos conjuntos de dados?",
             "es": "¿Qué modelos o esquemas utiliza para sus conjuntos de datos?"
           },
           "help": {
@@ -416,7 +416,7 @@
           "text": {
             "en": "Which usage license do you use for your metadata records?",
             "pt-PT": "Que licença de utilização aplica aos seus registos de metadados?",
-            "pt-BR": "Qual licença de uso você aplica aos seus registros de metadados?",
+            "pt-BR": "Qual licença de uso é adotada para os registros de metadados?",
             "es": "¿Qué licencia de uso aplica a sus registros de metadatos?"
           },
           "help": {
@@ -436,7 +436,7 @@
           "text": {
             "en": "Which usage license do you use for your datasets?",
             "pt-PT": "Que licença de utilização aplica aos seus conjuntos de dados?",
-            "pt-BR": "Qual licença de uso você aplica aos seus conjuntos de dados?",
+            "pt-BR": "Qual licença ou condição de uso é adotada para os conjuntos de dados?",
             "es": "¿Qué licencia de uso aplica a sus conjuntos de datos?"
           },
           "help": {
@@ -456,7 +456,7 @@
           "text": {
             "en": "Which metadata schemas do you use for describing the provenance of your metadata records?",
             "pt-PT": "Que esquemas de metadados utiliza para descrever a proveniência dos seus registos de metadados?",
-            "pt-BR": "Quais esquemas de metadados você usa para descrever a proveniência dos seus registros de metadados?",
+            "pt-BR": "Quais esquemas ou mecanismos são utilizados para descrever a proveniência dos registros de metadados?",
             "es": "¿Qué esquemas de metadatos utiliza para describir la procedencia de sus registros de metadatos?"
           },
           "help": {
@@ -476,7 +476,7 @@
           "text": {
             "en": "Which metadata schemas do you use for describing the provenance of your datasets?",
             "pt-PT": "Que esquemas de metadados utiliza para descrever a proveniência dos seus conjuntos de dados?",
-            "pt-BR": "Quais esquemas de metadados você usa para descrever a proveniência dos seus conjuntos de dados?",
+            "pt-BR": "Quais esquemas ou mecanismos são utilizados para descrever a proveniência dos conjuntos de dados?",
             "es": "¿Qué esquemas de metadatos utiliza para describir la procedencia de sus conjuntos de datos?"
           },
           "help": {
