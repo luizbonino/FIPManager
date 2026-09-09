@@ -61,6 +61,35 @@ def test_empty_allowed_origins_self_only_and_x_frame_options_sameorigin(client, 
         get_settings.cache_clear()
 
 
+def test_invalid_origin_token_ignored_valid_ones_kept(client, monkeypatch):
+    """Review finding 8: a malformed FIPM_EMBED_ALLOWED_ORIGINS token (has a
+    path, a stray "*" mixed with real origins, or -- the injection case --
+    a ";"/newline riding along) is dropped rather than passed through into
+    the CSP header; a well-formed origin alongside it still makes it in."""
+    from fipm.config import get_settings
+
+    fip_id = _create_fip(client, visibility="public")
+
+    monkeypatch.setenv(
+        "FIPM_EMBED_ALLOWED_ORIGINS",
+        "https://good.example,https://evil.example/path;frame-ancestors *,*",
+    )
+    get_settings.cache_clear()
+    try:
+        resp = client.get(f"/fips/{fip_id}/embed")
+        assert resp.status_code == 200
+        csp = resp.headers["content-security-policy"]
+        assert ";" not in csp.split("frame-ancestors ", 1)[1]
+        assert "https://good.example" in csp
+        assert "evil.example" not in csp
+        frame_ancestors_value = next(
+            part for part in csp.split(";") if part.strip().startswith("frame-ancestors")
+        )
+        assert "*" not in frame_ancestors_value.split()[1:]
+    finally:
+        get_settings.cache_clear()
+
+
 def test_public_fip_cache_control_public_max_age(client):
     fip_id = _create_fip(client, visibility="public")
     resp = client.get(f"/fips/{fip_id}/embed")

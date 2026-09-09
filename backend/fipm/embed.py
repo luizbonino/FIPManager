@@ -7,10 +7,15 @@ escaping is the security boundary (AC 7)."""
 from __future__ import annotations
 
 import html
+import logging
+import re
 from typing import Any
 
 from fipm.config import Settings
+from fipm.dmp import is_safe_https_url
 from fipm.models import Fip
+
+_logger = logging.getLogger(__name__)
 
 # spec 02-core-flows.md §4.3 / frontend `assets/styles.css`
 # `--color-status-*`: the SPA's CSS variables aren't available on this
@@ -121,13 +126,37 @@ def _e(value: Any) -> str:
     return html.escape(str(value), quote=True)
 
 
+# Review finding 8: a `frame-ancestors` token must be exactly `*`, or a bare
+# `scheme://host[:port]` origin (no path/query/fragment/credentials, no
+# whitespace) -- this both rejects operator typos and, since none of these
+# characters are in the allowed set, makes it structurally impossible for a
+# misconfigured `FIPM_EMBED_ALLOWED_ORIGINS` entry to inject a `;` or a
+# newline into the CSP header value.
+_ORIGIN_TOKEN_RE = re.compile(r"^https?://[A-Za-z0-9.-]+(?::[0-9]{1,5})?$")
+
+
+def _valid_origin_token(token: str) -> bool:
+    # A lone "*" is handled separately, above, as "every origin" -- mixed in
+    # with other origins it isn't a valid `frame-ancestors` source, so it's
+    # rejected (and logged) like any other malformed token.
+    return bool(_ORIGIN_TOKEN_RE.match(token))
+
+
 def frame_ancestors(settings: Settings) -> tuple[list[str], bool]:
     """The CSP `frame-ancestors` token list for `FIPM_EMBED_ALLOWED_ORIGINS`,
     plus whether the result is `'self'`-only (in which case `X-Frame-Options:
     SAMEORIGIN` is also sent -- the header can't express an allow-list)."""
-    origins = settings.embed_allowed_origins_list
-    if origins == ["*"]:
+    raw_origins = settings.embed_allowed_origins_list
+    if raw_origins == ["*"]:
         return ["*"], False
+
+    origins = []
+    for token in raw_origins:
+        if _valid_origin_token(token):
+            origins.append(token)
+        else:
+            _logger.warning("Ignoring invalid FIPM_EMBED_ALLOWED_ORIGINS token: %r", token)
+
     if not origins:
         return ["'self'"], True
     return ["'self'", *origins], False
@@ -252,13 +281,24 @@ def render_embed(
     if dmp_entries:
         dmp_items = []
         for dmp in dmp_entries:
-            label = dmp.get("dmpId") or dmp.get("url") or ""
+            url = dmp.get("url")
+            label = dmp.get("dmpId") or url or ""
             version = dmp.get("version")
             version_html = f' <span class="v">v{_e(version)}</span>' if version else ""
-            dmp_items.append(
-                f'<li><a href="{_e(dmp.get("url"))}" target="_blank" rel="noopener">'
-                f"{_e(label)}</a>{version_html}</li>"
-            )
+            # Review finding 2: `related_dmps` is normalised to https on
+            # every write path today, but this page renders whatever is in
+            # storage -- re-check the scheme here too, so a URL that
+            # predates that validation (or reached the DB some other way)
+            # never renders as a clickable non-https (e.g. `javascript:`)
+            # link. html.escape alone only neutralises markup, not the
+            # scheme itself.
+            if is_safe_https_url(url, settings):
+                dmp_items.append(
+                    f'<li><a href="{_e(url)}" target="_blank" rel="noopener">'
+                    f"{_e(label)}</a>{version_html}</li>"
+                )
+            else:
+                dmp_items.append(f"<li>{_e(label)}{version_html}</li>")
         dmp_html = f'<ul class="dmp-list">{"".join(dmp_items)}</ul>'
     else:
         dmp_html = f"<p>{_e(strings['noDmps'])}</p>"

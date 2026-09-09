@@ -11,6 +11,7 @@ shape (spec 01 §6) instead of Pydantic's error array.
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Any
 from urllib.parse import urlsplit, urlunsplit
 
@@ -45,10 +46,14 @@ def _normalise_url(raw: Any, settings: Settings) -> str:
     trailing `/`. Raises HTTPException(422, "dmp_url_invalid") otherwise."""
     if not isinstance(raw, str) or not raw:
         raise HTTPException(status_code=422, detail="dmp_url_invalid")
-    if _WHITESPACE_OR_CONTROL_RE.search(raw):
-        raise HTTPException(status_code=422, detail="dmp_url_invalid")
+    # Review finding 6: strip surrounding whitespace *before* scanning for
+    # control characters, so a pasted URL with leading/trailing spaces (a
+    # space is itself in the \x00-\x20 scan range) is accepted; an embedded
+    # control/whitespace character still rejects.
     trimmed = raw.strip()
     if not trimmed or len(trimmed) > MAX_URL_LEN:
+        raise HTTPException(status_code=422, detail="dmp_url_invalid")
+    if _WHITESPACE_OR_CONTROL_RE.search(trimmed):
         raise HTTPException(status_code=422, detail="dmp_url_invalid")
 
     try:
@@ -64,6 +69,28 @@ def _normalise_url(raw: Any, settings: Settings) -> str:
     host = parsed.hostname
     if not host:
         raise HTTPException(status_code=422, detail="dmp_url_invalid")
+
+    if not host.isascii():
+        # Review finding 7: `str.encode("idna")` silently *folds away*
+        # format characters (zero-width space/joiners, category "Cf") and
+        # collapses fullwidth/halfwidth compatibility variants onto plain
+        # ASCII look-alikes instead of erroring on them -- left unchecked,
+        # two visually distinct hosts (or a host smuggling an invisible
+        # character) would normalise to the identical stored URL. Reject
+        # those instead of letting idna quietly rewrite them; a genuine
+        # non-ASCII hostname (e.g. "münchen.de") is unaffected by either
+        # check and still round-trips through idna to its punycode form.
+        if (
+            any(unicodedata.category(ch) == "Cf" for ch in host)
+            or unicodedata.normalize("NFKC", host) != host
+        ):
+            raise HTTPException(status_code=422, detail="dmp_url_invalid")
+        try:
+            host = host.encode("idna").decode("ascii")
+        except UnicodeError as exc:
+            raise HTTPException(status_code=422, detail="dmp_url_invalid") from exc
+        if not host.isascii():
+            raise HTTPException(status_code=422, detail="dmp_url_invalid")
 
     netloc = host.lower()
     if port is not None and port != 443:
@@ -173,15 +200,67 @@ def apply_dmp_evidence(
     return answers
 
 
+def normalise_legacy_dmp_evidence(
+    answers: list[dict[str, Any]], related_dmps: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Review finding 1: opportunistically migrate a legacy `{url,
+    questionRef}` `dmpEvidence` object (spec 06 §2.4) to the current
+    `{dmpIndex, section, questionRef}` shape whenever a PATCH gives us the
+    chance to look at it -- match the stored `url` against `related_dmps`
+    by exact (already-normalised) string equality and rewrite it as a
+    `dmpIndex`; when it matches nothing currently related, drop the stale
+    `url` rather than leave a shape around that `apply_dmp_evidence` can
+    never validate (it has no `dmpIndex` to check). Never raises -- this is
+    a best-effort repair, not validation. A dict already in the current
+    shape (has no `url` key) is left untouched. Mutates and returns
+    `answers`."""
+    url_to_index = {d["url"]: i for i, d in enumerate(related_dmps)}
+    for answer in answers:
+        for decl in answer.get("declarations") or []:
+            raw = decl.get("dmpEvidence")
+            if not isinstance(raw, dict) or "url" not in raw:
+                continue
+            index = url_to_index.get(raw.get("url"))
+            new_evidence = {k: v for k, v in raw.items() if k != "url"}
+            if index is not None:
+                new_evidence["dmpIndex"] = index
+            decl["dmpEvidence"] = new_evidence
+    return answers
+
+
+def is_safe_https_url(raw: Any, settings: Settings | None = None) -> bool:
+    """Review findings 2/7: defensive re-check for a value already sitting
+    in storage (pre-validation data, or a legacy `dmpEvidence.url`) that is
+    about to be rendered as a link or handed to a consumer as `dmpUrl`:
+    true iff `raw` is still a valid, absolute https URL per
+    `_normalise_url`'s rules. Never raises -- callers must degrade
+    gracefully (plain text / null) rather than 500 on bad stored data."""
+    if not isinstance(raw, str) or not raw:
+        return False
+    if settings is None:
+        settings = get_settings()
+    try:
+        _normalise_url(raw, settings)
+    except HTTPException:
+        return False
+    return True
+
+
 def resolve_dmp_evidence_for_export(
-    dmp_evidence: dict[str, Any] | None, related_dmps: list[dict[str, Any]]
+    dmp_evidence: dict[str, Any] | None,
+    related_dmps: list[dict[str, Any]],
+    settings: Settings | None = None,
 ) -> dict[str, Any] | None:
     """spec 06 §2.4: resolve a stored `dmpEvidence` (new shape, index-based,
     or the legacy `{url, questionRef}` shape) into the export shape
     `{dmpIndex, dmpUrl, dmpSystem, dmpVersion, section, questionRef}`, so a
-    consumer never needs the index. A legacy object (no `dmpIndex`) exports
-    its `url` verbatim with `dmpIndex`/`dmpSystem`/`dmpVersion`/`section`
-    all null."""
+    consumer never needs the index. A legacy object (no resolvable
+    `dmpIndex`) exports its `url` as `dmpUrl` only when that url is still a
+    valid https URL (review finding 2); otherwise `dmpUrl` is null and the
+    raw value is kept under `rawUrl` so a consumer can still see it without
+    ever receiving a scheme (e.g. `javascript:`) that could render as a
+    clickable link. An unresolvable index likewise collapses to a null
+    `dmpUrl` while `section`/`questionRef` are always kept."""
     if not dmp_evidence:
         return None
 
@@ -192,11 +271,19 @@ def resolve_dmp_evidence_for_export(
     else:
         dmp_index = None
 
-    return {
+    result: dict[str, Any] = {
         "dmpIndex": dmp_index,
-        "dmpUrl": dmp["url"] if dmp else dmp_evidence.get("url"),
+        "dmpUrl": dmp["url"] if dmp else None,
         "dmpSystem": dmp.get("system") if dmp else None,
         "dmpVersion": dmp.get("version") if dmp else None,
         "section": dmp_evidence.get("section"),
         "questionRef": dmp_evidence.get("questionRef"),
     }
+    if dmp is None:
+        raw_url = dmp_evidence.get("url")
+        if raw_url:
+            if is_safe_https_url(raw_url, settings):
+                result["dmpUrl"] = raw_url
+            else:
+                result["rawUrl"] = raw_url
+    return result

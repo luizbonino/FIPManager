@@ -8,6 +8,9 @@ from __future__ import annotations
 
 import itertools
 
+from fipm.db import SessionLocal
+from fipm.models import Fip
+
 _EMAILS = (f"dmp-ac7-user-{i}@example.com" for i in itertools.count())
 
 _XSS_NAME = "<img src=x onerror=alert(1)>"
@@ -101,3 +104,29 @@ def test_xss_community_name_escaped_not_raw(client_factory):
     assert "<script" not in resp.text
     assert _XSS_NAME not in resp.text
     assert "&lt;img" in resp.text
+
+
+def test_non_https_related_dmp_url_renders_as_text_not_a_link(client_factory):
+    """Review finding 2: `related_dmps` is normalised to https on every
+    write path, but this defends the embed page against a URL that reached
+    storage some other way (e.g. data written before that validation
+    existed) -- html.escape alone neutralises markup, not a dangerous
+    scheme like `javascript:` inside an href."""
+    owner = client_factory()
+    fip = _create_fip(owner, visibility="public")
+    fip_id = fip["id"]
+
+    with SessionLocal() as db:
+        row = db.get(Fip, fip_id)
+        row.related_dmps = [
+            {"url": "javascript:alert(1)", "version": None, "system": "other", "dmpId": None}
+        ]
+        db.commit()
+
+    anon = client_factory()
+    resp = anon.get(f"/fips/{fip_id}/embed")
+    assert resp.status_code == 200
+    # Never a clickable link to it -- the label may still appear as inert
+    # escaped text (`html.escape` doesn't touch ":"/"(", only markup).
+    assert 'href="javascript' not in resp.text.lower()
+    assert "<li>javascript:alert(1)</li>" in resp.text

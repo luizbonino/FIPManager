@@ -115,3 +115,14 @@ def test_hidden_question_excluded_from_exports_and_counts(client):
         },
     )
     assert patch_hidden_answer.status_code == 200, patch_hidden_answer.text
+
+    # Review finding 5: this PATCH's `answers` replaces the FIP's whole
+    # answers array with just this one, hidden, q2 answer -- it must not be
+    # counted in the summary (answeredQuestions/declarations/byStatus all
+    # zero), keeping answered <= totalQuestions even though the FIP has a
+    # declaration on record.
+    summary = patch_hidden_answer.json()["summary"]
+    assert summary["totalQuestions"] == 2
+    assert summary["answeredQuestions"] == 0
+    assert summary["declarations"] == 0
+    assert summary["byStatus"]["current"] == 0

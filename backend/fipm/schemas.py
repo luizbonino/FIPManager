@@ -424,15 +424,21 @@ class SessionPublicOut(CamelModel):
 # ---------------------------------------------------------------------------
 
 
-def _question_count(content: dict[str, Any]) -> int:
-    """Non-hidden questions in a knowledge model's `content` (shared by
-    `km_summary_dict`'s `questionCount` and `FipOut.summary.totalQuestions`)."""
-    return sum(
-        1
+def _non_hidden_question_ids(content: dict[str, Any]) -> set[str]:
+    """Non-hidden question ids in a knowledge model's `content` (shared by
+    `_question_count`'s/`km_summary_dict`'s `questionCount`,
+    `FipOut.summary.totalQuestions`, and the set `_fip_summary` filters
+    `answeredQuestions`/`byStatus` by, review finding 5)."""
+    return {
+        question["id"]
         for section in (content.get("sections") or [])
         for question in (section.get("questions") or [])
         if question.get("hidden") is not True
-    )
+    }
+
+
+def _question_count(content: dict[str, Any]) -> int:
+    return len(_non_hidden_question_ids(content))
 
 
 def total_questions_for_km(km: Any | None) -> int | None:
@@ -444,11 +450,33 @@ def total_questions_for_km(km: Any | None) -> int | None:
     return _question_count(km.content or {})
 
 
-def _fip_summary(answers: list[dict[str, Any]], total_questions: int | None) -> FipSummary:
+def known_question_ids_for_km(km: Any | None) -> set[str] | None:
+    """Review finding 5: the same non-hidden question ids `total_questions_
+    for_km` counts, for `_fip_summary` to filter `answers` by -- `None`
+    (no filtering) when the FIP's knowledge model row is missing, matching
+    `total_questions_for_km`'s own `None` in that case."""
+    if km is None:
+        return None
+    return _non_hidden_question_ids(km.content or {})
+
+
+def _fip_summary(
+    answers: list[dict[str, Any]],
+    total_questions: int | None,
+    known_question_ids: set[str] | None = None,
+) -> FipSummary:
+    """Review finding 5: when `known_question_ids` is given, only answers to
+    those (non-hidden) questions count towards `answeredQuestions`/
+    `declarations`/`byStatus`, so an answer left behind for a since-hidden
+    question can't push `answeredQuestions` past `totalQuestions`. `None`
+    (knowledge model row missing, e.g. deleted since) counts every answer,
+    same as before this filter existed."""
     by_status: dict[str, int] = dict.fromkeys(DECLARATION_STATUSES, 0)
     answered_questions = 0
     declarations = 0
     for answer in answers:
+        if known_question_ids is not None and answer.get("questionId") not in known_question_ids:
+            continue
         decls = answer.get("declarations") or []
         if decls:
             answered_questions += 1
@@ -471,6 +499,7 @@ def fip_to_out(
     *,
     settings: Settings | None = None,
     total_questions: int | None = None,
+    known_question_ids: set[str] | None = None,
 ) -> FipOut:
     if settings is None:
         settings = get_settings()
@@ -492,7 +521,7 @@ def fip_to_out(
         updated_at=fip.updated_at,
         edit_token=edit_token,
         embed_url=f"{settings.base_url}/fips/{fip.id}/embed",
-        summary=_fip_summary(answers, total_questions),
+        summary=_fip_summary(answers, total_questions, known_question_ids),
     )
 
 
@@ -502,11 +531,16 @@ def fip_out_dict(
     *,
     settings: Settings | None = None,
     total_questions: int | None = None,
+    known_question_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     """FipOut as a camelCase dict, with the editToken key entirely absent
     (never merely null) unless it was actually issued."""
     data = fip_to_out(
-        fip, edit_token, settings=settings, total_questions=total_questions
+        fip,
+        edit_token,
+        settings=settings,
+        total_questions=total_questions,
+        known_question_ids=known_question_ids,
     ).model_dump(mode="json", by_alias=True)
     if data.get("editToken") is None:
         data.pop("editToken", None)

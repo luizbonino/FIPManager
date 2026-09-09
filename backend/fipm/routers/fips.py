@@ -21,7 +21,7 @@ from fipm.authz import (
 )
 from fipm.config import Settings, get_settings
 from fipm.db import get_db
-from fipm.dmp import apply_dmp_evidence, normalise_related_dmps
+from fipm.dmp import apply_dmp_evidence, normalise_legacy_dmp_evidence, normalise_related_dmps
 from fipm.exporters import build_export_csv, build_export_json, reconstruct_answers_from_export
 from fipm.ids import hash_token, new_token, short_id
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
@@ -35,6 +35,7 @@ from fipm.schemas import (
     PrefillFromDmpRequest,
     Visibility,
     fip_out_dict,
+    known_question_ids_for_km,
     total_questions_for_km,
 )
 
@@ -42,9 +43,27 @@ router = APIRouter(prefix="/fips", tags=["fips"])
 
 
 def _out(
-    fip: Fip, edit_token: str | None = None, total_questions: int | None = None
+    fip: Fip,
+    edit_token: str | None = None,
+    total_questions: int | None = None,
+    known_question_ids: set[str] | None = None,
 ) -> dict[str, Any]:
-    return fip_out_dict(fip, edit_token, total_questions=total_questions)
+    return fip_out_dict(
+        fip, edit_token, total_questions=total_questions, known_question_ids=known_question_ids
+    )
+
+
+def _out_for_km(
+    fip: Fip, km: KnowledgeModel | None, edit_token: str | None = None
+) -> dict[str, Any]:
+    """`_out`, deriving `total_questions`/`known_question_ids` from `km` in
+    one place (review findings 3/5)."""
+    return _out(
+        fip,
+        edit_token,
+        total_questions=total_questions_for_km(km),
+        known_question_ids=known_question_ids_for_km(km),
+    )
 
 
 def _km_for_fip(db: Session, fip: Fip) -> KnowledgeModel | None:
@@ -188,7 +207,6 @@ def create_fip(
     apply_dmp_evidence(answers, related_dmps)
     language = body.language or settings.default_language
     license_ = body.license or "CC0-1.0"
-    total_questions = total_questions_for_km(km)
 
     common: dict[str, Any] = {
         "questionnaire_id": questionnaire_id,
@@ -212,7 +230,7 @@ def create_fip(
             visibility=body.visibility or "link",
             **common,
         )
-        return _out(fip, edit_token=edit_token, total_questions=total_questions)
+        return _out_for_km(fip, km, edit_token=edit_token)
 
     if user is not None:
         fip = _insert_fip(
@@ -224,7 +242,7 @@ def create_fip(
             visibility=body.visibility or "private",
             **common,
         )
-        return _out(fip, total_questions=total_questions)
+        return _out_for_km(fip, km)
 
     raise HTTPException(status_code=400, detail="session_id_or_login_required")
 
@@ -276,7 +294,7 @@ def import_fip(
         language=language,
         license=fip_data.get("license") or "CC0-1.0",
     )
-    return _out(fip, total_questions=total_questions_for_km(km))
+    return _out_for_km(fip, km)
 
 
 @router.get("/{fip_id}")
@@ -288,7 +306,7 @@ def get_fip(
 ) -> dict[str, Any]:
     fip = _get_readable_fip(fip_id, request, db, user)
     km = _km_for_fip(db, fip)
-    return _out(fip, total_questions=total_questions_for_km(km))
+    return _out_for_km(fip, km)
 
 
 @router.patch("/{fip_id}")
@@ -316,8 +334,9 @@ def patch_fip(
             _validate_question_ids(body.answers, km)
         new_answers = [a.model_dump(mode="json", by_alias=True) for a in body.answers]
     else:
-        # A copy, not the ORM-tracked list itself: this is a validation-only
-        # pass unless body.related_dmps also shrinks it below.
+        # A copy, not the ORM-tracked list itself: mutated in place below
+        # only by the legacy-dmpEvidence normalisation pass, never
+        # re-validated (review finding 1).
         new_answers = copy.deepcopy(fip.answers or [])
 
     if body.related_dmps is not None:
@@ -327,15 +346,28 @@ def patch_fip(
     else:
         new_related_dmps = fip.related_dmps or []
 
-    # spec 06-dmp-linkage.md §2.2: evidence is validated after relatedDMPs
-    # are normalised, in the same transaction -- against the FIP's *final*
-    # answers/relatedDMPs, even when only one of the two was in this PATCH
-    # body (e.g. a PATCH that drops relatedDMPs to [] while an untouched,
-    # already-stored declaration still cites one).
-    apply_dmp_evidence(new_answers, new_related_dmps)
+    # Review finding 1: silently migrate any legacy `{url, questionRef}`
+    # dmpEvidence to the current `{dmpIndex, ...}` shape whenever a PATCH
+    # gives us the chance to look at it, regardless of what the request
+    # body touched -- this alone never rejects the PATCH.
+    normalise_legacy_dmp_evidence(new_answers, new_related_dmps)
 
     if body.answers is not None:
-        fip.answers = new_answers
+        # spec 06-dmp-linkage.md §2.2: only the evidence in *this request's*
+        # answers is validated against the FIP's final relatedDMPs. A PATCH
+        # that omits `answers` never re-validates the FIP's already-stored
+        # evidence (review finding 1): a legacy-shaped or now-out-of-range
+        # dmpIndex left over from before this was normalised/tightened
+        # would otherwise wedge every future PATCH (e.g. one that only
+        # changes `visibility`) shut with a permanent 422. Evidence that
+        # can no longer be resolved is instead handled gracefully at
+        # read/export time (`resolve_dmp_evidence_for_export`).
+        apply_dmp_evidence(new_answers, new_related_dmps)
+
+    # Persisted unconditionally: even a PATCH that didn't touch `answers`
+    # may have had legacy dmpEvidence migrated by the normalisation pass
+    # above (a no-op copy otherwise).
+    fip.answers = new_answers
     if body.related_dmps is not None:
         fip.related_dmps = new_related_dmps
     if body.language is not None:
@@ -347,7 +379,7 @@ def patch_fip(
 
     db.commit()
     db.refresh(fip)
-    return _out(fip, total_questions=total_questions_for_km(km))
+    return _out_for_km(fip, km)
 
 
 @router.delete("/{fip_id}", status_code=204)
@@ -389,7 +421,7 @@ def claim_fip(
     db.commit()
     db.refresh(fip)
     km = _km_for_fip(db, fip)
-    return _out(fip, total_questions=total_questions_for_km(km))
+    return _out_for_km(fip, km)
 
 
 @router.post("/{fip_id}/prefill-from-dmp")

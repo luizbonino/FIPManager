@@ -20,7 +20,9 @@ from fipm.schemas import (
     SessionPatchRequest,
     SessionPublicOut,
     fip_out_dict,
+    known_question_ids_for_km,
     session_to_out,
+    total_questions_for_km,
 )
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -130,7 +132,23 @@ def list_session_fips(
 ) -> dict[str, Any]:
     row = _get_owned_session(session_id, db, user)
     rows = db.query(Fip).filter(Fip.session_id == row.id).order_by(Fip.created_at).all()
-    items = [fip_out_dict(f) for f in rows]
+    # Review finding 3: `summary.totalQuestions` was always null here --
+    # fetch each distinct knowledge model referenced by these FIPs once
+    # (not once per FIP) and pass its question count/ids through.
+    km_cache: dict[tuple[str, str], KnowledgeModel | None] = {}
+    items = []
+    for f in rows:
+        km_key = (f.questionnaire_id, f.questionnaire_version)
+        if km_key not in km_cache:
+            km_cache[km_key] = db.get(KnowledgeModel, km_key)
+        km = km_cache[km_key]
+        items.append(
+            fip_out_dict(
+                f,
+                total_questions=total_questions_for_km(km),
+                known_question_ids=known_question_ids_for_km(km),
+            )
+        )
     return {"items": items, "total": len(items)}
 
 

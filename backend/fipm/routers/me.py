@@ -8,7 +8,14 @@ from fipm.authz import require_user
 from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
-from fipm.schemas import ListOut, fip_out_dict, km_summary_dict, session_to_out
+from fipm.schemas import (
+    ListOut,
+    fip_out_dict,
+    km_summary_dict,
+    known_question_ids_for_km,
+    session_to_out,
+    total_questions_for_km,
+)
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -31,7 +38,23 @@ def my_fips(
         )
     total = query.count()
     rows = query.order_by(Fip.updated_at.desc()).offset(offset).limit(limit).all()
-    items = [fip_out_dict(r) for r in rows]
+    # Review finding 3: `summary.totalQuestions` was always null here --
+    # fetch each distinct knowledge model referenced by this page of FIPs
+    # once (not once per FIP) and pass its question count/ids through.
+    km_cache: dict[tuple[str, str], KnowledgeModel | None] = {}
+    items = []
+    for r in rows:
+        km_key = (r.questionnaire_id, r.questionnaire_version)
+        if km_key not in km_cache:
+            km_cache[km_key] = db.get(KnowledgeModel, km_key)
+        km = km_cache[km_key]
+        items.append(
+            fip_out_dict(
+                r,
+                total_questions=total_questions_for_km(km),
+                known_question_ids=known_question_ids_for_km(km),
+            )
+        )
     return ListOut(items=items, total=total)
 
 

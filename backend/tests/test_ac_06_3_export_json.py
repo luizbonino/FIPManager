@@ -157,3 +157,52 @@ def test_legacy_shape_still_exports_and_imports(client):
         "section": None,
         "questionRef": "C.3",
     }
+
+
+def test_legacy_shape_with_non_https_url_exports_null_dmp_url_and_raw_url(client):
+    """Review finding 2: a legacy `{url}` dmpEvidence whose url is no
+    longer (or never was) a valid https URL exports `dmpUrl: null` --
+    never a scheme like `javascript:` that a consumer might render as a
+    link -- with the original value kept under `rawUrl` so nothing is
+    silently lost."""
+    _register(client)
+    created = client.post(
+        "/api/fips",
+        json={
+            "questionnaireRef": {"id": "test-km", "version": "1.0.0"},
+            "answers": [
+                {
+                    "questionId": "F1-metadata",
+                    "declarations": [{"ferId": "https://w3id.org/np/doi", "status": "current"}],
+                }
+            ],
+        },
+    ).json()
+    fip_id = created["id"]
+
+    with SessionLocal() as db:
+        fip = db.get(Fip, fip_id)
+        fip.answers = [
+            {
+                "questionId": "F1-metadata",
+                "declarations": [
+                    {
+                        "ferId": "https://w3id.org/np/doi",
+                        "status": "current",
+                        "dmpEvidence": {"url": "javascript:alert(1)", "questionRef": "C.3"},
+                    }
+                ],
+                "comment": None,
+            }
+        ]
+        db.commit()
+
+    export = client.get(f"/api/fips/{fip_id}/export.json")
+    assert export.status_code == 200
+    doc = export.json()
+    f1 = next(a for a in doc["answers"] if a["questionId"] == "F1-metadata")
+    evidence = f1["declarations"][0]["dmpEvidence"]
+    assert evidence["dmpUrl"] is None
+    assert evidence["rawUrl"] == "javascript:alert(1)"
+    assert evidence["section"] is None
+    assert evidence["questionRef"] == "C.3"

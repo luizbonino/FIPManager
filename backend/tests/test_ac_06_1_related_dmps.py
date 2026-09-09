@@ -113,6 +113,64 @@ def test_thirty_char_version_rejected(client):
     assert resp.json()["detail"] == "dmp_version_invalid"
 
 
+def test_surrounding_whitespace_stripped_and_accepted(client):
+    """Review finding 6: a pasted URL with leading/trailing whitespace is
+    accepted (and normalised), not rejected -- only an *internal* control/
+    whitespace character still 422s."""
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}",
+        json={"relatedDmps": [{"url": "  https://example.org/plan  "}]},
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["relatedDmps"][0]["url"] == "https://example.org/plan"
+
+
+def test_internal_whitespace_still_rejected(client):
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}",
+        json={"relatedDmps": [{"url": "https://exa mple.org/plan"}]},
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_url_invalid"
+
+
+def test_genuine_idn_host_encoded_to_punycode(client):
+    """Review finding 7: a legitimate non-ASCII hostname still round-trips
+    through `str.encode("idna")` to its canonical punycode form."""
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}", json={"relatedDmps": [{"url": "https://münchen.de/plan"}]}
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["relatedDmps"][0]["url"] == "https://xn--mnchen-3ya.de/plan"
+
+
+def test_fullwidth_host_rejected(client):
+    """`str.encode("idna")` would silently fold this fullwidth host onto
+    plain ASCII "example.com" instead of erroring -- reject it instead."""
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}",
+        json={"relatedDmps": [{"url": "https://ｅｘａｍｐｌｅ.com/"}]},
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_url_invalid"
+
+
+def test_zero_width_character_in_host_rejected(client):
+    """`str.encode("idna")` would silently strip a zero-width space out of
+    the host instead of erroring -- reject it instead."""
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}",
+        json={"relatedDmps": [{"url": "https://exa​mple.org/plan"}]},
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_url_invalid"
+
+
 def test_post_fips_also_normalises(client):
     client.post(
         "/api/auth/register",

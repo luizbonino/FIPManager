@@ -540,14 +540,23 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
             resolved_evidence = resolve_dmp_evidence_for_export(
                 decl.get("dmpEvidence"), fip.related_dmps or []
             )
-            if resolved_evidence and resolved_evidence.get("dmpUrl"):
-                evidence_iri = URIRef(resolved_evidence["dmpUrl"])
-                # The existing declaration-level prov:wasDerivedFrom to the
-                # same IRI is kept: prov: is what a generic consumer
-                # understands, fipmx:dmp-evidence says "this is the
-                # *justification* for this declaration".
-                g.add((decl_iri, PROV.wasDerivedFrom, evidence_iri))
-                g.add((decl_iri, fipmx["dmp-evidence"], evidence_iri))
+            if resolved_evidence:
+                # Review finding 4: dmp-section/dmp-question-ref describe
+                # *where in the DMP* this declaration's evidence lives --
+                # they're meaningful even when the DMP itself can no longer
+                # be resolved to an IRI (a stale/out-of-range dmpIndex, or a
+                # legacy `{url}` evidence whose url no longer validates), so
+                # they no longer require a resolved dmpUrl to be emitted.
+                # dmp-evidence/prov:wasDerivedFrom, in contrast, *are* an
+                # IRI reference and stay conditional on one existing.
+                if resolved_evidence.get("dmpUrl"):
+                    evidence_iri = URIRef(resolved_evidence["dmpUrl"])
+                    # The existing declaration-level prov:wasDerivedFrom to
+                    # the same IRI is kept: prov: is what a generic consumer
+                    # understands, fipmx:dmp-evidence says "this is the
+                    # *justification* for this declaration".
+                    g.add((decl_iri, PROV.wasDerivedFrom, evidence_iri))
+                    g.add((decl_iri, fipmx["dmp-evidence"], evidence_iri))
                 section = resolved_evidence.get("section")
                 if section:
                     g.add((decl_iri, fipmx["dmp-section"], Literal(section)))
