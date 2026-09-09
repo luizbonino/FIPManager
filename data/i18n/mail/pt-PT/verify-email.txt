@@ -1,0 +1,13 @@
+Subject: Confirme o seu endereço de email — {appName}
+
+Olá {displayName},
+
+Obrigado por criar uma conta {appName}. Confirme este endereço de
+email através da ligação abaixo:
+
+{link}
+
+Esta ligação expira dentro de {expiresHours} horas. Se não criou esta
+conta, pode ignorar esta mensagem.
+
+— {appName}

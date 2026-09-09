@@ -1,0 +1,13 @@
+Subject: Confirme su dirección de correo electrónico — {appName}
+
+Hola {displayName}:
+
+Gracias por crear una cuenta de {appName}. Confirme esta dirección de
+correo electrónico mediante el siguiente enlace:
+
+{link}
+
+Este enlace caduca en {expiresHours} horas. Si no creó esta cuenta,
+puede ignorar este mensaje.
+
+— {appName}
