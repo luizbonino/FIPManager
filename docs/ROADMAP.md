@@ -41,6 +41,14 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] Slides referencing the tool. Facilitator script and handout drafted (docs/workshop/); printed questionnaire available at /knowledge-models/{id}/{version}/print (done 9 Sep).
 - [ ] Fri 3 Oct: code freeze, tag `v1.0-confoa`.
 
+## Added 9 Sep · Didactic format from the co-facilitator's document
+- [x] Suggested options per question, inline FERs, compact declarations with default status (docs/specs/08-workshop-picklists.md).
+- [x] "Não se aplica" (not applicable) answers through editor, exports, RDF, matrix and migration.
+- [x] Sessions offering several area questionnaires; area choice at join; matrix grouped by area; session CSV `area` column.
+- [x] `scripts/import-workshop-docx.py`: Word document → area forks with suggested options; five CONFOA 2026 drafts imported (omics, biodiversity, agriculture, public health, nursing); 131 options resolved to the catalogue, 76 generic phrases skipped, 0 drafts. FER catalogue at 138 entries.
+- [ ] Remaining six area profiles once the co-facilitator delivers them (re-run the importer with `--bump`).
+- [ ] Facilitators review and publish the five area drafts in the editor before creating the workshop session.
+
 ## 6 Oct · Workshop
 - Collect FIPs, export session, gather feedback (short form in the tool or paper).
 

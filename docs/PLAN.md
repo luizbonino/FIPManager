@@ -1,6 +1,6 @@
 # FIP Manager – Tool Plan
 
-Status: draft v0.6, 2026-09-08. All four initial decisions closed; v0.5 added multi-user accounts and personal workspaces; v0.6 aligns statuses and FER types with the FIP ontology (see docs/specs/00-fip-ontology-mapping.md). Owners: L. O. Bonino da Silva Santos + 2 co-facilitators.
+Status: draft v0.7, 2026-09-09. All four initial decisions closed; v0.5 added multi-user accounts and personal workspaces; v0.6 aligns statuses and FER types with the FIP ontology (see docs/specs/00-fip-ontology-mapping.md). Owners: L. O. Bonino da Silva Santos + 2 co-facilitators.
 First milestone: FIP workshop at CONFOA 2026, Faro (PT), 6 October 2026.
 
 ## 1. Why a new tool
@@ -20,6 +20,8 @@ First milestone: FIP workshop at CONFOA 2026, Faro (PT), 6 October 2026.
 5. Integrate bidirectionally with FioDMP (https://fiodmp.fiocruz.br): a DMP can cite a FIP, and a FIP can point at answers in a DMP.
 6. Work well in a room: participants need no account, join by link, live side-by-side comparison of the FIPs produced by the groups.
 7. Be multi-user from day one: anyone can create an account and gets a personal workspace holding their own FIPs, workshop sessions, knowledge-model versions and FER additions. Everything outside a workshop session belongs to a user; a workshop session is a workspace object that accepts anonymous contributions by link.
+
+8. Support the CONFOA didactic format (decided 9 Sep from a co-facilitator's document): each group works on one thematic area; a knowledge model can carry curated *suggested options* per question, a "not applicable" answer, compact declarations with "currently used" as the default status; a session can offer several area-specific forks and the matrix compares across areas. Area forks are generated from the Word document by `scripts/import-workshop-docx.py` (docs/specs/08-workshop-picklists.md).
 
 Non-goals for v1: replacing the FIP Wizard for full GO FAIR FIP publication, team or organisation workspaces, single sign-on, FER curation at scale.
 
