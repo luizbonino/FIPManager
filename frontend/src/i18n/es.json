@@ -8,7 +8,8 @@
     "login": "Iniciar sesión",
     "register": "Registrarse",
     "workspace": "Espacio de trabajo",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "admin": "Administración"
   },
   "auth": {
     "loginTitle": "Iniciar sesión",
@@ -165,14 +166,16 @@
     "freeTextPlaceholder": "Indique el recurso que utiliza su comunidad",
     "useCatalogue": "Elegir del catálogo",
     "noFerMatch": "Sin coincidencias — use sus propias palabras.",
-    "replacementHint": "Añada también un segundo recurso con el estado 'Planificado' para la sustitución.",
     "progress": "{answered} de {total} preguntas respondidas",
     "readOnly": "Solo lectura en este dispositivo.",
     "editRightsLost": "Derechos de edición perdidos en este dispositivo.",
     "claim": "Guardar este FIP en mi espacio de trabajo",
     "claimed": "Guardado en su espacio de trabajo.",
     "preview": "Vista previa / imprimir",
-    "notAnswered": "Sin responder"
+    "notAnswered": "Sin responder",
+    "successor": "Sustituido por",
+    "successorHint": "Indique el recurso que lo sustituirá.",
+    "facilitatorBanner": "Está editando como facilitador."
   },
   "save": {
     "saved": "Guardado {time}",
@@ -194,7 +197,30 @@
     "title": "Compartir",
     "copyLink": "Copiar enlace",
     "copied": "Copiado",
-    "qrHint": "Escanee para abrir este FIP"
+    "qrHint": "Escanee para abrir este FIP",
+    "embed": "Insertar",
+    "copyEmbed": "Copiar código de inserción"
+  },
+  "dmp": {
+    "heading": "Planes de gestión de datos (DMP) relacionados",
+    "add": "Añadir un enlace de DMP",
+    "url": "URL del plan",
+    "version": "Versión",
+    "system": "Sistema",
+    "fiodmp": "FioDMP",
+    "other": "Otro",
+    "remove": "Quitar",
+    "maxReached": "Máximo 10 planes por FIP.",
+    "urlInvalid": "Use una URL completa https:// del plan.",
+    "duplicate": "Ese plan ya está vinculado.",
+    "none": "Ningún plan vinculado.",
+    "evidence": "Evidencia en el DMP",
+    "evidencePlan": "Plan",
+    "evidenceSection": "Sección",
+    "evidenceQuestion": "Pregunta o campo",
+    "evidenceHint": "¿Dónde en el plan está registrada esta respuesta?",
+    "sectionOther": "Otra",
+    "prefill": "Rellenar previamente a partir de este plan"
   },
   "visibility": {
     "label": "Quién puede ver este FIP",
@@ -228,7 +254,8 @@
     "matrix": "Matriz de comparación",
     "matrixSoon": "La matriz de comparación llega en la semana 3.",
     "hideChrome": "Modo proyector",
-    "reconnecting": "Reconectando…"
+    "reconnecting": "Reconectando…",
+    "open": "Abierta"
   },
   "fipRead": {
     "notShared": "Este FIP no existe o no está compartido.",
@@ -262,7 +289,8 @@
     "compact": "Compacto",
     "print": "Imprimir (A3 horizontal)",
     "showNote": "Mostrar motivo",
-    "otherGroup": "Otro"
+    "otherGroup": "Otro",
+    "successor": "→ sustituido por {label}"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -338,5 +366,74 @@
     "idTaken": "Ese identificador ya está en uso.",
     "importFailed": "Este archivo no es un modelo de conocimiento válido.",
     "noModels": "Aún no hay modelos."
+  },
+  "admin": {
+    "title": "Administración",
+    "users": "Usuarios",
+    "search": "Buscar usuarios",
+    "role": "Rol",
+    "created": "Creado",
+    "fips": "FIP",
+    "sessions": "Sesiones",
+    "models": "Modelos",
+    "resetPassword": "Restablecer contraseña",
+    "resetConfirm": "¿Restablecer la contraseña de este usuario? Su contraseña actual y todos sus inicios de sesión dejan de funcionar.",
+    "tempPassword": "Contraseña temporal",
+    "tempPasswordOnce": "Cópiela ahora — se muestra solo una vez. El usuario debe cambiarla en el próximo inicio de sesión.",
+    "pendingFers": "Recursos pendientes de promoción",
+    "noPendingFers": "No hay recursos aportados por usuarios.",
+    "usage": "Usado en {count} declaraciones",
+    "promote": "Promover al catálogo",
+    "promoteConfirm": "¿Añadir este recurso al catálogo global?",
+    "owner": "Aportado por",
+    "merge": "Fusionar en…",
+    "mergeConfirm": "¿Fusionar en {label}? Las declaraciones se redirigen y este recurso se elimina. Esta acción no se puede deshacer.",
+    "mergeDone": "{declarations} declaraciones en {fips} FIP redirigidas."
+  },
+  "password": {
+    "mustChangeTitle": "Elija una nueva contraseña",
+    "mustChangeHint": "Un administrador estableció una contraseña temporal para su cuenta. Elija la suya propia para continuar.",
+    "current": "Contraseña actual",
+    "new": "Nueva contraseña",
+    "submit": "Cambiar contraseña",
+    "changed": "Contraseña cambiada."
+  },
+  "privacy": {
+    "title": "Aviso de privacidad",
+    "version": "Versión {version}, {date}",
+    "link": "Aviso de privacidad",
+    "accept": "He leído el aviso de privacidad.",
+    "required": "Lea y acepte el aviso de privacidad.",
+    "joinNotice": "Sus respuestas se almacenan en esta herramienta y se comparten con el facilitador del taller. Consulte el {link}."
+  },
+  "print": {
+    "questionnaire": "Imprimir cuestionario",
+    "handoutTitle": "Cuestionario FIP — alternativa en papel",
+    "group": "Grupo / mesa",
+    "date": "Fecha",
+    "resource": "Recurso",
+    "declarationsPerQuestion": "Recursos por pregunta",
+    "ferType": "Tipo de recurso",
+    "footerTool": "Las hojas rellenadas se transcriben en Gestor de FIP después de la sesión.",
+    "instructions": "Marque un estado por recurso. Deje un bloque en blanco si su comunidad no tiene ninguno."
+  },
+  "feedback": {
+    "title": "¿Dos minutos para su opinión?",
+    "intro": "Anónimo. Nos ayuda a mejorar la herramienta y el taller.",
+    "q1": "El cuestionario fue fácil de entender.",
+    "q2": "La herramienta fue fácil de usar en mi dispositivo.",
+    "q3": "Ahora entiendo mejor qué es un FAIR Implementation Profile (Perfil de Implementación FAIR).",
+    "comment": "¿Qué deberíamos cambiar? (opcional)",
+    "scaleLow": "Totalmente en desacuerdo",
+    "scaleHigh": "Totalmente de acuerdo",
+    "submit": "Enviar opinión",
+    "thanks": "Gracias.",
+    "error": "No se pudo enviar la opinión.",
+    "summaryTitle": "Opiniones",
+    "responses": "{count} respuestas",
+    "mean": "Media {mean}",
+    "noResponses": "Aún no hay opiniones.",
+    "comments": "Comentarios",
+    "exportCsv": "Exportar opiniones (CSV)"
   }
 }
