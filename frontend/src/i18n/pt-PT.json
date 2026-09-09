@@ -202,7 +202,8 @@
     "error": "Não guardado — a tentar novamente",
     "failed": "Não guardado",
     "retry": "Tentar novamente",
-    "conflict": "Não guardado — alterado noutro local"
+    "conflict": "Não guardado — alterado noutro local",
+    "invalid": "Não guardado — verifique os seus dados ({code})"
   },
   "declarationStatus": {
     "current": "Em uso",

@@ -202,7 +202,8 @@
     "error": "Não salvo — tentando novamente",
     "failed": "Não salvo",
     "retry": "Tentar novamente",
-    "conflict": "Não salvo — alterado em outro local"
+    "conflict": "Não salvo — alterado em outro local",
+    "invalid": "Não salvo — verifique seus dados ({code})"
   },
   "declarationStatus": {
     "current": "Em uso",

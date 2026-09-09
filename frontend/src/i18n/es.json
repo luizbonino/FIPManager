@@ -202,7 +202,8 @@
     "error": "No guardado — reintentando",
     "failed": "No guardado",
     "retry": "Reintentar",
-    "conflict": "No guardado — modificado en otro lugar"
+    "conflict": "No guardado — modificado en otro lugar",
+    "invalid": "No guardado — revise sus datos ({code})"
   },
   "declarationStatus": {
     "current": "En uso actualmente",
