@@ -2,10 +2,10 @@
 
 Status: draft for v2, 2026-09-09. Two v2 items needing no external decision (PLAN §5 v2: "email verification and self-service
 password reset once SMTP is configured"; "FIP migration between knowledge-model versions (DSW-style), with a diff view").
-Authority: `01-foundations.md` §2 (tables), §4 (auth), §5 (authz), §6 (API), §7 (config); `04-knowledge-model-editor.md` §1
-(lifecycle, immutable published versions) and §2 (ids, hidden, split); `03-matrix-and-rdf.md` §2 (RDF shapes); PLAN §4, §7.
-Nothing here is needed on 6 Oct: **both features are off or invisible by default** (`FIPM_MAIL_BACKEND=console`,
-`FIPM_REQUIRE_EMAIL_VERIFICATION=false`; the migration banner appears only once a newer *published* model version exists).
+Authority: `01-foundations.md` §2/§4/§5/§6/§7 (tables, auth, authz, API, config); `04-knowledge-model-editor.md` §1 (lifecycle,
+immutable versions) and §2 (ids, hidden, split); `03-matrix-and-rdf.md` §2 (RDF); `05-v1-completion.md` (`_ensure_columns`, admin
+temporary password) and `06-dmp-linkage.md` (current export state); PLAN §4, §7.
+Nothing here is needed on 6 Oct: **both features are off or invisible by default** (`FIPM_MAIL_BACKEND=console`, `FIPM_REQUIRE_EMAIL_VERIFICATION=false`; the banner appears only once a newer *published* model version exists).
 
 ## 0. Shared schema change (`SCHEMA_VERSION` 4 → **5**)
 
@@ -256,15 +256,14 @@ stays as the record of where the answer came from. The migrate page shows the li
     `FipMigrate.vue` with a stubbed preview renders one row per item, unchanged rows behind the toggle, split radios defaulting to
     both, and a confirm dialog naming the target version.
 
-
 ## 9. Assumptions (facilitators away; both features are post-workshop)
 
 - **A1. Nothing here runs during CONFOA:** `console` mail and `FIPM_REQUIRE_EMAIL_VERIFICATION=false` are the defaults and no newer
   `gofair-fip-mini` version will be published before 6 Oct, so the banner cannot appear in the room. **A2. Verification gates only
   public listing**, never sign-in — an unverified account is a fully working private workspace, so a mistyped address cannot destroy
   someone's output. **A3.** A reset logs out every device, the one doing it included.
-- **A4. Mail is best-effort:** a failed send never fails the request and is visible only in the log; spec 05's admin temporary-password
-  path (with `must_change_password`) stays the guaranteed route back into an account.
+- **A4. Mail is best-effort:** a failed send never fails the request and is visible only in the log; spec 05's admin
+  temporary-password path (`must_change_password`) stays the guaranteed route back into an account.
 - **A5. Migration is forward-only and not undoable:** no "migrate back", no stored diff, and `migrated_from` keeps only the last hop
   (1.0.0 → 1.1.0 → 1.2.0 records 1.1.0); exports made before a migration remain the historical record.
 - **A6. One FIP at a time** — no bulk or session-wide migration in v2. **A7. `en` is the diff language**, so a translation-only `pt-BR`
@@ -276,7 +275,6 @@ stays as the record of where the answer came from. The migrate page shows the li
    a policy on which forks are offered (lineage via `content.forkedFrom`?) and on attribution when the licences differ.
 2. A facilitator-level "migrate this whole session to version W" (the pin's escape hatch): one endpoint, one confirm, N diffs —
    worth it only if a session outlives its model version, which the workshop will tell us.
-3. Should `required`, `allowMultiple` or `principle` changes appear as diff flags (v2 ignores them: they change no stored answer),
-   and should an orphaned answer be re-assignable **after** migration via a small `FipEditor` editor, not only during it?
+3. Should `required`/`allowMultiple`/`principle` changes appear as diff flags (v2 ignores them: no stored answer changes), and should an orphaned answer be re-assignable **after** migration in `FipEditor`, not only during it?
 4. The From address and DKIM/SPF depend on the hosting decision (PLAN §9.3); until it lands `smtp` is tested against a local relay
    only, and a bounced mail is invisible to the tool (no bounce handling in v2).
