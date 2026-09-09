@@ -344,6 +344,13 @@ export interface KnowledgeModelSummary {
   /** spec 04 §3 #1 additions. */
   ownerId: string | null
   isSystem: boolean
+  /**
+   * A shipped draft imported from `data/` with `ownerId` NULL and
+   * `isSystem` false — editable by an admin, who claims it (becomes
+   * `ownerId`) on their first write. Distinct from a true system model:
+   * `isSystem` rows stay read-only for everyone.
+   */
+  isUnownedDraft?: boolean
   /** Non-hidden question count, server-computed. */
   questionCount: number
   forkedFrom: KnowledgeModelForkedFrom | null

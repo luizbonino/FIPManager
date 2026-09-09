@@ -12,7 +12,9 @@
           <span v-if="areaLabelOf(fip)" class="area-chip">{{ areaLabelOf(fip) }}</span>
           <span class="visibility-chip">{{ $t(`visibility.${fip.visibility}`) }}</span>
         </div>
-        <ProgressBar :answered="answeredCount(fip.answers)" :total="totalFor(fip)" />
+        <span class="progress-wrap">
+          <ProgressBar :answered="answeredCount(fip.answers)" :total="totalFor(fip)" />
+        </span>
         <span class="updated">{{ $t('sessionAdmin.lastUpdate') }}: {{ relativeTime(fip.updatedAt) }}</span>
         <span class="row-links">
           <router-link :to="`/fips/${fip.id}`" class="view-link">{{ $t('common.view') }}</router-link>
@@ -134,14 +136,23 @@ function relativeTime(iso: string): string {
   gap: 0.5rem;
 }
 
+/*
+ * Bug fix: a fixed `2fr 1fr auto auto` grid let the progress bar's
+ * nowrap text ("N of 21 questions answered") overflow its 1fr track and
+ * paint over "Last update: …" once the row narrowed (e.g. at 1280px next
+ * to a sidebar). Flex-wrap instead: each section carries its own
+ * min-width, so a too-narrow row wraps sections onto new lines rather
+ * than letting text overlap — and at very narrow widths (375px) every
+ * section ends up on its own line, i.e. fully stacked.
+ */
 .fip-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
   padding: 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-md);
-  align-items: center;
 }
 
 .fip-row-main {
@@ -149,6 +160,13 @@ function relativeTime(iso: string): string {
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+
+.progress-wrap {
+  flex: 1 1 220px;
+  min-width: 200px;
 }
 
 .fip-name {
@@ -174,11 +192,15 @@ function relativeTime(iso: string): string {
 .updated {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+  flex: 0 1 auto;
+  white-space: nowrap;
 }
 
 .row-links {
   display: flex;
   gap: 0.75rem;
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .view-link,
@@ -187,11 +209,5 @@ function relativeTime(iso: string): string {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
-}
-
-@media (min-width: 640px) {
-  .fip-row {
-    grid-template-columns: 2fr 1fr auto auto;
-  }
 }
 </style>

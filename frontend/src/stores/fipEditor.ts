@@ -128,13 +128,68 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     scheduleSave()
   }
 
+  /**
+   * The backend's `Declaration._fer_xor` (schemas.py) rejects *any*
+   * declaration with neither `ferId` nor `ferFreeText` set — including the
+   * bare `{ status }` row `QuestionCard.onAdd()` creates right after "Add
+   * declaration", before the participant has picked a FER. Used both to
+   * decide whether adding one should mark the FIP dirty, and to strip such
+   * rows from the outgoing payload (they stay in local `fip.value` state so
+   * the row keeps rendering) — otherwise every autosave tick 422s until a
+   * FER is chosen.
+   */
+  function hasFerSelection(declaration: Declaration): boolean {
+    return !!declaration.ferId || !!declaration.ferFreeText
+  }
+
+  function stripIncompleteDeclarations(current: FipOut): FipPatchRequest['answers'] {
+    return current.answers.map((answer) => ({
+      ...answer,
+      declarations: answer.declarations.filter(hasFerSelection),
+    }))
+  }
+
+  /**
+   * The server never saw the incomplete declarations `stripIncompleteDeclarations`
+   * left out of the payload, so `updated` (its response) doesn't carry them
+   * either — applying it as-is to `fip.value` would silently delete the
+   * participant's just-added, not-yet-picked row. Splices each one back into
+   * `updated`'s matching answer at its original position (best-effort: this
+   * only needs to survive the common case of no concurrent edit to the same
+   * question while the request was in flight).
+   */
+  function reattachIncompleteDeclarations(before: FipOut, updated: FipOut): FipOut {
+    const answers = updated.answers.map((answer) => {
+      const beforeAnswer = before.answers.find((a) => a.questionId === answer.questionId)
+      if (!beforeAnswer) return answer
+      const declarations = [...answer.declarations]
+      beforeAnswer.declarations.forEach((declaration, index) => {
+        if (!hasFerSelection(declaration)) {
+          declarations.splice(Math.min(index, declarations.length), 0, declaration)
+        }
+      })
+      return { ...answer, declarations }
+    })
+    // A question whose declarations were *all* incomplete never appears in
+    // `updated.answers` at all (the server was sent an empty array, or the
+    // question was never sent) — carry it over untouched.
+    for (const beforeAnswer of before.answers) {
+      if (answers.some((a) => a.questionId === beforeAnswer.questionId)) continue
+      const incomplete = beforeAnswer.declarations.filter((d) => !hasFerSelection(d))
+      if (incomplete.length > 0) {
+        answers.push({ ...beforeAnswer, declarations: incomplete })
+      }
+    }
+    return { ...updated, answers }
+  }
+
   async function performSave(): Promise<void> {
     if (!fip.value || inFlight || !dirty.value) return
     inFlight = true
     saving.value = true
     const current = fip.value
     const payload: FipPatchRequest = {
-      answers: current.answers,
+      answers: stripIncompleteDeclarations(current),
       community: current.community ?? undefined,
       relatedDmps: current.relatedDmps,
       language: current.language,
@@ -144,7 +199,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     try {
       const token = getToken(current.id) ?? undefined
       const updated = await patchFip(current.id, payload, token)
-      fip.value = updated
+      fip.value = reattachIncompleteDeclarations(current, updated)
       lastError.value = null
       lastErrorDetail.value = null
       lastSavedAt.value = new Date()
@@ -223,7 +278,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' }
       if (token) headers['X-Edit-Token'] = token
       const body = JSON.stringify({
-        answers: fip.value.answers,
+        answers: stripIncompleteDeclarations(fip.value),
         community: fip.value.community,
         relatedDmps: fip.value.relatedDmps,
         language: fip.value.language,
@@ -347,7 +402,14 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     const answer = ensureAnswer(questionId)
     if (!answer) return
     answer.declarations = [...answer.declarations, declaration]
-    markDirty()
+    // Bug fix: "Add declaration" (QuestionCard.onAdd) starts the row with
+    // neither ferId nor ferFreeText set — nothing the backend would accept
+    // yet (Declaration._fer_xor 422s on it), so there's nothing to autosave
+    // until a FER is actually picked (which routes through setDeclaration/
+    // onToggleSuggested's own addDeclaration call, both of which do mark dirty).
+    if (hasFerSelection(declaration)) {
+      markDirty()
+    }
   }
 
   function removeDeclaration(questionId: string, index: number): void {

@@ -21,6 +21,7 @@
     <div v-else class="km-blocks">
       <section v-for="block in blocks" :key="block.key" class="km-block">
         <h2>{{ $t(block.labelKey) }}</h2>
+        <p v-if="block.key === 'unownedDrafts'" class="block-hint">{{ $t('km.unownedDraftHint') }}</p>
         <div v-if="block.items.length > 0" class="km-rows">
           <div v-for="model in block.items" :key="`${model.id}@${model.version}`" class="km-row">
             <div class="km-row-main">
@@ -36,7 +37,7 @@
               <router-link :to="`/knowledge-models/${model.id}/${model.version}`">{{ $t('common.view') }}</router-link>
               <button type="button" class="link-btn" @click="onFork(model)">{{ $t('km.fork') }}</button>
               <router-link
-                v-if="model.status === 'draft' && model.ownerId === userId"
+                v-if="(model.status === 'draft' && model.ownerId === userId) || (model.isUnownedDraft === true && isAdmin)"
                 :to="`/knowledge-models/${model.id}/${model.version}/edit`"
               >
                 {{ $t('km.edit') }}
@@ -74,16 +75,29 @@ const showImport = ref(false)
 const importErrors = ref<ContentError[]>([])
 
 const userId = computed(() => authStore.user?.id ?? null)
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 
+// spec 04 §5 addition: shipped drafts imported from data/ (ownerId NULL,
+// isSystem false) surface to admins only, in their own group above "Mine",
+// since an admin can edit and claim one on first write; a normal user
+// never sees this group even if the API happens to send such rows.
 const blocks = computed(() => {
   const mine = models.value.filter((m) => userId.value !== null && m.ownerId === userId.value)
   const system = models.value.filter((m) => m.isSystem)
-  const publicOnes = models.value.filter((m) => !m.isSystem && (userId.value === null || m.ownerId !== userId.value))
-  return [
+  const publicOnes = models.value.filter(
+    (m) => !m.isSystem && !m.isUnownedDraft && (userId.value === null || m.ownerId !== userId.value)
+  )
+  const result = []
+  if (isAdmin.value) {
+    const unownedDrafts = models.value.filter((m) => m.isUnownedDraft)
+    result.push({ key: 'unownedDrafts', labelKey: 'km.unownedDrafts', items: unownedDrafts })
+  }
+  result.push(
     { key: 'mine', labelKey: 'km.mine', items: mine },
     { key: 'system', labelKey: 'km.system', items: system },
-    { key: 'public', labelKey: 'km.public', items: publicOnes },
-  ]
+    { key: 'public', labelKey: 'km.public', items: publicOnes }
+  )
+  return result
 })
 
 async function load() {
@@ -165,6 +179,12 @@ onMounted(load)
   border-bottom: 1px solid var(--color-border);
   padding-bottom: 0.4rem;
   margin: 0 0 0.75rem;
+}
+
+.block-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: -0.5rem 0 0.75rem;
 }
 
 .km-rows {

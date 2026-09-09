@@ -173,6 +173,70 @@ describe('fipEditor store — autosave', () => {
   })
 })
 
+// Bug: "Add declaration" (QuestionCard.onAdd) creates a bare
+// `{ status }` row with neither ferId nor ferFreeText — the backend's
+// `Declaration._fer_xor` 422s on that unconditionally. Autosaving it every
+// debounce tick until a FER is picked was the reported bug.
+describe('fipEditor store — incomplete declarations (neither ferId nor ferFreeText)', () => {
+  it('addDeclaration with no ferId/ferFreeText does not mark the FIP dirty or schedule an autosave', async () => {
+    const store = useFipEditorStore()
+    store.setFip(makeFip())
+
+    store.addDeclaration('F1-metadata', { status: 'current' })
+    expect(store.dirty).toBe(false)
+
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS)
+    expect(patchFipMock).not.toHaveBeenCalled()
+    // The row itself is still there for the participant to fill in.
+    expect(store.fip!.answers[0].declarations).toEqual([{ status: 'current' }])
+  })
+
+  it('addDeclaration with a ferId does mark dirty and autosaves normally', async () => {
+    patchFipMock.mockResolvedValue(makeFip())
+    const store = useFipEditorStore()
+    store.setFip(makeFip())
+
+    store.addDeclaration('F1-metadata', { ferId: 'https://example.org/fer/a', status: 'current' })
+    expect(store.dirty).toBe(true)
+
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS)
+    expect(patchFipMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('strips an incomplete declaration from the PATCH payload but keeps it in local state', async () => {
+    const fip = makeFip({
+      answers: [
+        {
+          questionId: 'F1-metadata',
+          comment: null,
+          declarations: [{ status: 'current' }],
+        },
+      ],
+    })
+    // The server never received the incomplete declaration, so its
+    // response naturally omits it from that answer.
+    patchFipMock.mockResolvedValue(
+      makeFip({ answers: [{ questionId: 'F1-metadata', comment: 'updated', declarations: [] }] })
+    )
+
+    const store = useFipEditorStore()
+    store.setFip(fip)
+
+    // A second, unrelated edit on the same question marks the FIP dirty and
+    // triggers the autosave that used to also ship the incomplete row.
+    store.setComment('F1-metadata', 'updated')
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS)
+
+    expect(patchFipMock).toHaveBeenCalledTimes(1)
+    const sentAnswers = patchFipMock.mock.calls[0][1].answers as Answer[]
+    expect(sentAnswers[0].declarations).toEqual([])
+
+    // Local state still shows the incomplete declaration after the save resolves.
+    expect(store.fip!.answers[0].declarations).toEqual([{ status: 'current' }])
+    expect(store.dirty).toBe(false)
+  })
+})
+
 describe('fipEditor store — setRelatedDmps dmpIndex remap', () => {
   function fipWithEvidence(): FipOut {
     const answers: Answer[] = [

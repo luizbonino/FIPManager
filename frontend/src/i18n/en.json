@@ -337,6 +337,8 @@
   },
   "km": {
     "title": "Knowledge models",
+    "unownedDrafts": "Drafts to review",
+    "unownedDraftHint": "Imported drafts with no owner yet. Editing one claims it as yours.",
     "mine": "My models",
     "system": "Built-in models",
     "public": "Public models",

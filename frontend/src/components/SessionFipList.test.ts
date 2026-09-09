@@ -118,4 +118,31 @@ describe('SessionFipList.vue', () => {
 
     expect(wrapper.text()).toContain(en.editor.progress.replace('{answered}', '1').replace('{total}', '21'))
   })
+
+  // Bug: at 1280px the progress text ("N of 21 questions answered") and
+  // "Last update: …" overlapped — a fixed `2fr 1fr auto auto` grid let the
+  // progress bar's nowrap text spill past its 1fr track into the next
+  // column. Fixed by making `.fip-row` a wrapping flex row where the
+  // progress bar and the "Last update" text are separate flex siblings
+  // (each with their own min-width) rather than one overflowing into the
+  // other's grid cell — this asserts that DOM shape stays in place: the
+  // progress bar sits in its own `.progress-wrap` element, a sibling of
+  // (not an ancestor/descendant of) `.updated`.
+  it('renders the progress bar and "Last update" text as separate flex siblings, not nested', async () => {
+    getKnowledgeModelMock.mockResolvedValue(makeKm(21))
+    const fips = [makeFip({ id: 'fip-1' })]
+    const wrapper = mount(SessionFipList, { props: { fips }, global: { plugins: [makeI18n()] } })
+    await flushPromises()
+
+    const row = wrapper.get('.fip-row')
+    const progressWrap = row.get('.progress-wrap')
+    const updated = row.get('.updated')
+
+    expect(progressWrap.find('.progress-bar').exists()).toBe(true)
+    // Siblings under the same row — neither contains the other.
+    expect(progressWrap.element.contains(updated.element)).toBe(false)
+    expect(updated.element.contains(progressWrap.element)).toBe(false)
+    expect(progressWrap.element.parentElement).toBe(row.element)
+    expect(updated.element.parentElement).toBe(row.element)
+  })
 })
