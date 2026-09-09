@@ -426,16 +426,23 @@ class SeedIndex:
     exact: dict[str, list[tuple[str, str]]]
     # fer_type -> list of (fer_id, raw_text, norm_text) (steps 3-4 never cross types)
     by_type: dict[str, list[tuple[str, str, str]]]
+    # fer_id -> fer_type, for checking an id (however it was resolved --
+    # option-map override, aliases-workshop.md, or a seed match) against the
+    # requesting question's ferType.
+    id_type: dict[str, str]
 
 
 def build_seed_index(seed_entries: list[dict[str, Any]]) -> SeedIndex:
     exact: dict[str, list[tuple[str, str]]] = {}
     by_type: dict[str, list[tuple[str, str, str]]] = {}
+    id_type: dict[str, str] = {}
     for entry in seed_entries:
         fid = entry.get("id")
         ftype = entry.get("type")
         if not isinstance(fid, str):
             continue
+        if isinstance(ftype, str):
+            id_type[fid] = ftype
         texts: list[str] = []
         label = entry.get("label") or {}
         if isinstance(label, dict):
@@ -453,7 +460,7 @@ def build_seed_index(seed_entries: list[dict[str, Any]]) -> SeedIndex:
                 bucket.append(pair)
             if ftype:
                 by_type.setdefault(ftype, []).append((fid, raw, n))
-    return SeedIndex(exact=exact, by_type=by_type)
+    return SeedIndex(exact=exact, by_type=by_type, id_type=id_type)
 
 
 def _match_exact(option_norm: str, index: SeedIndex) -> str | None:
@@ -531,6 +538,50 @@ def resolve_via_seed(
     return None, best
 
 
+def resolve_via_seed_same_type(
+    option_text: str, fer_type: str | None, index: SeedIndex
+) -> tuple[str | None, dict[str, Any] | None]:
+    """Steps 3-4 only, which never cross types (unlike step 2, exact
+    match). Used as the type-safe fallback when the ordinary resolution --
+    the aliases table, or step 2 -- matched a FER of a different type than
+    the requesting question's ferType."""
+    if fer_type is None:
+        return None, None
+    n = norm(option_text)
+    rid = _match_substring(n, fer_type, index)
+    if rid:
+        return rid, None
+    rid, best = _match_fuzzy(n, fer_type, index)
+    if rid:
+        return rid, None
+    return None, best
+
+
+def entry_fer_ids(entry: dict[str, Any]) -> list[str]:
+    """The real FER id(s) an option-map entry resolves to, or [] for a
+    "skip" or still-unresolved ("ferId": null) entry."""
+    ids = entry.get("ferIds")
+    if ids:
+        return list(ids)
+    fer_id = entry.get("ferId")
+    if fer_id and fer_id != "skip":
+        return [fer_id]
+    return []
+
+
+def ids_match_type(ids: list[str], fer_type: str | None, index: SeedIndex) -> bool:
+    """True when `fer_type` is unset, `ids` is empty, none of `ids` has a
+    known type in seed.json (nothing to check -- e.g. all draft ids), or at
+    least one id's seed-known type equals `fer_type`."""
+    if fer_type is None or not ids:
+        return True
+    known = [index.id_type.get(i) for i in ids]
+    known = [t for t in known if t is not None]
+    if not known:
+        return True
+    return any(t == fer_type for t in known)
+
+
 def draft_fer_id(base_url: str, option_norm: str) -> str:
     """{base_url}/fers/draft/<hash16>, hash16 = first 16 hex of sha256(norm(option))."""
     hash16 = hashlib.sha256(option_norm.encode("utf-8")).hexdigest()[:16]
@@ -573,66 +624,109 @@ class Encounter:
     option_text: str
 
 
+def option_map_key(norm_text: str, fer_type: str | None) -> str:
+    """option-map.json keys on (normalised option text, question ferType),
+    not text alone: the exact same wording can legitimately resolve to
+    different FER ids depending on which question type it's offered under,
+    and keying on text alone silently reused whichever question type was
+    encountered first for every other type too."""
+    return f"{norm_text} :: {fer_type or 'notype'}"
+
+
+def resolve_group(
+    norm_text: str,
+    fer_type: str | None,
+    group: list[Encounter],
+    loaded_entry: dict[str, Any] | None,
+    alias_entries: dict[str, dict[str, Any]],
+    seed_index: SeedIndex,
+    base_url: str,
+) -> dict[str, Any]:
+    """Resolves one (norm_text, fer_type) group to an option-map.json entry.
+    `"source"` distinguishes a script guess ("auto", steps 2-4 of §4.2, may
+    be re-resolved on a later run) from a curated answer ("human" -- either
+    a real edit to option-map.json, or a row from data/fers/aliases-
+    workshop.md, which is applied fresh every run but then frozen the same
+    way): only "human" entries are ever kept as-is untouched. When the best
+    available id's seed.json type doesn't match `fer_type`, a same-type-only
+    fallback (steps 3-4, which never cross types) is preferred if one
+    exists; otherwise the cross-type id is kept and flagged
+    `"typeMismatch": true` for the report."""
+    first = group[0]
+
+    if (
+        loaded_entry is not None
+        and loaded_entry.get("source") == "human"
+        and is_decided(loaded_entry)
+    ):
+        kept = dict(loaded_entry)
+        kept.pop("stale", None)
+        return kept
+
+    alias_entry = alias_entries.get(norm_text)
+    if alias_entry is not None:
+        ids = entry_fer_ids(alias_entry)
+        if ids_match_type(ids, fer_type, seed_index):
+            out = dict(alias_entry)
+            out["source"] = "human"
+            return out
+        same_type_id, _best = resolve_via_seed_same_type(first.option_text, fer_type, seed_index)
+        if same_type_id is not None:
+            return {"ferId": same_type_id, "source": "auto"}
+        out = dict(alias_entry)
+        out["source"] = "human"
+        out["typeMismatch"] = True
+        return out
+
+    resolved_id, best = resolve_via_seed(first.option_text, fer_type, seed_index)
+    if resolved_id is not None:
+        if ids_match_type([resolved_id], fer_type, seed_index):
+            return {"ferId": resolved_id, "source": "auto"}
+        same_type_id, _best = resolve_via_seed_same_type(first.option_text, fer_type, seed_index)
+        if same_type_id is not None:
+            return {"ferId": same_type_id, "source": "auto"}
+        return {"ferId": resolved_id, "source": "auto", "typeMismatch": True}
+
+    draft_id = (loaded_entry or {}).get("draftFerId") or draft_fer_id(base_url, norm_text)
+    out = {
+        "ferId": None,
+        "draftFerId": draft_id,
+        "questionId": first.question_id,
+        "ferType": fer_type,
+        "seen": sorted({e.area_slug for e in group}),
+    }
+    if best is not None:
+        out["bestCandidate"] = best
+    return out
+
+
 def merge_option_map(
     loaded: dict[str, Any],
     encounters: list[Encounter],
     seed_index: SeedIndex,
     base_url: str,
+    alias_entries: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """§4.3 bullet 2: resolved entries are kept as-is; new options are
     appended; an entry whose option text has vanished from the document is
     kept and marked "stale": true. Step 1 of §4.2 (the map always wins,
-    including an explicit "ferId": null) is implemented by never
-    re-resolving a key that's already present. A "decided" entry (a real
-    ferId, the "skip" sentinel, or a ferIds list -- see `is_decided`) is
-    always kept as-is; only a still-open "ferId": null entry has its
-    diagnostics refreshed."""
+    including an explicit "ferId": null) is implemented by `resolve_group`
+    never re-resolving a "human"-sourced entry that's already present."""
+    alias_entries = alias_entries or {}
     groups: dict[str, list[Encounter]] = {}
+    key_info: dict[str, tuple[str, str | None]] = {}
     for enc in encounters:
-        groups.setdefault(norm(enc.option_text), []).append(enc)
+        norm_text = norm(enc.option_text)
+        key = option_map_key(norm_text, enc.fer_type)
+        groups.setdefault(key, []).append(enc)
+        key_info[key] = (norm_text, enc.fer_type)
 
     new_map: dict[str, Any] = {}
     for key, group in groups.items():
-        first = group[0]
-        if key in loaded:
-            entry = loaded[key]
-            if isinstance(entry, dict) and is_decided(entry):
-                # Decided (human, a previous run, or the aliases-workshop.md
-                # seed) -> kept as-is, verbatim.
-                kept = dict(entry)
-                kept.pop("stale", None)
-                new_map[key] = kept
-                continue
-            # Pinned unresolved (explicit "ferId": null) -> refresh diagnostics,
-            # keep the ferId: null pin.
-            _resolved_id, best = resolve_via_seed(first.option_text, first.fer_type, seed_index)
-            out = {
-                "ferId": None,
-                "draftFerId": draft_fer_id(base_url, key),
-                "questionId": first.question_id,
-                "ferType": first.fer_type,
-                "seen": sorted({e.area_slug for e in group}),
-            }
-            if best is not None:
-                out["bestCandidate"] = best
-            new_map[key] = out
-            continue
-
-        # Brand-new option this run -> attempt steps 2-4.
-        resolved_id, best = resolve_via_seed(first.option_text, first.fer_type, seed_index)
-        if resolved_id is not None:
-            new_map[key] = {"ferId": resolved_id}
-        else:
-            out = {
-                "ferId": None,
-                "draftFerId": draft_fer_id(base_url, key),
-                "questionId": first.question_id,
-                "ferType": first.fer_type,
-                "seen": sorted({e.area_slug for e in group}),
-            }
-            if best is not None:
-                out["bestCandidate"] = best
-            new_map[key] = out
+        norm_text, fer_type = key_info[key]
+        new_map[key] = resolve_group(
+            norm_text, fer_type, group, loaded.get(key), alias_entries, seed_index, base_url
+        )
 
     for key, entry in loaded.items():
         if key not in groups:
@@ -685,23 +779,6 @@ def parse_aliases_markdown(text: str) -> dict[str, dict[str, Any]]:
         if not ids:
             continue
         out[key] = {"ferId": ids[0]} if len(ids) == 1 else {"ferIds": ids}
-    return out
-
-
-def apply_alias_seed(
-    loaded: dict[str, Any], alias_entries: dict[str, dict[str, Any]]
-) -> dict[str, Any]:
-    """Seeds `loaded` from the aliases-workshop.md table: a key not already
-    "decided" in `loaded` (see `is_decided`) is filled in from the alias
-    table; an already-decided entry (a human edit, or a real resolution
-    from a previous run) is never overwritten -- option-map.json's own
-    entries always have the final say."""
-    out = dict(loaded)
-    for key, alias_entry in alias_entries.items():
-        existing = out.get(key)
-        if isinstance(existing, dict) and is_decided(existing):
-            continue
-        out[key] = dict(alias_entry)
     return out
 
 
@@ -759,6 +836,7 @@ class QuestionResult:
     truncated_from: int | None
     sentinel_counts: dict[str, int]
     skipped_generic: int = 0
+    type_mismatches: int = 0
 
 
 @dataclass
@@ -818,12 +896,14 @@ def build_area_import(
         ids_ordered: list[str] = []
         seen_ids: set[str] = set()
         skipped_generic = 0
+        type_mismatches = 0
         for opt in fq.options:
             kind = classify_sentinel(opt)
             if kind is not None:
                 sentinel_counts[kind] += 1
                 continue
-            key = norm(opt)
+            norm_text = norm(opt)
+            key = option_map_key(norm_text, fer_type)
             entry = option_map.get(key)
             if entry is None:
                 # Shouldn't happen: merge_option_map is expected to have
@@ -835,14 +915,18 @@ def build_area_import(
                 # -> no suggestion, no inlineFers draft.
                 skipped_generic += 1
                 continue
+            if entry.get("typeMismatch"):
+                type_mismatches += 1
             resolved_ids = entry.get("ferIds") or ([fer_id] if fer_id else None)
             if resolved_ids is None:
                 # Unresolved -> an inlineFers draft, shared across areas by
                 # the deterministic draft id (hash of norm(option)).
-                draft_id = entry.get("draftFerId") or draft_fer_id("https://fipm.example.org", key)
+                draft_id = entry.get("draftFerId") or draft_fer_id(
+                    "https://fipm.example.org", norm_text
+                )
                 inline_fers[draft_id] = {
                     "id": draft_id,
-                    "label": {"pt-BR": canonical_label_by_norm.get(key, opt)},
+                    "label": {"pt-BR": canonical_label_by_norm.get(norm_text, opt)},
                     "type": entry.get("ferType") or fer_type,
                     "homepage": None,
                 }
@@ -865,6 +949,7 @@ def build_area_import(
             truncated_from=truncated_from,
             sentinel_counts=sentinel_counts,
             skipped_generic=skipped_generic,
+            type_mismatches=type_mismatches,
         )
 
     title_en, title_es, _needs_review = translate_title(area.name, area.slug)
@@ -1033,11 +1118,13 @@ def render_report(
 
     sentinel_totals = {"other": 0, "undefined": 0, "not_applicable": 0}
     skipped_generic_total = 0
+    type_mismatch_total = 0
     for a in areas:
         for q in a.questions.values():
             for k, v in q.sentinel_counts.items():
                 sentinel_totals[k] += v
             skipped_generic_total += q.skipped_generic
+            type_mismatch_total += q.type_mismatches
 
     lines.append("## Totals")
     lines.append(f"- Areas detected: {len(areas)}")
@@ -1052,6 +1139,10 @@ def render_report(
     lines.append(
         f"- Options as inline FER drafts: {inline_total} "
         f"(ambiguous: {ambiguous}, unresolved: {unresolved})"
+    )
+    lines.append(
+        f"- Suggestions whose FER type differs from the question's ferType "
+        f"(kept, no same-type alternative found): {type_mismatch_total} occurrences across areas"
     )
     lines.append(
         "- Sentinels dropped: "
@@ -1078,6 +1169,11 @@ def render_report(
         area_skipped = sum(q.skipped_generic for q in a.questions.values())
         if area_skipped:
             lines.append(f"- Options skipped as generic/placeholder: {area_skipped}")
+        area_mismatches = sum(q.type_mismatches for q in a.questions.values())
+        if area_mismatches:
+            lines.append(
+                f"- Type mismatches (suggestion kept, see report section below): {area_mismatches}"
+            )
         for qid, q in a.questions.items():
             if not q.found:
                 continue
@@ -1113,6 +1209,21 @@ def render_report(
             lines.append(
                 f"- `{key}` (question `{entry.get('questionId')}`, type `{entry.get('ferType')}`) "
                 f"-> draft `{entry.get('draftFerId')}`, {best_str}, seen in: {seen_str}"
+            )
+        lines.append("")
+
+    mismatch_entries = [(k, v) for k, v in option_map.items() if v.get("typeMismatch")]
+    if mismatch_entries:
+        lines.append(
+            f"## Type mismatches ({len(mismatch_entries)}) -- kept, no same-type "
+            "alternative found in seed.json; facilitators should review"
+        )
+        for key, entry in sorted(mismatch_entries):
+            ids = entry_fer_ids(entry)
+            requested_type = key.rsplit(" :: ", 1)[-1]
+            lines.append(
+                f"- `{key}` -> {', '.join(f'`{i}`' for i in ids)} "
+                f"(question ferType `{requested_type}`, source: {entry.get('source')})"
             )
         lines.append("")
 
@@ -1214,7 +1325,6 @@ def main(argv: list[str] | None = None) -> int:
     except OSError as exc:
         print(f"error: cannot read --aliases {args.aliases}: {exc}", file=sys.stderr)
         return 2
-    loaded_map = apply_alias_seed(loaded_map, alias_entries)
 
     try:
         assert_doc_code_table(base_model)
@@ -1257,7 +1367,7 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 )
 
-    merged_map = merge_option_map(loaded_map, encounters, seed_index, args.base_url)
+    merged_map = merge_option_map(loaded_map, encounters, seed_index, args.base_url, alias_entries)
 
     # Pass 2: build each area's model content using the now-final option map.
     area_results: list[AreaImportResult] = []
@@ -1296,7 +1406,11 @@ def main(argv: list[str] | None = None) -> int:
             out_path = args.out / f"{area.model_id}-{decision.version}.json"
             _write_json(out_path, decision.content)
 
-    if not args.dry_run:
+    # Finding: option-map.json is derived from -- and only meaningful
+    # alongside -- a fully successful run; a partial run (one or more
+    # models failing validate_content, exit 2) must not persist its
+    # half-resolved option map.
+    if not args.dry_run and not validation_errors:
         _write_json(args.map, merged_map, sort_keys=True)
 
     base_url_is_placeholder = args.base_url == "https://fipm.example.org"

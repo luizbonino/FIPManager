@@ -6,9 +6,10 @@ Base URL: `https://fipm.example.org` -- PLACEHOLDER, pass a real --base-url befo
 ## Totals
 - Areas detected: 5
 - Questions found / expected: 104 / 105 (1 missing)
-- Options resolved to a catalogue FER: 131
-- Options skipped as generic/placeholder (data/fers/aliases-workshop.md): 76 (293 occurrences across areas)
+- Options resolved to a catalogue FER: 145
+- Options skipped as generic/placeholder (data/fers/aliases-workshop.md): 74 (293 occurrences across areas)
 - Options as inline FER drafts: 0 (ambiguous: 0, unresolved: 0)
+- Suggestions whose FER type differs from the question's ferType (kept, no same-type alternative found): 65 occurrences across areas
 - Sentinels dropped: Outro=105, Ainda não definido=104, Não se aplica=105
 
 ## Dados Ômicos (`confoa-2026-dados-omicos`, 1.0.0)
@@ -16,72 +17,75 @@ Base URL: `https://fipm.example.org` -- PLACEHOLDER, pass a real --base-url befo
 - Questions found: 20/21
 - Missing questions: I3.2 (I3-data)
 - Options skipped as generic/placeholder: 49
-  - F1-metadata: 5 suggested option(s)
-  - F1-data: 5 suggested option(s)
-  - F2: 4 suggested option(s)
+- Type mismatches (suggestion kept, see report section below): 25
+  - F1-metadata: 8 suggested option(s)
+  - F1-data: 9 suggested option(s)
+  - F2: 7 suggested option(s)
   - F3: 4 suggested option(s)
-  - F4-metadata: 6 suggested option(s)
-  - F4-data: 6 suggested option(s)
+  - F4-metadata: 10 suggested option(s)
+  - F4-data: 10 suggested option(s)
   - A1.1-metadata: 4 suggested option(s)
   - A1.1-data: 2 suggested option(s)
-  - A1.2-metadata: 1 suggested option(s)
+  - A1.2-metadata: 2 suggested option(s)
   - A1.2-data: 0 suggested option(s)
   - A2: 0 suggested option(s)
-  - I1-metadata: 5 suggested option(s)
-  - I1-data: 5 suggested option(s)
-  - I2-metadata: 6 suggested option(s)
-  - I2-data: 6 suggested option(s)
-  - I3-metadata: 10 suggested option(s)
+  - I1-metadata: 6 suggested option(s)
+  - I1-data: 7 suggested option(s)
+  - I2-metadata: 9 suggested option(s)
+  - I2-data: 9 suggested option(s)
+  - I3-metadata: 12 suggested option(s) (truncated from 15, see report totals)
   - R1.1-metadata: 2 suggested option(s)
   - R1.1-data: 2 suggested option(s)
   - R1.2-metadata: 5 suggested option(s)
-  - R1.2-data: 3 suggested option(s)
+  - R1.2-data: 4 suggested option(s)
 - Sentinels: Outro=21, Ainda não definido=21, Não se aplica=21
 
 ## Biodiversidade (`confoa-2026-biodiversidade`, 1.0.0)
 - Write action: write
 - Questions found: 21/21
 - Options skipped as generic/placeholder: 63
-  - F1-metadata: 2 suggested option(s)
-  - F1-data: 2 suggested option(s)
-  - F2: 4 suggested option(s)
+- Type mismatches (suggestion kept, see report section below): 12
+  - F1-metadata: 3 suggested option(s)
+  - F1-data: 3 suggested option(s)
+  - F2: 5 suggested option(s)
   - F3: 2 suggested option(s)
   - F4-metadata: 3 suggested option(s)
-  - F4-data: 2 suggested option(s)
+  - F4-data: 4 suggested option(s)
   - A1.1-metadata: 3 suggested option(s)
   - A1.1-data: 2 suggested option(s)
-  - A1.2-metadata: 1 suggested option(s)
+  - A1.2-metadata: 2 suggested option(s)
   - A1.2-data: 0 suggested option(s)
   - A2: 0 suggested option(s)
-  - I1-metadata: 4 suggested option(s)
-  - I1-data: 4 suggested option(s)
+  - I1-metadata: 5 suggested option(s)
+  - I1-data: 5 suggested option(s)
   - I2-metadata: 4 suggested option(s)
-  - I2-data: 4 suggested option(s)
+  - I2-data: 5 suggested option(s)
   - I3-metadata: 4 suggested option(s)
-  - I3-data: 4 suggested option(s)
+  - I3-data: 5 suggested option(s)
   - R1.1-metadata: 2 suggested option(s)
   - R1.1-data: 3 suggested option(s)
   - R1.2-metadata: 5 suggested option(s)
-  - R1.2-data: 2 suggested option(s)
+  - R1.2-data: 3 suggested option(s)
 - Sentinels: Outro=21, Ainda não definido=21, Não se aplica=21
 
 ## Agricultura (`confoa-2026-agricultura`, 1.0.0)
 - Write action: write
 - Questions found: 21/21
 - Options skipped as generic/placeholder: 60
-  - F1-metadata: 2 suggested option(s)
-  - F1-data: 2 suggested option(s)
+- Type mismatches (suggestion kept, see report section below): 8
+  - F1-metadata: 3 suggested option(s)
+  - F1-data: 3 suggested option(s)
   - F2: 4 suggested option(s)
   - F3: 2 suggested option(s)
   - F4-metadata: 3 suggested option(s)
-  - F4-data: 2 suggested option(s)
+  - F4-data: 4 suggested option(s)
   - A1.1-metadata: 3 suggested option(s)
   - A1.1-data: 2 suggested option(s)
-  - A1.2-metadata: 1 suggested option(s)
+  - A1.2-metadata: 2 suggested option(s)
   - A1.2-data: 0 suggested option(s)
   - A2: 0 suggested option(s)
-  - I1-metadata: 4 suggested option(s)
-  - I1-data: 5 suggested option(s)
+  - I1-metadata: 5 suggested option(s)
+  - I1-data: 7 suggested option(s)
   - I2-metadata: 3 suggested option(s)
   - I2-data: 5 suggested option(s)
   - I3-metadata: 4 suggested option(s)
@@ -89,65 +93,151 @@ Base URL: `https://fipm.example.org` -- PLACEHOLDER, pass a real --base-url befo
   - R1.1-metadata: 2 suggested option(s)
   - R1.1-data: 3 suggested option(s)
   - R1.2-metadata: 5 suggested option(s)
-  - R1.2-data: 2 suggested option(s)
+  - R1.2-data: 3 suggested option(s)
 - Sentinels: Outro=21, Ainda não definido=20, Não se aplica=21
 
 ## Saúde Pública (`confoa-2026-saude-publica`, 1.0.0)
 - Write action: write
 - Questions found: 21/21
 - Options skipped as generic/placeholder: 58
-  - F1-metadata: 2 suggested option(s)
-  - F1-data: 2 suggested option(s)
+- Type mismatches (suggestion kept, see report section below): 10
+  - F1-metadata: 3 suggested option(s)
+  - F1-data: 3 suggested option(s)
   - F2: 4 suggested option(s)
   - F3: 2 suggested option(s)
   - F4-metadata: 3 suggested option(s)
-  - F4-data: 2 suggested option(s)
+  - F4-data: 4 suggested option(s)
   - A1.1-metadata: 3 suggested option(s)
   - A1.1-data: 2 suggested option(s)
-  - A1.2-metadata: 1 suggested option(s)
+  - A1.2-metadata: 2 suggested option(s)
   - A1.2-data: 0 suggested option(s)
   - A2: 0 suggested option(s)
-  - I1-metadata: 4 suggested option(s)
+  - I1-metadata: 5 suggested option(s)
   - I1-data: 4 suggested option(s)
-  - I2-metadata: 4 suggested option(s)
-  - I2-data: 5 suggested option(s)
+  - I2-metadata: 5 suggested option(s)
+  - I2-data: 6 suggested option(s)
   - I3-metadata: 4 suggested option(s)
   - I3-data: 5 suggested option(s)
   - R1.1-metadata: 2 suggested option(s)
   - R1.1-data: 3 suggested option(s)
   - R1.2-metadata: 5 suggested option(s)
-  - R1.2-data: 2 suggested option(s)
+  - R1.2-data: 3 suggested option(s)
 - Sentinels: Outro=21, Ainda não definido=21, Não se aplica=21
 
 ## Enfermagem (`confoa-2026-enfermagem`, 1.0.0)
 - Write action: write
 - Questions found: 21/21
 - Options skipped as generic/placeholder: 63
-  - F1-metadata: 2 suggested option(s)
-  - F1-data: 2 suggested option(s)
+- Type mismatches (suggestion kept, see report section below): 10
+  - F1-metadata: 3 suggested option(s)
+  - F1-data: 3 suggested option(s)
   - F2: 4 suggested option(s)
   - F3: 2 suggested option(s)
   - F4-metadata: 3 suggested option(s)
-  - F4-data: 2 suggested option(s)
+  - F4-data: 4 suggested option(s)
   - A1.1-metadata: 3 suggested option(s)
   - A1.1-data: 2 suggested option(s)
-  - A1.2-metadata: 1 suggested option(s)
+  - A1.2-metadata: 2 suggested option(s)
   - A1.2-data: 0 suggested option(s)
   - A2: 0 suggested option(s)
-  - I1-metadata: 4 suggested option(s)
+  - I1-metadata: 5 suggested option(s)
   - I1-data: 4 suggested option(s)
-  - I2-metadata: 5 suggested option(s)
-  - I2-data: 5 suggested option(s)
+  - I2-metadata: 6 suggested option(s)
+  - I2-data: 7 suggested option(s)
   - I3-metadata: 4 suggested option(s)
   - I3-data: 5 suggested option(s)
   - R1.1-metadata: 2 suggested option(s)
   - R1.1-data: 3 suggested option(s)
   - R1.2-metadata: 5 suggested option(s)
-  - R1.2-data: 2 suggested option(s)
+  - R1.2-data: 3 suggested option(s)
 - Sentinels: Outro=21, Ainda não definido=21, Não se aplica=21
 
-## Stale option-map entries (no longer in the document): 3
-- `ainda nao definido`
-- `nao se aplica`
-- `outro`
+## Unresolved options
+- `abcd / biocase :: metadata-schema` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `bam / cram para alinhamentos :: semantic-model` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `biosample / sra / ena accession :: identifier-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `chebi / hmdb :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `darwin core / dwc-a :: semantic-model` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `datacite / bioschemas :: metadata-schema` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `datacite / bioschemas :: semantic-model` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `datacite commons / google dataset search :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `datacite commons ou google dataset search :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `dataverse ou zenodo :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `decs / mesh :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `ega / dbgap :: identifier-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `ega / dbgap :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `ega / dbgap accession :: identifier-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `fasta / fastq para sequencias :: semantic-model` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `fastq / bam / cram :: knowledge-representation-language` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `gbif backbone / catalogue of life :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `gene ontology / sequence ontology :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `geo / biostudies :: identifier-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `geo / biostudies :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `geojson / geopackage :: knowledge-representation-language` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `handle ou ark :: identifier-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `hpo / mondo :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `icnp / snomed ct :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `icnp integrada ao snomed ct :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `json / rdf :: knowledge-representation-language` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `json-ld / rdf :: knowledge-representation-language` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `json-ld ou rdf :: knowledge-representation-language` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `miame / minseqe / miape :: metadata-schema` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `miame / minseqe / miape :: semantic-model` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `ncbi / geo / ena :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `oauth 2.0 ou openid connect :: authentication-authorization-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `obi / efo :: structured-vocabulary` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `orcid e ror :: provenance-model` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `pride / metabolights :: identifier-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `pride / metabolights accession :: identifier-service` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `pride / proteomexchange :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `rdf / json-ld :: knowledge-representation-language` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `sra / ena / ddbj :: registry` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+- `w3c prov / ro-crate :: provenance-model` (question `None`, type `None`) -> draft `None`, no candidate, seen in: 
+
+## Type mismatches (45) -- kept, no same-type alternative found in seed.json; facilitators should review
+- `abcd :: semantic-model` -> `https://abcd.tdwg.org/` (question ferType `semantic-model`, source: human)
+- `bam / cram para alinhamentos :: semantic-model` -> `https://samtools.github.io/hts-specs/CRAMv3.pdf`, `https://samtools.github.io/hts-specs/SAMv1.pdf` (question ferType `semantic-model`, source: human)
+- `bioproject–biosample–experiment–run :: semantic-model` -> `https://www.ncbi.nlm.nih.gov/bioproject/` (question ferType `semantic-model`, source: human)
+- `campos de autoria e contribuicao do datacite :: provenance-model` -> `https://schema.datacite.org/` (question ferType `provenance-model`, source: human)
+- `csv tabular com dicionario de dados :: semantic-model` -> `https://www.rfc-editor.org/rfc/rfc4180` (question ferType `semantic-model`, source: human)
+- `darwin core / dwc-a :: semantic-model` -> `https://dwc.tdwg.org/`, `https://dwc.tdwg.org/text/` (question ferType `semantic-model`, source: human)
+- `darwin core :: semantic-model` -> `https://dwc.tdwg.org/` (question ferType `semantic-model`, source: human)
+- `darwin core terms / tdwg vocabularies :: structured-vocabulary` -> `https://dwc.tdwg.org/` (question ferType `structured-vocabulary`, source: human)
+- `darwin core terms :: structured-vocabulary` -> `https://dwc.tdwg.org/` (question ferType `structured-vocabulary`, source: human)
+- `datacite / bioschemas :: semantic-model` -> `https://bioschemas.org/`, `https://schema.datacite.org/` (question ferType `semantic-model`, source: human)
+- `datacite :: semantic-model` -> `https://schema.datacite.org/` (question ferType `semantic-model`, source: human)
+- `datacite metadata schema :: semantic-model` -> `https://schema.datacite.org/` (question ferType `semantic-model`, source: human)
+- `ddi :: semantic-model` -> `https://ddialliance.org/` (question ferType `semantic-model`, source: human)
+- `ddi para microdados :: semantic-model` -> `https://ddialliance.org/` (question ferType `semantic-model`, source: human)
+- `ddi para questionarios :: semantic-model` -> `https://ddialliance.org/` (question ferType `semantic-model`, source: human)
+- `dublin core :: semantic-model` -> `https://purl.org/dc/terms/` (question ferType `semantic-model`, source: human)
+- `dwc event para amostragem :: semantic-model` -> `https://dwc.tdwg.org/` (question ferType `semantic-model`, source: human)
+- `ega / dbgap :: registry` -> `https://ega-archive.org/`, `https://www.ncbi.nlm.nih.gov/gap/` (question ferType `registry`, source: human)
+- `eml :: semantic-model` -> `https://eml.ecoinformatics.org/` (question ferType `semantic-model`, source: human)
+- `fasta / fastq para sequencias :: semantic-model` -> `https://en.wikipedia.org/wiki/FASTQ_format`, `https://www.ncbi.nlm.nih.gov/genbank/fastaformat/` (question ferType `semantic-model`, source: human)
+- `geo / biostudies :: registry` -> `https://www.ebi.ac.uk/biostudies/`, `https://www.ncbi.nlm.nih.gov/geo/` (question ferType `registry`, source: human)
+- `geojson / padroes geoespaciais :: semantic-model` -> `https://geojson.org/` (question ferType `semantic-model`, source: human)
+- `geopackage / geojson :: semantic-model` -> `https://www.geopackage.org/` (question ferType `semantic-model`, source: human)
+- `h5ad para celula unica :: semantic-model` -> `https://anndata.readthedocs.io/` (question ferType `semantic-model`, source: human)
+- `hl7 fhir :: metadata-schema` -> `https://www.hl7.org/fhir/` (question ferType `metadata-schema`, source: human)
+- `isa :: semantic-model` -> `https://isa-tools.org/format/specification.html` (question ferType `semantic-model`, source: human)
+- `isa-tab / isa-json :: knowledge-representation-language` -> `https://isa-tools.org/format/specification.html` (question ferType `knowledge-representation-language`, source: human)
+- `isa-tab / isa-json :: provenance-model` -> `https://isa-tools.org/format/specification.html` (question ferType `provenance-model`, source: human)
+- `isa-tab / isa-json para integracao multiomica :: semantic-model` -> `https://isa-tools.org/format/specification.html` (question ferType `semantic-model`, source: human)
+- `iso 19115 :: semantic-model` -> `https://www.iso.org/standard/53798.html` (question ferType `semantic-model`, source: human)
+- `json / fhir :: knowledge-representation-language` -> `https://www.hl7.org/fhir/` (question ferType `knowledge-representation-language`, source: human)
+- `json schema :: semantic-model` -> `https://json-schema.org/` (question ferType `semantic-model`, source: human)
+- `metabolights / metabolomics workbench :: registry` -> `https://www.ebi.ac.uk/metabolights/` (question ferType `registry`, source: human)
+- `miame / minseqe / miape :: semantic-model` -> `https://www.fged.org/projects/minseqe/`, `https://www.fged.org/projects/miame`, `https://www.psidev.info/miape` (question ferType `semantic-model`, source: human)
+- `miappe :: semantic-model` -> `https://www.miappe.org/` (question ferType `semantic-model`, source: human)
+- `mixs :: semantic-model` -> `https://genomicsstandardsconsortium.github.io/mixs/` (question ferType `semantic-model`, source: human)
+- `mzml / mztab para proteomica ou metabolomica :: semantic-model` -> `https://www.psidev.info/mzml` (question ferType `semantic-model`, source: human)
+- `ncbi / ena apis :: communication-protocol` -> `https://www.ebi.ac.uk/ena/browser/home` (question ferType `communication-protocol`, source: human)
+- `ncbi / geo / ena :: registry` -> `https://www.ebi.ac.uk/ena/browser/home`, `https://www.ncbi.nlm.nih.gov/geo/` (question ferType `registry`, source: human)
+- `orcid e ror :: provenance-model` -> `https://orcid.org/`, `https://ror.org/` (question ferType `provenance-model`, source: human)
+- `rdf / grafo de conhecimento :: semantic-model` -> `https://www.w3.org/TR/rdf11-concepts/` (question ferType `semantic-model`, source: human)
+- `relacoes bioproject–biosample–experimento/execucao :: metadata-data-linking-schema` -> `https://www.ncbi.nlm.nih.gov/bioproject/` (question ferType `metadata-data-linking-schema`, source: human)
+- `relacoes isa entre investigacao, estudo, ensaio, amostra e arquivo :: metadata-data-linking-schema` -> `https://isa-tools.org/format/specification.html` (question ferType `metadata-data-linking-schema`, source: human)
+- `sra / ena / ddbj :: registry` -> `https://www.ebi.ac.uk/ena/browser/home`, `https://www.ncbi.nlm.nih.gov/sra` (question ferType `registry`, source: human)
+- `vcf / bcf para variantes :: semantic-model` -> `https://samtools.github.io/hts-specs/VCFv4.3.pdf` (question ferType `semantic-model`, source: human)
 

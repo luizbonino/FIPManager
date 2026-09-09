@@ -65,7 +65,8 @@
           "allowMultiple": true,
           "suggestedFerIds": [
             "https://www.doi.org/",
-            "https://arks.org/"
+            "https://arks.org/",
+            "https://www.handle.net/"
           ],
           "allowFreeText": true
         },
@@ -90,7 +91,8 @@
           "allowMultiple": true,
           "suggestedFerIds": [
             "https://www.doi.org/",
-            "https://arks.org/"
+            "https://arks.org/",
+            "https://www.handle.net/"
           ],
           "allowFreeText": true
         },
@@ -117,6 +119,7 @@
             "https://dwc.tdwg.org/",
             "https://eml.ecoinformatics.org/",
             "https://abcd.tdwg.org/",
+            "https://www.biocase.org/",
             "https://schema.datacite.org/"
           ],
           "allowFreeText": true
@@ -193,7 +196,9 @@
           "allowMultiple": true,
           "suggestedFerIds": [
             "https://dataverse.org/",
-            "https://commons.datacite.org/"
+            "https://zenodo.org/",
+            "https://commons.datacite.org/",
+            "https://datasetsearch.research.google.com/"
           ],
           "allowFreeText": true
         }
@@ -279,7 +284,8 @@
           "required": true,
           "allowMultiple": true,
           "suggestedFerIds": [
-            "https://openid.net/specs/openid-connect-core-1_0.html"
+            "https://openid.net/specs/openid-connect-core-1_0.html",
+            "https://www.rfc-editor.org/rfc/rfc6749"
           ],
           "allowFreeText": true
         },
@@ -361,6 +367,7 @@
             "https://www.json.org/json-en.html",
             "https://www.w3.org/TR/xml/",
             "https://www.w3.org/TR/json-ld11/",
+            "https://www.w3.org/TR/rdf11-concepts/",
             "https://www.rfc-editor.org/rfc/rfc4180"
           ],
           "allowFreeText": true
@@ -388,7 +395,8 @@
             "https://dwc.tdwg.org/text/",
             "https://www.rfc-editor.org/rfc/rfc4180",
             "https://geojson.org/",
-            "https://www.w3.org/TR/json-ld11/"
+            "https://www.w3.org/TR/json-ld11/",
+            "https://www.w3.org/TR/rdf11-concepts/"
           ],
           "allowFreeText": true
         },
@@ -441,6 +449,7 @@
           "suggestedFerIds": [
             "https://dwc.tdwg.org/",
             "https://www.catalogueoflife.org/",
+            "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
             "https://obofoundry.org/ontology/envo",
             "https://www.marinespecies.org/"
           ],
@@ -494,6 +503,7 @@
           "allowMultiple": true,
           "suggestedFerIds": [
             "https://dwc.tdwg.org/",
+            "https://dwc.tdwg.org/text/",
             "https://eco.tdwg.org/",
             "https://geojson.org/",
             "https://www.w3.org/TR/rdf11-concepts/"
@@ -583,9 +593,9 @@
           "allowMultiple": true,
           "suggestedFerIds": [
             "https://www.w3.org/TR/prov-o/",
-            "https://www.researchobject.org/ro-crate/",
             "https://schema.datacite.org/",
             "https://orcid.org/",
+            "https://ror.org/",
             "https://git-scm.com/"
           ],
           "allowFreeText": true
@@ -611,6 +621,7 @@
           "allowMultiple": true,
           "suggestedFerIds": [
             "https://www.researchobject.org/ro-crate/",
+            "https://www.w3.org/TR/prov-o/",
             "https://git-scm.com/"
           ],
           "allowFreeText": true

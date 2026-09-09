@@ -344,17 +344,63 @@ def test_merge_option_map_shared_draft_across_areas(iwd):
         ),
     ]
     merged = iwd.merge_option_map({}, encounters, index, "https://fipm.example.org")
-    key = iwd.norm(UNKNOWN_F11_TEXT)
+    norm_text = iwd.norm(UNKNOWN_F11_TEXT)
+    key = iwd.option_map_key(norm_text, "identifier-service")
     entry = merged[key]
     assert entry["ferId"] is None
-    assert entry["draftFerId"] == iwd.draft_fer_id("https://fipm.example.org", key)
+    assert entry["draftFerId"] == iwd.draft_fer_id("https://fipm.example.org", norm_text)
     assert entry["seen"] == ["area-dois", "area-um"]
 
 
-def test_merge_option_map_keeps_resolved_entry_as_is(iwd):
+def test_merge_option_map_keys_on_text_and_question_fer_type(iwd):
+    """The same option text under two *different* question types must
+    resolve independently -- not silently reuse whichever type was
+    encountered first (the bug this key change fixes). "Foo Bar" exact-
+    matches an identifier-service FER; under structured-vocabulary (a type
+    step 2's exact match doesn't respect) the type-safe substring fallback
+    (steps 3-4) correctly prefers the differently-typed "Foo Bar
+    Vocabulary" FER instead."""
+    seed_entries = [
+        {
+            "id": "https://exact.example.org/",
+            "label": {"en": "Foo Bar"},
+            "type": "identifier-service",
+        },
+        {
+            "id": "https://voc.example.org/",
+            "label": {"en": "Foo Bar Vocabulary"},
+            "type": "structured-vocabulary",
+        },
+    ]
+    index = iwd.build_seed_index(seed_entries)
+    encounters = [
+        iwd.Encounter(
+            area_slug="area-um",
+            question_id="F1-metadata",
+            fer_type="identifier-service",
+            option_text="Foo Bar",
+        ),
+        iwd.Encounter(
+            area_slug="area-um",
+            question_id="I2-metadata",
+            fer_type="structured-vocabulary",
+            option_text="Foo Bar",
+        ),
+    ]
+    merged = iwd.merge_option_map({}, encounters, index, "https://fipm.example.org")
+    norm_text = iwd.norm("Foo Bar")
+    id_key = iwd.option_map_key(norm_text, "identifier-service")
+    voc_key = iwd.option_map_key(norm_text, "structured-vocabulary")
+    assert id_key != voc_key
+    assert merged[id_key] == {"ferId": "https://exact.example.org/", "source": "auto"}
+    assert merged[voc_key] == {"ferId": "https://voc.example.org/", "source": "auto"}
+
+
+def test_merge_option_map_keeps_only_human_entries_as_is(iwd):
     index = iwd.build_seed_index(SEED_ENTRIES)
-    key = iwd.norm("API REST")
-    loaded = {key: {"ferId": "https://human-chosen.example.org/"}}
+    norm_text = iwd.norm("API REST")
+    key = iwd.option_map_key(norm_text, "identifier-service")
+    loaded = {key: {"ferId": "https://human-chosen.example.org/", "source": "human"}}
     encounters = [
         iwd.Encounter(
             area_slug="area-um",
@@ -364,15 +410,15 @@ def test_merge_option_map_keeps_resolved_entry_as_is(iwd):
         )
     ]
     merged = iwd.merge_option_map(loaded, encounters, index, "https://fipm.example.org")
-    assert merged[key] == {"ferId": "https://human-chosen.example.org/"}
+    assert merged[key] == {"ferId": "https://human-chosen.example.org/", "source": "human"}
 
 
 def test_merge_option_map_marks_vanished_entries_stale(iwd):
     index = iwd.build_seed_index(SEED_ENTRIES)
-    loaded = {"gone-option": {"ferId": "https://x/"}}
+    loaded = {"gone-option :: identifier-service": {"ferId": "https://x/", "source": "human"}}
     merged = iwd.merge_option_map(loaded, [], index, "https://fipm.example.org")
-    assert merged["gone-option"]["stale"] is True
-    assert merged["gone-option"]["ferId"] == "https://x/"
+    assert merged["gone-option :: identifier-service"]["stale"] is True
+    assert merged["gone-option :: identifier-service"]["ferId"] == "https://x/"
 
 
 # --------------------------------------------------------------------------
@@ -406,22 +452,59 @@ def test_parse_aliases_markdown(iwd):
     assert len(entries) == 4
 
 
-def test_apply_alias_seed_never_overrides_a_decided_entry(iwd):
-    alias_entries = {
-        "opt-a": {"ferId": "skip"},
-        "opt-b": {"ferId": "https://from-alias.example.org/"},
+def test_merge_option_map_alias_overrides_an_auto_resolved_single_id(iwd):
+    """Coordinator review finding 1: an auto-resolved entry (source "auto")
+    that only found the first of several ids curated in
+    data/fers/aliases-workshop.md must be replaced by the richer alias
+    answer on the next run; a "human"-sourced entry (a real edit to
+    option-map.json, or an alias answer already applied in a previous run)
+    must never be overwritten."""
+    index = iwd.build_seed_index(SEED_ENTRIES)
+    norm_text = iwd.norm("ABCD / BioCASe")
+    key = iwd.option_map_key(norm_text, "registry")
+    encounters = [
+        iwd.Encounter(
+            area_slug="area-um",
+            question_id="F4-metadata",
+            fer_type="registry",
+            option_text="ABCD / BioCASe",
+        )
+    ]
+    alias_entries = {norm_text: {"ferIds": ["https://abcd.tdwg.org/", "https://www.biocase.org/"]}}
+
+    # An "auto" entry from before the alias table existed -> overridden.
+    loaded_auto = {key: {"ferId": "https://abcd.tdwg.org/", "source": "auto"}}
+    merged = iwd.merge_option_map(
+        loaded_auto, encounters, index, "https://fipm.example.org", alias_entries
+    )
+    assert merged[key] == {
+        "ferIds": ["https://abcd.tdwg.org/", "https://www.biocase.org/"],
+        "source": "human",
     }
-    loaded = {"opt-b": {"ferId": "https://human-chosen.example.org/"}}  # already decided
-    out = iwd.apply_alias_seed(loaded, alias_entries)
-    assert out["opt-a"] == {"ferId": "skip"}
-    assert out["opt-b"] == {"ferId": "https://human-chosen.example.org/"}  # untouched
+
+    # A "human" entry (already fixed, or a real manual edit) -> frozen.
+    loaded_human = {key: {"ferId": "https://abcd.tdwg.org/", "source": "human"}}
+    merged2 = iwd.merge_option_map(
+        loaded_human, encounters, index, "https://fipm.example.org", alias_entries
+    )
+    assert merged2[key] == {"ferId": "https://abcd.tdwg.org/", "source": "human"}
 
 
-def test_apply_alias_seed_fills_an_open_null_entry(iwd):
-    loaded = {"opt-a": {"ferId": None, "draftFerId": "https://x/fers/draft/abc"}}
-    alias_entries = {"opt-a": {"ferId": "skip"}}
-    out = iwd.apply_alias_seed(loaded, alias_entries)
-    assert out["opt-a"] == {"ferId": "skip"}
+def test_merge_option_map_alias_fills_an_open_null_entry(iwd):
+    index = iwd.build_seed_index(SEED_ENTRIES)
+    norm_text = iwd.norm("opt-a")
+    key = iwd.option_map_key(norm_text, None)
+    loaded = {key: {"ferId": None, "draftFerId": "https://x/fers/draft/abc"}}
+    encounters = [
+        iwd.Encounter(
+            area_slug="area-um", question_id="F1-metadata", fer_type=None, option_text="opt-a"
+        )
+    ]
+    alias_entries = {norm_text: {"ferId": "skip"}}
+    merged = iwd.merge_option_map(
+        loaded, encounters, index, "https://fipm.example.org", alias_entries
+    )
+    assert merged[key] == {"ferId": "skip", "source": "human"}
 
 
 def test_is_decided(iwd):
@@ -544,9 +627,9 @@ def test_ac18_full_import(iwd, ac18_env):
     assert len(f1_drafts[0]) == 1 and len(f1_drafts[1]) == 1
     assert f1_drafts[0][0] == f1_drafts[1][0]
 
-    # option-map.json: unresolved entry shape.
+    # option-map.json: unresolved entry shape, keyed on (text, question ferType).
     option_map = json.loads(ac18_env["map"].read_text(encoding="utf-8"))
-    key = iwd.norm(UNKNOWN_F11_TEXT)
+    key = iwd.option_map_key(iwd.norm(UNKNOWN_F11_TEXT), "identifier-service")
     entry = option_map[key]
     assert entry["ferId"] is None
     assert "draftFerId" in entry
@@ -655,16 +738,53 @@ def test_ac18_aliases_md_skips_generic_and_resolves_multi_iri(iwd, ac18_env):
         assert doc["inlineFers"] == []  # no drafts remain at all
 
     option_map = json.loads(ac18_env["map"].read_text(encoding="utf-8"))
-    assert option_map[iwd.norm(UNKNOWN_I21_TEXT)] == {"ferId": "skip"}
-    assert option_map[iwd.norm(UNKNOWN_F11_TEXT)] == {
-        "ferIds": ["https://schema.org/", "https://www.wikidata.org/"]
+    i21_key = iwd.option_map_key(iwd.norm(UNKNOWN_I21_TEXT), "structured-vocabulary")
+    assert option_map[i21_key] == {"ferId": "skip", "source": "human"}
+    # Both alias ids are structured-vocabulary, so under F1-metadata's
+    # identifier-service this is a (kept, reported) type mismatch: no
+    # same-type alternative exists for this made-up text.
+    f11_key = iwd.option_map_key(iwd.norm(UNKNOWN_F11_TEXT), "identifier-service")
+    assert option_map[f11_key] == {
+        "ferIds": ["https://schema.org/", "https://www.wikidata.org/"],
+        "source": "human",
+        "typeMismatch": True,
     }
 
     report_text = ac18_env["report"].read_text(encoding="utf-8")
     assert "skipped as generic" in report_text.lower()
+    assert "type mismatches" in report_text.lower()
 
 
 def test_ac18_missing_aliases_file_is_not_an_error(iwd, ac18_env):
     assert not ac18_env["aliases"].exists()
     rc = _run(iwd, ac18_env)
     assert rc == 0
+
+
+def test_ac18_option_map_not_written_when_a_model_fails_validation(iwd, ac18_env):
+    """Coordinator review finding 3: option-map.json is only meaningful
+    alongside a fully successful run; it must not be written when any model
+    fails validate_content (exit 2)."""
+    broken_base = _base_model(iwd.DOC_CODE_TO_QUESTION_ID)
+    broken_base["description"] = {"pt-BR": "Sem inglês -- viola a regra 'en' obrigatório."}
+    ac18_env["base"].write_text(json.dumps(broken_base), encoding="utf-8")
+
+    assert not ac18_env["map"].exists()
+    rc = _run(iwd, ac18_env)
+    assert rc == 2
+    assert not ac18_env["map"].exists()
+    assert not any(ac18_env["out"].glob("*.json"))
+
+
+def test_ac18_option_map_untouched_by_a_later_failing_run(iwd, ac18_env):
+    rc = _run(iwd, ac18_env)
+    assert rc == 0
+    good_map = ac18_env["map"].read_bytes()
+
+    broken_base = _base_model(iwd.DOC_CODE_TO_QUESTION_ID)
+    broken_base["description"] = {"pt-BR": "Sem inglês."}
+    ac18_env["base"].write_text(json.dumps(broken_base), encoding="utf-8")
+
+    rc2 = _run(iwd, ac18_env)
+    assert rc2 == 2
+    assert ac18_env["map"].read_bytes() == good_map

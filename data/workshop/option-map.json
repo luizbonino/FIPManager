@@ -1,626 +1,1047 @@
 {
-  "a licenca ou condicao de uso ainda nao foi definida": {
-    "ferId": "skip"
-  },
-  "a vinculacao ocorre apenas por links manuais": {
-    "ferId": "skip"
-  },
-  "abcd": {
-    "ferId": "https://abcd.tdwg.org/"
-  },
-  "abcd / biocase": {
-    "ferId": "https://abcd.tdwg.org/"
-  },
-  "acesso apenas mediante solicitacao formal": {
-    "ferId": "skip"
-  },
-  "acesso controlado mediante termo/acordo": {
-    "ferId": "skip"
-  },
-  "acesso controlado por dac / dua / termo de uso": {
-    "ferId": "skip"
-  },
-  "acesso publico sem autenticacao": {
-    "ferId": "skip"
-  },
-  "agrovoc": {
-    "ferId": "https://agrovoc.fao.org/"
-  },
-  "ainda nao definido": {
+  "a licenca ou condicao de uso ainda nao foi definida :: data-usage-license": {
     "ferId": "skip",
-    "stale": true
+    "source": "human"
   },
-  "ainda nao e utilizado esquema formal": {
-    "ferId": "skip"
-  },
-  "ainda nao e utilizado modelo ou padrao formal": {
-    "ferId": "skip"
-  },
-  "ainda nao sao utilizados vocabularios controlados": {
-    "ferId": "skip"
-  },
-  "ambiente seguro / acesso remoto sem download": {
-    "ferId": "skip"
-  },
-  "ambiente seguro de analise": {
-    "ferId": "skip"
-  },
-  "ambiente seguro ou acesso remoto controlado": {
-    "ferId": "skip"
-  },
-  "apenas autoria e data sao registradas": {
-    "ferId": "skip"
-  },
-  "apenas formato proprietario": {
-    "ferId": "skip"
-  },
-  "apenas os principais metodos sao documentados": {
-    "ferId": "skip"
-  },
-  "apenas palavras-chave livres": {
-    "ferId": "skip"
-  },
-  "apenas texto nao estruturado": {
-    "ferId": "skip"
-  },
-  "api rest": {
-    "ferId": "skip"
-  },
-  "aprovacao por comite de acesso a dados": {
-    "ferId": "skip"
-  },
-  "aprovacao por comite ou instancia responsavel": {
-    "ferId": "skip"
-  },
-  "armazenamento em nuvem ou objetos": {
-    "ferId": "skip"
-  },
-  "autenticacao federada e/ou multifator": {
-    "ferId": "skip"
-  },
-  "backups, checksums e controle de versoes": {
-    "ferId": "skip"
-  },
-  "bam / cram para alinhamentos": {
-    "ferId": "https://samtools.github.io/hts-specs/CRAMv3.pdf"
-  },
-  "bioproject": {
-    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/"
-  },
-  "bioproject–biosample–experiment–run": {
-    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/"
-  },
-  "biosample / sra / ena accession": {
-    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
-  },
-  "brapi": {
-    "ferId": "https://brapi.org/"
-  },
-  "campos de autoria e contribuicao do datacite": {
-    "ferId": "https://schema.datacite.org/"
-  },
-  "catalogo institucional": {
-    "ferId": "skip"
-  },
-  "catalogo ou indice da area": {
-    "ferId": "skip"
-  },
-  "catalogo taxonomico reconhecido": {
-    "ferId": "https://www.catalogueoflife.org/"
-  },
-  "cc by 4.0": {
-    "ferId": "https://creativecommons.org/licenses/by/4.0/"
-  },
-  "cc by-nc 4.0": {
-    "ferId": "https://creativecommons.org/licenses/by-nc/4.0/"
-  },
-  "cc0 1.0": {
-    "ferId": "https://creativecommons.org/publicdomain/zero/1.0/"
-  },
-  "chave de api": {
-    "ferId": "skip"
-  },
-  "chebi": {
-    "ferId": "https://www.ebi.ac.uk/chebi/"
-  },
-  "chebi / hmdb": {
-    "ferId": "https://hmdb.ca/"
-  },
-  "checksums e relacao entre entradas e saidas": {
-    "ferId": "skip"
-  },
-  "conta do repositorio": {
-    "ferId": "skip"
-  },
-  "conta do repositorio / institucional": {
-    "ferId": "skip"
-  },
-  "conta do repositorio ou institucional": {
-    "ferId": "skip"
-  },
-  "conta institucional ou autenticacao federada": {
-    "ferId": "skip"
-  },
-  "crop ontology": {
-    "ferId": "https://www.cropontology.org/"
-  },
-  "csv / tsv": {
-    "ferId": "https://www.rfc-editor.org/rfc/rfc4180"
-  },
-  "csv tabular com dicionario de dados": {
-    "ferId": "https://www.rfc-editor.org/rfc/rfc4180"
-  },
-  "csv/tsv acompanhado de esquema": {
-    "ferId": "https://www.rfc-editor.org/rfc/rfc4180"
-  },
-  "darwin core": {
-    "ferId": "https://dwc.tdwg.org/"
-  },
-  "darwin core / dwc-a": {
-    "ferId": "https://dwc.tdwg.org/"
-  },
-  "darwin core archive": {
-    "ferId": "https://dwc.tdwg.org/text/"
-  },
-  "darwin core terms": {
-    "ferId": "https://dwc.tdwg.org/"
-  },
-  "darwin core terms / tdwg vocabularies": {
-    "ferId": "https://dwc.tdwg.org/"
-  },
-  "data use ontology": {
-    "ferId": "https://github.com/EBISPOT/DUO"
-  },
-  "datacite": {
-    "ferId": "https://schema.datacite.org/"
-  },
-  "datacite / bioschemas": {
-    "ferId": "https://bioschemas.org/"
-  },
-  "datacite commons": {
-    "ferId": "https://commons.datacite.org/"
-  },
-  "datacite commons / google dataset search": {
-    "ferId": "https://commons.datacite.org/"
-  },
-  "datacite commons ou google dataset search": {
-    "ferId": "https://commons.datacite.org/"
-  },
-  "datacite metadata schema": {
-    "ferId": "https://schema.datacite.org/"
-  },
-  "dataverse ou zenodo": {
-    "ferId": "https://dataverse.org/"
-  },
-  "ddi": {
-    "ferId": "https://ddialliance.org/"
-  },
-  "ddi para microdados": {
-    "ferId": "https://ddialliance.org/"
-  },
-  "ddi para questionarios": {
-    "ferId": "https://ddialliance.org/"
-  },
-  "decs / mesh": {
-    "ferId": "https://decs.bvsalud.org/"
-  },
-  "dicionario de dados, metodos e protocolos": {
-    "ferId": "skip"
-  },
-  "doi": {
-    "ferId": "https://www.doi.org/"
-  },
-  "doi do conjunto de dados": {
-    "ferId": "https://www.doi.org/"
-  },
-  "dublin core": {
-    "ferId": "https://purl.org/dc/terms/"
-  },
-  "dwc event para amostragem": {
-    "ferId": "https://dwc.tdwg.org/"
-  },
-  "ecological metadata language": {
-    "ferId": "https://eml.ecoinformatics.org/"
-  },
-  "ega / dbgap": {
-    "ferId": "https://ega-archive.org/"
-  },
-  "ega / dbgap accession": {
-    "ferId": "https://ega-archive.org/"
-  },
-  "eml": {
-    "ferId": "https://eml.ecoinformatics.org/"
-  },
-  "environment ontology": {
-    "ferId": "https://obofoundry.org/ontology/envo"
-  },
-  "envo": {
-    "ferId": "https://obofoundry.org/ontology/envo"
-  },
-  "esquema do repositorio omico utilizado": {
-    "ferId": "skip"
-  },
-  "esquema proprio com dicionario de dados": {
-    "ferId": "skip"
-  },
-  "existem apenas rotinas de backup": {
-    "ferId": "skip"
-  },
-  "fair data point": {
-    "ferId": "https://www.fairdatapoint.org/"
-  },
-  "fasta / fastq para sequencias": {
-    "ferId": "https://en.wikipedia.org/wiki/FASTQ_format"
-  },
-  "fastq / bam / cram": {
-    "ferId": "https://en.wikipedia.org/wiki/FASTQ_format"
-  },
-  "formato proprietario acompanhado de exportacao aberta": {
-    "ferId": "skip"
-  },
-  "formato proprietario acompanhado de formato aberto": {
-    "ferId": "skip"
-  },
-  "ftp/sftp": {
-    "ferId": "https://www.rfc-editor.org/rfc/rfc959"
-  },
-  "gbif backbone / catalogue of life": {
-    "ferId": "https://www.catalogueoflife.org/"
-  },
-  "gbif vocabularies": {
-    "ferId": "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c"
-  },
-  "gene ontology / sequence ontology": {
-    "ferId": "https://geneontology.org/"
-  },
-  "geo / biostudies": {
-    "ferId": "https://www.ebi.ac.uk/biostudies/"
-  },
-  "geo accession": {
-    "ferId": "https://www.ncbi.nlm.nih.gov/geo/"
-  },
-  "geojson": {
-    "ferId": "https://geojson.org/"
-  },
-  "geojson / geopackage": {
-    "ferId": "https://geojson.org/"
-  },
-  "geojson / padroes geoespaciais": {
-    "ferId": "https://geojson.org/"
-  },
-  "geopackage / geojson": {
-    "ferId": "https://www.geopackage.org/"
-  },
-  "geotiff": {
-    "ferId": "https://www.ogc.org/standard/geotiff/"
-  },
-  "git / controle de versoes": {
-    "ferId": "https://git-scm.com/"
-  },
-  "git ou outro controle de versoes": {
-    "ferId": "https://git-scm.com/"
-  },
-  "git ou sistema equivalente": {
-    "ferId": "https://git-scm.com/"
-  },
-  "google dataset search": {
-    "ferId": "https://datasetsearch.research.google.com/"
-  },
-  "h5ad / anndata": {
-    "ferId": "https://anndata.readthedocs.io/"
-  },
-  "h5ad para celula unica": {
-    "ferId": "https://anndata.readthedocs.io/"
-  },
-  "handle ou ark": {
-    "ferId": "https://arks.org/"
-  },
-  "hgnc / ncbi gene / ensembl": {
-    "ferId": "https://www.ensembl.org/"
-  },
-  "historico de versoes e datas de atualizacao": {
-    "ferId": "skip"
-  },
-  "hl7 fhir": {
-    "ferId": "https://www.hl7.org/fhir/"
-  },
-  "hpo / mondo": {
-    "ferId": "https://hpo.jax.org/"
-  },
-  "https": {
-    "ferId": "https://www.rfc-editor.org/rfc/rfc9110"
-  },
-  "humboldt extension": {
-    "ferId": "https://eco.tdwg.org/"
-  },
-  "icd-11": {
-    "ferId": "https://icd.who.int/en"
-  },
-  "icnp / snomed ct": {
-    "ferId": "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp"
-  },
-  "icnp integrada ao snomed ct": {
-    "ferId": "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp"
-  },
-  "identificador institucional persistente": {
-    "ferId": "skip"
-  },
-  "identificador persistente do repositorio ou infraestrutura tematica": {
-    "ferId": "skip"
-  },
-  "identificador/accession do repositorio tematico": {
-    "ferId": "skip"
-  },
-  "interface web sem api": {
-    "ferId": "skip"
-  },
-  "isa": {
-    "ferId": "https://isa-tools.org/format/specification.html"
-  },
-  "isa-tab / isa-json": {
-    "ferId": "https://isa-tools.org/format/specification.html"
-  },
-  "isa-tab / isa-json para integracao multiomica": {
-    "ferId": "https://isa-tools.org/format/specification.html"
-  },
-  "iso 19115": {
-    "ferId": "https://www.iso.org/standard/53798.html"
-  },
-  "json": {
-    "ferId": "https://www.json.org/json-en.html"
-  },
-  "json / fhir": {
-    "ferId": "https://www.hl7.org/fhir/"
-  },
-  "json / rdf": {
-    "ferId": "https://www.w3.org/TR/json-ld11/"
-  },
-  "json schema": {
-    "ferId": "https://json-schema.org/"
-  },
-  "json-ld / rdf": {
-    "ferId": "https://www.w3.org/TR/json-ld11/"
-  },
-  "json-ld ou rdf": {
-    "ferId": "https://www.w3.org/TR/json-ld11/"
-  },
-  "licenca institucional": {
-    "ferId": "skip"
-  },
-  "licenca ou termos adotados pelo repositorio": {
-    "ferId": "skip"
-  },
-  "licenca ou termos do repositorio": {
-    "ferId": "skip"
-  },
-  "loinc": {
-    "ferId": "https://loinc.org/"
-  },
-  "manifesto, tabela de relacionamento ou dicionario de dados": {
-    "ferId": "skip"
-  },
-  "metabolights / metabolomics workbench": {
-    "ferId": "https://www.ebi.ac.uk/metabolights/"
-  },
-  "metadados publicos sem licenca explicitamente declarada": {
-    "ferId": "skip"
-  },
-  "miame / minseqe / miape": {
-    "ferId": "https://www.fged.org/projects/miame"
-  },
-  "miappe": {
-    "ferId": "https://www.miappe.org/"
-  },
-  "migracao de formatos": {
-    "ferId": "skip"
-  },
-  "mixs": {
-    "ferId": "https://genomicsstandardsconsortium.github.io/mixs/"
-  },
-  "mzml / mztab": {
-    "ferId": "https://www.psidev.info/mzml"
-  },
-  "mzml / mztab para proteomica ou metabolomica": {
-    "ferId": "https://www.psidev.info/mzml"
-  },
-  "nao se aplica": {
+  "a vinculacao ocorre apenas por links manuais :: metadata-data-linking-schema": {
     "ferId": "skip",
-    "stale": true
+    "source": "human"
   },
-  "ncbi / ena apis": {
-    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
+  "abcd / biocase :: metadata-schema": {
+    "ferIds": [
+      "https://abcd.tdwg.org/",
+      "https://www.biocase.org/"
+    ],
+    "source": "human"
   },
-  "ncbi / geo / ena": {
-    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
+  "abcd :: semantic-model": {
+    "ferId": "https://abcd.tdwg.org/",
+    "source": "human",
+    "typeMismatch": true
   },
-  "ncbi taxonomy": {
-    "ferId": "https://www.ncbi.nlm.nih.gov/taxonomy"
-  },
-  "netcdf": {
-    "ferId": "https://www.unidata.ucar.edu/software/netcdf/"
-  },
-  "netcdf-cf para series ambientais": {
-    "ferId": "https://cfconventions.org/"
-  },
-  "o registro detalhado ainda esta em desenvolvimento": {
-    "ferId": "skip"
-  },
-  "oai-pmh": {
-    "ferId": "https://www.openarchives.org/pmh/"
-  },
-  "oauth 2.0 ou openid connect": {
-    "ferId": "https://openid.net/specs/openid-connect-core-1_0.html"
-  },
-  "obi / efo": {
-    "ferId": "https://obofoundry.org/ontology/obi"
-  },
-  "omicsdi": {
-    "ferId": "https://www.omicsdi.org/"
-  },
-  "omop common data model": {
-    "ferId": "https://ohdsi.github.io/CommonDataModel/"
-  },
-  "orcid e ror": {
-    "ferId": "https://orcid.org/"
-  },
-  "os dados ainda nao estao acessiveis externamente": {
-    "ferId": "skip"
-  },
-  "outro": {
+  "acesso apenas mediante solicitacao formal :: communication-protocol": {
     "ferId": "skip",
-    "stale": true
+    "source": "human"
   },
-  "pagina de destino associada ao doi ou pid": {
-    "ferId": "https://schema.datacite.org/meta/kernel-4.6/"
+  "acesso controlado mediante termo/acordo :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "pagina doi / datacite relatedidentifier": {
-    "ferId": "https://schema.datacite.org/meta/kernel-4.6/"
+  "acesso controlado por dac / dua / termo de uso :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "parquet": {
-    "ferId": "https://parquet.apache.org/"
+  "acesso publico sem autenticacao :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "perfil proprio documentado": {
-    "ferId": "skip"
+  "agrovoc :: structured-vocabulary": {
+    "ferId": "https://agrovoc.fao.org/",
+    "source": "human"
   },
-  "plano de gestao de dados ou politica institucional": {
-    "ferId": "skip"
+  "ainda nao e utilizado esquema formal :: metadata-schema": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "plano de recuperacao de desastres": {
-    "ferId": "skip"
+  "ainda nao e utilizado modelo ou padrao formal :: semantic-model": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "plant ontology": {
-    "ferId": "https://browser.planteome.org/amigo"
+  "ainda nao sao utilizados vocabularios controlados :: structured-vocabulary": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "politica do repositorio": {
-    "ferId": "skip"
+  "ambiente seguro / acesso remoto sem download :: communication-protocol": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "pride / metabolights": {
-    "ferId": "https://www.ebi.ac.uk/metabolights/"
+  "ambiente seguro de analise :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "pride / metabolights accession": {
-    "ferId": "https://www.ebi.ac.uk/metabolights/"
+  "ambiente seguro ou acesso remoto controlado :: communication-protocol": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "pride / proteomexchange": {
-    "ferId": "http://www.proteomexchange.org/"
+  "apenas autoria e data sao registradas :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "protocolo experimental e metricas de qualidade": {
-    "ferId": "skip"
+  "apenas formato proprietario :: knowledge-representation-language": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "rdf / grafo de conhecimento": {
-    "ferId": "https://www.w3.org/TR/rdf11-concepts/"
+  "apenas os principais metodos sao documentados :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "rdf / json-ld": {
-    "ferId": "https://www.w3.org/TR/json-ld11/"
+  "apenas palavras-chave livres :: structured-vocabulary": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "referencias cruzadas do repositorio": {
-    "ferId": "skip"
+  "apenas texto nao estruturado :: knowledge-representation-language": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "referencias cruzadas entre repositorios": {
-    "ferId": "skip"
+  "api rest :: communication-protocol": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "relacoes bioproject–biosample–experimento/execucao": {
-    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/"
+  "aprovacao por comite de acesso a dados :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "relacoes isa entre investigacao, estudo, ensaio, amostra e arquivo": {
-    "ferId": "https://isa-tools.org/format/specification.html"
+  "aprovacao por comite ou instancia responsavel :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "relacoes relatedidentifier do datacite": {
-    "ferId": "https://schema.datacite.org/meta/kernel-4.6/"
+  "armazenamento em nuvem ou objetos :: communication-protocol": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "repositorio institucional": {
-    "ferId": "skip"
+  "autenticacao federada e/ou multifator :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "repositorio tematico da area": {
-    "ferId": "skip"
+  "backups, checksums e controle de versoes :: metadata-preservation-policy": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "representacao especifica da area": {
-    "ferId": "skip"
+  "bam / cram para alinhamentos :: semantic-model": {
+    "ferIds": [
+      "https://samtools.github.io/hts-specs/CRAMv3.pdf",
+      "https://samtools.github.io/hts-specs/SAMv1.pdf"
+    ],
+    "source": "human",
+    "typeMismatch": true
   },
-  "responsaveis definidos pela preservacao": {
-    "ferId": "skip"
+  "bioproject :: identifier-service": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/",
+    "source": "human"
   },
-  "reutilizacao nao permitida": {
-    "ferId": "skip"
+  "bioproject–biosample–experiment–run :: semantic-model": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/",
+    "source": "human",
+    "typeMismatch": true
   },
-  "ro-crate": {
-    "ferId": "https://www.researchobject.org/ro-crate/"
+  "biosample / sra / ena accession :: identifier-service": {
+    "ferIds": [
+      "https://www.ebi.ac.uk/ena/browser/home",
+      "https://www.ncbi.nlm.nih.gov/biosample/",
+      "https://www.ncbi.nlm.nih.gov/sra"
+    ],
+    "source": "human"
   },
-  "ro-crate / rdf / json-ld": {
-    "ferId": "https://www.researchobject.org/ro-crate/"
+  "brapi :: semantic-model": {
+    "ferId": "https://brapi.org/",
+    "source": "human"
   },
-  "ro-crate, rdf ou json-ld": {
-    "ferId": "https://www.researchobject.org/ro-crate/"
+  "campos de autoria e contribuicao do datacite :: provenance-model": {
+    "ferId": "https://schema.datacite.org/",
+    "source": "human",
+    "typeMismatch": true
   },
-  "sistema internacional de unidades": {
-    "ferId": "https://www.bipm.org/en/measurement-units"
+  "catalogo institucional :: registry": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "sistema internacional de unidades / ucum": {
-    "ferId": "https://ucum.org/"
+  "catalogo ou indice da area :: registry": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "snomed ct": {
-    "ferId": "https://www.snomed.org/"
+  "catalogo taxonomico reconhecido :: structured-vocabulary": {
+    "ferId": "https://www.catalogueoflife.org/",
+    "source": "human"
   },
-  "sparql": {
-    "ferId": "https://www.w3.org/TR/sparql11-protocol/"
+  "cc by 4.0 :: data-usage-license": {
+    "ferId": "https://creativecommons.org/licenses/by/4.0/",
+    "source": "human"
   },
-  "sra / ena / ddbj": {
-    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
+  "cc by-nc 4.0 :: data-usage-license": {
+    "ferId": "https://creativecommons.org/licenses/by-nc/4.0/",
+    "source": "human"
   },
-  "sra toolkit / ferramentas ena": {
-    "ferId": "https://github.com/ncbi/sra-tools"
+  "cc0 1.0 :: data-usage-license": {
+    "ferId": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "human"
   },
-  "termo de uso / data use agreement": {
-    "ferId": "skip"
+  "chave de api :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "termo de uso / dua / consentimento compativel": {
-    "ferId": "skip"
+  "chebi / hmdb :: structured-vocabulary": {
+    "ferIds": [
+      "https://hmdb.ca/",
+      "https://www.ebi.ac.uk/chebi/"
+    ],
+    "source": "human"
   },
-  "termos do repositorio tematico": {
-    "ferId": "skip"
+  "chebi :: structured-vocabulary": {
+    "ferId": "https://www.ebi.ac.uk/chebi/",
+    "source": "human"
   },
-  "uniprot": {
-    "ferId": "https://www.uniprot.org/"
+  "checksums e relacao entre entradas e saidas :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "uso apenas em ambiente seguro": {
-    "ferId": "skip"
+  "conta do repositorio / institucional :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "uso compativel com consentimento e aprovacao etica": {
-    "ferId": "skip"
+  "conta do repositorio :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "uso limitado a finalidade aprovada": {
-    "ferId": "skip"
+  "conta do repositorio ou institucional :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "vcf / bcf / gvcf": {
-    "ferId": "https://samtools.github.io/hts-specs/VCFv4.3.pdf"
+  "conta institucional ou autenticacao federada :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
   },
-  "vcf / bcf para variantes": {
-    "ferId": "https://samtools.github.io/hts-specs/VCFv4.3.pdf"
+  "crop ontology :: structured-vocabulary": {
+    "ferId": "https://www.cropontology.org/",
+    "source": "human"
   },
-  "versoes de software, genoma de referencia e parametros": {
-    "ferId": "skip"
+  "csv / tsv :: knowledge-representation-language": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc4180",
+    "source": "human"
   },
-  "versoes de software, parametros e configuracoes": {
-    "ferId": "skip"
+  "csv tabular com dicionario de dados :: semantic-model": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc4180",
+    "source": "human",
+    "typeMismatch": true
   },
-  "vocabulario institucional documentado": {
-    "ferId": "skip"
+  "csv/tsv acompanhado de esquema :: knowledge-representation-language": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc4180",
+    "source": "human"
   },
-  "vocabulario proprio documentado": {
-    "ferId": "skip"
+  "darwin core / dwc-a :: semantic-model": {
+    "ferIds": [
+      "https://dwc.tdwg.org/",
+      "https://dwc.tdwg.org/text/"
+    ],
+    "source": "human",
+    "typeMismatch": true
   },
-  "w3c prov / prov-o": {
-    "ferId": "https://www.w3.org/TR/prov-o/"
+  "darwin core :: metadata-schema": {
+    "ferId": "https://dwc.tdwg.org/",
+    "source": "human"
   },
-  "w3c prov / ro-crate": {
-    "ferId": "https://www.researchobject.org/ro-crate/"
+  "darwin core :: semantic-model": {
+    "ferId": "https://dwc.tdwg.org/",
+    "source": "human",
+    "typeMismatch": true
   },
-  "workflow, scripts ou notebooks": {
-    "ferId": "skip"
+  "darwin core archive :: knowledge-representation-language": {
+    "ferId": "https://dwc.tdwg.org/text/",
+    "source": "human"
   },
-  "worms": {
-    "ferId": "https://www.marinespecies.org/"
+  "darwin core terms / tdwg vocabularies :: structured-vocabulary": {
+    "ferId": "https://dwc.tdwg.org/",
+    "source": "human",
+    "typeMismatch": true
   },
-  "xml": {
-    "ferId": "https://www.w3.org/TR/xml/"
+  "darwin core terms :: structured-vocabulary": {
+    "ferId": "https://dwc.tdwg.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "data use ontology :: structured-vocabulary": {
+    "ferId": "https://github.com/EBISPOT/DUO",
+    "source": "human"
+  },
+  "datacite / bioschemas :: metadata-schema": {
+    "ferIds": [
+      "https://bioschemas.org/",
+      "https://schema.datacite.org/"
+    ],
+    "source": "human"
+  },
+  "datacite / bioschemas :: semantic-model": {
+    "ferIds": [
+      "https://bioschemas.org/",
+      "https://schema.datacite.org/"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "datacite :: semantic-model": {
+    "ferId": "https://schema.datacite.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "datacite commons / google dataset search :: registry": {
+    "ferIds": [
+      "https://commons.datacite.org/",
+      "https://datasetsearch.research.google.com/"
+    ],
+    "source": "human"
+  },
+  "datacite commons :: registry": {
+    "ferId": "https://commons.datacite.org/",
+    "source": "human"
+  },
+  "datacite commons ou google dataset search :: registry": {
+    "ferIds": [
+      "https://commons.datacite.org/",
+      "https://datasetsearch.research.google.com/"
+    ],
+    "source": "human"
+  },
+  "datacite metadata schema :: metadata-schema": {
+    "ferId": "https://schema.datacite.org/",
+    "source": "human"
+  },
+  "datacite metadata schema :: semantic-model": {
+    "ferId": "https://schema.datacite.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "dataverse ou zenodo :: registry": {
+    "ferIds": [
+      "https://dataverse.org/",
+      "https://zenodo.org/"
+    ],
+    "source": "human"
+  },
+  "ddi :: metadata-schema": {
+    "ferId": "https://ddialliance.org/",
+    "source": "human"
+  },
+  "ddi :: semantic-model": {
+    "ferId": "https://ddialliance.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "ddi para microdados :: semantic-model": {
+    "ferId": "https://ddialliance.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "ddi para questionarios :: semantic-model": {
+    "ferId": "https://ddialliance.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "decs / mesh :: structured-vocabulary": {
+    "ferIds": [
+      "https://decs.bvsalud.org/",
+      "https://id.nlm.nih.gov/mesh/"
+    ],
+    "source": "human"
+  },
+  "dicionario de dados, metodos e protocolos :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "doi :: identifier-service": {
+    "ferId": "https://www.doi.org/",
+    "source": "human"
+  },
+  "doi do conjunto de dados :: identifier-service": {
+    "ferId": "https://www.doi.org/",
+    "source": "human"
+  },
+  "dublin core :: metadata-schema": {
+    "ferId": "https://purl.org/dc/terms/",
+    "source": "human"
+  },
+  "dublin core :: semantic-model": {
+    "ferId": "https://purl.org/dc/terms/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "dwc event para amostragem :: semantic-model": {
+    "ferId": "https://dwc.tdwg.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "ecological metadata language :: metadata-schema": {
+    "ferId": "https://eml.ecoinformatics.org/",
+    "source": "human"
+  },
+  "ega / dbgap :: identifier-service": {
+    "ferIds": [
+      "https://ega-archive.org/",
+      "https://www.ncbi.nlm.nih.gov/gap/"
+    ],
+    "source": "human"
+  },
+  "ega / dbgap :: registry": {
+    "ferIds": [
+      "https://ega-archive.org/",
+      "https://www.ncbi.nlm.nih.gov/gap/"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "ega / dbgap accession :: identifier-service": {
+    "ferIds": [
+      "https://ega-archive.org/",
+      "https://www.ncbi.nlm.nih.gov/gap/"
+    ],
+    "source": "human"
+  },
+  "eml :: semantic-model": {
+    "ferId": "https://eml.ecoinformatics.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "environment ontology :: structured-vocabulary": {
+    "ferId": "https://obofoundry.org/ontology/envo",
+    "source": "human"
+  },
+  "envo :: structured-vocabulary": {
+    "ferId": "https://obofoundry.org/ontology/envo",
+    "source": "human"
+  },
+  "esquema do repositorio omico utilizado :: metadata-schema": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "esquema proprio com dicionario de dados :: semantic-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "existem apenas rotinas de backup :: metadata-preservation-policy": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "fair data point :: registry": {
+    "ferId": "https://www.fairdatapoint.org/",
+    "source": "human"
+  },
+  "fasta / fastq para sequencias :: semantic-model": {
+    "ferIds": [
+      "https://en.wikipedia.org/wiki/FASTQ_format",
+      "https://www.ncbi.nlm.nih.gov/genbank/fastaformat/"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "fastq / bam / cram :: knowledge-representation-language": {
+    "ferIds": [
+      "https://en.wikipedia.org/wiki/FASTQ_format",
+      "https://samtools.github.io/hts-specs/CRAMv3.pdf",
+      "https://samtools.github.io/hts-specs/SAMv1.pdf"
+    ],
+    "source": "human"
+  },
+  "formato proprietario acompanhado de exportacao aberta :: knowledge-representation-language": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "formato proprietario acompanhado de formato aberto :: knowledge-representation-language": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "ftp/sftp :: communication-protocol": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc959",
+    "source": "human"
+  },
+  "gbif backbone / catalogue of life :: structured-vocabulary": {
+    "ferIds": [
+      "https://www.catalogueoflife.org/",
+      "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c"
+    ],
+    "source": "human"
+  },
+  "gbif vocabularies :: structured-vocabulary": {
+    "ferId": "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+    "source": "human"
+  },
+  "gene ontology / sequence ontology :: structured-vocabulary": {
+    "ferIds": [
+      "https://geneontology.org/",
+      "https://obofoundry.org/ontology/so"
+    ],
+    "source": "human"
+  },
+  "geo / biostudies :: identifier-service": {
+    "ferIds": [
+      "https://www.ebi.ac.uk/biostudies/",
+      "https://www.ncbi.nlm.nih.gov/geo/"
+    ],
+    "source": "human"
+  },
+  "geo / biostudies :: registry": {
+    "ferIds": [
+      "https://www.ebi.ac.uk/biostudies/",
+      "https://www.ncbi.nlm.nih.gov/geo/"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "geo accession :: identifier-service": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/geo/",
+    "source": "human"
+  },
+  "geojson / geopackage :: knowledge-representation-language": {
+    "ferIds": [
+      "https://geojson.org/",
+      "https://www.geopackage.org/"
+    ],
+    "source": "human"
+  },
+  "geojson / padroes geoespaciais :: semantic-model": {
+    "ferId": "https://geojson.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "geojson :: knowledge-representation-language": {
+    "ferId": "https://geojson.org/",
+    "source": "human"
+  },
+  "geopackage / geojson :: semantic-model": {
+    "ferId": "https://www.geopackage.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "geotiff :: knowledge-representation-language": {
+    "ferId": "https://www.ogc.org/standard/geotiff/",
+    "source": "human"
+  },
+  "git / controle de versoes :: provenance-model": {
+    "ferId": "https://git-scm.com/",
+    "source": "human"
+  },
+  "git ou outro controle de versoes :: provenance-model": {
+    "ferId": "https://git-scm.com/",
+    "source": "human"
+  },
+  "git ou sistema equivalente :: provenance-model": {
+    "ferId": "https://git-scm.com/",
+    "source": "human"
+  },
+  "google dataset search :: registry": {
+    "ferId": "https://datasetsearch.research.google.com/",
+    "source": "human"
+  },
+  "h5ad / anndata :: knowledge-representation-language": {
+    "ferId": "https://anndata.readthedocs.io/",
+    "source": "human"
+  },
+  "h5ad para celula unica :: semantic-model": {
+    "ferId": "https://anndata.readthedocs.io/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "handle ou ark :: identifier-service": {
+    "ferIds": [
+      "https://arks.org/",
+      "https://www.handle.net/"
+    ],
+    "source": "human"
+  },
+  "hgnc / ncbi gene / ensembl :: structured-vocabulary": {
+    "ferId": "https://www.ensembl.org/",
+    "source": "human"
+  },
+  "historico de versoes e datas de atualizacao :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "hl7 fhir :: metadata-schema": {
+    "ferId": "https://www.hl7.org/fhir/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "hl7 fhir :: semantic-model": {
+    "ferId": "https://www.hl7.org/fhir/",
+    "source": "human"
+  },
+  "hpo / mondo :: structured-vocabulary": {
+    "ferIds": [
+      "https://hpo.jax.org/",
+      "https://mondo.monarchinitiative.org/"
+    ],
+    "source": "human"
+  },
+  "https :: communication-protocol": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc9110",
+    "source": "human"
+  },
+  "humboldt extension :: semantic-model": {
+    "ferId": "https://eco.tdwg.org/",
+    "source": "human"
+  },
+  "icd-11 :: structured-vocabulary": {
+    "ferId": "https://icd.who.int/en",
+    "source": "human"
+  },
+  "icnp / snomed ct :: structured-vocabulary": {
+    "ferIds": [
+      "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp",
+      "https://www.snomed.org/"
+    ],
+    "source": "human"
+  },
+  "icnp integrada ao snomed ct :: structured-vocabulary": {
+    "ferIds": [
+      "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp",
+      "https://www.snomed.org/"
+    ],
+    "source": "human"
+  },
+  "identificador institucional persistente :: identifier-service": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "identificador persistente do repositorio ou infraestrutura tematica :: identifier-service": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "identificador/accession do repositorio tematico :: identifier-service": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "interface web sem api :: communication-protocol": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "isa :: semantic-model": {
+    "ferId": "https://isa-tools.org/format/specification.html",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "isa-tab / isa-json :: knowledge-representation-language": {
+    "ferId": "https://isa-tools.org/format/specification.html",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "isa-tab / isa-json :: metadata-schema": {
+    "ferId": "https://isa-tools.org/format/specification.html",
+    "source": "human"
+  },
+  "isa-tab / isa-json :: provenance-model": {
+    "ferId": "https://isa-tools.org/format/specification.html",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "isa-tab / isa-json para integracao multiomica :: semantic-model": {
+    "ferId": "https://isa-tools.org/format/specification.html",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "iso 19115 :: metadata-schema": {
+    "ferId": "https://www.iso.org/standard/53798.html",
+    "source": "human"
+  },
+  "iso 19115 :: semantic-model": {
+    "ferId": "https://www.iso.org/standard/53798.html",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "json / fhir :: knowledge-representation-language": {
+    "ferId": "https://www.hl7.org/fhir/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "json / rdf :: knowledge-representation-language": {
+    "ferIds": [
+      "https://www.w3.org/TR/json-ld11/",
+      "https://www.w3.org/TR/rdf11-concepts/"
+    ],
+    "source": "human"
+  },
+  "json :: knowledge-representation-language": {
+    "ferId": "https://www.json.org/json-en.html",
+    "source": "human"
+  },
+  "json schema :: semantic-model": {
+    "ferId": "https://json-schema.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "json-ld / rdf :: knowledge-representation-language": {
+    "ferIds": [
+      "https://www.w3.org/TR/json-ld11/",
+      "https://www.w3.org/TR/rdf11-concepts/"
+    ],
+    "source": "human"
+  },
+  "json-ld ou rdf :: knowledge-representation-language": {
+    "ferIds": [
+      "https://www.w3.org/TR/json-ld11/",
+      "https://www.w3.org/TR/rdf11-concepts/"
+    ],
+    "source": "human"
+  },
+  "licenca institucional :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "licenca ou termos adotados pelo repositorio :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "licenca ou termos do repositorio :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "loinc :: structured-vocabulary": {
+    "ferId": "https://loinc.org/",
+    "source": "human"
+  },
+  "manifesto, tabela de relacionamento ou dicionario de dados :: metadata-data-linking-schema": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "metabolights / metabolomics workbench :: registry": {
+    "ferId": "https://www.ebi.ac.uk/metabolights/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "metadados publicos sem licenca explicitamente declarada :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "miame / minseqe / miape :: metadata-schema": {
+    "ferIds": [
+      "https://www.fged.org/projects/minseqe/",
+      "https://www.fged.org/projects/miame",
+      "https://www.psidev.info/miape"
+    ],
+    "source": "human"
+  },
+  "miame / minseqe / miape :: semantic-model": {
+    "ferIds": [
+      "https://www.fged.org/projects/minseqe/",
+      "https://www.fged.org/projects/miame",
+      "https://www.psidev.info/miape"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "miappe :: metadata-schema": {
+    "ferId": "https://www.miappe.org/",
+    "source": "human"
+  },
+  "miappe :: semantic-model": {
+    "ferId": "https://www.miappe.org/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "migracao de formatos :: metadata-preservation-policy": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "mixs :: metadata-schema": {
+    "ferId": "https://genomicsstandardsconsortium.github.io/mixs/",
+    "source": "human"
+  },
+  "mixs :: semantic-model": {
+    "ferId": "https://genomicsstandardsconsortium.github.io/mixs/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "mzml / mztab :: knowledge-representation-language": {
+    "ferId": "https://www.psidev.info/mzml",
+    "source": "human"
+  },
+  "mzml / mztab para proteomica ou metabolomica :: semantic-model": {
+    "ferId": "https://www.psidev.info/mzml",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "ncbi / ena apis :: communication-protocol": {
+    "ferId": "https://www.ebi.ac.uk/ena/browser/home",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "ncbi / geo / ena :: registry": {
+    "ferIds": [
+      "https://www.ebi.ac.uk/ena/browser/home",
+      "https://www.ncbi.nlm.nih.gov/geo/"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "ncbi taxonomy :: structured-vocabulary": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/taxonomy",
+    "source": "human"
+  },
+  "netcdf :: knowledge-representation-language": {
+    "ferId": "https://www.unidata.ucar.edu/software/netcdf/",
+    "source": "human"
+  },
+  "netcdf-cf para series ambientais :: semantic-model": {
+    "ferId": "https://cfconventions.org/",
+    "source": "human"
+  },
+  "o registro detalhado ainda esta em desenvolvimento :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "oai-pmh :: communication-protocol": {
+    "ferId": "https://www.openarchives.org/pmh/",
+    "source": "human"
+  },
+  "oauth 2.0 ou openid connect :: authentication-authorization-service": {
+    "ferIds": [
+      "https://openid.net/specs/openid-connect-core-1_0.html",
+      "https://www.rfc-editor.org/rfc/rfc6749"
+    ],
+    "source": "human"
+  },
+  "obi / efo :: structured-vocabulary": {
+    "ferIds": [
+      "https://obofoundry.org/ontology/obi",
+      "https://www.ebi.ac.uk/efo/"
+    ],
+    "source": "human"
+  },
+  "omicsdi :: registry": {
+    "ferId": "https://www.omicsdi.org/",
+    "source": "human"
+  },
+  "omop common data model :: semantic-model": {
+    "ferId": "https://ohdsi.github.io/CommonDataModel/",
+    "source": "human"
+  },
+  "orcid e ror :: provenance-model": {
+    "ferIds": [
+      "https://orcid.org/",
+      "https://ror.org/"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "os dados ainda nao estao acessiveis externamente :: communication-protocol": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "pagina de destino associada ao doi ou pid :: metadata-data-linking-schema": {
+    "ferId": "https://schema.datacite.org/meta/kernel-4.6/",
+    "source": "human"
+  },
+  "pagina doi / datacite relatedidentifier :: metadata-data-linking-schema": {
+    "ferId": "https://schema.datacite.org/meta/kernel-4.6/",
+    "source": "human"
+  },
+  "parquet :: knowledge-representation-language": {
+    "ferId": "https://parquet.apache.org/",
+    "source": "human"
+  },
+  "perfil proprio documentado :: metadata-schema": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "perfil proprio documentado :: semantic-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "plano de gestao de dados ou politica institucional :: metadata-preservation-policy": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "plano de recuperacao de desastres :: metadata-preservation-policy": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "plant ontology :: structured-vocabulary": {
+    "ferId": "https://browser.planteome.org/amigo",
+    "source": "human"
+  },
+  "politica do repositorio :: metadata-preservation-policy": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "pride / metabolights :: identifier-service": {
+    "ferIds": [
+      "https://www.ebi.ac.uk/metabolights/",
+      "https://www.ebi.ac.uk/pride/"
+    ],
+    "source": "human"
+  },
+  "pride / metabolights accession :: identifier-service": {
+    "ferIds": [
+      "https://www.ebi.ac.uk/metabolights/",
+      "https://www.ebi.ac.uk/pride/"
+    ],
+    "source": "human"
+  },
+  "pride / proteomexchange :: registry": {
+    "ferIds": [
+      "http://www.proteomexchange.org/",
+      "https://www.ebi.ac.uk/pride/"
+    ],
+    "source": "human"
+  },
+  "protocolo experimental e metricas de qualidade :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "rdf / grafo de conhecimento :: semantic-model": {
+    "ferId": "https://www.w3.org/TR/rdf11-concepts/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "rdf / json-ld :: knowledge-representation-language": {
+    "ferIds": [
+      "https://www.w3.org/TR/json-ld11/",
+      "https://www.w3.org/TR/rdf11-concepts/"
+    ],
+    "source": "human"
+  },
+  "referencias cruzadas do repositorio :: metadata-data-linking-schema": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "referencias cruzadas entre repositorios :: metadata-data-linking-schema": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "relacoes bioproject–biosample–experimento/execucao :: metadata-data-linking-schema": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "relacoes isa entre investigacao, estudo, ensaio, amostra e arquivo :: metadata-data-linking-schema": {
+    "ferId": "https://isa-tools.org/format/specification.html",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "relacoes relatedidentifier do datacite :: metadata-data-linking-schema": {
+    "ferId": "https://schema.datacite.org/meta/kernel-4.6/",
+    "source": "human"
+  },
+  "repositorio institucional :: registry": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "repositorio tematico da area :: registry": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "representacao especifica da area :: knowledge-representation-language": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "responsaveis definidos pela preservacao :: metadata-preservation-policy": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "reutilizacao nao permitida :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "ro-crate / rdf / json-ld :: metadata-data-linking-schema": {
+    "ferId": "https://www.researchobject.org/ro-crate/",
+    "source": "human"
+  },
+  "ro-crate :: provenance-model": {
+    "ferId": "https://www.w3.org/TR/prov-o/",
+    "source": "auto"
+  },
+  "ro-crate, rdf ou json-ld :: metadata-data-linking-schema": {
+    "ferId": "https://www.researchobject.org/ro-crate/",
+    "source": "human"
+  },
+  "sistema internacional de unidades / ucum :: structured-vocabulary": {
+    "ferId": "https://ucum.org/",
+    "source": "human"
+  },
+  "sistema internacional de unidades :: structured-vocabulary": {
+    "ferId": "https://www.bipm.org/en/measurement-units",
+    "source": "human"
+  },
+  "snomed ct :: structured-vocabulary": {
+    "ferId": "https://www.snomed.org/",
+    "source": "human"
+  },
+  "sparql :: communication-protocol": {
+    "ferId": "https://www.w3.org/TR/sparql11-protocol/",
+    "source": "human"
+  },
+  "sra / ena / ddbj :: registry": {
+    "ferIds": [
+      "https://www.ebi.ac.uk/ena/browser/home",
+      "https://www.ncbi.nlm.nih.gov/sra"
+    ],
+    "source": "human",
+    "typeMismatch": true
+  },
+  "sra toolkit / ferramentas ena :: communication-protocol": {
+    "ferId": "https://github.com/ncbi/sra-tools",
+    "source": "human"
+  },
+  "termo de uso / data use agreement :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "termo de uso / dua / consentimento compativel :: authentication-authorization-service": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "termos do repositorio tematico :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "uniprot :: structured-vocabulary": {
+    "ferId": "https://www.uniprot.org/",
+    "source": "human"
+  },
+  "uso apenas em ambiente seguro :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "uso compativel com consentimento e aprovacao etica :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "uso limitado a finalidade aprovada :: data-usage-license": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "vcf / bcf / gvcf :: knowledge-representation-language": {
+    "ferId": "https://samtools.github.io/hts-specs/VCFv4.3.pdf",
+    "source": "human"
+  },
+  "vcf / bcf para variantes :: semantic-model": {
+    "ferId": "https://samtools.github.io/hts-specs/VCFv4.3.pdf",
+    "source": "human",
+    "typeMismatch": true
+  },
+  "versoes de software, genoma de referencia e parametros :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "versoes de software, parametros e configuracoes :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "vocabulario institucional documentado :: structured-vocabulary": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "vocabulario proprio documentado :: structured-vocabulary": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "w3c prov / prov-o :: provenance-model": {
+    "ferId": "https://www.w3.org/TR/prov-o/",
+    "source": "human"
+  },
+  "w3c prov / ro-crate :: provenance-model": {
+    "ferIds": [
+      "https://www.researchobject.org/ro-crate/",
+      "https://www.w3.org/TR/prov-o/"
+    ],
+    "source": "human"
+  },
+  "workflow, scripts ou notebooks :: provenance-model": {
+    "ferId": "skip",
+    "source": "human"
+  },
+  "worms :: structured-vocabulary": {
+    "ferId": "https://www.marinespecies.org/",
+    "source": "human"
+  },
+  "xml :: knowledge-representation-language": {
+    "ferId": "https://www.w3.org/TR/xml/",
+    "source": "human"
   }
 }
