@@ -2,6 +2,8 @@
   <div class="workspace-view">
     <h1>{{ $t('workspace.title') }}</h1>
 
+    <p v-if="sessionDeleted" class="form-success">{{ $t('sessionAdmin.deleted') }}</p>
+
     <div v-if="showVerifyBanner" class="verify-banner">
       <p>{{ $t('auth.verifyBanner') }}</p>
       <div class="verify-banner-actions">
@@ -57,12 +59,20 @@
           <h2>{{ $t('workspace.mySessions') }}</h2>
           <router-link to="/sessions/new" class="btn btn-primary">{{ $t('workspace.createNewSession') }}</router-link>
         </div>
-        <div v-if="mySessions.length > 0" class="items-grid">
-          <router-link v-for="session in mySessions" :key="session.id" :to="`/sessions/${session.id}`" class="item-card">
-            <h3>{{ session.title }}</h3>
-            <p class="item-meta">{{ session.joinCode }}</p>
-            <span v-if="session.status === 'closed'" class="item-badge">{{ $t('sessionAdmin.closed') }}</span>
-          </router-link>
+        <div v-if="mySessions.length > 0" class="fip-rows">
+          <div v-for="session in mySessions" :key="session.id" class="fip-row">
+            <div class="fip-row-main">
+              <span class="fip-name">{{ session.title }}</span>
+              <span v-if="session.status === 'closed'" class="visibility-chip">{{ $t('sessionAdmin.closed') }}</span>
+            </div>
+            <span class="questionnaire-ref">{{ session.joinCode }}</span>
+            <div class="fip-row-actions">
+              <router-link :to="`/sessions/${session.id}`">{{ $t('common.view') }}</router-link>
+              <button type="button" class="delete-link" @click="onDeleteSession(session)">
+                {{ $t('common.delete') }}
+              </button>
+            </div>
+          </div>
         </div>
         <div v-else class="empty-state">
           <p>{{ $t('workspace.noSessions') }}</p>
@@ -114,9 +124,10 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { myFips as apiMyFips, myKnowledgeModels as apiMyKms, mySessions as apiMySessions } from '@/api/me'
 import { deleteFip, fipExportCsvUrl, fipExportJsonUrl } from '@/api/fips'
+import { deleteSession } from '@/api/sessions'
 import { resendVerification } from '@/api/auth'
 import {
   deleteKnowledgeModel,
@@ -133,8 +144,13 @@ import type { FipOut, KnowledgeModelSummary, SessionOut } from '@/types/api'
 
 // Spec 02 §3: three lists from GET /api/me/{fips,sessions,knowledge-models}.
 const { locale, t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+
+// SessionDetail.vue's "Delete session" redirects here with `?sessionDeleted=1`
+// (same flash pattern as ResetPassword.vue's `?resetOk=1` read by Login.vue).
+const sessionDeleted = !!route.query.sessionDeleted
 
 // spec 07 §3: `verificationRequired && !emailVerifiedAt` (criterion 10),
 // dismissible for this visit only — it comes back on the next load while
@@ -181,6 +197,12 @@ async function onDeleteFip(id: string) {
   if (!confirm(t('common.deleteFipConfirm'))) return
   await deleteFip(id)
   myFips.value = myFips.value.filter((f) => f.id !== id)
+}
+
+async function onDeleteSession(session: SessionOut) {
+  if (!confirm(t('sessionAdmin.deleteConfirm'))) return
+  await deleteSession(session.id)
+  mySessions.value = mySessions.value.filter((s) => s.id !== session.id)
 }
 
 async function onForkKm(model: KnowledgeModelSummary) {
@@ -248,6 +270,15 @@ onMounted(fetchData)
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+.form-success {
+  color: var(--color-success);
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--color-success-bg);
+  border-radius: 4px;
+  margin: 0 0 1rem;
 }
 
 .verify-banner {
@@ -383,40 +414,10 @@ onMounted(fetchData)
   font-size: var(--font-size-sm);
 }
 
-.items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-.item-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  padding: 1rem;
-  color: var(--color-text);
-  text-decoration: none;
-  display: block;
-}
-
-.item-card h3 {
-  font-size: 1rem;
-  margin: 0 0 0.35rem;
-}
-
 .item-meta {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   margin: 0;
-}
-
-.item-badge {
-  display: inline-block;
-  margin-top: 0.5rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--border-radius-sm);
-  background-color: var(--color-secondary);
-  color: var(--color-secondary-text);
-  font-size: var(--font-size-xs);
 }
 
 .empty-state {
@@ -457,9 +458,4 @@ onMounted(fetchData)
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-  .items-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

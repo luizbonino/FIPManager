@@ -42,16 +42,23 @@
 
       <FeedbackForm :session-id="session.id" />
       <FeedbackSummary :session-id="session.id" />
+
+      <div class="danger-zone">
+        <h2>{{ $t('sessionAdmin.dangerZone') }}</h2>
+        <button type="button" class="btn btn-danger" @click="onDelete">
+          {{ $t('sessionAdmin.delete') }}
+        </button>
+      </div>
     </template>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSessionStore } from '@/stores/session'
-import { sessionExportCsvUrl, sessionExportJsonUrl, sessionExportTtlUrl } from '@/api/sessions'
+import { deleteSession, sessionExportCsvUrl, sessionExportJsonUrl, sessionExportTtlUrl } from '@/api/sessions'
 import QrCode from '@/components/QrCode.vue'
 import SessionFipList from '@/components/SessionFipList.vue'
 import FeedbackForm from '@/components/FeedbackForm.vue'
@@ -59,6 +66,7 @@ import FeedbackSummary from '@/components/FeedbackSummary.vue'
 
 // Spec 02 §4.2.
 const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 const store = useSessionStore()
 
@@ -75,8 +83,26 @@ async function onClose() {
   await store.close()
 }
 
+// spec 02: owner/admin only (this view only loads once `GET /sessions/{id}`
+// — an owner-or-admin gated endpoint — succeeds); deletes the session and
+// its anonymous FIPs server-side, detaches claimed FIPs, then flashes a
+// confirmation on the workspace list.
+async function onDelete() {
+  if (!session.value) return
+  if (!confirm(t('sessionAdmin.deleteConfirm'))) return
+  await deleteSession(session.value.id)
+  await router.push({ path: '/workspace', query: { sessionDeleted: '1' } })
+}
+
 onMounted(async () => {
-  await store.load(String(route.params.id))
+  try {
+    await store.load(String(route.params.id))
+  } catch {
+    // 404 (not owner/admin, or already deleted): `store.error` is set,
+    // `session` stays null, and the template's `v-else-if="session"`
+    // branch — danger zone included — simply never renders.
+    return
+  }
   await store.loadFips()
   store.startPolling()
 })
@@ -173,6 +199,21 @@ onUnmounted(() => {
 .btn-danger {
   background-color: var(--color-error);
   color: #fff;
+}
+
+.danger-zone {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-error);
+  border-radius: var(--border-radius-md);
+}
+
+.danger-zone h2 {
+  margin: 0 0 0.75rem;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 </style>
 

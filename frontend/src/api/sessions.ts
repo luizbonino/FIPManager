@@ -1,4 +1,4 @@
-import { get, patch, post } from './client'
+import { del, get, patch, post } from './client'
 import type {
   FipOut,
   ListOut,
@@ -22,6 +22,11 @@ export function getSessionByCode(joinCode: string) {
 
 export function patchSession(id: string, body: SessionPatchRequest) {
   return patch<SessionOut>(`/sessions/${id}`, body)
+}
+
+/** `DELETE /api/sessions/{id}` (owner or admin): deletes the session and its anonymous FIPs, detaches claimed FIPs. */
+export function deleteSession(id: string) {
+  return del<void>(`/sessions/${id}`)
 }
 
 export function listSessionFips(id: string) {
