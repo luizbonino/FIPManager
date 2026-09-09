@@ -81,12 +81,12 @@ The declaration statuses mirror the FIP ontology one-to-one: `current` → `fip:
 - RDF export (Turtle/JSON-LD) using the FIP ontology.
 
 ### v2 (post-workshop, Oct–Dec 2026)
-- FioDMP link: paste a FioDMP URL, validate it, store id+version; per-answer evidence pointing to a DMP section/question; embeddable FIP summary + `GET /api/fips/{id}` for FioDMP to render.
+- ~~FioDMP link: paste a FioDMP URL, validate it, store id+version; per-answer evidence pointing to a DMP section/question; embeddable FIP summary + `GET /api/fips/{id}` for FioDMP to render.~~ Done 9 Sep (docs/specs/06-dmp-linkage.md; contract draft in docs/integration/).
 - Prefill from DMP once FioDMP exposes JSON (mapping table in §6).
 - FER lookup in the nanopublication network (Nanopub Query) and publish FIPs as nanopublications (Python `nanopub` library).
-- FIP migration between knowledge-model versions (DSW-style), with a diff view of changed questions.
+- ~~FIP migration between knowledge-model versions (DSW-style), with a diff view of changed questions.~~ Done 9 Sep (docs/specs/07-mail-and-migration.md).
 - ~~Successor FER on `planned-replacement` declarations~~ Done 9 Sep (docs/specs/05-v1-completion.md).
-- Sign-in with ORCID and Login Único Fiocruz next to email/password; email verification and self-service password reset once SMTP is configured.
+- Sign-in with ORCID and Login Único Fiocruz next to email/password. ~~Email verification and self-service password reset~~ done 9 Sep; active once FIPM_MAIL_BACKEND=smtp is configured.
 - Team workspaces: share a session, FIP or knowledge model with named collaborators; public gallery of FIPs.
 
 ## 6. FioDMP ↔ FIP Manager integration design

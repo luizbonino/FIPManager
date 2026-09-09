@@ -53,8 +53,8 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] Prefill from FioDMP JSON once available (endpoint stub returns 501 with the contract pointer).
 - [x] Spanish (es) translation (draft done 9 Sep: 288 UI keys, 21 questions, FER types; pending native review).
 - [ ] FER lookup via Nanopub Query; publish FIPs as nanopublications.
-- [ ] FIP migration between knowledge-model versions (DSW-style).
-- [ ] ORCID and Login Único Fiocruz sign-in; email verification and password reset via SMTP.
+- [x] FIP migration between knowledge-model versions (DSW-style) — done 9 Sep, docs/specs/07-mail-and-migration.md: diff view, split/orphan decisions, migratedFrom in exports; verified in browser.
+- [ ] ORCID and Login Único Fiocruz sign-in (needs client registrations). Email verification and password reset done 9 Sep behind FIPM_MAIL_BACKEND (console by default; set smtp + FIPM_SMTP_* at deployment) and FIPM_REQUIRE_EMAIL_VERIFICATION (default off).
 - [ ] Team workspaces (share sessions, FIPs, models with collaborators); public FIP gallery.
 - [ ] Paper or report on the workshop results and the FIP–DMP linkage.
 
