@@ -49,7 +49,7 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] `relatedDMPs` and per-answer `dmpEvidence` (works by URL today).
 - [ ] `GET /api/fips/{id}` and `/fips/{id}/embed` for FioDMP to display FIPs.
 - [ ] Prefill from FioDMP JSON once available.
-- [ ] Spanish (es) translation.
+- [x] Spanish (es) translation (draft done 9 Sep: 288 UI keys, 21 questions, FER types; pending native review).
 - [ ] FER lookup via Nanopub Query; publish FIPs as nanopublications.
 - [ ] FIP migration between knowledge-model versions (DSW-style).
 - [ ] ORCID and Login Único Fiocruz sign-in; email verification and password reset via SMTP.

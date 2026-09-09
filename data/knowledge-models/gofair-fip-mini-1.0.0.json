@@ -10,18 +10,20 @@
   "title": {
     "en": "GO FAIR FIP mini-questionnaire",
     "pt-PT": "Mini-questionário FIP da GO FAIR",
-    "pt-BR": "Miniquestionário FIP da GO FAIR"
+    "pt-BR": "Miniquestionário FIP da GO FAIR",
+    "es": "Minicuestionario FIP de GO FAIR"
   },
   "description": {
     "en": "The 21 questions of the GO FAIR Foundation FIP mini-questionnaire (version 2.0.0), one FAIR Enabling Resource type per question, imported unchanged.",
     "pt-PT": "As 21 perguntas do mini-questionário FIP da GO FAIR Foundation (versão 2.0.0), com um tipo de Recurso Facilitador FAIR (FER) por pergunta, importadas sem alterações.",
-    "pt-BR": "As 21 perguntas do miniquestionário FIP da GO FAIR Foundation (versão 2.0.0), com um tipo de Recurso Facilitador FAIR (FER) por pergunta, importadas sem alterações."
+    "pt-BR": "As 21 perguntas do miniquestionário FIP da GO FAIR Foundation (versão 2.0.0), com um tipo de Recurso Facilitador FAIR (FER) por pergunta, importadas sem alterações.",
+    "es": "Las 21 preguntas del minicuestionario FIP de GO FAIR Foundation (versión 2.0.0), con un tipo de FAIR Enabling Resource (FER) [Recurso Habilitador FAIR] por pregunta, importadas sin modificaciones."
   },
   "changelog": [
     {
       "version": "1.0.0",
       "date": "2026-09-08",
-      "notes": "Initial import of the GO FAIR FIP questionnaire, unchanged. English wording is verbatim from the FIP mini-questionnaire v2.0.0; pt-PT and pt-BR drafts pending facilitator review. The questionnaire's 22nd row (R1.3, “Who is the community, and what are their domain-relevant community standards?”) is not a question — it is answered by the FIP itself — and is carried by the FIP's community field instead, which is how the count is exactly 21."
+      "notes": "Initial import of the GO FAIR FIP questionnaire, unchanged. English wording is verbatim from the FIP mini-questionnaire v2.0.0; pt-PT and pt-BR drafts pending facilitator review. The questionnaire's 22nd row (R1.3, “Who is the community, and what are their domain-relevant community standards?”) is not a question — it is answered by the FIP itself — and is carried by the FIP's community field instead, which is how the count is exactly 21. es draft added 9 Sep 2026, pending review."
     }
   ],
   "sections": [
@@ -30,7 +32,8 @@
       "title": {
         "en": "F – Findable",
         "pt-PT": "F – Localizável",
-        "pt-BR": "F – Localizável"
+        "pt-BR": "F – Localizável",
+        "es": "F – Localizable"
       },
       "questions": [
         {
@@ -40,12 +43,14 @@
           "text": {
             "en": "What globally unique, persistent, resolvable identifiers do you use for metadata records?",
             "pt-PT": "Que identificadores globalmente únicos, persistentes e resolúveis utiliza para os registos de metadados?",
-            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis você usa para os registros de metadados?"
+            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis você usa para os registros de metadados?",
+            "es": "¿Qué identificadores globalmente únicos, persistentes y resolubles utiliza para los registros de metadatos?"
           },
           "help": {
             "en": "Persistent identifier services for the metadata records, e.g. doi.org, w3id.org, purl.archive.org, Handle, ARK. Name the service, not an individual identifier.",
             "pt-PT": "Serviços de identificadores persistentes para os registos de metadados, p. ex. doi.org, w3id.org, purl.archive.org, Handle, ARK. Indique o serviço, não um identificador individual.",
-            "pt-BR": "Serviços de identificadores persistentes para os registros de metadados, por exemplo doi.org, w3id.org, purl.archive.org, Handle, ARK. Indique o serviço, não um identificador individual."
+            "pt-BR": "Serviços de identificadores persistentes para os registros de metadados, por exemplo doi.org, w3id.org, purl.archive.org, Handle, ARK. Indique o serviço, não um identificador individual.",
+            "es": "Servicios de identificadores persistentes para los registros de metadatos, p. ej. doi.org, w3id.org, purl.archive.org, Handle, ARK. Indique el servicio, no un identificador individual."
           },
           "ferType": "identifier-service",
           "required": true,
@@ -58,12 +63,14 @@
           "text": {
             "en": "What globally unique, persistent, resolvable identifiers do you use for datasets?",
             "pt-PT": "Que identificadores globalmente únicos, persistentes e resolúveis utiliza para os conjuntos de dados?",
-            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis você usa para os conjuntos de dados?"
+            "pt-BR": "Quais identificadores globalmente únicos, persistentes e resolvíveis você usa para os conjuntos de dados?",
+            "es": "¿Qué identificadores globalmente únicos, persistentes y resolubles utiliza para los conjuntos de datos?"
           },
           "help": {
             "en": "The same, for the datasets themselves rather than their metadata records.",
             "pt-PT": "O mesmo, mas para os próprios conjuntos de dados (os ficheiros) e não para os seus registos de metadados.",
-            "pt-BR": "O mesmo, mas para os próprios conjuntos de dados (os arquivos) e não para os seus registros de metadados."
+            "pt-BR": "O mesmo, mas para os próprios conjuntos de dados (os arquivos) e não para os seus registros de metadados.",
+            "es": "Lo mismo, pero para los propios conjuntos de datos (los archivos) y no para sus registros de metadatos."
           },
           "ferType": "identifier-service",
           "required": true,
@@ -76,12 +83,14 @@
           "text": {
             "en": "Which metadata schemas do you use for findability?",
             "pt-PT": "Que esquemas de metadados utiliza para efeitos de localizabilidade?",
-            "pt-BR": "Quais esquemas de metadados você usa para a localizabilidade?"
+            "pt-BR": "Quais esquemas de metadados você usa para a localizabilidade?",
+            "es": "¿Qué esquemas de metadatos utiliza para la localizabilidad?"
           },
           "help": {
             "en": "The metadata schema that makes your records findable, e.g. DataCite, Dublin Core, DCAT, schema.org, ISO 19115.",
             "pt-PT": "O esquema de metadados que torna os seus registos localizáveis, p. ex. DataCite, Dublin Core, DCAT, schema.org, ISO 19115.",
-            "pt-BR": "O esquema de metadados que torna os seus registros localizáveis, por exemplo DataCite, Dublin Core, DCAT, schema.org, ISO 19115."
+            "pt-BR": "O esquema de metadados que torna os seus registros localizáveis, por exemplo DataCite, Dublin Core, DCAT, schema.org, ISO 19115.",
+            "es": "El esquema de metadatos que hace que sus registros sean localizables, p. ej. DataCite, Dublin Core, DCAT, schema.org, ISO 19115."
           },
           "ferType": "metadata-schema",
           "required": true,
@@ -94,12 +103,14 @@
           "text": {
             "en": "What is the technology that links the persistent identifiers of your data to the metadata description?",
             "pt-PT": "Qual é a tecnologia que liga os identificadores persistentes dos seus dados à descrição em metadados?",
-            "pt-BR": "Qual tecnologia liga os identificadores persistentes dos seus dados à descrição de metadados?"
+            "pt-BR": "Qual tecnologia liga os identificadores persistentes dos seus dados à descrição de metadados?",
+            "es": "¿Cuál es la tecnología que vincula los identificadores persistentes de sus datos con la descripción en metadatos?"
           },
           "help": {
             "en": "The mechanism that ties a dataset's identifier to its metadata record and back, e.g. the DataCite relatedIdentifier field, Signposting, an FDO record.",
             "pt-PT": "O mecanismo que liga o identificador de um conjunto de dados ao seu registo de metadados e vice-versa, p. ex. o campo relatedIdentifier do DataCite, Signposting, um registo FDO.",
-            "pt-BR": "O mecanismo que liga o identificador de um conjunto de dados ao seu registro de metadados e vice-versa, por exemplo o campo relatedIdentifier do DataCite, Signposting, um registro FDO."
+            "pt-BR": "O mecanismo que liga o identificador de um conjunto de dados ao seu registro de metadados e vice-versa, por exemplo o campo relatedIdentifier do DataCite, Signposting, um registro FDO.",
+            "es": "El mecanismo que vincula el identificador de un conjunto de datos con su registro de metadatos y viceversa, p. ej. el campo relatedIdentifier de DataCite, Signposting, un registro FDO."
           },
           "ferType": "metadata-data-linking-schema",
           "required": true,
@@ -112,12 +123,14 @@
           "text": {
             "en": "In which search engines are your metadata records indexed?",
             "pt-PT": "Em que motores de busca estão indexados os seus registos de metadados?",
-            "pt-BR": "Em quais mecanismos de busca os seus registros de metadados estão indexados?"
+            "pt-BR": "Em quais mecanismos de busca os seus registros de metadados estão indexados?",
+            "es": "¿En qué motores de búsqueda están indexados sus registros de metadatos?"
           },
           "help": {
             "en": "Search engines, registries or aggregators that index your metadata records, e.g. DataCite Commons, Google Dataset Search, B2FIND, OpenAIRE.",
             "pt-PT": "Motores de busca, registos ou agregadores que indexam os seus registos de metadados, p. ex. DataCite Commons, Google Dataset Search, B2FIND, OpenAIRE.",
-            "pt-BR": "Mecanismos de busca, registros ou agregadores que indexam os seus registros de metadados, por exemplo DataCite Commons, Google Dataset Search, B2FIND, OpenAIRE."
+            "pt-BR": "Mecanismos de busca, registros ou agregadores que indexam os seus registros de metadados, por exemplo DataCite Commons, Google Dataset Search, B2FIND, OpenAIRE.",
+            "es": "Motores de búsqueda, registros o agregadores que indexan sus registros de metadatos, p. ej. DataCite Commons, Google Dataset Search, B2FIND, OpenAIRE."
           },
           "ferType": "registry",
           "required": true,
@@ -130,12 +143,14 @@
           "text": {
             "en": "In which search engines are your datasets indexed?",
             "pt-PT": "Em que motores de busca estão indexados os seus conjuntos de dados?",
-            "pt-BR": "Em quais mecanismos de busca os seus conjuntos de dados estão indexados?"
+            "pt-BR": "Em quais mecanismos de busca os seus conjuntos de dados estão indexados?",
+            "es": "¿En qué motores de búsqueda están indexados sus conjuntos de datos?"
           },
           "help": {
             "en": "Search engines or repositories in which the datasets themselves can be found, e.g. Zenodo, Figshare, a domain repository.",
             "pt-PT": "Motores de busca ou repositórios onde os próprios conjuntos de dados podem ser encontrados, p. ex. Zenodo, Figshare, um repositório de domínio.",
-            "pt-BR": "Mecanismos de busca ou repositórios onde os próprios conjuntos de dados podem ser encontrados, por exemplo Zenodo, Figshare, um repositório de domínio."
+            "pt-BR": "Mecanismos de busca ou repositórios onde os próprios conjuntos de dados podem ser encontrados, por exemplo Zenodo, Figshare, um repositório de domínio.",
+            "es": "Motores de búsqueda o repositorios donde pueden encontrarse los propios conjuntos de datos, p. ej. Zenodo, Figshare, un repositorio de dominio."
           },
           "ferType": "registry",
           "required": true,
@@ -148,7 +163,8 @@
       "title": {
         "en": "A – Accessible",
         "pt-PT": "A – Acessível",
-        "pt-BR": "A – Acessível"
+        "pt-BR": "A – Acessível",
+        "es": "A – Accesible"
       },
       "questions": [
         {
@@ -158,12 +174,14 @@
           "text": {
             "en": "Which standardized communication protocol do you use for metadata records?",
             "pt-PT": "Que protocolo de comunicação normalizado utiliza para os registos de metadados?",
-            "pt-BR": "Qual protocolo de comunicação padronizado você usa para os registros de metadados?"
+            "pt-BR": "Qual protocolo de comunicação padronizado você usa para os registros de metadados?",
+            "es": "¿Qué protocolo de comunicación normalizado utiliza para los registros de metadatos?"
           },
           "help": {
             "en": "The open, standardised protocol used to retrieve metadata, e.g. HTTPS, OAI-PMH, SPARQL, a REST API.",
             "pt-PT": "O protocolo aberto e normalizado usado para obter metadados, p. ex. HTTPS, OAI-PMH, SPARQL, uma API REST.",
-            "pt-BR": "O protocolo aberto e padronizado usado para obter metadados, por exemplo HTTPS, OAI-PMH, SPARQL, uma API REST."
+            "pt-BR": "O protocolo aberto e padronizado usado para obter metadados, por exemplo HTTPS, OAI-PMH, SPARQL, uma API REST.",
+            "es": "El protocolo abierto y normalizado utilizado para obtener metadatos, p. ej. HTTPS, OAI-PMH, SPARQL, una API REST."
           },
           "ferType": "communication-protocol",
           "required": true,
@@ -176,12 +194,14 @@
           "text": {
             "en": "Which standardized communication protocol do you use for datasets?",
             "pt-PT": "Que protocolo de comunicação normalizado utiliza para os conjuntos de dados?",
-            "pt-BR": "Qual protocolo de comunicação padronizado você usa para os conjuntos de dados?"
+            "pt-BR": "Qual protocolo de comunicação padronizado você usa para os conjuntos de dados?",
+            "es": "¿Qué protocolo de comunicación normalizado utiliza para los conjuntos de datos?"
           },
           "help": {
             "en": "The protocol used to retrieve the data files, e.g. HTTPS, FTPS, S3, GridFTP.",
             "pt-PT": "O protocolo usado para obter os ficheiros de dados, p. ex. HTTPS, FTPS, S3, GridFTP.",
-            "pt-BR": "O protocolo usado para obter os arquivos de dados, por exemplo HTTPS, FTPS, S3, GridFTP."
+            "pt-BR": "O protocolo usado para obter os arquivos de dados, por exemplo HTTPS, FTPS, S3, GridFTP.",
+            "es": "El protocolo utilizado para obtener los archivos de datos, p. ej. HTTPS, FTPS, S3, GridFTP."
           },
           "ferType": "communication-protocol",
           "required": true,
@@ -194,12 +214,14 @@
           "text": {
             "en": "Which authentication & authorisation technique do you use for metadata records?",
             "pt-PT": "Que técnica de autenticação e autorização utiliza para os registos de metadados?",
-            "pt-BR": "Qual técnica de autenticação e autorização você usa para os registros de metadados?"
+            "pt-BR": "Qual técnica de autenticação e autorização você usa para os registros de metadados?",
+            "es": "¿Qué técnica de autenticación y autorización utiliza para los registros de metadatos?"
           },
           "help": {
             "en": "How users are identified and permissions checked when metadata are restricted, e.g. OAuth 2.0, OpenID Connect, Shibboleth/SAML, ORCID login. Answer “open, no authentication” if there is none.",
             "pt-PT": "Como os utilizadores são identificados e as permissões verificadas quando os metadados são restritos, p. ex. OAuth 2.0, OpenID Connect, Shibboleth/SAML, autenticação por ORCID. Responda «aberto, sem autenticação» se não existir.",
-            "pt-BR": "Como os usuários são identificados e as permissões verificadas quando os metadados são restritos, por exemplo OAuth 2.0, OpenID Connect, Shibboleth/SAML, autenticação por ORCID. Responda “aberto, sem autenticação” se não houver."
+            "pt-BR": "Como os usuários são identificados e as permissões verificadas quando os metadados são restritos, por exemplo OAuth 2.0, OpenID Connect, Shibboleth/SAML, autenticação por ORCID. Responda “aberto, sem autenticação” se não houver.",
+            "es": "Cómo se identifica a los usuarios y se verifican los permisos cuando los metadatos son restringidos, p. ej. OAuth 2.0, OpenID Connect, Shibboleth/SAML, inicio de sesión con ORCID. Responda «abierto, sin autenticación» si no hay ninguna."
           },
           "ferType": "authentication-authorization-service",
           "required": true,
@@ -212,12 +234,14 @@
           "text": {
             "en": "Which authentication & authorisation technique do you use for datasets?",
             "pt-PT": "Que técnica de autenticação e autorização utiliza para os conjuntos de dados?",
-            "pt-BR": "Qual técnica de autenticação e autorização você usa para os conjuntos de dados?"
+            "pt-BR": "Qual técnica de autenticação e autorização você usa para os conjuntos de dados?",
+            "es": "¿Qué técnica de autenticación y autorización utiliza para los conjuntos de datos?"
           },
           "help": {
             "en": "The same, for access to the data files themselves.",
             "pt-PT": "O mesmo, para o acesso aos próprios ficheiros de dados.",
-            "pt-BR": "O mesmo, para o acesso aos próprios arquivos de dados."
+            "pt-BR": "O mesmo, para o acesso aos próprios arquivos de dados.",
+            "es": "Lo mismo, para el acceso a los propios archivos de datos."
           },
           "ferType": "authentication-authorization-service",
           "required": true,
@@ -230,12 +254,14 @@
           "text": {
             "en": "What is your metadata preservation policy?",
             "pt-PT": "Qual é a sua política de preservação de metadados?",
-            "pt-BR": "Qual é a sua política de preservação de metadados?"
+            "pt-BR": "Qual é a sua política de preservação de metadados?",
+            "es": "¿Cuál es su política de preservación de metadatos?"
           },
           "help": {
             "en": "The documented policy stating for how long, and under which conditions, metadata remain available after the data are gone, e.g. a repository preservation policy with a stated retention period.",
             "pt-PT": "A política documentada que indica por quanto tempo, e em que condições, os metadados permanecem disponíveis depois de os dados deixarem de existir, p. ex. a política de preservação de um repositório com um prazo de retenção declarado.",
-            "pt-BR": "A política documentada que indica por quanto tempo, e em quais condições, os metadados permanecem disponíveis depois que os dados deixam de existir, por exemplo a política de preservação de um repositório com um prazo de retenção declarado."
+            "pt-BR": "A política documentada que indica por quanto tempo, e em quais condições, os metadados permanecem disponíveis depois que os dados deixam de existir, por exemplo a política de preservação de um repositório com um prazo de retenção declarado.",
+            "es": "La política documentada que indica durante cuánto tiempo, y en qué condiciones, los metadatos permanecen disponibles después de que los datos dejen de existir, p. ej. la política de preservación de un repositorio con un período de retención declarado."
           },
           "ferType": "metadata-preservation-policy",
           "required": true,
@@ -248,7 +274,8 @@
       "title": {
         "en": "I – Interoperable",
         "pt-PT": "I – Interoperável",
-        "pt-BR": "I – Interoperável"
+        "pt-BR": "I – Interoperável",
+        "es": "I – Interoperable"
       },
       "questions": [
         {
@@ -258,12 +285,14 @@
           "text": {
             "en": "Which knowledge representation languages (allowing machine interoperation) do you use for metadata records?",
             "pt-PT": "Que linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) utiliza para os registos de metadados?",
-            "pt-BR": "Quais linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) você usa para os registros de metadados?"
+            "pt-BR": "Quais linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) você usa para os registros de metadados?",
+            "es": "¿Qué lenguajes de representación del conocimiento (que permiten la interoperación entre máquinas) utiliza para los registros de metadatos?"
           },
           "help": {
             "en": "The machine-readable language in which metadata are expressed, e.g. RDF, OWL, JSON-LD, XML.",
             "pt-PT": "A linguagem legível por máquina em que os metadados são expressos, p. ex. RDF, OWL, JSON-LD, XML.",
-            "pt-BR": "A linguagem legível por máquina na qual os metadados são expressos, por exemplo RDF, OWL, JSON-LD, XML."
+            "pt-BR": "A linguagem legível por máquina na qual os metadados são expressos, por exemplo RDF, OWL, JSON-LD, XML.",
+            "es": "El lenguaje legible por máquina en el que se expresan los metadatos, p. ej. RDF, OWL, JSON-LD, XML."
           },
           "ferType": "knowledge-representation-language",
           "required": true,
@@ -276,12 +305,14 @@
           "text": {
             "en": "Which knowledge representation languages (allowing machine interoperation) do you use for datasets?",
             "pt-PT": "Que linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) utiliza para os conjuntos de dados?",
-            "pt-BR": "Quais linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) você usa para os conjuntos de dados?"
+            "pt-BR": "Quais linguagens de representação de conhecimento (que permitem a interoperação entre máquinas) você usa para os conjuntos de dados?",
+            "es": "¿Qué lenguajes de representación del conocimiento (que permiten la interoperación entre máquinas) utiliza para los conjuntos de datos?"
           },
           "help": {
             "en": "The same, for the data: the format or language that lets machines interoperate on the data content, e.g. RDF, CSV on the Web, NetCDF, HL7 FHIR.",
             "pt-PT": "O mesmo, para os dados: o formato ou linguagem que permite às máquinas interoperar sobre o conteúdo dos dados, p. ex. RDF, CSV on the Web, NetCDF, HL7 FHIR.",
-            "pt-BR": "O mesmo, para os dados: o formato ou linguagem que permite às máquinas interoperar sobre o conteúdo dos dados, por exemplo RDF, CSV on the Web, NetCDF, HL7 FHIR."
+            "pt-BR": "O mesmo, para os dados: o formato ou linguagem que permite às máquinas interoperar sobre o conteúdo dos dados, por exemplo RDF, CSV on the Web, NetCDF, HL7 FHIR.",
+            "es": "Lo mismo, para los datos: el formato o lenguaje que permite a las máquinas interoperar sobre el contenido de los datos, p. ej. RDF, CSV on the Web, NetCDF, HL7 FHIR."
           },
           "ferType": "knowledge-representation-language",
           "required": true,
@@ -294,12 +325,14 @@
           "text": {
             "en": "Which structured vocabularies do you use to annotate your metadata records?",
             "pt-PT": "Que vocabulários estruturados utiliza para anotar os seus registos de metadados?",
-            "pt-BR": "Quais vocabulários estruturados você usa para anotar os seus registros de metadados?"
+            "pt-BR": "Quais vocabulários estruturados você usa para anotar os seus registros de metadados?",
+            "es": "¿Qué vocabularios estructurados utiliza para anotar sus registros de metadatos?"
           },
           "help": {
             "en": "Controlled vocabularies, thesauri or ontologies whose terms fill your metadata fields, e.g. MeSH, DeCS, AGROVOC, a SKOS thesaurus.",
             "pt-PT": "Vocabulários controlados, tesauros ou ontologias cujos termos preenchem os campos dos seus metadados, p. ex. MeSH, DeCS, AGROVOC, um tesauro em SKOS.",
-            "pt-BR": "Vocabulários controlados, tesauros ou ontologias cujos termos preenchem os campos dos seus metadados, por exemplo MeSH, DeCS, AGROVOC, um tesauro em SKOS."
+            "pt-BR": "Vocabulários controlados, tesauros ou ontologias cujos termos preenchem os campos dos seus metadados, por exemplo MeSH, DeCS, AGROVOC, um tesauro em SKOS.",
+            "es": "Vocabularios controlados, tesauros u ontologías cuyos términos completan los campos de sus metadatos, p. ej. MeSH, DeCS, AGROVOC, un tesauro en SKOS."
           },
           "ferType": "structured-vocabulary",
           "required": true,
@@ -312,12 +345,14 @@
           "text": {
             "en": "Which structured vocabularies do you use to encode your datasets?",
             "pt-PT": "Que vocabulários estruturados utiliza para codificar os seus conjuntos de dados?",
-            "pt-BR": "Quais vocabulários estruturados você usa para codificar os seus conjuntos de dados?"
+            "pt-BR": "Quais vocabulários estruturados você usa para codificar os seus conjuntos de dados?",
+            "es": "¿Qué vocabularios estructurados utiliza para codificar sus conjuntos de datos?"
           },
           "help": {
             "en": "The same, for values inside the datasets, e.g. SNOMED CT, ICD-11, ChEBI, a units ontology.",
             "pt-PT": "O mesmo, para os valores dentro dos conjuntos de dados, p. ex. SNOMED CT, CID-11, ChEBI, uma ontologia de unidades.",
-            "pt-BR": "O mesmo, para os valores dentro dos conjuntos de dados, por exemplo SNOMED CT, CID-11, ChEBI, uma ontologia de unidades."
+            "pt-BR": "O mesmo, para os valores dentro dos conjuntos de dados, por exemplo SNOMED CT, CID-11, ChEBI, uma ontologia de unidades.",
+            "es": "Lo mismo, para los valores dentro de los conjuntos de datos, p. ej. SNOMED CT, CIE-11, ChEBI, una ontología de unidades."
           },
           "ferType": "structured-vocabulary",
           "required": true,
@@ -330,12 +365,14 @@
           "text": {
             "en": "Which models, schema(s) do you use for your metadata records?",
             "pt-PT": "Que modelos ou esquemas utiliza para os seus registos de metadados?",
-            "pt-BR": "Quais modelos ou esquemas você usa para os seus registros de metadados?"
+            "pt-BR": "Quais modelos ou esquemas você usa para os seus registros de metadados?",
+            "es": "¿Qué modelos o esquemas utiliza para sus registros de metadatos?"
           },
           "help": {
             "en": "The semantic model or ontology that gives your metadata qualified relations to other resources, e.g. DCAT, PROV-O, schema.org, a domain ontology.",
             "pt-PT": "O modelo semântico ou ontologia que confere aos seus metadados relações qualificadas com outros recursos, p. ex. DCAT, PROV-O, schema.org, uma ontologia de domínio.",
-            "pt-BR": "O modelo semântico ou ontologia que dá aos seus metadados relações qualificadas com outros recursos, por exemplo DCAT, PROV-O, schema.org, uma ontologia de domínio."
+            "pt-BR": "O modelo semântico ou ontologia que dá aos seus metadados relações qualificadas com outros recursos, por exemplo DCAT, PROV-O, schema.org, uma ontologia de domínio.",
+            "es": "El modelo semántico u ontología que otorga a sus metadatos relaciones cualificadas con otros recursos, p. ej. DCAT, PROV-O, schema.org, una ontología de dominio."
           },
           "ferType": "semantic-model",
           "required": true,
@@ -348,12 +385,14 @@
           "text": {
             "en": "Which models, schema(s) do you use for your datasets?",
             "pt-PT": "Que modelos ou esquemas utiliza para os seus conjuntos de dados?",
-            "pt-BR": "Quais modelos ou esquemas você usa para os seus conjuntos de dados?"
+            "pt-BR": "Quais modelos ou esquemas você usa para os seus conjuntos de dados?",
+            "es": "¿Qué modelos o esquemas utiliza para sus conjuntos de datos?"
           },
           "help": {
             "en": "The same, for the data content: the model or schema the data conform to, e.g. OMOP CDM, CDISC SDTM, an OBO ontology.",
             "pt-PT": "O mesmo, para o conteúdo dos dados: o modelo ou esquema a que os dados obedecem, p. ex. OMOP CDM, CDISC SDTM, uma ontologia OBO.",
-            "pt-BR": "O mesmo, para o conteúdo dos dados: o modelo ou esquema ao qual os dados obedecem, por exemplo OMOP CDM, CDISC SDTM, uma ontologia OBO."
+            "pt-BR": "O mesmo, para o conteúdo dos dados: o modelo ou esquema ao qual os dados obedecem, por exemplo OMOP CDM, CDISC SDTM, uma ontologia OBO.",
+            "es": "Lo mismo, para el contenido de los datos: el modelo o esquema al que los datos se ajustan, p. ej. OMOP CDM, CDISC SDTM, una ontología OBO."
           },
           "ferType": "semantic-model",
           "required": true,
@@ -366,7 +405,8 @@
       "title": {
         "en": "R – Reusable",
         "pt-PT": "R – Reutilizável",
-        "pt-BR": "R – Reutilizável"
+        "pt-BR": "R – Reutilizável",
+        "es": "R – Reutilizable"
       },
       "questions": [
         {
@@ -376,12 +416,14 @@
           "text": {
             "en": "Which usage license do you use for your metadata records?",
             "pt-PT": "Que licença de utilização aplica aos seus registos de metadados?",
-            "pt-BR": "Qual licença de uso você aplica aos seus registros de metadados?"
+            "pt-BR": "Qual licença de uso você aplica aos seus registros de metadados?",
+            "es": "¿Qué licencia de uso aplica a sus registros de metadatos?"
           },
           "help": {
             "en": "The licence attached to the metadata records, e.g. CC0 1.0, CC BY 4.0. Metadata are commonly CC0 even when the data are restricted.",
             "pt-PT": "A licença aplicada aos registos de metadados, p. ex. CC0 1.0, CC BY 4.0. Os metadados são frequentemente CC0 mesmo quando os dados são restritos.",
-            "pt-BR": "A licença aplicada aos registros de metadados, por exemplo CC0 1.0, CC BY 4.0. Os metadados costumam ser CC0 mesmo quando os dados são restritos."
+            "pt-BR": "A licença aplicada aos registros de metadados, por exemplo CC0 1.0, CC BY 4.0. Os metadados costumam ser CC0 mesmo quando os dados são restritos.",
+            "es": "La licencia aplicada a los registros de metadatos, p. ej. CC0 1.0, CC BY 4.0. Los metadatos suelen ser CC0 incluso cuando los datos son restringidos."
           },
           "ferType": "data-usage-license",
           "required": true,
@@ -394,12 +436,14 @@
           "text": {
             "en": "Which usage license do you use for your datasets?",
             "pt-PT": "Que licença de utilização aplica aos seus conjuntos de dados?",
-            "pt-BR": "Qual licença de uso você aplica aos seus conjuntos de dados?"
+            "pt-BR": "Qual licença de uso você aplica aos seus conjuntos de dados?",
+            "es": "¿Qué licencia de uso aplica a sus conjuntos de datos?"
           },
           "help": {
             "en": "The licence attached to the datasets, e.g. CC BY 4.0, CC BY-SA 4.0, ODbL, or a restricted-access data use agreement.",
             "pt-PT": "A licença aplicada aos conjuntos de dados, p. ex. CC BY 4.0, CC BY-SA 4.0, ODbL, ou um acordo de utilização de dados de acesso restrito.",
-            "pt-BR": "A licença aplicada aos conjuntos de dados, por exemplo CC BY 4.0, CC BY-SA 4.0, ODbL, ou um acordo de uso de dados de acesso restrito."
+            "pt-BR": "A licença aplicada aos conjuntos de dados, por exemplo CC BY 4.0, CC BY-SA 4.0, ODbL, ou um acordo de uso de dados de acesso restrito.",
+            "es": "La licencia aplicada a los conjuntos de datos, p. ej. CC BY 4.0, CC BY-SA 4.0, ODbL, o un acuerdo de uso de datos de acceso restringido."
           },
           "ferType": "data-usage-license",
           "required": true,
@@ -412,12 +456,14 @@
           "text": {
             "en": "Which metadata schemas do you use for describing the provenance of your metadata records?",
             "pt-PT": "Que esquemas de metadados utiliza para descrever a proveniência dos seus registos de metadados?",
-            "pt-BR": "Quais esquemas de metadados você usa para descrever a proveniência dos seus registros de metadados?"
+            "pt-BR": "Quais esquemas de metadados você usa para descrever a proveniência dos seus registros de metadados?",
+            "es": "¿Qué esquemas de metadatos utiliza para describir la procedencia de sus registros de metadatos?"
           },
           "help": {
             "en": "The provenance model used to record where the metadata came from and how they changed, e.g. PROV-O, PAV, DataCite provenance fields.",
             "pt-PT": "O modelo de proveniência usado para registar a origem dos metadados e as suas alterações, p. ex. PROV-O, PAV, campos de proveniência do DataCite.",
-            "pt-BR": "O modelo de proveniência usado para registrar a origem dos metadados e as suas alterações, por exemplo PROV-O, PAV, campos de proveniência do DataCite."
+            "pt-BR": "O modelo de proveniência usado para registrar a origem dos metadados e as suas alterações, por exemplo PROV-O, PAV, campos de proveniência do DataCite.",
+            "es": "El modelo de procedencia utilizado para registrar el origen de los metadatos y cómo cambiaron, p. ej. PROV-O, PAV, campos de procedencia de DataCite."
           },
           "ferType": "provenance-model",
           "required": true,
@@ -430,12 +476,14 @@
           "text": {
             "en": "Which metadata schemas do you use for describing the provenance of your datasets?",
             "pt-PT": "Que esquemas de metadados utiliza para descrever a proveniência dos seus conjuntos de dados?",
-            "pt-BR": "Quais esquemas de metadados você usa para descrever a proveniência dos seus conjuntos de dados?"
+            "pt-BR": "Quais esquemas de metadados você usa para descrever a proveniência dos seus conjuntos de dados?",
+            "es": "¿Qué esquemas de metadatos utiliza para describir la procedencia de sus conjuntos de datos?"
           },
           "help": {
             "en": "The same, for the datasets: the model describing their origin, lineage and processing steps.",
             "pt-PT": "O mesmo, para os conjuntos de dados: o modelo que descreve a sua origem, linhagem e passos de processamento.",
-            "pt-BR": "O mesmo, para os conjuntos de dados: o modelo que descreve a sua origem, linhagem e etapas de processamento."
+            "pt-BR": "O mesmo, para os conjuntos de dados: o modelo que descreve a sua origem, linhagem e etapas de processamento.",
+            "es": "Lo mismo, para los conjuntos de datos: el modelo que describe su origen, linaje y pasos de procesamiento."
           },
           "ferType": "provenance-model",
           "required": true,

@@ -16,7 +16,8 @@
       "label": {
         "en": "Identifier service",
         "pt-PT": "Serviço de identificadores",
-        "pt-BR": "Serviço de identificadores"
+        "pt-BR": "Serviço de identificadores",
+        "es": "Servicio de identificadores"
       },
       "description": {
         "en": "A service that provides for any digital object (1) algorithms guaranteeing global uniqueness, (2) policy document that guarantees persistent and (3) resolution of the identifier to machine-actionable metadata describing the object and its location."
@@ -29,7 +30,8 @@
       "label": {
         "en": "Metadata schema",
         "pt-PT": "Esquema de metadados",
-        "pt-BR": "Esquema de metadados"
+        "pt-BR": "Esquema de metadados",
+        "es": "Esquema de metadatos"
       },
       "description": {
         "en": "A specification that specifies the structured representation of metadata describing attributes of data or other digital objects in terms of semantics, syntax and optionality."
@@ -42,7 +44,8 @@
       "label": {
         "en": "Metadata-data linking schema",
         "pt-PT": "Esquema de ligação entre metadados e dados",
-        "pt-BR": "Esquema de vinculação entre metadados e dados"
+        "pt-BR": "Esquema de vinculação entre metadados e dados",
+        "es": "Esquema de vinculación entre metadatos y datos"
       },
       "description": {
         "en": "A specification that provides a unique, persistent, (ideally) bi-directional, machine-actionable link between metadata and the data they describe."
@@ -55,7 +58,8 @@
       "label": {
         "en": "Registry",
         "pt-PT": "Registo (catálogo pesquisável)",
-        "pt-BR": "Registro (catálogo pesquisável)"
+        "pt-BR": "Registro (catálogo pesquisável)",
+        "es": "Registro (catálogo consultable)"
       },
       "description": {
         "en": "A service that indexes metadata and data and provides search over that index."
@@ -68,7 +72,8 @@
       "label": {
         "en": "Communication protocol",
         "pt-PT": "Protocolo de comunicação",
-        "pt-BR": "Protocolo de comunicação"
+        "pt-BR": "Protocolo de comunicação",
+        "es": "Protocolo de comunicación"
       },
       "description": {
         "en": "A specification of how messages are structured and exchanged."
@@ -81,7 +86,8 @@
       "label": {
         "en": "Authentication and authorization service",
         "pt-PT": "Serviço de autenticação e autorização",
-        "pt-BR": "Serviço de autenticação e autorização"
+        "pt-BR": "Serviço de autenticação e autorização",
+        "es": "Servicio de autenticación y autorización"
       },
       "description": {
         "en": "A service that mediates access to digital objects according to specifed conditions."
@@ -94,7 +100,8 @@
       "label": {
         "en": "Metadata preservation policy",
         "pt-PT": "Política de preservação de metadados",
-        "pt-BR": "Política de preservação de metadados"
+        "pt-BR": "Política de preservação de metadados",
+        "es": "Política de preservación de metadatos"
       },
       "description": {
         "en": "A data policy that describes the conditions under which metadata should be provided in the future."
@@ -107,7 +114,8 @@
       "label": {
         "en": "Knowledge representation language",
         "pt-PT": "Linguagem de representação de conhecimento",
-        "pt-BR": "Linguagem de representação de conhecimento"
+        "pt-BR": "Linguagem de representação de conhecimento",
+        "es": "Lenguaje de representación del conocimiento"
       },
       "description": {
         "en": "A language specification that enables knowledge to be processed by machines."
@@ -120,7 +128,8 @@
       "label": {
         "en": "Structured vocabulary",
         "pt-PT": "Vocabulário estruturado",
-        "pt-BR": "Vocabulário estruturado"
+        "pt-BR": "Vocabulário estruturado",
+        "es": "Vocabulario estructurado"
       },
       "description": {
         "en": "A specification for a controlled list of uniquely identified and unambigous concepts with their definitions represented using web standards."
@@ -133,7 +142,8 @@
       "label": {
         "en": "Semantic model",
         "pt-PT": "Modelo semântico",
-        "pt-BR": "Modelo semântico"
+        "pt-BR": "Modelo semântico",
+        "es": "Modelo semántico"
       },
       "description": {
         "en": "A specification that defines qualified relations between entities describing data or other digital objects according to the Linked Data principles. This can include semantic data models and ontologies."
@@ -146,7 +156,8 @@
       "label": {
         "en": "Data usage license",
         "pt-PT": "Licença de utilização dos dados",
-        "pt-BR": "Licença de uso dos dados"
+        "pt-BR": "Licença de uso dos dados",
+        "es": "Licencia de uso de los datos"
       },
       "description": {
         "en": "A data policy that specifies legal restrictions on the reuse of the data."
@@ -159,7 +170,8 @@
       "label": {
         "en": "Provenance model",
         "pt-PT": "Modelo de proveniência",
-        "pt-BR": "Modelo de proveniência"
+        "pt-BR": "Modelo de proveniência",
+        "es": "Modelo de procedencia"
       },
       "description": {
         "en": "A specification that specifies metadata describing the origin and lineage of data or other digital objects."

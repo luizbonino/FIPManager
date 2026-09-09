@@ -1,6 +1,7 @@
-"""spec 02-core-flows.md §5.5 / §8 item 6: `Language = Literal["en","pt-PT","pt-BR"]`
+"""spec 02-core-flows.md §5.5 / §8 item 6: `Language = Literal["en","pt-PT","pt-BR","es"]`
 applied to session defaultLanguage and FIP language (create + patch) -> 422
-on anything else, 200 for an allowed value."""
+on anything else, 200 for an allowed value (including "es", added as the
+fourth UI language)."""
 
 from __future__ import annotations
 
@@ -48,6 +49,31 @@ def test_session_default_language_rejects_unknown_value(client):
     patch_status_good = client.patch(f"/api/sessions/{session_id}", json={"status": "open"})
     assert patch_status_good.status_code == 200
 
+    patch_es = client.patch(f"/api/sessions/{session_id}", json={"defaultLanguage": "es"})
+    assert patch_es.status_code == 200
+    assert patch_es.json()["defaultLanguage"] == "es"
+
+
+def test_session_default_language_accepts_es(client):
+    client.post(
+        "/api/auth/register",
+        json={
+            "email": "lang-session-es@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "L",
+        },
+    )
+    good = client.post(
+        "/api/sessions",
+        json={
+            "title": "t",
+            "questionnaireRef": {"id": "test-km", "version": "1.0.0"},
+            "defaultLanguage": "es",
+        },
+    )
+    assert good.status_code == 201
+    assert good.json()["defaultLanguage"] == "es"
+
 
 def test_fip_language_rejects_unknown_value_on_create_and_patch(client):
     client.post(
@@ -78,3 +104,24 @@ def test_fip_language_rejects_unknown_value_on_create_and_patch(client):
     patch_good = client.patch(f"/api/fips/{fip_id}", json={"language": "pt-PT"})
     assert patch_good.status_code == 200
     assert patch_good.json()["language"] == "pt-PT"
+
+    patch_es = client.patch(f"/api/fips/{fip_id}", json={"language": "es"})
+    assert patch_es.status_code == 200
+    assert patch_es.json()["language"] == "es"
+
+
+def test_fip_language_accepts_es_on_create(client):
+    client.post(
+        "/api/auth/register",
+        json={
+            "email": "lang-fip-es@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "L",
+        },
+    )
+    good = client.post(
+        "/api/fips",
+        json={"questionnaireRef": {"id": "test-km", "version": "1.0.0"}, "language": "es"},
+    )
+    assert good.status_code == 201
+    assert good.json()["language"] == "es"

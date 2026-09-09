@@ -20,7 +20,7 @@ import type {
 
 export const QUESTION_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/
 export const SECTION_ID_PATTERN = QUESTION_ID_PATTERN
-export const SUPPORTED_LANGUAGES = ['en', 'pt-PT', 'pt-BR'] as const
+export const SUPPORTED_LANGUAGES = ['en', 'pt-PT', 'pt-BR', 'es'] as const
 export const PRINCIPLES = [
   'F1',
   'F2',

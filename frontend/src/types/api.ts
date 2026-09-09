@@ -6,13 +6,13 @@
  * See docs/specs/01-foundations.md §2.2/§3 and docs/specs/02-core-flows.md §5/§6.4.
  */
 
-/** `{"en": "...", "pt-PT": "...", "pt-BR": "..."}` — never assume all three keys are present. */
+/** `{"en": "...", "pt-PT": "...", "pt-BR": "...", "es": "..."}` — never assume all keys are present. */
 export type LangMap = Record<string, string>
 
 export type Visibility = 'private' | 'link' | 'public'
 export type SessionStatus = 'open' | 'closed'
-/** The three UI locales (spec 02 §5.5's `Language` schema literal). */
-export type Language = 'en' | 'pt-PT' | 'pt-BR'
+/** The four UI locales (spec 02 §5.5's `Language` schema literal). */
+export type Language = 'en' | 'pt-PT' | 'pt-BR' | 'es'
 /** `fipm.config.DECLARATION_STATUSES` (spec 02 §1) — the UI never invents a sixth. */
 export type DeclarationStatus =
   | 'current'

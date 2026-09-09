@@ -144,14 +144,14 @@ describe('KnowledgeModelEditor.vue', () => {
     expect(lastMoveButtons[1].attributes('disabled')).toBeDefined() // down, at the last section
   })
 
-  it('renders question cards with three language tabs (en / pt-PT / pt-BR)', async () => {
+  it('renders question cards with four language tabs (en / pt-PT / pt-BR / es)', async () => {
     const { wrapper } = await mountEditor(fixtureContent())
     const cards = wrapper.findAll('.km-question-card')
     expect(cards.length).toBeGreaterThan(0)
     // Each card has two `KmLangTabs` instances (text, help); scope to the
-    // first field group (the question text) for "three tabs".
+    // first field group (the question text) for "four tabs".
     const tabs = cards[0].get('.field-group').findAll('.tabs .tab')
-    expect(tabs).toHaveLength(3)
+    expect(tabs).toHaveLength(4)
     expect(tabs.map((t) => t.text().replace(/\s+/g, ' ').trim())).toEqual(
       expect.arrayContaining([expect.stringContaining('English')])
     )

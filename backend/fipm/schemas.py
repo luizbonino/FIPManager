@@ -19,9 +19,9 @@ class CamelModel(BaseModel):
 # `Literal`s, not DB-native enums: the columns stay `String` per the spec.
 Visibility = Literal["private", "link", "public"]
 SessionStatus = Literal["open", "closed"]
-# spec 02-core-flows.md §5.5: the three languages the frontend ships UI
+# spec 02-core-flows.md §5.5: the four languages the frontend ships UI
 # strings for. Plain `Literal`, not a DB-native enum (columns stay `String`).
-Language = Literal["en", "pt-PT", "pt-BR"]
+Language = Literal["en", "pt-PT", "pt-BR", "es"]
 
 
 # ---------------------------------------------------------------------------

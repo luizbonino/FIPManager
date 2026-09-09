@@ -15,7 +15,7 @@ First milestone: FIP workshop at CONFOA 2026, Faro (PT), 6 October 2026.
 
 1. Let a community (or a workshop group) declare a FAIR Implementation Profile by answering an editable questionnaire.
 2. Use the GO FAIR FIP mini-questionnaire v2.0.0 as-is (21 questions, 12 FER types; content licensed CC BY-SA 4.0 by the GO FAIR Foundation, attribution required) for the workshop. Treat the questionnaire as an editable, versioned *knowledge model* in the DSW sense: editors can translate, reorder, hide, add or split questions and publish a new version without code changes; every FIP records which version it answers.
-3. Be multilingual from day one: English (`en`), European Portuguese (`pt-PT`) and Brazilian Portuguese (`pt-BR`), for the interface *and* the questionnaire content. Default language comes from the browser's locale; English is the fallback. Spanish (`es`, a FioDMP language) is a later addition.
+3. Be multilingual from day one: English (`en`), European Portuguese (`pt-PT`) and Brazilian Portuguese (`pt-BR`), for the interface *and* the questionnaire content. Default language comes from the browser's locale; English is the fallback. Spanish (`es`, a FioDMP language) was added as a draft on 9 Sep 2026 (UI, questionnaire and FER types); fallback es → en.
 4. Produce standards-based output: JSON, CSV, RDF/Turtle following the FIP ontology (https://w3id.org/fair/fip/terms/), nanopublications later.
 5. Integrate bidirectionally with FioDMP (https://fiodmp.fiocruz.br): a DMP can cite a FIP, and a FIP can point at answers in a DMP.
 6. Work well in a room: participants need no account, join by link, live side-by-side comparison of the FIPs produced by the groups.

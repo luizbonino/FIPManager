@@ -1,4 +1,4 @@
-"""spec 02-core-flows.md §8/§9 item 9 (backend half): the same six cases the
+"""spec 02-core-flows.md §8/§9 item 9 (backend half): the same eight cases the
 frontend's `lib/lang.ts` `resolveLang` is tested against, run here against
 `fipm.exporters.resolve_lang` -- the fallback resolver `resolveLang` mirrors
 -- so the two implementations cannot drift. `resolveLang(map, locale)` has
@@ -26,6 +26,11 @@ from fipm.exporters import resolve_lang
         # 5. A map with only an unrelated language ("de") returns that value
         #    (first-available fallback; no exact match, no sibling, no "en").
         ({"de": "D"}, "en", "D"),
+        # 6. "es" has no pt sibling: missing "es" falls straight through to
+        #    the "en" default (spec 02 §5.5: es is the fourth UI language).
+        ({"en": "E", "pt-PT": "P", "pt-BR": "B"}, "es", "E"),
+        # 7. Exact "es" match wins over the "en" default.
+        ({"en": "E", "es": "S"}, "es", "S"),
     ],
 )
 def test_resolve_lang_table(langmap, language, expected):
@@ -33,6 +38,6 @@ def test_resolve_lang_table(langmap, language, expected):
 
 
 def test_resolve_lang_null_or_empty_map_returns_null():
-    # 6. null / {} both return null.
+    # 8. null / {} both return null.
     assert resolve_lang(None, "en") is None
     assert resolve_lang({}, "en") is None

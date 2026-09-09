@@ -90,7 +90,8 @@
   "languages": {
     "en": "English",
     "pt-PT": "Portuguese (Portugal)",
-    "pt-BR": "Portuguese (Brazil)"
+    "pt-BR": "Portuguese (Brazil)",
+    "es": "Spanish"
   },
   "common": {
     "welcome": "Welcome",

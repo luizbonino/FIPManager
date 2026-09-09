@@ -32,7 +32,7 @@ ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 # Knowledge-model id pattern (spec 04 §1 "Model ids").
 MODEL_ID_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])$")
 
-LANGUAGES: frozenset[str] = frozenset({"en", "pt-PT", "pt-BR"})
+LANGUAGES: frozenset[str] = frozenset({"en", "pt-PT", "pt-BR", "es"})
 
 # spec 04 §3.3 rule 5: whitelist of FAIR principle ids a question may cite.
 PRINCIPLES: frozenset[str] = frozenset(
@@ -80,7 +80,7 @@ def _check_langmap(
     value: Any, path: str, errors: list[ContentError], *, required: bool = True
 ) -> None:
     """Rule 3: a LangMap is an object of `str -> non-empty str` whose keys
-    are within {en, pt-PT, pt-BR} and contains `en`."""
+    are within {en, pt-PT, pt-BR, es} and contains `en`."""
     if value is None:
         if required:
             _err(errors, path, "missing_key", f"{path} is required")
