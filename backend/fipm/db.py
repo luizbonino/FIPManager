@@ -6,7 +6,8 @@ import logging
 from collections.abc import Generator
 from datetime import UTC, datetime
 
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import Engine, create_engine, event, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 from fipm.config import get_settings
@@ -27,18 +28,44 @@ logger = logging.getLogger(__name__)
 # delete the sqlite file (FIPM_DB_PATH) and rerun `import-data` to pick it up.
 # v4 (spec 05-v1-completion.md §1): `users` gains `must_change_password`
 # (Boolean, NOT NULL, default False) and `privacy_accepted_version` (String,
-# nullable); one new table `feedback`. Unlike v2/v3, this *is* handled
-# losslessly on an existing DB: `init_db()` now also calls `_ensure_columns()`
-# (below), which runs `PRAGMA table_info(<table>)` for each expected column
-# and issues `ALTER TABLE ... ADD COLUMN` when it's missing -- idempotent,
-# logged, and run after `create_all()` (which adds the new `feedback` table
-# but never alters an existing table's columns) and before the
-# schema_version reconciliation.
+# nullable); one new table `feedback`. `knowledge_models` gains `is_system`
+# (v3), `changelog` and `content_sha256` (v2) -- review finding 1: an
+# existing v1/v2/v3 DB is missing these NOT NULL columns entirely, so every
+# query touching them would raise `OperationalError: no such column` at
+# runtime, not merely carry stale FK/constraint definitions. `_ensure_columns()`
+# (below) retrofits every column added since v1, with a default sane enough
+# not to lose data: `is_system=0` (a pre-existing row wasn't necessarily a
+# seed row -- a plain `import-data` run then reports the on-disk seed as
+# "changed" for that row, per the existing content_sha256-mismatch path in
+# `_import_knowledge_models`, and only rewrites `is_system`/`changelog`/
+# `content_sha256` with the real values when re-run with `--force`, same as
+# any other on-disk content change), `changelog='[]'` (unknown history is
+# treated as empty history), `content_sha256=''` a deliberately-wrong
+# placeholder that never matches a freshly computed hash, so a legacy
+# user-owned KM's If-Match ETag simply misses once until its next edit
+# recomputes the real hash.
+#
+# `init_db()` calls `_ensure_columns()` (`PRAGMA table_info(<table>)` per
+# expected column, `ALTER TABLE ... ADD COLUMN` when missing) after
+# `create_all()` (which adds new *tables*, like v4's `feedback`, but never
+# alters columns on a table that already exists) and, critically, *before*
+# the schema_version row is bumped -- if `_ensure_columns()` raises, the
+# whole `_ensure_columns()` call runs inside one transaction (rolled back
+# atomically) and `init_db()` propagates the exception without ever writing
+# schema_version, so a half-migrated DB never reports itself as fully
+# upgraded. A concurrent second process doing the same startup migration
+# (e.g. two container replicas booting together) can lose the
+# PRAGMA-table_info-then-ALTER race; `_ensure_columns()` catches SQLite's
+# "duplicate column name" OperationalError for that one statement and treats
+# it as "someone else already added it", not a startup failure.
 SCHEMA_VERSION = 4
 
 _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("users", "must_change_password", "BOOLEAN NOT NULL DEFAULT 0"),
     ("users", "privacy_accepted_version", "VARCHAR"),
+    ("knowledge_models", "is_system", "BOOLEAN NOT NULL DEFAULT 0"),
+    ("knowledge_models", "changelog", "JSON NOT NULL DEFAULT '[]'"),
+    ("knowledge_models", "content_sha256", "VARCHAR NOT NULL DEFAULT ''"),
 )
 
 settings = get_settings()
@@ -69,15 +96,30 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def _ensure_columns() -> None:
+def _ensure_columns(bind: Engine | None = None) -> None:
     """Idempotently add any `_EXPECTED_COLUMNS` entry missing from its table
     -- SQLite's `ALTER TABLE ... ADD COLUMN`, since `create_all()` never
-    alters columns on a table that already exists (see the v4 note above)."""
-    with engine.begin() as conn:
+    alters columns on a table that already exists (see the v4 note above).
+
+    `bind` defaults to the module-level `engine`; a test may pass its own
+    isolated engine. If another process wins the race and adds the same
+    column between our `PRAGMA table_info` read and our `ALTER TABLE`,
+    SQLite raises `OperationalError: duplicate column name: ...` -- caught
+    and logged, not fatal (review finding 1)."""
+    eng = bind if bind is not None else engine
+    with eng.begin() as conn:
         for table, column, ddl in _EXPECTED_COLUMNS:
             existing = {row[1] for row in conn.execute(text(f"PRAGMA table_info({table})"))}
-            if column not in existing:
+            if column in existing:
+                continue
+            try:
                 conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))
+            except OperationalError as exc:
+                if "duplicate column name" in str(exc).lower():
+                    logger.info("column %s.%s already added concurrently, skipping", table, column)
+                    continue
+                raise
+            else:
                 logger.info("added column %s.%s", table, column)
 
 

@@ -8,6 +8,10 @@ services:
     environment:
       FIPM_DB_PATH: /data/fipm.db
       FIPM_COOKIE_SECURE: "false"
+      # Shown in the privacy notice and GET /api/health -- replace with the
+      # real operator contact/organisation before deploying for real use.
+      FIPM_CONTACT_EMAIL: "contact@example.org"
+      FIPM_HOSTING_ORG: "the FIP Manager operators"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s

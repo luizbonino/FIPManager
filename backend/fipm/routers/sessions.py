@@ -126,6 +126,33 @@ def patch_session(
     return session_to_out(row, settings.base_url).model_dump(mode="json", by_alias=True)
 
 
+@router.delete("/{session_id}", status_code=204)
+def delete_session(
+    session_id: str, db: Session = Depends(get_db), user: User = Depends(require_user)
+) -> Response:
+    """Review finding 5: owner or admin only (`_get_owned_session`, same as
+    every other session route). `Fip.session_id` has no `ondelete` action
+    (unlike `Feedback.session_id`/`Feedback.fip_id`, which are already
+    `ondelete="SET NULL"`), so a plain `db.delete(row)` here would hit an
+    IntegrityError the moment any FIP still references this session -- each
+    FIP is handled explicitly first: an anonymous one (never claimed,
+    `owner_id IS NULL`) is deleted outright, a claimed/owned one is merely
+    detached (`session_id = None`) so it survives under its owner. Feedback
+    rows referencing this session or one of its now-deleted FIPs are left in
+    place with their `session_id`/`fip_id` nulled by the FK's own
+    `ondelete="SET NULL"`, so previously collected feedback stays readable."""
+    row = _get_owned_session(session_id, db, user)
+    fips = db.query(Fip).filter(Fip.session_id == row.id).all()
+    for fip in fips:
+        if fip.owner_id is None:
+            db.delete(fip)
+        else:
+            fip.session_id = None
+    db.delete(row)
+    db.commit()
+    return Response(status_code=204)
+
+
 @router.get("/{session_id}/fips")
 def list_session_fips(
     session_id: str, db: Session = Depends(get_db), user: User = Depends(require_user)

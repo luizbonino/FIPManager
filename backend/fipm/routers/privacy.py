@@ -6,7 +6,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Response
 
 from fipm.config import get_settings
-from fipm.privacy import resolve_privacy
+from fipm.privacy import privacy_notice_date, resolve_privacy
 from fipm.schemas import PrivacyOut
 
 router = APIRouter(prefix="/privacy", tags=["privacy"])
@@ -20,4 +20,11 @@ def get_privacy(response: Response, lang: str | None = None) -> PrivacyOut:
         "{{HOSTING_ORG}}", settings.hosting_org
     )
     response.headers["Cache-Control"] = "public, max-age=3600"
-    return PrivacyOut(version=version, date=version, lang=resolved_lang, markdown=rendered.strip())
+    # Review finding 11: `date` is only ever the header's ISO date, not a
+    # duplicated free-text `version` -- see fipm.privacy.privacy_notice_date.
+    return PrivacyOut(
+        version=version,
+        date=privacy_notice_date(version),
+        lang=resolved_lang,
+        markdown=rendered.strip(),
+    )

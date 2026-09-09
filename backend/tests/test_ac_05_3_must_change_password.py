@@ -71,3 +71,33 @@ def test_flagged_user_can_still_logout(client):
 
     r = client.post("/api/auth/logout")
     assert r.status_code == 204
+
+
+def test_flagged_user_can_still_login_and_register(client):
+    """Review finding 3: /api/auth/login and /api/auth/register are exempt
+    from password_change_middleware -- a stale cookie for a must-change
+    account must not block logging into a *different* account, or
+    registering a brand new one, with an unrelated 403
+    password_change_required."""
+    _register(client, "ac05-3-relogin@example.com")
+    _force_must_change_password("ac05-3-relogin@example.com")
+
+    # Re-submitting the login form for the still-flagged account: reachable,
+    # not swallowed by the password-change gate (the temp password is wrong
+    # here, so this is a 401, never a 403 password_change_required).
+    relogin = client.post(
+        "/api/auth/login",
+        json={"email": "ac05-3-relogin@example.com", "password": "wrong-password"},
+    )
+    assert relogin.status_code == 401
+
+    register_another = client.post(
+        "/api/auth/register",
+        json={
+            "email": "ac05-3-another@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "Another",
+            "privacyAcceptedVersion": PRIVACY_VERSION,
+        },
+    )
+    assert register_another.status_code == 201

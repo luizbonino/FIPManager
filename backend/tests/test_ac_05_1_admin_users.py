@@ -59,7 +59,11 @@ def test_admin_users_200_with_accurate_counts_and_search(client_factory):
         },
     )
 
-    r = admin.get("/api/admin/users")
+    # Filtered by q=, not the unfiltered first page: the shared test-session
+    # DB accumulates far more than one page's worth of users across the
+    # whole suite, and this member's account isn't guaranteed to land on
+    # page 1 by creation order alone.
+    r = admin.get("/api/admin/users", params={"q": "ac05-1-member"})
     assert r.status_code == 200
     body = r.json()
     items = {item["email"]: item for item in body["items"]}
@@ -77,3 +81,24 @@ def test_admin_users_200_with_accurate_counts_and_search(client_factory):
     q_name = admin.get("/api/admin/users", params={"q": "SEARCHABLE"})
     assert q_name.status_code == 200
     assert any(i["email"] == "ac05-1-member@example.com" for i in q_name.json()["items"])
+
+
+def test_admin_users_limit_and_offset_are_clamped(client_factory):
+    """Review finding 12: limit is 1..200 and offset >= 0, both 422 outside
+    that range -- an unbounded limit or a negative offset used to be
+    accepted silently."""
+    admin = client_factory()
+    _register(admin, "ac05-1-clamp-admin@example.com")
+    _promote_to_admin("ac05-1-clamp-admin@example.com")
+
+    too_big_limit = admin.get("/api/admin/users", params={"limit": 201})
+    assert too_big_limit.status_code == 422
+
+    zero_limit = admin.get("/api/admin/users", params={"limit": 0})
+    assert zero_limit.status_code == 422
+
+    negative_offset = admin.get("/api/admin/users", params={"offset": -1})
+    assert negative_offset.status_code == 422
+
+    max_limit = admin.get("/api/admin/users", params={"limit": 200, "offset": 0})
+    assert max_limit.status_code == 200

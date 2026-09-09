@@ -90,12 +90,28 @@ LOGIN_LIMIT_PER_IP = 30
 LOGIN_WINDOW_SECONDS = 15 * 60
 REGISTER_LIMIT_PER_IP = 5
 REGISTER_WINDOW_SECONDS = 60 * 60
-# spec 05-v1-completion.md §4: POST /api/feedback, 5 per hour per client IP.
-FEEDBACK_LIMIT_PER_IP = 5
+# spec 05-v1-completion.md §4: POST /api/feedback. Review finding 6: raised
+# from 5 to 20 per hour per client IP -- a workshop room full of
+# participants sharing one NAT'd IP would otherwise exhaust the original
+# cap almost immediately.
+FEEDBACK_LIMIT_PER_IP = 20
 FEEDBACK_WINDOW_SECONDS = 60 * 60
 
 
 def client_ip(request: Request) -> str:
+    """Review finding 6: `X-Forwarded-For` is attacker-controlled unless a
+    trusted reverse proxy sets (and never merely forwards) it, so it's used
+    only when the deployment opts in via `FIPM_TRUST_PROXY=true` -- the
+    leftmost address in the header is the original client, per the usual
+    proxy-chain convention. Falls back to the ASGI-reported peer address
+    otherwise, same as before."""
+    settings = get_settings()
+    if settings.trust_proxy:
+        forwarded = request.headers.get("x-forwarded-for")
+        if forwarded:
+            first = forwarded.split(",")[0].strip()
+            if first:
+                return first
     return request.client.host if request.client else "unknown"
 
 
@@ -137,14 +153,23 @@ def check_register_rate_limit(request: Request) -> None:
 
 
 def check_feedback_rate_limit(request: Request) -> None:
-    """5 per hour per client IP (spec 05-v1-completion.md §4), checked and
-    recorded like `check_register_rate_limit`."""
+    """20 per hour per client IP (spec 05-v1-completion.md §4, review
+    finding 6). Only *checks* the cap -- call `record_feedback_attempt`
+    after the feedback row is actually committed, so a request rejected for
+    an unrelated reason (e.g. 403 feedback_disabled) never eats into the
+    cap."""
     ip = client_ip(request)
     limited, retry = _rate_limiter.is_limited(
         f"feedback-ip:{ip}", FEEDBACK_LIMIT_PER_IP, FEEDBACK_WINDOW_SECONDS
     )
     if limited:
         _raise_rate_limited(retry)
+
+
+def record_feedback_attempt(ip: str) -> None:
+    """Review finding 6: called only after a successful POST /api/feedback
+    insert, not before the work is attempted -- pairs with
+    `check_feedback_rate_limit`."""
     _rate_limiter.record(f"feedback-ip:{ip}", FEEDBACK_WINDOW_SECONDS)
 
 
@@ -250,7 +275,17 @@ async def csrf_middleware(request: Request, call_next):
 # must_change_password enforcement (spec 05-v1-completion.md §1)
 # ---------------------------------------------------------------------------
 
-_PASSWORD_CHANGE_EXEMPT_PATHS = {"/api/auth/password", "/api/auth/logout"}
+_PASSWORD_CHANGE_EXEMPT_PATHS = {
+    "/api/auth/password",
+    "/api/auth/logout",
+    # Review finding 3: a signed-in user flagged must_change_password can
+    # still hold a stale cookie for a *different* account (or simply be
+    # re-submitting the login form) -- login and register must stay
+    # reachable rather than surfacing an unrelated 403
+    # password_change_required on them.
+    "/api/auth/login",
+    "/api/auth/register",
+}
 
 
 async def password_change_middleware(request: Request, call_next):

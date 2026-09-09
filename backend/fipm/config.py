@@ -71,6 +71,12 @@ class Settings(BaseSettings):
     # GET /api/health.
     contact_email: str = "contact@example.org"
     hosting_org: str = "the FIP Manager operators"
+    # Review finding 6: X-Forwarded-For is only trusted (for the feedback
+    # rate limiter's client_ip()) when a reverse proxy in front of this
+    # deployment is known to set it and strip any client-supplied copy --
+    # False by default, since trusting it blindly lets a client spoof its
+    # own rate-limit bucket.
+    trust_proxy: bool = False
 
     @property
     def allowed_origins_list(self) -> list[str]:

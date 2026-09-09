@@ -10,7 +10,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -35,8 +35,11 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 @router.get("/users", response_model=ListOut)
 def list_users(
     q: str | None = None,
-    limit: int = 50,
-    offset: int = 0,
+    # Review finding 12: an unclamped limit/offset lets a caller request an
+    # unbounded page (limit) or a nonsensical negative offset; both are 422
+    # now instead of silently doing something odd.
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin_404),
 ) -> ListOut:
@@ -130,8 +133,9 @@ def _fer_usage_counts(db: Session) -> dict[str, int]:
 def list_pending_fers(
     pending: int | None = None,
     q: str | None = None,
-    limit: int = 50,
-    offset: int = 0,
+    # Review finding 12: same clamp as list_users above.
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin_404),
 ) -> ListOut:
@@ -199,9 +203,24 @@ def merge_fer(
     source = db.get(Fer, fer_id)
     if source is None:
         raise HTTPException(status_code=404, detail="not_found")
+    # Review finding 4: a "seed" FER is the FIP ontology's own curated
+    # registry entry (loaded by the importer, never user-submitted) --
+    # merging it away would delete canonical data every re-import would
+    # otherwise recreate, and there is no separate delete route for FERs to
+    # protect it from either.
+    if source.source == "seed":
+        raise HTTPException(status_code=409, detail="seed_fer_protected")
 
     target = db.get(Fer, body.target_fer_id)
-    if target is None or target.source not in ("seed", "user-promoted"):
+    if (
+        target is None
+        or target.source not in ("seed", "user-promoted")
+        # Review finding 4: merging into a target of a different FER type
+        # would silently change what every repointed declaration asserts
+        # (e.g. a metadata-schema declaration repointed at an
+        # identifier-service).
+        or target.type != source.type
+    ):
         raise HTTPException(status_code=409, detail="invalid_merge_target")
 
     repointed_declarations = 0

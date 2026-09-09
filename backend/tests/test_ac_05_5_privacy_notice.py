@@ -6,10 +6,26 @@ Assumption (see fipm/privacy.py docstring): the spec describes a shared
 data/i18n/privacy/version.json, but the actual data/i18n/privacy/*.md files
 instead each start with an identical `<!-- version: ... -->` header comment
 and no version.json exists on disk; this test therefore checks that
-`version`/`date` are non-empty and identical across languages, rather than
-reading a version.json that isn't there."""
+`version` is non-empty and identical across languages, rather than reading a
+version.json that isn't there.
+
+Review finding 11: the test fixtures' header comment is `test-v1` (matching
+`PRIVACY_VERSION` used across the rest of the suite when registering) --
+deliberately *not* a date, unlike the real data/i18n/privacy/*.md files. So
+`date` must come back empty here, not a duplicate of `version`; see
+test_privacy_notice_date_helper below for the case where the header value
+actually does parse as YYYY-MM-DD."""
 
 from __future__ import annotations
+
+from fipm.privacy import privacy_notice_date
+
+
+def test_privacy_notice_date_helper():
+    assert privacy_notice_date("2026-09-12") == "2026-09-12"
+    assert privacy_notice_date("test-v1") == ""
+    assert privacy_notice_date("unknown") == ""
+    assert privacy_notice_date("1.0") == ""
 
 
 def test_privacy_lang_resolution_and_shared_version(client):
@@ -18,8 +34,10 @@ def test_privacy_lang_resolution_and_shared_version(client):
     en_body = en.json()
     assert en_body["lang"] == "en"
     assert "Privacy notice (en)" in en_body["markdown"]
-    assert en_body["version"]
-    assert en_body["date"]
+    assert en_body["version"] == "test-v1"
+    # The fixture header isn't a real date, so `date` must not just echo
+    # `version` back (review finding 11) -- it's the ISO date or nothing.
+    assert en_body["date"] == ""
 
     pt_pt = client.get("/api/privacy", params={"lang": "pt-PT"})
     assert pt_pt.status_code == 200

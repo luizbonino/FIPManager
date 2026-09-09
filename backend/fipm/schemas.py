@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import Any, Literal
 
@@ -229,6 +230,25 @@ class DmpEvidence(CamelModel):
     question_ref: Any = None
 
 
+# Review finding 8: ferId/successorFerId are meant to be FER identifiers --
+# IRIs, either http(s) URLs (the common case: FERs are typically resolvable
+# registry/service homepages) or urn: URNs -- not arbitrary free text
+# (that's what ferFreeText/successorFreeText are for). No control characters
+# or whitespace anywhere in the value; \S already excludes whitespace, so
+# only C0/DEL control characters need a separate check.
+_FER_IRI_RE = re.compile(r"^(?:https?://|urn:)\S+$")
+_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def _validate_fer_iri(value: str) -> str:
+    if _CONTROL_CHAR_RE.search(value) or not _FER_IRI_RE.match(value):
+        raise ValueError(
+            "must be an http(s):// or urn: IRI with no whitespace/control characters "
+            "(invalid_fer_iri)"
+        )
+    return value
+
+
 class Declaration(CamelModel):
     fer_id: str | None = None
     fer_free_text: str | None = None
@@ -241,6 +261,13 @@ class Declaration(CamelModel):
     # JSON like every other declaration field.
     successor_fer_id: str | None = None
     successor_free_text: str | None = None
+
+    @field_validator("fer_id", "successor_fer_id")
+    @classmethod
+    def _fer_id_fields_are_iris(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return _validate_fer_iri(v)
 
     @model_validator(mode="after")
     def _fer_xor(self) -> Declaration:
@@ -260,6 +287,10 @@ class Declaration(CamelModel):
             raise ValueError(
                 "successorFerId/successorFreeText require status == 'planned-replacement'"
             )
+        # Review finding 8: a "replacement" that points right back at
+        # itself isn't a replacement.
+        if has_id and self.successor_fer_id == self.fer_id:
+            raise ValueError("successorFerId must not equal ferId (successor_same_as_fer)")
         return self
 
     @field_validator("status")

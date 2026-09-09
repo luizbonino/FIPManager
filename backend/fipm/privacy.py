@@ -7,8 +7,20 @@ The spec text describes one shared `data/i18n/privacy/version.json`
 files actually shipped instead each start with an identical
 `<!-- version: YYYY-MM-DD -->` HTML comment (no `version.json` on disk), and
 this backend change may only *read* those files, not add to `data/` -- so
-that comment is read as both the notice's `version` and its `date`. See the
-builder report for this assumption.
+that comment is read as the notice's `version`. See the builder report for
+this assumption.
+
+Review finding 11: `PrivacyOut.date` used to just be a second copy of
+`version`, unconditionally -- harmless for the real `*.md` files, whose
+header comment already *is* a `YYYY-MM-DD` date, but wrong in spirit (`date`
+duplicating a free-text `version` field rather than being validated as a
+date) and actively wrong for a malformed file missing the header comment,
+where `_load` falls back to the literal string `"unknown"` for `version` --
+`date` would then read `"unknown"` too, which is not a date.
+`privacy_notice_date` below only echoes the header value into `date` when it
+actually parses as `YYYY-MM-DD`; otherwise `date` is `""`. If a `*.md`
+body's own human-readable date ever disagrees with the header, that's left
+alone -- `date` reflects the header only, `markdown` is never rewritten.
 """
 
 from __future__ import annotations
@@ -22,6 +34,7 @@ from fastapi import HTTPException
 from fipm.config import Settings, get_settings
 
 _VERSION_COMMENT_RE = re.compile(r"^<!--\s*version:\s*(?P<version>\S+?)\s*-->\s*\n?")
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 # pt-PT <-> pt-BR, es -> en, and anything else (including "en" itself and an
 # unknown lang) -> en only. Mirrors exporters.resolve_lang's fallback chain.
@@ -62,6 +75,14 @@ def resolve_privacy(settings: Settings, lang: str | None) -> tuple[str, str, str
             version, markdown = loaded
             return candidate, version, markdown
     raise HTTPException(status_code=503, detail="privacy_notice_missing")
+
+
+def privacy_notice_date(version: str) -> str:
+    """`version` echoed into `PrivacyOut.date` only when it parses as an ISO
+    `YYYY-MM-DD` date (true for every shipped `*.md` header today); `""`
+    otherwise, e.g. for the `"unknown"` fallback of a malformed file
+    (review finding 11)."""
+    return version if _ISO_DATE_RE.match(version) else ""
 
 
 def current_privacy_version(settings: Settings | None = None) -> str:

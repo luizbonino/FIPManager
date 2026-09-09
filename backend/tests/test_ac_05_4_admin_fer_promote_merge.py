@@ -102,8 +102,14 @@ def test_merge_repoints_fer_and_successor_and_deletes_source(client_factory):
                     "questionId": "F1-metadata",
                     "declarations": [
                         {"ferId": source["id"], "status": "current"},
+                        {"ferId": source["id"], "status": "none"},
+                        # A successorFerId equal to *this declaration's own*
+                        # ferId is rejected as successor_same_as_fer (review
+                        # finding 8), so this one's ferId is unrelated --
+                        # only its successorFerId points at the source FER
+                        # being merged away.
                         {
-                            "ferId": source["id"],
+                            "ferId": "https://example.org/fers/ac05-4-unrelated",
                             "status": "planned-replacement",
                             "successorFerId": source["id"],
                         },
@@ -111,7 +117,9 @@ def test_merge_repoints_fer_and_successor_and_deletes_source(client_factory):
                 }
             ],
         },
-    ).json()
+    )
+    assert fip.status_code == 201, fip.text
+    fip = fip.json()
 
     merged = admin.post(f"/api/admin/fers/{source['id']}/merge", json={"targetFerId": target["id"]})
     assert merged.status_code == 200
@@ -161,3 +169,76 @@ def test_merge_same_fer_and_invalid_target(client_factory):
     invalid = admin.post(f"/api/admin/fers/{a['id']}/merge", json={"targetFerId": b["id"]})
     assert invalid.status_code == 409
     assert invalid.json()["detail"] == "invalid_merge_target"
+
+
+def test_merge_rejects_seed_source_and_mismatched_type(client_factory):
+    """Review finding 4: a source="seed" FER (loaded by the importer, e.g.
+    data/fers/seed.json's DOI entry) can't be merged away -- there's no
+    other delete route for FERs, so this is the only place that needs
+    guarding. And a merge target of a different `type` than the source is
+    rejected too, since repointing would silently change what every
+    declaration asserts."""
+    admin = client_factory()
+    _register(admin, "ac05-4-seed-admin@example.com")
+    _promote_to_admin("ac05-4-seed-admin@example.com")
+
+    contributor = client_factory()
+    _register(contributor, "ac05-4-seed-contrib@example.com")
+    same_type_target = contributor.post(
+        "/api/fers",
+        json={
+            "id": "https://example.org/fers/ac05-4-seed-target",
+            "label": {"en": "Identifier service target"},
+            "type": "identifier-service",
+        },
+    ).json()
+    admin.post(f"/api/admin/fers/{same_type_target['id']}/promote")
+
+    seed_fer_id = "https://w3id.org/np/doi"  # type identifier-service, source="seed"
+    protected = admin.post(
+        f"/api/admin/fers/{seed_fer_id}/merge", json={"targetFerId": same_type_target["id"]}
+    )
+    assert protected.status_code == 409
+    assert protected.json()["detail"] == "seed_fer_protected"
+
+    source = contributor.post(
+        "/api/fers",
+        json={
+            "id": "https://example.org/fers/ac05-4-mismatch-source",
+            "label": {"en": "Mismatch source"},
+            "type": "identifier-service",
+        },
+    ).json()
+    different_type_target = contributor.post(
+        "/api/fers",
+        json={
+            "id": "https://example.org/fers/ac05-4-mismatch-target",
+            "label": {"en": "Mismatch target"},
+            "type": "metadata-schema",
+        },
+    ).json()
+    admin.post(f"/api/admin/fers/{different_type_target['id']}/promote")
+
+    mismatched = admin.post(
+        f"/api/admin/fers/{source['id']}/merge",
+        json={"targetFerId": different_type_target["id"]},
+    )
+    assert mismatched.status_code == 409
+    assert mismatched.json()["detail"] == "invalid_merge_target"
+
+
+def test_admin_fers_limit_and_offset_are_clamped(client_factory):
+    """Review finding 12: same limit=1..200/offset>=0 clamp as
+    GET /api/admin/users."""
+    admin = client_factory()
+    _register(admin, "ac05-4-clamp-admin@example.com")
+    _promote_to_admin("ac05-4-clamp-admin@example.com")
+
+    too_big_limit = admin.get("/api/admin/fers", params={"limit": 500})
+    assert too_big_limit.status_code == 422
+
+    negative_offset = admin.get("/api/admin/fers", params={"offset": -5})
+    assert negative_offset.status_code == 422
+
+    ok = admin.get("/api/admin/fers", params={"limit": 1, "offset": 0})
+    assert ok.status_code == 200

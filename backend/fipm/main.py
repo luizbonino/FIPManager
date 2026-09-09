@@ -112,8 +112,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="FIP Manager", lifespan=lifespan)
 
 app.add_middleware(BodySizeLimitMiddleware, max_bytes=get_settings().max_body_bytes)
-app.middleware("http")(csrf_middleware)
+# Review finding 9: Starlette's `.middleware("http")` inserts each new
+# middleware at the front of `user_middleware` and then wraps the stack in
+# *reverse* of that list, so the *last* registered middleware ends up
+# outermost -- i.e. it runs first on the way in. password_change_middleware
+# is registered before csrf_middleware so that csrf_middleware is outermost:
+# a CSRF failure (403 csrf_failed) always wins over password_change_required
+# for a request that fails both checks, rather than the two racing based on
+# registration order.
 app.middleware("http")(password_change_middleware)
+app.middleware("http")(csrf_middleware)
 
 app.include_router(health.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
