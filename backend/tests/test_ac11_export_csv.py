@@ -1,5 +1,7 @@
-"""AC11: GET /fips/{id}/export.csv returns text/csv with the exact 21-column
-§3.2 header, one row per declaration, and one row for each unanswered question."""
+"""AC11: GET /fips/{id}/export.csv returns text/csv with the exact 24-column
+§3.2 header (spec 06-dmp-linkage.md §2.4 appended dmp_url/dmp_section/
+dmp_question), one row per declaration, and one row for each unanswered
+question."""
 
 from __future__ import annotations
 
@@ -42,7 +44,7 @@ def test_export_csv_header_and_rows(client):
     lines = raw.split("\r\n")
     header = lines[0].split(",")
     assert header == CSV_HEADER
-    assert len(header) == 21
+    assert len(header) == 24
 
     data_lines = [line for line in lines[1:] if line]
     # 2 declarations for F1-metadata + 1 row for the unanswered F2 = 3 rows.

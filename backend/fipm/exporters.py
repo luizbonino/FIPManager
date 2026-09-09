@@ -10,6 +10,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from fipm.config import Settings
+from fipm.dmp import resolve_dmp_evidence_for_export
 from fipm.models import Fer, Fip, KnowledgeModel, WorkshopSession
 
 CSV_HEADER = [
@@ -34,6 +35,11 @@ CSV_HEADER = [
     "status",
     "note",
     "comment",
+    # spec 06-dmp-linkage.md §2.4: appended, so every existing column index
+    # is unchanged.
+    "dmp_url",
+    "dmp_section",
+    "dmp_question",
 ]
 
 
@@ -92,6 +98,7 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
     default_language = settings.default_language
 
     answers_by_qid = {a["questionId"]: a for a in (fip.answers or [])}
+    related_dmps = fip.related_dmps or []
 
     out_answers: list[dict[str, Any]] = []
     for section in content.get("sections", []):
@@ -127,7 +134,9 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
                             "ferFreeText": decl.get("ferFreeText"),
                             "status": decl.get("status"),
                             "note": resolve_lang(decl.get("note"), language, default_language),
-                            "dmpEvidence": decl.get("dmpEvidence"),
+                            "dmpEvidence": resolve_dmp_evidence_for_export(
+                                decl.get("dmpEvidence"), related_dmps
+                            ),
                         }
                     )
             out_answers.append(
@@ -196,10 +205,11 @@ def _fip_csv_rows(fip: Fip, doc: dict[str, Any]) -> list[list[Any]]:
         ]
         declarations = answer["declarations"]
         if not declarations:
-            rows.append(base + ["", "", "", "", "", "", answer["comment"] or ""])
+            rows.append(base + ["", "", "", "", "", "", answer["comment"] or "", "", "", ""])
         else:
             for idx, decl in enumerate(declarations):
                 fer = decl.get("fer") or {}
+                dmp_evidence = decl.get("dmpEvidence") or {}
                 rows.append(
                     base
                     + [
@@ -210,6 +220,9 @@ def _fip_csv_rows(fip: Fip, doc: dict[str, Any]) -> list[list[Any]]:
                         decl.get("status") or "",
                         decl.get("note") or "",
                         answer["comment"] or "",
+                        dmp_evidence.get("dmpUrl") or "",
+                        dmp_evidence.get("section") or "",
+                        dmp_evidence.get("questionRef") or "",
                     ]
                 )
     return rows
@@ -272,10 +285,37 @@ def build_session_export_csv(
     return "﻿" + buf.getvalue()
 
 
+def _reconstruct_dmp_evidence(
+    dmp_evidence: dict[str, Any] | None, url_to_index: dict[str, int]
+) -> dict[str, Any] | None:
+    """Inverse of `resolve_dmp_evidence_for_export`, for POST /fips/import
+    (spec 06-dmp-linkage.md §2.4): match the export's `dmpUrl` against the
+    *imported* document's (already-normalised) `relatedDMPs`, falling back
+    to the export's own `dmpIndex` when the URL isn't found there. Covers
+    the legacy `{url, questionRef}` stored shape too, since its export also
+    carries `dmpUrl` (with `dmpIndex` null)."""
+    if not dmp_evidence:
+        return None
+    url = dmp_evidence.get("dmpUrl")
+    index = url_to_index.get(url) if url else None
+    if index is None:
+        index = dmp_evidence.get("dmpIndex")
+    if not isinstance(index, int) or isinstance(index, bool):
+        return None
+    return {
+        "dmpIndex": index,
+        "section": dmp_evidence.get("section"),
+        "questionRef": dmp_evidence.get("questionRef"),
+    }
+
+
 def reconstruct_answers_from_export(
-    export_answers: list[dict[str, Any]], language: str
+    export_answers: list[dict[str, Any]],
+    language: str,
+    related_dmps: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Inverse of build_export_json's answer enrichment, for POST /fips/import."""
+    url_to_index = {d["url"]: i for i, d in enumerate(related_dmps or [])}
     answers: list[dict[str, Any]] = []
     for answer in export_answers:
         declarations = []
@@ -289,7 +329,7 @@ def reconstruct_answers_from_export(
                     "ferFreeText": decl.get("ferFreeText"),
                     "status": decl.get("status"),
                     "note": {language: note_text} if note_text else None,
-                    "dmpEvidence": decl.get("dmpEvidence"),
+                    "dmpEvidence": _reconstruct_dmp_evidence(decl.get("dmpEvidence"), url_to_index),
                 }
             )
         answers.append(

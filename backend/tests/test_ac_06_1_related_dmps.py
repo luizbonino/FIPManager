@@ -1,0 +1,140 @@
+"""AC1/AC2 (spec 06-dmp-linkage.md §5): `relatedDmps` normalisation on
+PATCH /api/fips/{id} -- FioDMP URL detection/canonicalisation, generic
+"other" URLs, and the four 422 validation codes."""
+
+from __future__ import annotations
+
+import itertools
+
+_EMAILS = (f"dmp-ac1-user-{i}@example.com" for i in itertools.count())
+
+
+def _create_fip(client) -> str:
+    client.post(
+        "/api/auth/register",
+        json={
+            "email": next(_EMAILS),
+            "password": "correcthorsebattery",
+            "displayName": "DMP",
+        },
+    )
+    created = client.post(
+        "/api/fips",
+        json={"questionnaireRef": {"id": "test-km", "version": "1.0.0"}, "answers": []},
+    )
+    assert created.status_code == 201, created.text
+    return created.json()["id"]
+
+
+def test_fiodmp_url_normalised_and_generic_url_kept_as_other(client):
+    fip_id = _create_fip(client)
+
+    patched = client.patch(
+        f"/api/fips/{fip_id}",
+        json={
+            "relatedDmps": [
+                {
+                    "url": "https://www.fiodmp.fiocruz.br/publico/kqu5n0c/",
+                    "version": "13",
+                    "system": "x",
+                },
+                {"url": "https://example.org/plan?x=1#f"},
+            ]
+        },
+    )
+    assert patched.status_code == 200, patched.text
+    entries = patched.json()["relatedDmps"]
+    assert entries[0] == {
+        "url": "https://fiodmp.fiocruz.br/KQU5N0C",
+        "version": "13",
+        "system": "FioDMP",
+        "dmpId": "KQU5N0C",
+    }
+    assert entries[1] == {
+        "url": "https://example.org/plan?x=1",
+        "version": None,
+        "system": "other",
+    }
+    assert "dmpId" not in entries[1]
+
+    fetched = client.get(f"/api/fips/{fip_id}").json()
+    assert fetched["relatedDmps"] == entries
+
+
+def test_http_scheme_rejected(client):
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}", json={"relatedDmps": [{"url": "http://example.org/plan"}]}
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_url_invalid"
+
+
+def test_javascript_scheme_rejected(client):
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}", json={"relatedDmps": [{"url": "javascript:alert(1)"}]}
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_url_invalid"
+
+
+def test_eleven_entries_rejected(client):
+    fip_id = _create_fip(client)
+    entries = [{"url": f"https://example.org/plan-{i}"} for i in range(11)]
+    resp = client.patch(f"/api/fips/{fip_id}", json={"relatedDmps": entries})
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_too_many"
+
+
+def test_same_plan_twice_in_different_casings_rejected(client):
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}",
+        json={
+            "relatedDmps": [
+                {"url": "https://fiodmp.fiocruz.br/kqu5n0c"},
+                {"url": "https://fiodmp.fiocruz.br/KQU5N0C"},
+            ]
+        },
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_url_duplicate"
+
+
+def test_thirty_char_version_rejected(client):
+    fip_id = _create_fip(client)
+    resp = client.patch(
+        f"/api/fips/{fip_id}",
+        json={"relatedDmps": [{"url": "https://example.org/plan", "version": "x" * 30}]},
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "dmp_version_invalid"
+
+
+def test_post_fips_also_normalises(client):
+    client.post(
+        "/api/auth/register",
+        json={
+            "email": "dmp-ac1-create@example.com",
+            "password": "correcthorsebattery",
+            "displayName": "DMP",
+        },
+    )
+    created = client.post(
+        "/api/fips",
+        json={
+            "questionnaireRef": {"id": "test-km", "version": "1.0.0"},
+            "answers": [],
+            "relatedDmps": [{"url": "https://fiodmp.fiocruz.br/publico/AbCd1234"}],
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["relatedDmps"] == [
+        {
+            "url": "https://fiodmp.fiocruz.br/ABCD1234",
+            "version": None,
+            "system": "FioDMP",
+            "dmpId": "ABCD1234",
+        }
+    ]

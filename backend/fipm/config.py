@@ -56,10 +56,21 @@ class Settings(BaseSettings):
     # chunked/unbounded body is rejected as soon as the running total crosses
     # the cap). 2 MiB matches the pre-existing import-specific check.
     max_body_bytes: int = 2 * 1024 * 1024
+    # spec 06-dmp-linkage.md §1.1: the host a `relatedDmps` URL is matched
+    # against to detect a FioDMP plan (vs. a generic "other" plan URL).
+    fiodmp_base_url: str = "https://fiodmp.fiocruz.br"
+    # spec 06-dmp-linkage.md §3: comma-separated CSP `frame-ancestors` allow
+    # list for GET /fips/{id}/embed. `'self'` is always prepended unless the
+    # value is exactly `*`; empty means `'self'` only.
+    embed_allowed_origins: str = "https://fiodmp.fiocruz.br"
 
     @property
     def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
+    @property
+    def embed_allowed_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.embed_allowed_origins.split(",") if o.strip()]
 
     def check_production_safety(self) -> None:
         """Refuse to start with an insecure default secret key in production."""

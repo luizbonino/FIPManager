@@ -17,7 +17,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from fipm.auth import csrf_middleware
 from fipm.config import get_settings
 from fipm.importer import run_import
-from fipm.routers import auth, fer_types, fers, fips, health, knowledge_models, me, sessions
+from fipm.routers import auth, embed, fer_types, fers, fips, health, knowledge_models, me, sessions
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +109,10 @@ app.include_router(fers.router, prefix="/api")
 app.include_router(fer_types.router, prefix="/api")
 app.include_router(fips.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
+# spec 06-dmp-linkage.md §3: GET /fips/{id}/embed lives outside /api, so it
+# must be included here -- before the SPA catch-all below -- or the
+# catch-all swallows it.
+app.include_router(embed.router)
 
 
 def _static_dir() -> Path:

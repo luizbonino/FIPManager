@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import copy
 import json
 import secrets
 from typing import Any, get_args
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -19,6 +21,7 @@ from fipm.authz import (
 )
 from fipm.config import Settings, get_settings
 from fipm.db import get_db
+from fipm.dmp import apply_dmp_evidence, normalise_related_dmps
 from fipm.exporters import build_export_csv, build_export_json, reconstruct_answers_from_export
 from fipm.ids import hash_token, new_token, short_id
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
@@ -29,15 +32,23 @@ from fipm.schemas import (
     FipImportDoc,
     FipPatchRequest,
     Language,
+    PrefillFromDmpRequest,
     Visibility,
     fip_out_dict,
+    total_questions_for_km,
 )
 
 router = APIRouter(prefix="/fips", tags=["fips"])
 
 
-def _out(fip: Fip, edit_token: str | None = None) -> dict[str, Any]:
-    return fip_out_dict(fip, edit_token)
+def _out(
+    fip: Fip, edit_token: str | None = None, total_questions: int | None = None
+) -> dict[str, Any]:
+    return fip_out_dict(fip, edit_token, total_questions=total_questions)
+
+
+def _km_for_fip(db: Session, fip: Fip) -> KnowledgeModel | None:
+    return db.get(KnowledgeModel, (fip.questionnaire_id, fip.questionnaire_version))
 
 
 def _insert_fip(db: Session, settings: Settings, **kwargs: Any) -> Fip:
@@ -171,9 +182,13 @@ def create_fip(
 
     answers = [a.model_dump(mode="json", by_alias=True) for a in body.answers]
     community = body.community.model_dump(mode="json", by_alias=True) if body.community else None
-    related_dmps = [d.model_dump(mode="json", by_alias=True) for d in body.related_dmps]
+    related_dmps = normalise_related_dmps(
+        [d.model_dump(mode="json", by_alias=True) for d in body.related_dmps], settings
+    )
+    apply_dmp_evidence(answers, related_dmps)
     language = body.language or settings.default_language
     license_ = body.license or "CC0-1.0"
+    total_questions = total_questions_for_km(km)
 
     common: dict[str, Any] = {
         "questionnaire_id": questionnaire_id,
@@ -197,7 +212,7 @@ def create_fip(
             visibility=body.visibility or "link",
             **common,
         )
-        return _out(fip, edit_token=edit_token)
+        return _out(fip, edit_token=edit_token, total_questions=total_questions)
 
     if user is not None:
         fip = _insert_fip(
@@ -209,7 +224,7 @@ def create_fip(
             visibility=body.visibility or "private",
             **common,
         )
-        return _out(fip)
+        return _out(fip, total_questions=total_questions)
 
     raise HTTPException(status_code=400, detail="session_id_or_login_required")
 
@@ -231,14 +246,19 @@ def import_fip(
     if visibility not in get_args(Visibility):
         raise HTTPException(status_code=400, detail="invalid_visibility")
 
+    related_dmps = normalise_related_dmps(fip_data.get("relatedDMPs") or [], settings)
+
     try:
-        reconstructed = reconstruct_answers_from_export(body.answers, language)
+        reconstructed = reconstruct_answers_from_export(body.answers, language, related_dmps)
         answers = [Answer.model_validate(a) for a in reconstructed]
     except (KeyError, ValidationError) as exc:
         raise HTTPException(status_code=400, detail="invalid_answers") from exc
 
     _validate_question_ids(answers, km)
     community = fip_data.get("community")
+
+    answer_dicts = [a.model_dump(mode="json", by_alias=True) for a in answers]
+    apply_dmp_evidence(answer_dicts, related_dmps)
 
     fip = _insert_fip(
         db,
@@ -251,12 +271,12 @@ def import_fip(
         questionnaire_version=body.questionnaire_ref.version,
         title=community.get("name") if community else None,
         community=community,
-        related_dmps=fip_data.get("relatedDMPs") or [],
-        answers=[a.model_dump(mode="json", by_alias=True) for a in answers],
+        related_dmps=related_dmps,
+        answers=answer_dicts,
         language=language,
         license=fip_data.get("license") or "CC0-1.0",
     )
-    return _out(fip)
+    return _out(fip, total_questions=total_questions_for_km(km))
 
 
 @router.get("/{fip_id}")
@@ -267,7 +287,8 @@ def get_fip(
     user: User | None = Depends(optional_user),
 ) -> dict[str, Any]:
     fip = _get_readable_fip(fip_id, request, db, user)
-    return _out(fip)
+    km = _km_for_fip(db, fip)
+    return _out(fip, total_questions=total_questions_for_km(km))
 
 
 @router.patch("/{fip_id}")
@@ -282,18 +303,41 @@ def patch_fip(
     if fip is None:
         raise HTTPException(status_code=404, detail="not_found")
     _authorize_fip_write(fip, user, request, db)
+    settings = get_settings()
 
     if body.community is not None:
         community = body.community.model_dump(mode="json", by_alias=True)
         fip.community = community
         fip.title = community.get("name")
+
+    km = _km_for_fip(db, fip)
     if body.answers is not None:
-        km = db.get(KnowledgeModel, (fip.questionnaire_id, fip.questionnaire_version))
         if km is not None:
             _validate_question_ids(body.answers, km)
-        fip.answers = [a.model_dump(mode="json", by_alias=True) for a in body.answers]
+        new_answers = [a.model_dump(mode="json", by_alias=True) for a in body.answers]
+    else:
+        # A copy, not the ORM-tracked list itself: this is a validation-only
+        # pass unless body.related_dmps also shrinks it below.
+        new_answers = copy.deepcopy(fip.answers or [])
+
     if body.related_dmps is not None:
-        fip.related_dmps = [d.model_dump(mode="json", by_alias=True) for d in body.related_dmps]
+        new_related_dmps = normalise_related_dmps(
+            [d.model_dump(mode="json", by_alias=True) for d in body.related_dmps], settings
+        )
+    else:
+        new_related_dmps = fip.related_dmps or []
+
+    # spec 06-dmp-linkage.md §2.2: evidence is validated after relatedDMPs
+    # are normalised, in the same transaction -- against the FIP's *final*
+    # answers/relatedDMPs, even when only one of the two was in this PATCH
+    # body (e.g. a PATCH that drops relatedDMPs to [] while an untouched,
+    # already-stored declaration still cites one).
+    apply_dmp_evidence(new_answers, new_related_dmps)
+
+    if body.answers is not None:
+        fip.answers = new_answers
+    if body.related_dmps is not None:
+        fip.related_dmps = new_related_dmps
     if body.language is not None:
         fip.language = body.language
     if body.license is not None:
@@ -303,7 +347,7 @@ def patch_fip(
 
     db.commit()
     db.refresh(fip)
-    return _out(fip)
+    return _out(fip, total_questions=total_questions_for_km(km))
 
 
 @router.delete("/{fip_id}", status_code=204)
@@ -344,7 +388,47 @@ def claim_fip(
     fip.edit_token_hash = None
     db.commit()
     db.refresh(fip)
-    return _out(fip)
+    km = _km_for_fip(db, fip)
+    return _out(fip, total_questions=total_questions_for_km(km))
+
+
+@router.post("/{fip_id}/prefill-from-dmp")
+def prefill_from_dmp(
+    fip_id: str,
+    body: PrefillFromDmpRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> Response:
+    """spec 06-dmp-linkage.md §4: stub -- the URL is validated (bad URL ->
+    422 dmp_url_invalid), auth is the FIP write rule, and the handler always
+    returns 501 with a body describing what a real implementation needs.
+    No frontend calls this in v2.0; the ICTIC demo calls it from /docs."""
+    fip = db.get(Fip, fip_id)
+    if fip is None:
+        raise HTTPException(status_code=404, detail="not_found")
+    _authorize_fip_write(fip, user, request, db)
+
+    normalised = normalise_related_dmps([{"url": body.dmp_url}])
+    entry = normalised[0]
+    return JSONResponse(
+        status_code=501,
+        content={
+            "detail": "fiodmp_api_unavailable",
+            "dmpUrl": entry["url"],
+            "system": entry["system"],
+            "requires": {
+                "endpoint": "GET /api/plans/{id}",
+                "format": "RDA DMP Common Standard (maDMP) 1.1 JSON",
+                "reference": "https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard",
+                "contract": "docs/integration/fiodmp-api-contract.md",
+            },
+            "message": (
+                "FioDMP exposes no machine-readable plan export yet; the "
+                "FIP→DMP link works by URL today."
+            ),
+        },
+    )
 
 
 @router.get("/{fip_id}/export.json")

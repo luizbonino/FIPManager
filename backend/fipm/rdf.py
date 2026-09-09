@@ -29,6 +29,7 @@ from rdflib.namespace import FOAF
 from sqlalchemy.orm import Session
 
 from fipm.config import Settings
+from fipm.dmp import resolve_dmp_evidence_for_export
 from fipm.exporters import fip_url
 from fipm.fer_types import get_fer_types
 from fipm.models import Fer, Fip, KnowledgeModel, WorkshopSession
@@ -510,12 +511,25 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
                 if note_text:
                     g.add((decl_iri, FIP.considerations, Literal(note_text, lang=note_lang)))
 
-            dmp_evidence = decl.get("dmpEvidence")
-            if dmp_evidence:
-                evidence_url = dmp_evidence.get("url")
-                if evidence_url:
-                    g.add((decl_iri, PROV.wasDerivedFrom, URIRef(evidence_url)))
-                question_ref = dmp_evidence.get("questionRef")
+            # spec 06-dmp-linkage.md §2.4: resolve the stored dmpEvidence
+            # (new index-based shape, or the legacy {url, questionRef}
+            # shape) the same way the JSON export does, so both agree on
+            # what "the DMP's IRI" is.
+            resolved_evidence = resolve_dmp_evidence_for_export(
+                decl.get("dmpEvidence"), fip.related_dmps or []
+            )
+            if resolved_evidence and resolved_evidence.get("dmpUrl"):
+                evidence_iri = URIRef(resolved_evidence["dmpUrl"])
+                # The existing declaration-level prov:wasDerivedFrom to the
+                # same IRI is kept: prov: is what a generic consumer
+                # understands, fipmx:dmp-evidence says "this is the
+                # *justification* for this declaration".
+                g.add((decl_iri, PROV.wasDerivedFrom, evidence_iri))
+                g.add((decl_iri, fipmx["dmp-evidence"], evidence_iri))
+                section = resolved_evidence.get("section")
+                if section:
+                    g.add((decl_iri, fipmx["dmp-section"], Literal(section)))
+                question_ref = resolved_evidence.get("questionRef")
                 if question_ref:
                     g.add((decl_iri, fipmx["dmp-question-ref"], Literal(question_ref)))
 
@@ -592,6 +606,9 @@ def _jsonld_context(g: Graph) -> dict[str, Any]:
         "created": {"@id": "dcterms:created", "@type": "xsd:dateTime"},
         "modified": {"@id": "dcterms:modified", "@type": "xsd:dateTime"},
         "declarationIndex": {"@id": "fipmx:declaration-index", "@type": "xsd:integer"},
+        # spec 06-dmp-linkage.md §2.4: amends spec 03 §2.1's closed term list.
+        "dmpEvidence": {"@id": "fipmx:dmp-evidence", "@type": "@id"},
+        "dmpSection": {"@id": "fipmx:dmp-section"},
         "license": {"@id": "dcterms:license", "@type": "@id"},
         "conformsTo": {"@id": "dcterms:conformsTo", "@type": "@id"},
         "declaredBy": {"@id": "fip:declared-by", "@type": "@id"},

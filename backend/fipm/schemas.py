@@ -8,7 +8,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 
-from fipm.config import DECLARATION_STATUSES
+from fipm.config import DECLARATION_STATUSES, Settings, get_settings
 
 
 class CamelModel(BaseModel):
@@ -200,8 +200,19 @@ class FerOut(CamelModel):
 
 
 class DmpEvidence(CamelModel):
-    url: str | None = None
-    question_ref: str | None = None
+    """spec 06-dmp-linkage.md §2.1: `{dmpIndex, section, questionRef}`.
+    Fields are deliberately untyped (`Any`) rather than `int | None` etc.:
+    validation (missing/wrong-type/out-of-range `dmpIndex`, oversized
+    `section`/`questionRef`) lives in `fipm.dmp.apply_dmp_evidence`, not
+    here, so failures keep the API-wide `{"detail": "<code>"}` shape
+    instead of Pydantic's error array. Writers only ever produce this
+    shape; the legacy `{url, questionRef}` shape some stored data may still
+    carry is read directly out of the JSON column by exporters/rdf/import,
+    never through this model."""
+
+    dmp_index: Any = None
+    section: Any = None
+    question_ref: Any = None
 
 
 class Declaration(CamelModel):
@@ -250,6 +261,12 @@ class RelatedDmp(CamelModel):
     url: str
     version: str | None = None
     system: str | None = None
+    # spec 06-dmp-linkage.md §1.1: derived server-side by
+    # `fipm.dmp.normalise_related_dmps` and ignored on input (a client-sent
+    # `system`/`dmpId` is overwritten) -- present here so a client that
+    # echoes back a previously-normalised entry (e.g. a PATCH built from the
+    # last GET) round-trips without an unknown-field surprise.
+    dmp_id: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -278,6 +295,16 @@ class FipPatchRequest(CamelModel):
     visibility: Visibility | None = None
 
 
+class FipSummary(CamelModel):
+    """spec 06-dmp-linkage.md §3.1: cheap per-FIP counts a consumer (e.g.
+    FioDMP) can render without fetching the full `answers` array."""
+
+    answered_questions: int
+    total_questions: int | None
+    declarations: int
+    by_status: dict[str, int]
+
+
 class FipOut(CamelModel):
     id: str
     owner_id: str | None
@@ -294,6 +321,15 @@ class FipOut(CamelModel):
     created_at: datetime
     updated_at: datetime
     edit_token: str | None = None
+    # spec 06-dmp-linkage.md §3.1: two cheap additions for FioDMP.
+    embed_url: str
+    summary: FipSummary
+
+
+class PrefillFromDmpRequest(CamelModel):
+    """Body of POST /api/fips/{id}/prefill-from-dmp (spec 06 §4)."""
+
+    dmp_url: str
 
 
 class FipImportDoc(CamelModel):
@@ -356,7 +392,57 @@ class SessionPublicOut(CamelModel):
 # ---------------------------------------------------------------------------
 
 
-def fip_to_out(fip: Any, edit_token: str | None = None) -> FipOut:
+def _question_count(content: dict[str, Any]) -> int:
+    """Non-hidden questions in a knowledge model's `content` (shared by
+    `km_summary_dict`'s `questionCount` and `FipOut.summary.totalQuestions`)."""
+    return sum(
+        1
+        for section in (content.get("sections") or [])
+        for question in (section.get("questions") or [])
+        if question.get("hidden") is not True
+    )
+
+
+def total_questions_for_km(km: Any | None) -> int | None:
+    """spec 06-dmp-linkage.md §3.1: `null` when the FIP's knowledge model
+    row is missing (e.g. deleted since); otherwise its non-hidden question
+    count, matching the padding `exporters.build_export_json` applies."""
+    if km is None:
+        return None
+    return _question_count(km.content or {})
+
+
+def _fip_summary(answers: list[dict[str, Any]], total_questions: int | None) -> FipSummary:
+    by_status: dict[str, int] = dict.fromkeys(DECLARATION_STATUSES, 0)
+    answered_questions = 0
+    declarations = 0
+    for answer in answers:
+        decls = answer.get("declarations") or []
+        if decls:
+            answered_questions += 1
+        for decl in decls:
+            declarations += 1
+            status = decl.get("status")
+            if status in by_status:
+                by_status[status] += 1
+    return FipSummary(
+        answered_questions=answered_questions,
+        total_questions=total_questions,
+        declarations=declarations,
+        by_status=by_status,
+    )
+
+
+def fip_to_out(
+    fip: Any,
+    edit_token: str | None = None,
+    *,
+    settings: Settings | None = None,
+    total_questions: int | None = None,
+) -> FipOut:
+    if settings is None:
+        settings = get_settings()
+    answers = fip.answers or []
     return FipOut(
         id=fip.id,
         owner_id=fip.owner_id,
@@ -367,19 +453,29 @@ def fip_to_out(fip: Any, edit_token: str | None = None) -> FipOut:
         title=fip.title,
         community=fip.community,
         related_dmps=fip.related_dmps or [],
-        answers=fip.answers or [],
+        answers=answers,
         language=fip.language,
         license=fip.license,
         created_at=fip.created_at,
         updated_at=fip.updated_at,
         edit_token=edit_token,
+        embed_url=f"{settings.base_url}/fips/{fip.id}/embed",
+        summary=_fip_summary(answers, total_questions),
     )
 
 
-def fip_out_dict(fip: Any, edit_token: str | None = None) -> dict[str, Any]:
+def fip_out_dict(
+    fip: Any,
+    edit_token: str | None = None,
+    *,
+    settings: Settings | None = None,
+    total_questions: int | None = None,
+) -> dict[str, Any]:
     """FipOut as a camelCase dict, with the editToken key entirely absent
     (never merely null) unless it was actually issued."""
-    data = fip_to_out(fip, edit_token).model_dump(mode="json", by_alias=True)
+    data = fip_to_out(
+        fip, edit_token, settings=settings, total_questions=total_questions
+    ).model_dump(mode="json", by_alias=True)
     if data.get("editToken") is None:
         data.pop("editToken", None)
     return data
@@ -390,12 +486,7 @@ def km_summary_dict(row: Any) -> dict[str, Any]:
     hidden questions) and `forkedFrom` read out of the row's `content` JSON
     (spec 04-knowledge-model-editor.md §3 API #1)."""
     content = row.content or {}
-    question_count = sum(
-        1
-        for section in (content.get("sections") or [])
-        for question in (section.get("questions") or [])
-        if question.get("hidden") is not True
-    )
+    question_count = _question_count(content)
     summary = KnowledgeModelSummary(
         id=row.id,
         version=row.version,
