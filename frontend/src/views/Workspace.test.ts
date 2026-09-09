@@ -22,11 +22,14 @@ vi.mock('@/api/auth', () => ({
 }))
 
 import { get } from '@/api/client'
+import { listKnowledgeModels } from '@/api/knowledgeModels'
 import { resendVerification } from '@/api/auth'
 import { useAuthStore, type User } from '@/stores/auth'
 import Workspace from './Workspace.vue'
+import type { KnowledgeModelSummary } from '@/types/api'
 
 const getMock = vi.mocked(get)
+const listKnowledgeModelsMock = vi.mocked(listKnowledgeModels)
 const resendVerificationMock = vi.mocked(resendVerification)
 
 function makeI18n() {
@@ -49,10 +52,14 @@ function makeUser(overrides: Partial<User> = {}): User {
   }
 }
 
-async function mountWorkspace(verificationRequired: boolean, emailVerifiedAt: string | null) {
+async function mountWorkspace(
+  verificationRequired: boolean,
+  emailVerifiedAt: string | null,
+  userOverrides: Partial<User> = {}
+) {
   const pinia = createPinia()
   setActivePinia(pinia)
-  getMock.mockResolvedValue({ ...makeUser({ emailVerifiedAt }), verificationRequired })
+  getMock.mockResolvedValue({ ...makeUser({ emailVerifiedAt, ...userOverrides }), verificationRequired })
   const authStore = useAuthStore()
   await authStore.restoreSession()
 
@@ -69,6 +76,25 @@ async function mountWorkspace(verificationRequired: boolean, emailVerifiedAt: st
   })
   await flushPromises()
   return wrapper
+}
+
+function unownedDraft(id: string): KnowledgeModelSummary {
+  return {
+    id,
+    version: '1.0.0',
+    status: 'draft',
+    visibility: 'private',
+    license: 'CC0-1.0',
+    title: { en: 'Shipped draft' },
+    description: { en: '' },
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+    ownerId: null,
+    isSystem: false,
+    isUnownedDraft: true,
+    questionCount: 3,
+    forkedFrom: null,
+  }
 }
 
 // Criterion 10: Workspace.vue shows the verify banner only when
@@ -105,5 +131,48 @@ describe('Workspace.vue — email verification banner', () => {
 
     expect(resendVerificationMock).toHaveBeenCalled()
     expect(wrapper.text()).toContain(en.auth.verifySent)
+  })
+})
+
+// Workspace links to the public catalogue, and points admins at unowned
+// (shipped-draft) knowledge models awaiting review, computed from the same
+// listKnowledgeModels() call fetchData already makes for the FIP progress
+// denominator — no extra request.
+describe('Workspace.vue — browse-models link and unowned-drafts notice', () => {
+  beforeEach(() => {
+    getMock.mockReset()
+    listKnowledgeModelsMock.mockReset()
+  })
+
+  it('always shows a link to browse all knowledge models', async () => {
+    listKnowledgeModelsMock.mockResolvedValue({ items: [], total: 0 })
+    const wrapper = await mountWorkspace(false, null)
+
+    const browseLink = wrapper.findAll('a').find((a) => a.text() === en.workspace.browseModels)
+    expect(browseLink).toBeTruthy()
+  })
+
+  it('shows the unowned-drafts notice to an admin when drafts are waiting for review', async () => {
+    listKnowledgeModelsMock.mockResolvedValue({ items: [unownedDraft('km-a'), unownedDraft('km-b')], total: 2 })
+    const wrapper = await mountWorkspace(false, null, { role: 'admin' })
+
+    expect(wrapper.text()).toContain('2')
+    expect(wrapper.find('.notice').exists()).toBe(true)
+    const reviewLink = wrapper.findAll('a').find((a) => a.text() === en.workspace.reviewDrafts)
+    expect(reviewLink).toBeTruthy()
+  })
+
+  it('hides the unowned-drafts notice for a non-admin, even when drafts exist', async () => {
+    listKnowledgeModelsMock.mockResolvedValue({ items: [unownedDraft('km-a')], total: 1 })
+    const wrapper = await mountWorkspace(false, null, { role: 'user' })
+
+    expect(wrapper.find('.notice').exists()).toBe(false)
+  })
+
+  it('hides the unowned-drafts notice for an admin when there are no unowned drafts', async () => {
+    listKnowledgeModelsMock.mockResolvedValue({ items: [], total: 0 })
+    const wrapper = await mountWorkspace(false, null, { role: 'admin' })
+
+    expect(wrapper.find('.notice').exists()).toBe(false)
   })
 })

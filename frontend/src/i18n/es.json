@@ -5,6 +5,7 @@
   "appName": "Gestor de FIP",
   "nav": {
     "home": "Inicio",
+    "knowledgeModels": "Modelos de conocimiento",
     "login": "Iniciar sesión",
     "register": "Registrarse",
     "workspace": "Espacio de trabajo",
@@ -61,6 +62,9 @@
     "myFips": "Mis FIP",
     "mySessions": "Mis sesiones",
     "myKnowledgeModels": "Mis modelos de conocimiento",
+    "browseModels": "Ver todos los modelos",
+    "unownedDraftsNotice": "{count} borrador(es) importado(s) esperan revisión antes de poder usarse en una sesión.",
+    "reviewDrafts": "Revisar borradores",
     "createNewFip": "Crear nuevo FIP",
     "createNewSession": "Crear nueva sesión",
     "noFips": "Aún no tiene ningún FIP.",

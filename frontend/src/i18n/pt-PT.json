@@ -5,6 +5,7 @@
   "appName": "Gestor de FIP",
   "nav": {
     "home": "Início",
+    "knowledgeModels": "Modelos de conhecimento",
     "login": "Iniciar Sessão",
     "register": "Registar",
     "workspace": "Área de Trabalho",
@@ -61,6 +62,9 @@
     "myFips": "Os meus FIPs",
     "mySessions": "As minhas Sessões",
     "myKnowledgeModels": "Os meus Modelos de Conhecimento",
+    "browseModels": "Ver todos os modelos",
+    "unownedDraftsNotice": "{count} rascunho(s) importado(s) aguardam revisão antes de poderem ser usados numa sessão.",
+    "reviewDrafts": "Rever rascunhos",
     "createNewFip": "Criar Novo FIP",
     "createNewSession": "Criar Nova Sessão",
     "noFips": "Ainda não tem nenhum FIP.",

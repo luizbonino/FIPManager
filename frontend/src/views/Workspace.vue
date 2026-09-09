@@ -82,8 +82,15 @@
       <section class="workspace-section">
         <div class="section-head">
           <h2>{{ $t('workspace.myKnowledgeModels') }}</h2>
-          <router-link to="/knowledge-models/new" class="btn btn-primary">{{ $t('km.new') }}</router-link>
+          <div class="section-head-actions">
+            <router-link to="/knowledge-models/new" class="btn btn-primary">{{ $t('km.new') }}</router-link>
+            <router-link to="/knowledge-models" class="btn btn-secondary">{{ $t('workspace.browseModels') }}</router-link>
+          </div>
         </div>
+        <p v-if="isAdmin && unownedDraftCount > 0" class="notice">
+          {{ $t('workspace.unownedDraftsNotice', { count: unownedDraftCount }) }}
+          <router-link to="/knowledge-models">{{ $t('workspace.reviewDrafts') }}</router-link>
+        </p>
         <div v-if="myKnowledgeModels.length > 0" class="fip-rows">
           <div v-for="model in myKnowledgeModels" :key="`${model.id}@${model.version}`" class="fip-row">
             <div class="fip-row-main">
@@ -147,6 +154,7 @@ const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 
 // SessionDetail.vue's "Delete session" redirects here with `?sessionDeleted=1`
 // (same flash pattern as ResetPassword.vue's `?resetOk=1` read by Login.vue).
@@ -184,6 +192,10 @@ const error = ref<string | null>(null)
 // model's `questionCount` (non-hidden), read from every readable model's
 // summary rather than fetching each FIP's full model document.
 const questionCountByModel = ref<Record<string, number>>({})
+// spec 04 §5 addition: admins are pointed at shipped drafts (`ownerId`
+// NULL, `isUnownedDraft: true`) waiting for review, counted from the same
+// `listKnowledgeModels()` call fetchData already makes — no extra request.
+const unownedDraftCount = ref(0)
 
 function questionCountFor(fip: FipOut): number {
   return questionCountByModel.value[`${fip.questionnaireId}@${fip.questionnaireVersion}`] ?? TOTAL_QUESTIONS
@@ -243,6 +255,7 @@ async function fetchData() {
     questionCountByModel.value = Object.fromEntries(
       allModelsResponse.items.map((m) => [`${m.id}@${m.version}`, m.questionCount])
     )
+    unownedDraftCount.value = allModelsResponse.items.filter((m) => m.isUnownedDraft).length
   } catch {
     error.value = 'error'
   } finally {
@@ -340,6 +353,25 @@ onMounted(fetchData)
 
 .section-head h2 {
   margin: 0;
+}
+
+.section-head-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-user-info);
+  color: var(--color-user-info-text);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
 }
 
 .fip-rows {

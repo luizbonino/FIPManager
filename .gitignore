@@ -36,3 +36,4 @@ frontend/dist/
 # SQLite sidecar files
 *.db-shm
 *.db-wal
+docker-compose.local.yml
