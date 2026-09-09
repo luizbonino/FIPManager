@@ -7,9 +7,9 @@ Authority: `01-foundations.md` §2 (tables), §4 (auth), §5 (authz), §6 (API),
 Nothing here is needed on 6 Oct: **both features are off or invisible by default** (`FIPM_MAIL_BACKEND=console`,
 `FIPM_REQUIRE_EMAIL_VERIFICATION=false`; the migration banner appears only once a newer *published* model version exists).
 
-## 0. Shared schema change (`SCHEMA_VERSION = 1 -> 2`)
+## 0. Shared schema change (`SCHEMA_VERSION` 4 → **5**)
 
-One bump covers both features. New table + three nullable columns, all additive:
+One bump covers both features (spec 05 leaves the schema at 4). New table + three nullable columns, all additive:
 
 | Change | Shape |
 |---|---|
@@ -18,9 +18,9 @@ One bump covers both features. New table + three nullable columns, all additive:
 | `fips.migrated_from` | JSON nullable — `{"id","version","at"}`, the version migrated **from** on the last migration |
 | `fips.orphaned_answers` | JSON nullable list, §4.4 |
 
-`db.init_db()` keeps `create_all()` (which makes `email_tokens`) and gains one guarded step: for each of the three columns,
-`PRAGMA table_info(<table>)` and, if absent, `ALTER TABLE <table> ADD COLUMN <col> <type> NULL`. Still no Alembic (spec 01 §1); the
-guard is idempotent, runs before the `schema_version` upsert, and is the only hand-written DDL. A v1 DB upgrades in place.
+`create_all()` makes `email_tokens`; the three columns are added to spec 05's `db._ensure_columns()` table of expected
+`(table, column, ddl)` triples, which already runs `PRAGMA table_info` + `ALTER TABLE … ADD COLUMN` idempotently before the
+`schema_version` reconciliation. No Alembic (spec 01 §1); a v1-era DB upgrades in place.
 
 ## 1. Mail backend (`backend/fipm/mail.py`)
 
@@ -28,24 +28,23 @@ guard is idempotent, runs before the `schema_version` upsert, and is the only ha
 |---|---|---|
 | `FIPM_MAIL_BACKEND` | `console` | `console \| smtp`; unknown value → refuse to start |
 | `FIPM_MAIL_FROM` | `FIP Manager <no-reply@localhost>` | RFC 5322 address, used as `From` |
-| `FIPM_SMTP_HOST` / `FIPM_SMTP_PORT` | unset / `587` | required when backend is `smtp` (else refuse to start) |
-| `FIPM_SMTP_USER` / `FIPM_SMTP_PASSWORD` | unset | omitted → unauthenticated relay |
+| `FIPM_SMTP_HOST` / `FIPM_SMTP_PORT` | unset / `587` | host required when backend is `smtp` (else refuse to start) |
+| `FIPM_SMTP_USER` / `FIPM_SMTP_PASSWORD` | unset / unset | omitted → unauthenticated relay |
 | `FIPM_SMTP_TLS` / `FIPM_SMTP_TIMEOUT` | `starttls` / `10` | `starttls \| ssl \| none`; timeout in seconds |
-| `FIPM_REQUIRE_EMAIL_VERIFICATION` | `false` | §2 gate |
-| `FIPM_MAIL_TOKEN_TTL_HOURS` / `FIPM_RESET_TOKEN_TTL_HOURS` | `24` / `1` | token lifetimes |
+| `FIPM_REQUIRE_EMAIL_VERIFICATION` | `false` | §2 gate; `FIPM_MAIL_TOKEN_TTL_HOURS` / `FIPM_RESET_TOKEN_TTL_HOURS` = `24` / `1` |
 
 `send_mail(to, subject, text, html=None) -> None` builds an `EmailMessage` (`text/plain; charset=utf-8`, `html` as an alternative
 part when given) and dispatches per backend: **console** logs one INFO record on logger `fipm.mail` (`MAIL to=… subject=…` plus the
 indented body) — so with no SMTP an admin reads the verification or reset link out of `docker compose logs fipm`, the documented
-fallback next to spec 05's admin temporary-password path; **smtp** uses `smtplib.SMTP`/`SMTP_SSL`. Startup logs one WARNING when
-`FIPM_ENV=production` and the backend is `console` ("account mail only reaches the log; links are readable by anyone with log access").
+fallback beside spec 05's admin temporary-password path; **smtp** uses `smtplib.SMTP`/`SMTP_SSL`. Startup logs one WARNING when
+`FIPM_ENV=production` and the backend is `console` ("account mail only reaches the log; anyone with log access can read the links").
 
 `render_mail(template, lang, ctx) -> (subject, text)` reads `data/i18n/mail/{lang}/{template}.txt`, whose **first line** is
 `Subject: …` with the body after one blank line; placeholders are `{name}` filled by `str.format(**ctx)` (keys `displayName`,
-`link`, `appName`, `baseUrl`, `expiresHours`). Language resolution reuses the UI chain `pt-PT ⇄ pt-BR → en`, extended with
-`es → en`; all four directories `en`, `pt-PT`, `pt-BR`, `es` exist from the first commit (an untranslated file may be a copy of
-`en`, never missing — absence is a test failure, not a runtime surprise). Templates in v2: `verify-email.txt` and
-`password-reset.txt`; an optional sibling `{template}.html` is passed as `html` when present.
+`link`, `appName`, `baseUrl`, `expiresHours`). Language resolution reuses the UI chain `pt-PT ⇄ pt-BR → en` plus `es → en`; all
+four directories `en`, `pt-PT`, `pt-BR`, `es` exist from the first commit (an untranslated file may copy `en`, never be missing —
+absence is a test failure, not a runtime surprise). Templates: `verify-email.txt`, `password-reset.txt`; an optional sibling
+`{template}.html` is passed as `html` when present.
 
 Every send runs in a FastAPI `BackgroundTasks` callback wrapped in `try/except Exception` that logs and swallows: mail must never
 turn a 201/202 into a 500, and the caller must not learn from timing whether a mailbox exists.
@@ -60,8 +59,8 @@ turn a 201/202 into a 500, and the caller must not learn from timing whether a m
   unused ones of the same purpose. Link: `{FIPM_BASE_URL}/verify?token=…`.
 - `POST /api/auth/verify-email {token}` (no auth — the token is the credential): look up `hash_token(token)`; unknown, used, or
   `email` no longer matching `users.email` → 400 `invalid_token`; expired → 410 `token_expired` (a distinct code only so the UI can
-  offer "send a new link"; the token is a secret, so no enumeration surface). Success: set `email_verified_at` and `used_at`,
-  return 200 `UserOut`. Replays are 400, by design.
+  offer "send a new link"; the token is a secret, so no enumeration surface). Success sets `email_verified_at` and `used_at` and
+  returns 200 `UserOut`; replays are 400, by design.
 - **Gate rule (one line):** while `FIPM_REQUIRE_EMAIL_VERIFICATION=true`, an unverified user may do everything except make content
   world-listed — any write that would set `visibility="public"` on a FIP, knowledge model or FER returns **403
   `email_verification_required`**. It is the smallest rule that stops spam in the public listings while leaving sign-in, `private`
@@ -74,14 +73,13 @@ turn a 201/202 into a 500, and the caller must not learn from timing whether a m
 
 - `POST /api/auth/password-reset/request {email}` → **always 202, empty body**, whether the address exists, is malformed or is
   already mid-reset. Only on a match: issue a `password_reset` token (TTL 1 h, single use, same hashing) and queue
-  `password-reset.txt` with link `{FIPM_BASE_URL}/reset-password?token=…`. Rate limit 3/hour per lowercased email and 10/hour per
-  ip; **over-limit also returns 202** (no 429 — a 429 keyed on an email is itself an enumeration oracle): the limiter drops and
-  logs the mail instead.
+  `password-reset.txt` with link `{FIPM_BASE_URL}/reset-password?token=…`. Rate limit 3/hour per lowercased email, 10/hour per ip;
+  **over-limit also returns 202** (a 429 keyed on an email is itself an enumeration oracle) and the mail is dropped and logged.
 - `POST /api/auth/password-reset/confirm {token, newPassword}` → 204. Validation: token unknown/used/email-mismatch → 400
   `invalid_token`; expired → 410 `token_expired`; `newPassword` outside 10–128 chars → 400 (`RegisterRequest`'s validator, reused).
-  Effects, in one transaction: argon2id rehash of the password, `used_at` set, **every** `auth_sessions` row of that user deleted
-  (including the caller's — a reset means "I may have been compromised", so it logs out every device; the SPA then shows the login
-  form), and `email_verified_at` set if it was null (completing a reset proves control of the mailbox).
+  Effects, one transaction: argon2id rehash, `used_at` set, **every** `auth_sessions` row of that user deleted (the caller's too —
+  a reset means "I may have been compromised", so the SPA then shows the login form), and `email_verified_at` set if it was null
+  (completing a reset proves control of the mailbox).
 - With `FIPM_MAIL_BACKEND=console` the reset link appears in the log, so a self-hosted single-facilitator deployment can use this
   flow without SMTP; spec 05's admin temporary-password path stays the no-mail-at-all route, unchanged.
 - Frontend: `/forgot-password` (`ForgotPassword.vue`, email field → always the same "check your inbox" panel); `/reset-password`
@@ -118,7 +116,7 @@ leftovers. A question id carrying at least one declaration or a non-empty commen
 Non-exclusive flags on an `unchanged`/`hidden` item: `text-changed` when the **`en`** `text` differs after whitespace
 normalisation (`en` is mandatory per spec 04 §3.3, so both sides always exist); `fer-type-changed` and `scope-changed` likewise —
 declarations are kept either way (a FER reference is a free IRI, never re-typed), the flag only lets the review page say "this
-question now asks for a different kind of resource". `required`, `allowMultiple` and `principle` are not diffed in v2 (§10.3).
+question now asks for a different kind of resource". `required`, `allowMultiple` and `principle` are not diffed (§10.3).
 
 ### 4.2 Diff JSON (`diffVersion: 1`)
 
@@ -157,7 +155,7 @@ preview is advisory and a stale tab cannot smuggle a decision past the current s
 `unknown_decision`; a `splitCopies` target outside that item's `splitInto`, or an `orphanReassign` target hidden, absent or already
 answered in `W` → 400 `invalid_decision`; missing decisions take the §4.2 defaults (split → both, removed → orphan). Effects, one
 transaction: `questionnaire_version = W`, `answers` rewritten in target order, `orphaned_answers` extended, `migrated_from =
-{"id": X, "version": V, "at": <now>}`, `updated_at` refreshed. Target equal to the current version → 409 `already_on_version`.
+{"id": X, "version": V, "at": now}`, `updated_at` refreshed; target == current version → 409 `already_on_version`.
 
 ### 4.4 `orphanedAnswers` storage
 
@@ -171,8 +169,8 @@ stays as the record of where the answer came from. The migrate page shows the li
 ## 5. Frontend
 
 - `MigrationBanner.vue` on `FipEditor.vue` and `FipRead.vue`, only for a caller who may write and only when `migration-targets` is
-  non-empty: "A newer version of this questionnaire is available (1.1.0)." + `Review changes` → `/fips/:id/migrate`; on a pinned
-  session FIP it renders the pinned explanation and no button.
+  non-empty: "A newer version of this questionnaire is available (1.1.0)." + `Review changes` → `/fips/:id/migrate`; a pinned
+  session FIP gets the pinned explanation and no button.
 - Route `/fips/:id/migrate` → `FipMigrate.vue` (`requiresAuth: false`; write rights checked in the view, like `FipEditor`): a
   target select when several, then a diff table **old question | new question | status badge | decision control**, ordered
   `split`/`removed` first, then `added`, flagged rows, then `unchanged`/`hidden` behind a "show unchanged (18)" toggle. Split →
@@ -181,8 +179,7 @@ stays as the record of where the answer came from. The migrate page shows the li
   and a confirm dialog naming the target version and saying migration cannot be undone. One column at 375 px (the table collapses
   to stacked cards), reusing `StatusBadge.vue`.
 - `api/fips.ts`: `getMigrationTargets(id)`, `getMigrationPreview(id, to)`, `migrateFip(id, body)`. No new store — the view holds
-  the preview and the decision map; `lib/migration.ts` holds the pure diff + apply functions (vitest), tested against the same
-  fixtures as the backend.
+  the preview and the decision map; `lib/migration.ts` holds the pure diff + apply functions (vitest, same fixtures as the backend).
 - New i18n block `migration:` (`bannerTitle`, `bannerBody "A newer version of this questionnaire is available ({version})."`,
   `review`, `pinned`, `targetLabel`, `statusUnchanged|Added|Removed|Hidden|Split`, `flagTextChanged`, `flagFerTypeChanged`,
   `splitBoth|Metadata|Data|None`, `reassign`, `keepOrphaned`, `summary`, `migrate`, `confirmTitle`, `confirmBody`, `done`,
@@ -192,11 +189,10 @@ stays as the record of where the answer came from. The migrate page shows the li
 
 ## 6. Exports
 
-- **JSON** (`exportVersion: 2`; readers of 1 are unaffected, and `POST /api/fips/import` accepts 1 and 2): `fip.migratedFrom`
-  (object or null) and a top-level `orphanedAnswers` array whose declarations are FER-enriched exactly like `answers`. Import
-  preserves both.
-- **CSV** is unchanged — the 21 columns of spec 01 §3.2, only the current questionnaire's questions; orphaned answers are
-  deliberately not rows, having no `question_id` in the model the file conforms to.
+- **JSON** (`exportVersion: 2`; readers of 1 unaffected, `POST /api/fips/import` accepts 1 and 2): `fip.migratedFrom` (object or
+  null) and a top-level `orphanedAnswers` array whose declarations are FER-enriched like `answers`; import preserves both.
+- **CSV** is untouched by this spec — whatever header specs 05/06 leave, and only the current questionnaire's questions; orphaned
+  answers are deliberately not rows, having no `question_id` in the model the file conforms to.
 - **RDF**, minimal and honest: the FIP node keeps `dcterms:conformsTo <…/knowledge-models/X/W>` and gains
   `fipmx:migrated-from <…/knowledge-models/X/V>` (one term added to the spec 03 §2.1 `fipmx:` list). Orphaned answers become
   **Turtle comment lines** in the prepended header block (`# orphaned answer A2: <DOI> (current)`), not triples, so they appear in
@@ -209,24 +205,23 @@ stays as the record of where the answer came from. The migrate page shows the li
    `{FIPM_BASE_URL}/verify?token=`, and `hash_token(token) == email_tokens.id` (64 hex) while no column holds the plaintext.
 2. `POST /api/auth/verify-email` with that token → 200 and `emailVerifiedAt` set; the same token again → 400 `invalid_token`; a
    token whose `expires_at` is moved into the past → 410 `token_expired`; a random token → 400 `invalid_token`.
-3. With `FIPM_REQUIRE_EMAIL_VERIFICATION=true`, an unverified user gets 403 `email_verification_required` from `POST /api/fips`
+3. With `FIPM_REQUIRE_EMAIL_VERIFICATION=true` an unverified user gets 403 `email_verification_required` from `POST /api/fips`
    with `visibility="public"` and from a `PATCH` to `public`, but 201/200 for `private`/`link` and may create and answer a session;
-   after verification the public write succeeds. With the flag `false` nothing is blocked and no spec 01/02/04 test changes.
+   after verification the public write succeeds. With the flag `false` nothing is blocked and no spec 01–06 test changes.
 4. `POST /api/auth/verify-email/resend` → 202 for an unverified user, 202 with **no** mail for a verified one, 429 with
    `Retry-After` on the 4th call within an hour.
 5. `POST /api/auth/password-reset/request` → 202 for a known address (one mail logged, link contains `/reset-password?token=`) and
-   202 with no mail and no `email_tokens` row for an unknown or malformed one; bodies and codes are byte-identical across the
-   three, and the 4th call for one address is still 202 with no mail.
+   202 with no mail and no `email_tokens` row for an unknown or malformed one — bodies and codes byte-identical; the 4th call for
+   one address is still 202 with no mail.
 6. `POST /api/auth/password-reset/confirm` with a valid token and a 12-char password → 204; the old password then fails login
    (401) and the new one succeeds; **every** pre-existing `auth_sessions` row is gone (a cookie captured before the reset returns
    401 on `GET /api/auth/me`); `email_verified_at` is set although no verify link was clicked.
-7. Reset token: replay → 400 `invalid_token` with the password unchanged; past its 1 h TTL → 410 `token_expired`; issuing a second
-   reset token deletes the first unused one (row count 1).
+7. Reset token: replay → 400 `invalid_token`, password unchanged; past its 1 h TTL → 410 `token_expired`; a second reset token
+   deletes the first unused one (row count 1).
 8. `render_mail` renders both templates in all four languages with no `KeyError` and a non-empty subject each; a `pt-PT` user with
    only `pt-BR` present gets the `pt-BR` file; a missing language file fails the suite (all four directories exist).
 9. `FIPM_MAIL_BACKEND=smtp` with no `FIPM_SMTP_HOST` refuses to start; against a stub server one `sendmail` call carries the
-   `FIPM_MAIL_FROM` sender, the recipient and a `text/plain; charset=utf-8` part; an SMTP exception is logged, the response stays
-   201/202.
+   `FIPM_MAIL_FROM` sender, the recipient and a `text/plain; charset=utf-8` part; an SMTP error is logged, the response stays 201/202.
 10. *(vitest)* `ForgotPassword.vue` renders the same panel for any submitted address; `ResetPassword.vue` disables Submit until
     both fields match at ≥10 chars and renders `auth.resetExpired` with a `/forgot-password` link on 410; `Workspace.vue` shows
     the verify banner only when `verificationRequired && !emailVerifiedAt`.
@@ -238,22 +233,22 @@ stays as the record of where the answer came from. The migrate page shows the li
     `GET …/migration-targets` lists exactly `1.1.0` with its changelog entry, and returned `[]` before 1.1.0 was published.
 12. `GET …/migration-preview?to=1.1.0` returns `diffVersion: 1` with AC 11's statuses assigned correctly, the edited question
     `unchanged` with `flags: ["text-changed"]`, `counts.decisionsRequired == 2`, and `orphanReassign.options` holding only
-    unanswered non-hidden target ids.
+    unanswered, non-hidden target ids.
 13. `POST …/migrate` with no `decisions` applies the defaults: the split answer lands under **both** new ids, the deleted
     question's answer is in `orphanedAnswers` with `fromVersion "1.0.0"`, `questionnaireRef.version == "1.1.0"`, `migratedFrom ==
     {"id": …, "version": "1.0.0", "at": …}`, and the hidden question's answer is still in `answers`.
 14. `splitCopies {"F2": ["F2-metadata"]}` puts the answer on `F2-metadata` only and not in `orphanedAnswers`; an empty list orphans
-    it; `orphanReassign {"A2": "A2-data"}` places the declarations on `A2-data` and still records the `orphanedAnswers` entry.
+    it; `orphanReassign {"A2": "A2-data"}` puts the declarations on `A2-data` and still records the `orphanedAnswers` entry.
 15. Rejections: current version → 409 `already_on_version`; a draft or lower version → 400 `version_not_greater`; another model id
     → 404 `target_not_found`; a decision key on an `unchanged` question → 400 `unknown_decision`; an `orphanReassign` target that
     is hidden or already answered → 400 `invalid_decision`. In every rejected case the FIP row is unchanged (same `updated_at`).
-16. A FIP with `session_id` set → 409 `session_version_pinned` on migrate while `migration-targets`/`migration-preview` still
-    return 200; after `POST /api/fips/{id}/claim` it keeps `session_id` and stays pinned — the pin is the session's, not the owner's.
+16. A FIP with `session_id` set → 409 `session_version_pinned` on migrate while `migration-targets`/`migration-preview` still return
+    200; after `POST /api/fips/{id}/claim` it keeps `session_id` and stays pinned — the pin is the session's, not the owner's.
 17. Authorization: a second signed-in user gets 404 on all three endpoints for a private FIP and 403 for a `link` FIP; an
     anonymous caller with the right `X-Edit-Token` on a session-less anonymous FIP may migrate, as may the owner and an admin.
 18. After migration `export.json` has `exportVersion 2`, `fip.migratedFrom`, `orphanedAnswers` with enriched FER labels and no
-    `answers` entry for the hidden or removed question; re-importing that document yields a FIP whose `answers`, `orphanedAnswers`,
-    `migratedFrom` and `questionnaireRef` equal the original's; `export.csv` still has exactly the 21 columns.
+    `answers` entry for the hidden or removed question; re-importing it yields a FIP whose `answers`, `orphanedAnswers`,
+    `migratedFrom` and `questionnaireRef` equal the original's, and `export.csv`'s header is unchanged by this spec.
 19. `export.ttl` contains `dcterms:conformsTo <…/gofair-fip-mini/1.1.0>`, `fipmx:migrated-from <…/gofair-fip-mini/1.0.0>`, one
     `# orphaned answer` comment line and **no** `prov:wasRevisionOf`; the JSON-LD carries no orphaned-answer node.
 20. *(vitest)* `lib/migration.ts` computes the same statuses, flags and counts as the backend on a shared fixture pair (under
@@ -264,16 +259,16 @@ stays as the record of where the answer came from. The migrate page shows the li
 
 ## 9. Assumptions (facilitators away; both features are post-workshop)
 
-- **A1. Nothing here runs during CONFOA:** `console` mail and `FIPM_REQUIRE_EMAIL_VERIFICATION=false` are the defaults and no
-  newer `gofair-fip-mini` version will be published before 6 Oct, so the banner cannot appear in the room.
-- **A2. Verification gates only public listing**, never sign-in — an unverified account is a fully working private workspace, so a
-  mistyped address cannot destroy someone's output. **A3.** A reset logs out every device, including the one doing it.
-- **A4. Mail is best-effort:** a failed send never fails the request and is visible only in the log; spec 05's admin
-  temporary-password path stays the guaranteed route back into an account.
-- **A5. Migration is forward-only and not undoable:** no "migrate back", no stored diff, and `migrated_from` keeps only the last
-  hop (1.0.0 → 1.1.0 → 1.2.0 records 1.1.0); exports made before a migration remain the historical record.
-- **A6. One FIP at a time** — no bulk or session-wide migration in v2. **A7. `en` is the diff language**, so a translation-only
-  `pt-BR` change raises no flag and needs no review: the answer stays valid.
+- **A1. Nothing here runs during CONFOA:** `console` mail and `FIPM_REQUIRE_EMAIL_VERIFICATION=false` are the defaults and no newer
+  `gofair-fip-mini` version will be published before 6 Oct, so the banner cannot appear in the room. **A2. Verification gates only
+  public listing**, never sign-in — an unverified account is a fully working private workspace, so a mistyped address cannot destroy
+  someone's output. **A3.** A reset logs out every device, the one doing it included.
+- **A4. Mail is best-effort:** a failed send never fails the request and is visible only in the log; spec 05's admin temporary-password
+  path (with `must_change_password`) stays the guaranteed route back into an account.
+- **A5. Migration is forward-only and not undoable:** no "migrate back", no stored diff, and `migrated_from` keeps only the last hop
+  (1.0.0 → 1.1.0 → 1.2.0 records 1.1.0); exports made before a migration remain the historical record.
+- **A6. One FIP at a time** — no bulk or session-wide migration in v2. **A7. `en` is the diff language**, so a translation-only `pt-BR`
+  change raises no flag and needs no review: the answer stays valid.
 
 ## 10. Open questions
 
@@ -281,8 +276,7 @@ stays as the record of where the answer came from. The migrate page shows the li
    a policy on which forks are offered (lineage via `content.forkedFrom`?) and on attribution when the licences differ.
 2. A facilitator-level "migrate this whole session to version W" (the pin's escape hatch): one endpoint, one confirm, N diffs —
    worth it only if a session outlives its model version, which the workshop will tell us.
-3. Should `required`, `allowMultiple` or `principle` changes appear as diff flags? They change no stored answer, so v2 ignores them.
-4. Should an orphaned answer be re-assignable **after** migration (a small editor on `FipRead`/`FipEditor`), or only during
-   migration as specified?
-5. The From address and DKIM/SPF depend on the hosting decision (PLAN §9.3); until it lands `smtp` is tested against a local relay
+3. Should `required`, `allowMultiple` or `principle` changes appear as diff flags (v2 ignores them: they change no stored answer),
+   and should an orphaned answer be re-assignable **after** migration via a small `FipEditor` editor, not only during it?
+4. The From address and DKIM/SPF depend on the hosting decision (PLAN §9.3); until it lands `smtp` is tested against a local relay
    only, and a bounced mail is invisible to the tool (no bounce handling in v2).

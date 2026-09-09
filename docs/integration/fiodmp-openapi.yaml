@@ -1,0 +1,739 @@
+openapi: 3.1.0
+info:
+  title: FIP Manager <-> FioDMP integration
+  version: 0.1.0-draft
+  summary: What FIP Manager exposes today, and what we ask FioDMP to expose.
+  description: |
+    Two sides in one document (see docs/integration/fiodmp-api-contract.md).
+
+    * Paths tagged `fip-manager` are IMPLEMENTED by FIP Manager (v2, Nov 2026). Bodies are camelCase.
+    * Paths tagged `fiodmp-proposed` are a PROPOSAL for the ICTIC/Fiocruz team. Bodies are snake_case,
+      following the RDA DMP Common Standard (maDMP) 1.1:
+      https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard
+
+    Per-path `servers` say which side a path belongs to. The FIP Manager base URL is a placeholder until
+    hosting is decided (PLAN section 9, item 3). FIP Manager code is MIT; this document is CC BY 4.0.
+  license:
+    name: MIT
+    identifier: MIT
+  contact:
+    name: L. O. Bonino da Silva Santos
+    url: https://github.com/LuizBonino/FIPManager
+servers:
+  - url: https://fipm.example.org
+    description: FIP Manager (placeholder host)
+  - url: https://fiodmp.fiocruz.br
+    description: FioDMP (proposed endpoints)
+tags:
+  - name: fip-manager
+    description: Implemented by FIP Manager. Public for FIPs whose visibility is `public` or `link`.
+  - name: fiodmp-proposed
+    description: Proposed for FioDMP. Read-only, public plans only in v1.
+paths:
+  /api/fips/{fipId}:
+    servers:
+      - url: https://fipm.example.org
+    get:
+      tags: [fip-manager]
+      operationId: getFip
+      summary: One FIP as JSON
+      description: |
+        Returns 404 (never 403) when the FIP is `private` and the caller is not its owner, so ids do not leak.
+        No CORS header is sent: fetch this server-side, or ask us to allow the FioDMP origin.
+      parameters:
+        - $ref: '#/components/parameters/FipId'
+      security:
+        - {}
+        - cookieAuth: []
+        - editToken: []
+      responses:
+        '200':
+          description: The FIP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fip'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /fips/{fipId}/embed:
+    servers:
+      - url: https://fipm.example.org
+    get:
+      tags: [fip-manager]
+      operationId: getFipEmbed
+      summary: Compact HTML summary for an iframe
+      description: |
+        Server-rendered HTML: community name, questionnaire reference, the 21 questions with their declared
+        resources and statuses, linked plans, a link to the full FIP, and the attribution footer. No
+        JavaScript, no external requests, inline CSS, responsive. Sent with
+        `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'self' https://fiodmp.fiocruz.br`
+        (the allowed origins are configurable) and `Cache-Control: public, max-age=300` for a `public` or
+        `link` FIP.
+      parameters:
+        - $ref: '#/components/parameters/FipId'
+        - name: lang
+          in: query
+          required: false
+          description: Interface language of the fixed labels; falls back to the FIP's own language.
+          schema:
+            type: string
+            enum: [en, pt-PT, pt-BR]
+      security:
+        - {}
+        - cookieAuth: []
+        - editToken: []
+      responses:
+        '200':
+          description: HTML fragment page
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Unknown or non-shared FIP, as a small HTML page
+          content:
+            text/html:
+              schema:
+                type: string
+  /api/fips/{fipId}/export.jsonld:
+    servers:
+      - url: https://fipm.example.org
+    get:
+      tags: [fip-manager]
+      operationId: getFipJsonLd
+      summary: The FIP as RDF (JSON-LD)
+      description: |
+        FIP Ontology terms (https://w3id.org/fair/fip/terms/), CC0. `export.ttl` returns the same triples as
+        Turtle. A linked plan appears as a `dcso:DMP` node; per-declaration evidence appears as
+        `fipmx:dmp-evidence` with `fipmx:dmp-section` / `fipmx:dmp-question-ref` literals.
+      parameters:
+        - $ref: '#/components/parameters/FipId'
+      security:
+        - {}
+        - cookieAuth: []
+        - editToken: []
+      responses:
+        '200':
+          description: JSON-LD document with an inline `@context`
+          content:
+            application/ld+json:
+              schema:
+                type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/fips/{fipId}/prefill-from-dmp:
+    servers:
+      - url: https://fipm.example.org
+    post:
+      tags: [fip-manager]
+      operationId: prefillFipFromDmp
+      summary: Prefill a FIP from a DMP (stub - always 501 until FioDMP exposes JSON)
+      description: |
+        Implemented as a stub so the intent is visible and testable. Validates the plan URL, then returns 501
+        describing the missing FioDMP endpoint. Requires write access to the FIP (owner, admin, session owner
+        or the `X-Edit-Token` of an anonymous workshop FIP) and an `Origin` header (CSRF).
+      parameters:
+        - $ref: '#/components/parameters/FipId'
+      security:
+        - cookieAuth: []
+        - editToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrefillRequest'
+      responses:
+        '422':
+          description: The plan URL is not an absolute https URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '501':
+          description: FioDMP exposes no machine-readable plan export yet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrefillUnavailable'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/plans/{planId}:
+    servers:
+      - url: https://fiodmp.fiocruz.br
+    get:
+      tags: [fiodmp-proposed]
+      operationId: getPlan
+      summary: PROPOSED - one plan as RDA maDMP 1.1 JSON
+      description: |
+        `planId` is the short public id already used in the plan URL (e.g. `KQU5N0C`). No authentication for a
+        plan that is already public; a private or unknown plan returns 404 without distinguishing the two.
+        Only the fields in `Dmp` below are consumed by FIP Manager; any other valid maDMP content is ignored.
+      parameters:
+        - $ref: '#/components/parameters/PlanId'
+        - name: version
+          in: query
+          required: false
+          description: Plan revision (FioDMP shows Versao 13). Omitted means the current revision.
+          schema:
+            type: string
+      security:
+        - {}
+        - bearerAuth: []
+      responses:
+        '200':
+          description: The plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaDmpDocument'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          description: Rate limited (60 requests per minute would be ample)
+  /api/plans/{planId}/versions:
+    servers:
+      - url: https://fiodmp.fiocruz.br
+    get:
+      tags: [fiodmp-proposed]
+      operationId: listPlanVersions
+      summary: PROPOSED - revisions of one plan, newest first
+      parameters:
+        - $ref: '#/components/parameters/PlanId'
+      security:
+        - {}
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Version list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanVersionList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    FipId:
+      name: fipId
+      in: path
+      required: true
+      description: Short, URL-stable FIP identifier, e.g. 7Q2M8XKD.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9-]{4,32}$'
+    PlanId:
+      name: planId
+      in: path
+      required: true
+      description: Short public FioDMP plan identifier, e.g. KQU5N0C.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9]{4,16}$'
+  responses:
+    NotFound:
+      description: Unknown, or not visible to the caller
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Known but not writable by the caller
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: fipm_session
+      description: FIP Manager session cookie (HttpOnly, SameSite=Lax).
+    editToken:
+      type: apiKey
+      in: header
+      name: X-Edit-Token
+      description: Per-FIP capability token held by the browser that created an anonymous workshop FIP.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: PROPOSED, out of scope for v1 - only for private FioDMP plans.
+  schemas:
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: snake_case error code, e.g. not_found, dmp_url_invalid.
+      examples:
+        - detail: not_found
+    Fip:
+      type: object
+      required: [id, visibility, questionnaireId, questionnaireVersion, language, license, answers, updatedAt]
+      properties:
+        id:
+          type: string
+        visibility:
+          type: string
+          enum: [private, link, public]
+        questionnaireId:
+          type: string
+          examples: [gofair-fip-mini]
+        questionnaireVersion:
+          type: string
+          examples: ['1.0.0']
+        language:
+          type: string
+          description: BCP 47 tag.
+          examples: [pt-BR]
+        license:
+          type: string
+          examples: [CC0-1.0]
+        title:
+          type: [string, 'null']
+        community:
+          $ref: '#/components/schemas/Community'
+        relatedDmps:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/RelatedDmp'
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
+        embedUrl:
+          type: string
+          format: uri
+          description: The /fips/{id}/embed URL of this FIP.
+        summary:
+          $ref: '#/components/schemas/FipSummary'
+        ownerId:
+          type: [string, 'null']
+        sessionId:
+          type: [string, 'null']
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    FipSummary:
+      type: object
+      description: Counts, so a consumer can show a badge without parsing answers.
+      properties:
+        answeredQuestions:
+          type: integer
+        totalQuestions:
+          type: [integer, 'null']
+        declarations:
+          type: integer
+        byStatus:
+          type: object
+          additionalProperties:
+            type: integer
+          examples:
+            - current: 14
+              planned: 3
+              planned-development: 1
+              planned-replacement: 0
+              none: 0
+    Community:
+      type: [object, 'null']
+      properties:
+        name:
+          type: [string, 'null']
+        description:
+          type: [string, 'null']
+        domain:
+          type: [string, 'null']
+        links:
+          type: array
+          items:
+            type: string
+            format: uri
+        dataSteward:
+          type: [object, 'null']
+          properties:
+            orcid:
+              type: [string, 'null']
+              examples: ['0000-0002-1825-0097']
+            name:
+              type: [string, 'null']
+    RelatedDmp:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Normalised https URL of the plan.
+          examples: ['https://fiodmp.fiocruz.br/KQU5N0C']
+        version:
+          type: [string, 'null']
+          examples: ['13']
+        system:
+          type: string
+          enum: [FioDMP, other]
+          description: Detected server-side; a client-sent value is ignored.
+        dmpId:
+          type: [string, 'null']
+          description: Short plan id, present only for a recognised FioDMP URL.
+          examples: [KQU5N0C]
+    Answer:
+      type: object
+      required: [questionId, declarations]
+      properties:
+        questionId:
+          type: string
+          examples: [F2, R1.1-data]
+        declarations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Declaration'
+        comment:
+          type: [string, 'null']
+    Declaration:
+      type: object
+      required: [status]
+      description: Exactly one of ferId or ferFreeText is set.
+      properties:
+        ferId:
+          type: [string, 'null']
+          description: IRI of a FAIR Enabling Resource.
+          examples: ['https://www.doi.org/']
+        ferFreeText:
+          type: [string, 'null']
+        status:
+          type: string
+          enum: [current, planned, planned-development, planned-replacement, none]
+        note:
+          description: Considerations, one entry per language tag.
+          type: [object, 'null']
+          additionalProperties:
+            type: string
+        dmpEvidence:
+          $ref: '#/components/schemas/DmpEvidence'
+    DmpEvidence:
+      type: [object, 'null']
+      description: Where in a linked plan this declaration is written down. Resolved in exports.
+      properties:
+        dmpIndex:
+          type: integer
+          minimum: 0
+        dmpUrl:
+          type: string
+          format: uri
+        dmpSystem:
+          type: string
+        dmpVersion:
+          type: [string, 'null']
+        section:
+          type: [string, 'null']
+          description: FioDMP section letter A-G, or free text.
+          examples: [C]
+        questionRef:
+          type: [string, 'null']
+          examples: [C.3]
+    PrefillRequest:
+      type: object
+      required: [dmpUrl]
+      properties:
+        dmpUrl:
+          type: string
+          format: uri
+          examples: ['https://fiodmp.fiocruz.br/KQU5N0C']
+    PrefillUnavailable:
+      type: object
+      required: [detail, requires]
+      properties:
+        detail:
+          type: string
+          const: fiodmp_api_unavailable
+        dmpUrl:
+          type: string
+          format: uri
+        system:
+          type: string
+        message:
+          type: string
+        requires:
+          type: object
+          properties:
+            endpoint:
+              type: string
+              examples: ['GET /api/plans/{id}']
+            format:
+              type: string
+              examples: ['RDA DMP Common Standard (maDMP) 1.1 JSON']
+            reference:
+              type: string
+              format: uri
+              examples: ['https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard']
+            contract:
+              type: string
+              examples: ['docs/integration/fiodmp-api-contract.md']
+    PlanVersionList:
+      type: object
+      required: [plan_id, versions]
+      properties:
+        plan_id:
+          type: string
+        versions:
+          type: array
+          items:
+            type: object
+            required: [version]
+            properties:
+              version:
+                type: string
+              modified:
+                type: string
+                format: date-time
+              url:
+                type: string
+                format: uri
+    MaDmpDocument:
+      type: object
+      required: [dmp]
+      properties:
+        dmp:
+          $ref: '#/components/schemas/Dmp'
+    Dmp:
+      type: object
+      description: RDA maDMP 1.1 plan, reduced to what FIP Manager reads.
+      required: [dmp_id, title, modified]
+      properties:
+        dmp_id:
+          $ref: '#/components/schemas/Identifier'
+        title:
+          type: string
+        description:
+          type: string
+        created:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+        language:
+          type: string
+          description: ISO 639-3, as in maDMP.
+          examples: [por, eng, spa]
+        ethical_issues_exist:
+          type: string
+          enum: ['yes', 'no', 'unknown']
+        contact:
+          $ref: '#/components/schemas/Contact'
+        contributor:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        project:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+        dataset:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dataset'
+        fair_implementation_profile:
+          type: string
+          format: uri
+          description: |
+            PROPOSED extension (contract doc section 3.2): the URL of the FIP this plan follows. The
+            alternative shape is `extension: [{"fiodmp": {"fair_implementation_profile": "..."}}]`.
+          examples: ['https://fipm.example.org/fips/7Q2M8XKD']
+    Identifier:
+      type: object
+      required: [identifier, type]
+      properties:
+        identifier:
+          type: string
+        type:
+          type: string
+          enum: [handle, doi, ark, url, other]
+    Contact:
+      type: object
+      properties:
+        name:
+          type: string
+        mbox:
+          type: string
+          format: email
+        role:
+          type: array
+          items:
+            type: string
+        contact_id:
+          type: object
+          properties:
+            identifier:
+              type: string
+              examples: ['https://orcid.org/0000-0002-1825-0097']
+            type:
+              type: string
+              enum: [orcid, isni, openid, other]
+        contributor_id:
+          type: object
+          properties:
+            identifier:
+              type: string
+            type:
+              type: string
+    Dataset:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        issued:
+          type: string
+        language:
+          type: string
+        keyword:
+          type: array
+          items:
+            type: string
+        personal_data:
+          type: string
+          enum: ['yes', 'no', 'unknown']
+        sensitive_data:
+          type: string
+          enum: ['yes', 'no', 'unknown']
+        preservation_statement:
+          type: string
+        data_quality_assurance:
+          type: array
+          items:
+            type: string
+        dataset_id:
+          $ref: '#/components/schemas/Identifier'
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetMetadata'
+        security_and_privacy:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+        technical_resource:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+        distribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/Distribution'
+    DatasetMetadata:
+      type: object
+      required: [metadata_standard_id]
+      properties:
+        description:
+          type: string
+        language:
+          type: string
+        metadata_standard_id:
+          type: object
+          required: [identifier, type]
+          properties:
+            identifier:
+              type: string
+              examples: ['http://www.dublincore.org/specifications/dublin-core/dcmi-terms/']
+            type:
+              type: string
+              enum: [url, other]
+    Distribution:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        access_url:
+          type: string
+        download_url:
+          type: string
+          format: uri
+        available_until:
+          type: string
+        byte_size:
+          type: integer
+        data_access:
+          type: string
+          enum: [open, shared, closed]
+        format:
+          type: array
+          description: IANA media types.
+          items:
+            type: string
+        license:
+          type: array
+          items:
+            type: object
+            required: [license_ref]
+            properties:
+              license_ref:
+                type: string
+                format: uri
+                examples: ['https://creativecommons.org/licenses/by/4.0/']
+              start_date:
+                type: string
+        host:
+          $ref: '#/components/schemas/Host'
+    Host:
+      type: object
+      required: [title, url]
+      properties:
+        title:
+          type: string
+          examples: [ARCA - Repositorio Institucional da Fiocruz]
+        url:
+          type: string
+          format: uri
+        description:
+          type: string
+        availability:
+          type: string
+        backup_frequency:
+          type: string
+        backup_type:
+          type: string
+        certified_with:
+          type: string
+        geo_location:
+          type: string
+        storage_type:
+          type: string
+        support_versioning:
+          type: string
+          enum: ['yes', 'no', 'unknown']
+        pid_system:
+          type: array
+          description: Identifier systems the host mints - maps to FIP question F1.
+          items:
+            type: string
+            enum: [ark, arxiv, bibcode, doi, ean13, eissn, handle, igsn, isbn, issn, istc, lissn, lsid, pmid, purl, upc, url, urn, other]
