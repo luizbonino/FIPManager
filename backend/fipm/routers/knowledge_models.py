@@ -189,10 +189,24 @@ def _get_readable_km_or_404(
 def _get_owned_km_or_404(db: Session, km_id: str, version: str, user: User) -> KnowledgeModel:
     """404 unreadable; 403 system_model_readonly for a system row (no admin
     exception -- spec 04 §7 A2: never editable in place, not even by an
-    admin, through this API); 403 forbidden readable-but-not-owned."""
+    admin, through this API); 403 forbidden readable-but-not-owned.
+
+    A shipped `status: "draft"` model (CONFOA 2026 workshop forks) imports as
+    `is_system=False, owner_id=None` -- an "unowned draft" meant to be
+    reviewed/edited/published by a facilitator. An admin may write it, and
+    doing so claims it (`owner_id` is set to that admin) so the normal
+    owned-row rules apply from then on. A non-admin gets 403 forbidden, same
+    as any other model they don't own."""
     row = _get_readable_km_or_404(db, km_id, version, user)
-    if row.owner_id is None:
+    if row.is_system:
         raise HTTPException(status_code=403, detail="system_model_readonly")
+    if row.owner_id is None:
+        if user.role != "admin":
+            raise HTTPException(status_code=403, detail="forbidden")
+        row.owner_id = user.id
+        db.commit()
+        db.refresh(row)
+        return row
     if not can_write_owned(row.owner_id, user):
         raise HTTPException(status_code=403, detail="forbidden")
     return row
@@ -251,10 +265,19 @@ def list_knowledge_models(
     else:
         query = db.query(KnowledgeModel)
         if user is not None:
-            query = query.filter(
-                ((KnowledgeModel.visibility == "public") & (KnowledgeModel.status == "published"))
-                | (KnowledgeModel.owner_id == user.id)
-            )
+            visible = (
+                (KnowledgeModel.visibility == "public") & (KnowledgeModel.status == "published")
+            ) | (KnowledgeModel.owner_id == user.id)
+            if user.role == "admin":
+                # Unowned drafts (shipped status: "draft" models awaiting
+                # facilitator review -- is_system=False, owner_id=None) are
+                # otherwise invisible to this listing: neither published nor
+                # owned by anyone. Surface them to admins so they can be
+                # found, edited and published.
+                visible = visible | (
+                    KnowledgeModel.owner_id.is_(None) & KnowledgeModel.is_system.is_(False)
+                )
+            query = query.filter(visible)
         else:
             query = query.filter(
                 KnowledgeModel.visibility == "public", KnowledgeModel.status == "published"
@@ -607,7 +630,7 @@ def patch_knowledge_model(
     if body.visibility is not None:
         check_email_verification_gate(user, body.visibility)
 
-    if row.owner_id is None:
+    if row.is_system:
         # spec 04 §7 A2: system models take admin writes for visibility only.
         if user.role != "admin":
             raise HTTPException(status_code=403, detail="system_model_readonly")
@@ -619,7 +642,14 @@ def patch_knowledge_model(
             db.refresh(row)
         return _km_out(row)
 
-    if not can_write_owned(row.owner_id, user):
+    if row.owner_id is None:
+        # Unowned draft (shipped status: "draft" model, is_system=False):
+        # only an admin may write it, and doing so claims it -- see
+        # _get_owned_km_or_404.
+        if user.role != "admin":
+            raise HTTPException(status_code=403, detail="forbidden")
+        row.owner_id = user.id
+    elif not can_write_owned(row.owner_id, user):
         raise HTTPException(status_code=403, detail="forbidden")
 
     if row.status == "published":

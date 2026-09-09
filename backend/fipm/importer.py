@@ -188,6 +188,29 @@ def _bootstrap_admin(db: Session, settings: Settings, summary: ImportSummary) ->
     # Password is never overwritten for an existing admin.
 
 
+def _sync_existing_km_row(
+    db: Session,
+    existing: KnowledgeModel,
+    doc: dict,
+    content_sha256: str,
+    *,
+    is_system: bool,
+) -> None:
+    """Overwrite `existing` with `doc`'s content. Only reached for a row that
+    is either unowned (`owner_id is None`) or being force-synced, so this
+    never touches `owner_id`."""
+    existing.is_system = is_system
+    existing.status = doc["status"]
+    existing.license = doc["license"]
+    existing.source = normalize_source(doc["source"])
+    existing.title = doc["title"]
+    existing.description = doc["description"]
+    existing.changelog = doc.get("changelog", [])
+    existing.content = doc
+    existing.content_sha256 = content_sha256
+    db.commit()
+
+
 def import_knowledge_model_doc(
     db: Session,
     settings: Settings,
@@ -217,6 +240,14 @@ def import_knowledge_model_doc(
     _validate_knowledge_model(doc, settings, known_fer_ids, known_fer_sources)
 
     content_sha256 = _sha256(doc)
+    # Design note (facilitator-editable drafts): `is_system` tracks whether a
+    # row is *published, built-in, read-only* content -- a shipped
+    # `status: "draft"` model (the CONFOA 2026 workshop forks) is meant to be
+    # reviewed and edited by a facilitator/admin before publishing, so it is
+    # NOT a system model even though it ships in data/knowledge-models/ and
+    # starts owner_id=None ("unowned draft" -- routers.knowledge_models
+    # authorizes admin writes on it and claims ownership on first write).
+    is_system = doc["status"] == "published"
     existing = db.get(KnowledgeModel, (doc["id"], doc["version"]))
     if existing is None:
         db.add(
@@ -225,7 +256,7 @@ def import_knowledge_model_doc(
                 version=doc["version"],
                 owner_id=None,
                 visibility="public",
-                is_system=True,
+                is_system=is_system,
                 status=doc["status"],
                 license=doc["license"],
                 source=normalize_source(doc["source"]),
@@ -240,12 +271,33 @@ def import_knowledge_model_doc(
         summary.knowledge_models.created += 1
         # spec 08-workshop-picklists.md §1.3: "python -m fipm import-data
         # ... upsert every inlineFers entry into fers as source=model" --
-        # a system model is owner_id=None.
+        # a freshly-imported row (system or unowned draft) is owner_id=None.
         promoted = promote_inline_fers(db, doc, owner_id=None)
         summary.fers.created += promoted["created"]
         summary.fers.skipped += promoted["skipped"]
     elif existing.content_sha256 == content_sha256:
         summary.knowledge_models.skipped += 1
+    elif existing.owner_id is not None:
+        # A facilitator/admin has since claimed this draft (claim-on-write --
+        # routers.knowledge_models._get_owned_km_or_404) and may have edited
+        # its content. owner_id is never set on a system row, so this can
+        # only be a claimed draft; never overwrite it, --force included.
+        logger.info(
+            "knowledge model %s@%s is claimed by user %s; skipping re-import "
+            "(facilitator edits are never overwritten by import-data)",
+            doc["id"],
+            doc["version"],
+            existing.owner_id,
+        )
+        summary.knowledge_models.skipped += 1
+    elif existing.status == "draft":
+        # Unclaimed draft whose source file changed on disk: safe to sync
+        # unconditionally (no facilitator edits to lose).
+        _sync_existing_km_row(db, existing, doc, content_sha256, is_system=is_system)
+        summary.knowledge_models.updated += 1
+        promoted = promote_inline_fers(db, doc, owner_id=None)
+        summary.fers.created += promoted["created"]
+        summary.fers.skipped += promoted["skipped"]
     elif not force:
         logger.warning(
             "knowledge model %s@%s changed on disk; skipping (rerun with --force)",
@@ -254,16 +306,7 @@ def import_knowledge_model_doc(
         )
         summary.knowledge_models.skipped += 1
     else:
-        existing.is_system = True
-        existing.status = doc["status"]
-        existing.license = doc["license"]
-        existing.source = normalize_source(doc["source"])
-        existing.title = doc["title"]
-        existing.description = doc["description"]
-        existing.changelog = doc.get("changelog", [])
-        existing.content = doc
-        existing.content_sha256 = content_sha256
-        db.commit()
+        _sync_existing_km_row(db, existing, doc, content_sha256, is_system=is_system)
         summary.knowledge_models.updated += 1
         promoted = promote_inline_fers(db, doc, owner_id=None)
         summary.fers.created += promoted["created"]

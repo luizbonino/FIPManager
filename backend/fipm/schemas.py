@@ -155,6 +155,11 @@ class KnowledgeModelSummary(CamelModel):
     # ones kept so the pre-week-3 frontend keeps working.
     owner_id: str | None = None
     is_system: bool = False
+    # True only for a shipped `status: "draft"` model (is_system=False,
+    # owner_id=None) awaiting facilitator review/claim -- lets the frontend
+    # group these separately from a published system model or a user's own
+    # draft (routers.knowledge_models.list_knowledge_models, importer.py).
+    is_unowned_draft: bool = False
     question_count: int = 0
     forked_from: dict[str, str] | None = None
 
@@ -808,6 +813,7 @@ def km_summary_dict(row: Any) -> dict[str, Any]:
         updated_at=row.updated_at,
         owner_id=row.owner_id,
         is_system=row.is_system,
+        is_unowned_draft=row.owner_id is None and not row.is_system,
         question_count=question_count,
         forked_from=content.get("forkedFrom"),
     )
