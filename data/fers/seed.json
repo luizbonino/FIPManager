@@ -1,560 +1,2079 @@
 [
   {
     "id": "https://www.doi.org/",
-    "label": { "en": "DOI (Digital Object Identifier)" },
+    "label": {
+      "en": "DOI (Digital Object Identifier)"
+    },
     "type": "identifier-service",
     "homepage": "https://www.doi.org/",
-    "description": { "en": "The DOI System provides persistent, resolvable identifiers for digital objects, managed by registration agencies such as DataCite and Crossref." },
-    "source": "seed"
+    "description": {
+      "en": "The DOI System provides persistent, resolvable identifiers for digital objects, managed by registration agencies such as DataCite and Crossref."
+    },
+    "source": "seed",
+    "aliases": [
+      "DOI",
+      "DOI do conjunto de dados"
+    ]
   },
   {
     "id": "https://www.handle.net/",
-    "label": { "en": "Handle System" },
+    "label": {
+      "en": "Handle System"
+    },
     "type": "identifier-service",
     "homepage": "https://www.handle.net/",
-    "description": { "en": "A general-purpose distributed system for assigning, managing and resolving persistent identifiers; the underlying technology for DOIs." },
-    "source": "seed"
+    "description": {
+      "en": "A general-purpose distributed system for assigning, managing and resolving persistent identifiers; the underlying technology for DOIs."
+    },
+    "source": "seed",
+    "aliases": [
+      "Handle ou ARK"
+    ]
   },
   {
     "id": "https://purl.archive.org/",
-    "label": { "en": "PURL (Persistent URL)" },
+    "label": {
+      "en": "PURL (Persistent URL)"
+    },
     "type": "identifier-service",
     "homepage": "https://purl.archive.org/",
-    "description": { "en": "A redirection service, now operated by the Internet Archive, providing stable URLs that can be repointed as resource locations change." },
+    "description": {
+      "en": "A redirection service, now operated by the Internet Archive, providing stable URLs that can be repointed as resource locations change."
+    },
     "source": "seed"
   },
   {
     "id": "https://w3id.org/",
-    "label": { "en": "w3id.org" },
+    "label": {
+      "en": "w3id.org"
+    },
     "type": "identifier-service",
     "homepage": "https://w3id.org/",
-    "description": { "en": "A permanent URL redirection service for Linked Data and Semantic Web vocabularies, maintained by the W3C Permanent Identifier Community Group." },
+    "description": {
+      "en": "A permanent URL redirection service for Linked Data and Semantic Web vocabularies, maintained by the W3C Permanent Identifier Community Group."
+    },
     "source": "seed"
   },
   {
     "id": "https://arks.org/",
-    "label": { "en": "ARK (Archival Resource Key)" },
+    "label": {
+      "en": "ARK (Archival Resource Key)"
+    },
     "type": "identifier-service",
     "homepage": "https://arks.org/",
-    "description": { "en": "A persistent identifier scheme designed to support long-term access to information objects, widely used by libraries and archives." },
-    "source": "seed"
+    "description": {
+      "en": "A persistent identifier scheme designed to support long-term access to information objects, widely used by libraries and archives."
+    },
+    "source": "seed",
+    "aliases": [
+      "Handle ou ARK"
+    ]
   },
   {
     "id": "https://orcid.org/",
-    "label": { "en": "ORCID" },
+    "label": {
+      "en": "ORCID"
+    },
     "type": "identifier-service",
     "homepage": "https://orcid.org/",
-    "description": { "en": "Provides a persistent, unique identifier for researchers to distinguish themselves and connect their research contributions." },
-    "source": "seed"
+    "description": {
+      "en": "Provides a persistent, unique identifier for researchers to distinguish themselves and connect their research contributions."
+    },
+    "source": "seed",
+    "aliases": [
+      "ORCID e ROR"
+    ]
   },
   {
     "id": "https://ror.org/",
-    "label": { "en": "ROR (Research Organization Registry)" },
+    "label": {
+      "en": "ROR (Research Organization Registry)"
+    },
     "type": "identifier-service",
     "homepage": "https://ror.org/",
-    "description": { "en": "A global, community-led registry providing persistent identifiers for research organizations." },
-    "source": "seed"
+    "description": {
+      "en": "A global, community-led registry providing persistent identifiers for research organizations."
+    },
+    "source": "seed",
+    "aliases": [
+      "ORCID e ROR"
+    ]
   },
   {
     "id": "https://purl.org/dc/terms/",
-    "label": { "en": "DCMI Metadata Terms (Dublin Core)" },
+    "label": {
+      "en": "DCMI Metadata Terms (Dublin Core)"
+    },
     "type": "metadata-schema",
     "homepage": "https://www.dublincore.org/specifications/dublin-core/dcmi-terms/",
-    "aliases": ["Dublin Core", "DCMI Terms"],
-    "description": { "en": "A general-purpose metadata vocabulary of properties and classes for describing resources, maintained by the Dublin Core Metadata Initiative." },
+    "aliases": [
+      "Dublin Core",
+      "DCMI Terms"
+    ],
+    "description": {
+      "en": "A general-purpose metadata vocabulary of properties and classes for describing resources, maintained by the Dublin Core Metadata Initiative."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/vocab-dcat-3/",
-    "label": { "en": "DCAT (Data Catalog Vocabulary)" },
+    "label": {
+      "en": "DCAT (Data Catalog Vocabulary)"
+    },
     "type": "metadata-schema",
     "homepage": "https://www.w3.org/TR/vocab-dcat-3/",
-    "aliases": ["DCAT2", "DCAT3"],
-    "description": { "en": "A W3C RDF vocabulary for describing data catalogs, datasets, distributions and services to enable interoperable data discovery." },
+    "aliases": [
+      "DCAT2",
+      "DCAT3"
+    ],
+    "description": {
+      "en": "A W3C RDF vocabulary for describing data catalogs, datasets, distributions and services to enable interoperable data discovery."
+    },
     "source": "seed"
   },
   {
     "id": "https://schema.org/",
-    "label": { "en": "schema.org" },
+    "label": {
+      "en": "schema.org"
+    },
     "type": "metadata-schema",
     "homepage": "https://schema.org/",
-    "description": { "en": "A collaborative, cross-vendor vocabulary for structured data markup on web pages, widely used to describe datasets via schema:Dataset." },
+    "description": {
+      "en": "A collaborative, cross-vendor vocabulary for structured data markup on web pages, widely used to describe datasets via schema:Dataset."
+    },
     "source": "seed"
   },
   {
     "id": "https://schema.datacite.org/",
-    "label": { "en": "DataCite Metadata Schema" },
+    "label": {
+      "en": "DataCite Metadata Schema"
+    },
     "type": "metadata-schema",
     "homepage": "https://schema.datacite.org/",
-    "description": { "en": "A list of core metadata properties for accurate and consistent identification of research data and other outputs for citation and discovery." },
-    "source": "seed"
+    "description": {
+      "en": "A list of core metadata properties for accurate and consistent identification of research data and other outputs for citation and discovery."
+    },
+    "source": "seed",
+    "aliases": [
+      "DataCite Metadata Schema",
+      "Campos de autoria e contribuição do DataCite",
+      "DataCite / Bioschemas",
+      "DataCite"
+    ]
   },
   {
     "id": "https://www.iso.org/standard/53798.html",
-    "label": { "en": "ISO 19115-1:2014 Geographic information — Metadata" },
+    "label": {
+      "en": "ISO 19115-1:2014 Geographic information — Metadata"
+    },
     "type": "metadata-schema",
     "homepage": "https://www.iso.org/standard/53798.html",
-    "aliases": ["ISO 19115"],
-    "description": { "en": "Defines the schema for describing geographic information and services, including identification, extent, quality and distribution metadata." },
+    "aliases": [
+      "ISO 19115",
+      "ISO 19115 (dados geoespaciais)"
+    ],
+    "description": {
+      "en": "Defines the schema for describing geographic information and services, including identification, extent, quality and distribution metadata."
+    },
     "source": "seed"
   },
   {
     "id": "https://ddialliance.org/",
-    "label": { "en": "DDI (Data Documentation Initiative)" },
+    "label": {
+      "en": "DDI (Data Documentation Initiative)"
+    },
     "type": "metadata-schema",
     "homepage": "https://ddialliance.org/",
-    "description": { "en": "An international standard for describing data from the social, behavioral and economic sciences across the research data lifecycle." },
-    "source": "seed"
+    "description": {
+      "en": "An international standard for describing data from the social, behavioral and economic sciences across the research data lifecycle."
+    },
+    "source": "seed",
+    "aliases": [
+      "DDI (inquéritos e microdados)",
+      "DDI (quando pesquisa por questionário)",
+      "DDI para microdados",
+      "DDI para questionários",
+      "DDI"
+    ]
   },
   {
     "id": "https://dwc.tdwg.org/",
-    "label": { "en": "Darwin Core" },
+    "label": {
+      "en": "Darwin Core"
+    },
     "type": "metadata-schema",
     "homepage": "https://dwc.tdwg.org/",
-    "description": { "en": "A biodiversity data standard providing a stable, extensible vocabulary of terms for sharing information about biological diversity." },
-    "source": "seed"
+    "description": {
+      "en": "A biodiversity data standard providing a stable, extensible vocabulary of terms for sharing information about biological diversity."
+    },
+    "source": "seed",
+    "aliases": [
+      "Darwin Core terms / TDWG vocabularies",
+      "Darwin Core terms",
+      "Darwin Core / DwC-A",
+      "DwC Event para amostragem"
+    ]
   },
   {
     "id": "https://www.fged.org/projects/miame",
-    "label": { "en": "MIAME (Minimum Information About a Microarray Experiment)" },
+    "label": {
+      "en": "MIAME (Minimum Information About a Microarray Experiment)"
+    },
     "type": "metadata-schema",
     "homepage": "https://www.fged.org/projects/miame",
-    "description": { "en": "Specifies the minimum information required to unambiguously interpret and independently verify microarray experiment results." },
-    "source": "seed"
+    "description": {
+      "en": "Specifies the minimum information required to unambiguously interpret and independently verify microarray experiment results."
+    },
+    "source": "seed",
+    "aliases": [
+      "MIAME / MINSEQE / MIAPE"
+    ]
   },
   {
     "id": "https://metadatacenter.org/",
-    "label": { "en": "CEDAR Metadata Templates" },
+    "label": {
+      "en": "CEDAR Metadata Templates"
+    },
     "type": "metadata-schema",
     "homepage": "https://metadatacenter.org/",
-    "description": { "en": "The CEDAR Workbench lets researchers author, share and reuse metadata templates to produce structured, standards-compliant metadata." },
+    "description": {
+      "en": "The CEDAR Workbench lets researchers author, share and reuse metadata templates to produce structured, standards-compliant metadata."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.rd-alliance.org/groups/dmp-common-standards-wg/",
-    "label": { "en": "RDA DMP Common Standard (maDMP)" },
+    "label": {
+      "en": "RDA DMP Common Standard (maDMP)"
+    },
     "type": "metadata-schema",
     "homepage": "https://www.rd-alliance.org/groups/dmp-common-standards-wg/",
-    "aliases": ["RDA maDMP"],
-    "description": { "en": "A machine-actionable data management plan (maDMP) schema enabling DMPs to be exchanged and processed automatically by tools and systems." },
+    "aliases": [
+      "RDA maDMP"
+    ],
+    "description": {
+      "en": "A machine-actionable data management plan (maDMP) schema enabling DMPs to be exchanged and processed automatically by tools and systems."
+    },
     "source": "seed"
   },
   {
     "id": "https://signposting.org/",
-    "label": { "en": "Signposting" },
+    "label": {
+      "en": "Signposting"
+    },
     "type": "metadata-data-linking-schema",
     "homepage": "https://signposting.org/",
-    "description": { "en": "Adds typed HTTP Link headers and link relations that make the relationship between a resource, its metadata and related resources machine-discoverable." },
+    "description": {
+      "en": "Adds typed HTTP Link headers and link relations that make the relationship between a resource, its metadata and related resources machine-discoverable."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.researchobject.org/ro-crate/",
-    "label": { "en": "RO-Crate" },
+    "label": {
+      "en": "RO-Crate"
+    },
     "type": "metadata-data-linking-schema",
     "homepage": "https://www.researchobject.org/ro-crate/",
-    "description": { "en": "A lightweight method to package research data together with machine-readable JSON-LD metadata describing the data, its context and provenance." },
-    "source": "seed"
+    "description": {
+      "en": "A lightweight method to package research data together with machine-readable JSON-LD metadata describing the data, its context and provenance."
+    },
+    "source": "seed",
+    "aliases": [
+      "RO-Crate / RDF / JSON-LD",
+      "W3C PROV / RO-Crate",
+      "RO-Crate, RDF ou JSON-LD"
+    ]
   },
   {
     "id": "https://www.w3.org/ns/dcat#Distribution",
-    "label": { "en": "DCAT Distribution" },
+    "label": {
+      "en": "DCAT Distribution"
+    },
     "type": "metadata-data-linking-schema",
     "homepage": "https://www.w3.org/TR/vocab-dcat-3/#Class:Distribution",
-    "description": { "en": "The dcat:Distribution class links a dataset's metadata record to its actual accessible data files, formats and access URLs." },
+    "description": {
+      "en": "The dcat:Distribution class links a dataset's metadata record to its actual accessible data files, formats and access URLs."
+    },
     "source": "seed"
   },
   {
     "id": "https://commons.datacite.org/",
-    "label": { "en": "DataCite Commons" },
+    "label": {
+      "en": "DataCite Commons"
+    },
     "type": "registry",
     "homepage": "https://commons.datacite.org/",
-    "description": { "en": "A discovery service for exploring connections between research outputs, people, organizations and funders using DataCite and ORCID metadata." },
-    "source": "seed"
+    "description": {
+      "en": "A discovery service for exploring connections between research outputs, people, organizations and funders using DataCite and ORCID metadata."
+    },
+    "source": "seed",
+    "aliases": [
+      "DataCite Commons",
+      "DataCite Commons / Google Dataset Search",
+      "DataCite Commons ou Google Dataset Search"
+    ]
   },
   {
     "id": "https://datasetsearch.research.google.com/",
-    "label": { "en": "Google Dataset Search" },
+    "label": {
+      "en": "Google Dataset Search"
+    },
     "type": "registry",
     "homepage": "https://datasetsearch.research.google.com/",
-    "description": { "en": "A search engine for discovering datasets indexed from their schema.org and DCAT metadata across the web." },
-    "source": "seed"
+    "description": {
+      "en": "A search engine for discovering datasets indexed from their schema.org and DCAT metadata across the web."
+    },
+    "source": "seed",
+    "aliases": [
+      "DataCite Commons / Google Dataset Search",
+      "DataCite Commons ou Google Dataset Search",
+      "Google Dataset Search"
+    ]
   },
   {
     "id": "https://www.re3data.org/",
-    "label": { "en": "re3data" },
+    "label": {
+      "en": "re3data"
+    },
     "type": "registry",
     "homepage": "https://www.re3data.org/",
-    "description": { "en": "A global registry of research data repositories covering a wide range of academic disciplines." },
+    "description": {
+      "en": "A global registry of research data repositories covering a wide range of academic disciplines."
+    },
     "source": "seed"
   },
   {
     "id": "https://fairsharing.org/",
-    "label": { "en": "FAIRsharing" },
+    "label": {
+      "en": "FAIRsharing"
+    },
     "type": "registry",
     "homepage": "https://fairsharing.org/",
-    "description": { "en": "A curated, searchable registry of standards, databases and data policies across scientific disciplines." },
+    "description": {
+      "en": "A curated, searchable registry of standards, databases and data policies across scientific disciplines."
+    },
     "source": "seed"
   },
   {
     "id": "https://b2find.eudat.eu/",
-    "label": { "en": "B2FIND" },
+    "label": {
+      "en": "B2FIND"
+    },
     "type": "registry",
     "homepage": "https://b2find.eudat.eu/",
-    "description": { "en": "A EUDAT metadata catalogue that harvests and indexes research data from EUDAT and other repositories for cross-disciplinary discovery." },
+    "description": {
+      "en": "A EUDAT metadata catalogue that harvests and indexes research data from EUDAT and other repositories for cross-disciplinary discovery."
+    },
     "source": "seed"
   },
   {
     "id": "https://explore.openaire.eu/",
-    "label": { "en": "OpenAIRE Explore" },
+    "label": {
+      "en": "OpenAIRE Explore"
+    },
     "type": "registry",
     "homepage": "https://explore.openaire.eu/",
-    "description": { "en": "An open discovery portal for publications, datasets, software and other research products linked across European infrastructures." },
+    "description": {
+      "en": "An open discovery portal for publications, datasets, software and other research products linked across European infrastructures."
+    },
     "source": "seed"
   },
   {
     "id": "https://zenodo.org/",
-    "label": { "en": "Zenodo" },
+    "label": {
+      "en": "Zenodo"
+    },
     "type": "registry",
     "homepage": "https://zenodo.org/",
-    "description": { "en": "A general-purpose open repository operated by CERN that lets researchers deposit and discover datasets, software and publications." },
-    "source": "seed"
+    "description": {
+      "en": "A general-purpose open repository operated by CERN that lets researchers deposit and discover datasets, software and publications."
+    },
+    "source": "seed",
+    "aliases": [
+      "Dataverse ou Zenodo"
+    ]
   },
   {
     "id": "https://dataverse.org/",
-    "label": { "en": "Dataverse" },
+    "label": {
+      "en": "Dataverse"
+    },
     "type": "registry",
     "homepage": "https://dataverse.org/",
-    "description": { "en": "An open-source repository platform for sharing, citing and preserving research data, deployed by institutions worldwide." },
-    "source": "seed"
+    "description": {
+      "en": "An open-source repository platform for sharing, citing and preserving research data, deployed by institutions worldwide."
+    },
+    "source": "seed",
+    "aliases": [
+      "Dataverse ou Zenodo"
+    ]
   },
   {
     "id": "https://dspace.org/",
-    "label": { "en": "DSpace" },
+    "label": {
+      "en": "DSpace"
+    },
     "type": "registry",
     "homepage": "https://dspace.org/",
-    "description": { "en": "An open-source repository software platform used by institutions to manage and provide searchable access to digital collections." },
+    "description": {
+      "en": "An open-source repository software platform used by institutions to manage and provide searchable access to digital collections."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.rfc-editor.org/rfc/rfc9110",
-    "label": { "en": "HTTPS" },
+    "label": {
+      "en": "HTTPS"
+    },
     "type": "communication-protocol",
     "homepage": "https://www.rfc-editor.org/rfc/rfc9110",
-    "description": { "en": "HTTP layered over TLS encryption; the standard secure protocol for transferring data and metadata over the Web." },
+    "description": {
+      "en": "HTTP layered over TLS encryption; the standard secure protocol for transferring data and metadata over the Web."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.openarchives.org/pmh/",
-    "label": { "en": "OAI-PMH" },
+    "label": {
+      "en": "OAI-PMH"
+    },
     "type": "communication-protocol",
     "homepage": "https://www.openarchives.org/pmh/",
-    "description": { "en": "The Open Archives Initiative Protocol for Metadata Harvesting provides an application-independent framework for harvesting metadata between repositories." },
+    "description": {
+      "en": "The Open Archives Initiative Protocol for Metadata Harvesting provides an application-independent framework for harvesting metadata between repositories."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/sparql11-protocol/",
-    "label": { "en": "SPARQL Protocol" },
+    "label": {
+      "en": "SPARQL Protocol"
+    },
     "type": "communication-protocol",
     "homepage": "https://www.w3.org/TR/sparql11-protocol/",
-    "description": { "en": "Defines how SPARQL queries and updates are transmitted to a SPARQL processing service over HTTP." },
-    "source": "seed"
+    "description": {
+      "en": "Defines how SPARQL queries and updates are transmitted to a SPARQL processing service over HTTP."
+    },
+    "source": "seed",
+    "aliases": [
+      "SPARQL"
+    ]
   },
   {
     "id": "https://www.rfc-editor.org/rfc/rfc959",
-    "label": { "en": "FTP / SFTP" },
+    "label": {
+      "en": "FTP / SFTP"
+    },
     "type": "communication-protocol",
     "homepage": "https://www.rfc-editor.org/rfc/rfc959",
-    "aliases": ["FTP", "SFTP"],
-    "description": { "en": "FTP and its secure variant SFTP are standard protocols for transferring files between a client and a server over a network." },
+    "aliases": [
+      "FTP",
+      "SFTP",
+      "FTP/SFTP"
+    ],
+    "description": {
+      "en": "FTP and its secure variant SFTP are standard protocols for transferring files between a client and a server over a network."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.rfc-editor.org/rfc/rfc6749",
-    "label": { "en": "OAuth 2.0" },
+    "label": {
+      "en": "OAuth 2.0"
+    },
     "type": "authentication-authorization-service",
     "homepage": "https://www.rfc-editor.org/rfc/rfc6749",
-    "description": { "en": "An authorization framework enabling applications to obtain limited access to a user's resources without exposing their credentials." },
-    "source": "seed"
+    "description": {
+      "en": "An authorization framework enabling applications to obtain limited access to a user's resources without exposing their credentials."
+    },
+    "source": "seed",
+    "aliases": [
+      "OAuth 2.0 ou OpenID Connect"
+    ]
   },
   {
     "id": "https://openid.net/specs/openid-connect-core-1_0.html",
-    "label": { "en": "OpenID Connect" },
+    "label": {
+      "en": "OpenID Connect"
+    },
     "type": "authentication-authorization-service",
     "homepage": "https://openid.net/specs/openid-connect-core-1_0.html",
-    "description": { "en": "An identity layer built on top of OAuth 2.0 that lets clients verify user identity and obtain basic profile information." },
-    "source": "seed"
+    "description": {
+      "en": "An identity layer built on top of OAuth 2.0 that lets clients verify user identity and obtain basic profile information."
+    },
+    "source": "seed",
+    "aliases": [
+      "OAuth 2.0 ou OpenID Connect"
+    ]
   },
   {
     "id": "https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf",
-    "label": { "en": "SAML 2.0" },
+    "label": {
+      "en": "SAML 2.0"
+    },
     "type": "authentication-authorization-service",
     "homepage": "https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf",
-    "description": { "en": "An XML-based OASIS standard for exchanging authentication and authorization data between identity and service providers." },
+    "description": {
+      "en": "An XML-based OASIS standard for exchanging authentication and authorization data between identity and service providers."
+    },
     "source": "seed"
   },
   {
     "id": "https://edugain.org/",
-    "label": { "en": "eduGAIN" },
+    "label": {
+      "en": "eduGAIN"
+    },
     "type": "authentication-authorization-service",
     "homepage": "https://edugain.org/",
-    "description": { "en": "An international interfederation service that interconnects research and education identity federations for federated access." },
+    "description": {
+      "en": "An international interfederation service that interconnects research and education identity federations for federated access."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.shibboleth.net/",
-    "label": { "en": "Shibboleth" },
+    "label": {
+      "en": "Shibboleth"
+    },
     "type": "authentication-authorization-service",
     "homepage": "https://www.shibboleth.net/",
-    "description": { "en": "An open-source federated identity and access management system implementing SAML-based single sign-on for web applications." },
+    "description": {
+      "en": "An open-source federated identity and access management system implementing SAML-based single sign-on for web applications."
+    },
     "source": "seed"
   },
   {
     "id": "https://orcid.org/oauth/authorize",
-    "label": { "en": "ORCID Sign In" },
+    "label": {
+      "en": "ORCID Sign In"
+    },
     "type": "authentication-authorization-service",
     "homepage": "https://info.orcid.org/documentation/",
-    "aliases": ["ORCID login", "ORCID OAuth"],
-    "description": { "en": "Lets researchers authenticate to third-party systems using their ORCID iD via OAuth 2.0, linking actions to their persistent identifier." },
+    "aliases": [
+      "ORCID login",
+      "ORCID OAuth"
+    ],
+    "description": {
+      "en": "Lets researchers authenticate to third-party systems using their ORCID iD via OAuth 2.0, linking actions to their persistent identifier."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.coretrustseal.org/",
-    "label": { "en": "CoreTrustSeal" },
+    "label": {
+      "en": "CoreTrustSeal"
+    },
     "type": "metadata-preservation-policy",
     "homepage": "https://www.coretrustseal.org/",
-    "description": { "en": "A community-based certification for trustworthy data repositories, assessing their policies for long-term data and metadata preservation." },
+    "description": {
+      "en": "A community-based certification for trustworthy data repositories, assessing their policies for long-term data and metadata preservation."
+    },
     "source": "seed"
   },
   {
     "id": "https://support.dataverse.harvard.edu/harvard-dataverse-preservation-policy",
-    "label": { "en": "Dataverse Preservation Policy" },
+    "label": {
+      "en": "Dataverse Preservation Policy"
+    },
     "type": "metadata-preservation-policy",
     "homepage": "https://support.dataverse.harvard.edu/harvard-dataverse-preservation-policy",
-    "description": { "en": "Harvard Dataverse's published policy describing how deposited data and metadata are curated and preserved for the long term." },
+    "description": {
+      "en": "Harvard Dataverse's published policy describing how deposited data and metadata are curated and preserved for the long term."
+    },
     "source": "seed"
   },
   {
     "id": "https://about.zenodo.org/policies/",
-    "label": { "en": "Zenodo Preservation Policy" },
+    "label": {
+      "en": "Zenodo Preservation Policy"
+    },
     "type": "metadata-preservation-policy",
     "homepage": "https://about.zenodo.org/policies/",
-    "description": { "en": "Zenodo's general policies, including its commitment to preserve deposited content and metadata for the lifetime of the CERN data centre." },
+    "description": {
+      "en": "Zenodo's general policies, including its commitment to preserve deposited content and metadata for the lifetime of the CERN data centre."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/rdf11-concepts/",
-    "label": { "en": "RDF 1.1" },
+    "label": {
+      "en": "RDF 1.1"
+    },
     "type": "knowledge-representation-language",
     "homepage": "https://www.w3.org/TR/rdf11-concepts/",
-    "description": { "en": "The W3C data model and abstract syntax for representing information as subject-predicate-object triples on the Web." },
-    "source": "seed"
+    "description": {
+      "en": "The W3C data model and abstract syntax for representing information as subject-predicate-object triples on the Web."
+    },
+    "source": "seed",
+    "aliases": [
+      "JSON / RDF",
+      "JSON-LD / RDF",
+      "JSON-LD ou RDF",
+      "RDF / JSON-LD",
+      "RDF / grafo de conhecimento"
+    ]
   },
   {
     "id": "https://www.w3.org/TR/owl2-overview/",
-    "label": { "en": "OWL 2" },
+    "label": {
+      "en": "OWL 2"
+    },
     "type": "knowledge-representation-language",
     "homepage": "https://www.w3.org/TR/owl2-overview/",
-    "description": { "en": "The W3C Web Ontology Language for representing rich, machine-interpretable knowledge via classes, properties and axioms." },
+    "description": {
+      "en": "The W3C Web Ontology Language for representing rich, machine-interpretable knowledge via classes, properties and axioms."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/skos-reference/",
-    "label": { "en": "SKOS" },
+    "label": {
+      "en": "SKOS"
+    },
     "type": "knowledge-representation-language",
     "homepage": "https://www.w3.org/TR/skos-reference/",
-    "description": { "en": "The Simple Knowledge Organization System, a W3C model for expressing controlled vocabularies, thesauri and taxonomies as machine-readable RDF." },
+    "description": {
+      "en": "The Simple Knowledge Organization System, a W3C model for expressing controlled vocabularies, thesauri and taxonomies as machine-readable RDF."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/json-ld11/",
-    "label": { "en": "JSON-LD" },
+    "label": {
+      "en": "JSON-LD"
+    },
     "type": "knowledge-representation-language",
     "homepage": "https://www.w3.org/TR/json-ld11/",
-    "description": { "en": "A W3C standard for expressing Linked Data using JSON syntax, allowing data to carry semantic context." },
-    "source": "seed"
+    "description": {
+      "en": "A W3C standard for expressing Linked Data using JSON syntax, allowing data to carry semantic context."
+    },
+    "source": "seed",
+    "aliases": [
+      "JSON / RDF",
+      "JSON-LD / RDF",
+      "JSON-LD ou RDF",
+      "RDF / JSON-LD"
+    ]
   },
   {
     "id": "https://json-schema.org/",
-    "label": { "en": "JSON Schema" },
+    "label": {
+      "en": "JSON Schema"
+    },
     "type": "knowledge-representation-language",
     "homepage": "https://json-schema.org/",
-    "description": { "en": "A vocabulary for annotating and validating the structure, content and semantics of JSON documents." },
+    "description": {
+      "en": "A vocabulary for annotating and validating the structure, content and semantics of JSON documents."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/xmlschema11-1/",
-    "label": { "en": "XML Schema (XSD)" },
+    "label": {
+      "en": "XML Schema (XSD)"
+    },
     "type": "knowledge-representation-language",
     "homepage": "https://www.w3.org/TR/xmlschema11-1/",
-    "description": { "en": "Defines the structure, content and semantics of XML documents through a machine-processable schema language." },
+    "description": {
+      "en": "Defines the structure, content and semantics of XML documents through a machine-processable schema language."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/shacl/",
-    "label": { "en": "SHACL" },
+    "label": {
+      "en": "SHACL"
+    },
     "type": "knowledge-representation-language",
     "homepage": "https://www.w3.org/TR/shacl/",
-    "description": { "en": "The Shapes Constraint Language, a W3C language for validating RDF graphs against a set of conditions expressed as shapes." },
+    "description": {
+      "en": "The Shapes Constraint Language, a W3C language for validating RDF graphs against a set of conditions expressed as shapes."
+    },
     "source": "seed"
   },
   {
     "id": "https://id.nlm.nih.gov/mesh/",
-    "label": { "en": "MeSH (Medical Subject Headings)" },
+    "label": {
+      "en": "MeSH (Medical Subject Headings)"
+    },
     "type": "structured-vocabulary",
     "homepage": "https://www.nlm.nih.gov/mesh/meshhome.html",
-    "description": { "en": "The U.S. National Library of Medicine's controlled vocabulary thesaurus used for indexing biomedical literature." },
-    "source": "seed"
+    "description": {
+      "en": "The U.S. National Library of Medicine's controlled vocabulary thesaurus used for indexing biomedical literature."
+    },
+    "source": "seed",
+    "aliases": [
+      "DeCS / MeSH"
+    ]
   },
   {
     "id": "https://icd.who.int/en",
-    "label": { "en": "ICD-11" },
+    "label": {
+      "en": "ICD-11"
+    },
     "type": "structured-vocabulary",
     "homepage": "https://icd.who.int/en",
-    "description": { "en": "The World Health Organization's international classification of diseases and related health conditions." },
+    "description": {
+      "en": "The World Health Organization's international classification of diseases and related health conditions."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.snomed.org/",
-    "label": { "en": "SNOMED CT" },
+    "label": {
+      "en": "SNOMED CT"
+    },
     "type": "structured-vocabulary",
     "homepage": "https://www.snomed.org/",
-    "description": { "en": "A comprehensive, multilingual clinical healthcare terminology used for recording and exchanging clinical data." },
-    "source": "seed"
+    "description": {
+      "en": "A comprehensive, multilingual clinical healthcare terminology used for recording and exchanging clinical data."
+    },
+    "source": "seed",
+    "aliases": [
+      "ICNP integrada ao SNOMED CT",
+      "ICNP / SNOMED CT"
+    ]
   },
   {
     "id": "https://agrovoc.fao.org/",
-    "label": { "en": "AGROVOC" },
+    "label": {
+      "en": "AGROVOC"
+    },
     "type": "structured-vocabulary",
     "homepage": "https://agrovoc.fao.org/",
-    "description": { "en": "FAO's multilingual controlled vocabulary covering agriculture, forestry, fisheries, food and related domains." },
+    "description": {
+      "en": "FAO's multilingual controlled vocabulary covering agriculture, forestry, fisheries, food and related domains."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.eionet.europa.eu/gemet/en/about/",
-    "label": { "en": "GEMET" },
+    "label": {
+      "en": "GEMET"
+    },
     "type": "structured-vocabulary",
     "homepage": "https://www.eionet.europa.eu/gemet/en/about/",
-    "description": { "en": "The GEneral Multilingual Environmental Thesaurus, a controlled vocabulary of environmental terminology maintained by the European Environment Agency." },
+    "description": {
+      "en": "The GEneral Multilingual Environmental Thesaurus, a controlled vocabulary of environmental terminology maintained by the European Environment Agency."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.nlm.nih.gov/research/umls/index.html",
-    "label": { "en": "UMLS (Unified Medical Language System)" },
+    "label": {
+      "en": "UMLS (Unified Medical Language System)"
+    },
     "type": "structured-vocabulary",
     "homepage": "https://www.nlm.nih.gov/research/umls/index.html",
-    "description": { "en": "Integrates and distributes key biomedical terminologies and standards to enable interoperability among health information systems." },
+    "description": {
+      "en": "Integrates and distributes key biomedical terminologies and standards to enable interoperability among health information systems."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.dbpedia.org/",
-    "label": { "en": "DBpedia" },
+    "label": {
+      "en": "DBpedia"
+    },
     "type": "semantic-model",
     "homepage": "https://www.dbpedia.org/",
-    "description": { "en": "A crowd-sourced community effort providing a structured, Linked Data knowledge graph extracted from Wikipedia." },
+    "description": {
+      "en": "A crowd-sourced community effort providing a structured, Linked Data knowledge graph extracted from Wikipedia."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.wikidata.org/",
-    "label": { "en": "Wikidata" },
+    "label": {
+      "en": "Wikidata"
+    },
     "type": "semantic-model",
     "homepage": "https://www.wikidata.org/",
-    "description": { "en": "A free, collaborative knowledge base providing structured Linked Data usable across the Wikimedia projects and beyond." },
+    "description": {
+      "en": "A free, collaborative knowledge base providing structured Linked Data usable across the Wikimedia projects and beyond."
+    },
     "source": "seed"
   },
   {
     "id": "http://xmlns.com/foaf/spec/",
-    "label": { "en": "FOAF (Friend of a Friend)" },
+    "label": {
+      "en": "FOAF (Friend of a Friend)"
+    },
     "type": "semantic-model",
     "homepage": "http://xmlns.com/foaf/spec/",
-    "description": { "en": "An RDF vocabulary and ontology for describing people, their attributes and their social connections." },
+    "description": {
+      "en": "An RDF vocabulary and ontology for describing people, their attributes and their social connections."
+    },
     "source": "seed"
   },
   {
     "id": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "label": { "en": "CC0 1.0" },
+    "label": {
+      "en": "CC0 1.0"
+    },
     "type": "data-usage-license",
     "homepage": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "description": { "en": "A public domain dedication that waives all copyright and related rights to a work, allowing unrestricted reuse." },
+    "description": {
+      "en": "A public domain dedication that waives all copyright and related rights to a work, allowing unrestricted reuse."
+    },
     "source": "seed"
   },
   {
     "id": "https://creativecommons.org/licenses/by/4.0/",
-    "label": { "en": "CC BY 4.0" },
+    "label": {
+      "en": "CC BY 4.0"
+    },
     "type": "data-usage-license",
     "homepage": "https://creativecommons.org/licenses/by/4.0/",
-    "description": { "en": "Permits unrestricted reuse and redistribution of a work provided that appropriate credit is given to the creator." },
+    "description": {
+      "en": "Permits unrestricted reuse and redistribution of a work provided that appropriate credit is given to the creator."
+    },
     "source": "seed"
   },
   {
     "id": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "label": { "en": "CC BY-SA 4.0" },
+    "label": {
+      "en": "CC BY-SA 4.0"
+    },
     "type": "data-usage-license",
     "homepage": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "description": { "en": "Permits reuse and adaptation with attribution, provided derivative works are shared under the same licence." },
+    "description": {
+      "en": "Permits reuse and adaptation with attribution, provided derivative works are shared under the same licence."
+    },
     "source": "seed"
   },
   {
     "id": "https://creativecommons.org/licenses/by-nc/4.0/",
-    "label": { "en": "CC BY-NC 4.0" },
+    "label": {
+      "en": "CC BY-NC 4.0"
+    },
     "type": "data-usage-license",
     "homepage": "https://creativecommons.org/licenses/by-nc/4.0/",
-    "description": { "en": "Permits reuse and adaptation with attribution for non-commercial purposes only." },
+    "description": {
+      "en": "Permits reuse and adaptation with attribution for non-commercial purposes only."
+    },
     "source": "seed"
   },
   {
     "id": "https://opendatacommons.org/licenses/by/",
-    "label": { "en": "ODC-BY (Open Data Commons Attribution License)" },
+    "label": {
+      "en": "ODC-BY (Open Data Commons Attribution License)"
+    },
     "type": "data-usage-license",
     "homepage": "https://opendatacommons.org/licenses/by/",
-    "description": { "en": "Allows free reuse of a database provided that attribution is given to its creator." },
+    "description": {
+      "en": "Allows free reuse of a database provided that attribution is given to its creator."
+    },
     "source": "seed"
   },
   {
     "id": "https://opendatacommons.org/licenses/odbl/",
-    "label": { "en": "ODbL (Open Database License)" },
+    "label": {
+      "en": "ODbL (Open Database License)"
+    },
     "type": "data-usage-license",
     "homepage": "https://opendatacommons.org/licenses/odbl/",
-    "description": { "en": "A share-alike licence for databases requiring attribution and that derivative databases remain open." },
+    "description": {
+      "en": "A share-alike licence for databases requiring attribution and that derivative databases remain open."
+    },
     "source": "seed"
   },
   {
     "id": "https://opensource.org/license/mit/",
-    "label": { "en": "MIT License" },
+    "label": {
+      "en": "MIT License"
+    },
     "type": "data-usage-license",
     "homepage": "https://opensource.org/license/mit/",
-    "description": { "en": "A short, permissive software licence allowing reuse with minimal restrictions, requiring only preservation of the copyright notice." },
+    "description": {
+      "en": "A short, permissive software licence allowing reuse with minimal restrictions, requiring only preservation of the copyright notice."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.apache.org/licenses/LICENSE-2.0",
-    "label": { "en": "Apache License 2.0" },
+    "label": {
+      "en": "Apache License 2.0"
+    },
     "type": "data-usage-license",
     "homepage": "https://www.apache.org/licenses/LICENSE-2.0",
-    "description": { "en": "A permissive licence that additionally grants an express patent licence from contributors to users." },
+    "description": {
+      "en": "A permissive licence that additionally grants an express patent licence from contributors to users."
+    },
     "source": "seed"
   },
   {
     "id": "https://www.w3.org/TR/prov-o/",
-    "label": { "en": "PROV-O" },
+    "label": {
+      "en": "PROV-O"
+    },
     "type": "provenance-model",
     "homepage": "https://www.w3.org/TR/prov-o/",
-    "description": { "en": "The W3C OWL ontology for representing and interchanging provenance information generated in different systems and contexts." },
-    "source": "seed"
+    "description": {
+      "en": "The W3C OWL ontology for representing and interchanging provenance information generated in different systems and contexts."
+    },
+    "source": "seed",
+    "aliases": [
+      "W3C PROV / PROV-O",
+      "W3C PROV / RO-Crate"
+    ]
   },
   {
     "id": "https://www.w3.org/TR/prov-dm/",
-    "label": { "en": "PROV-DM" },
+    "label": {
+      "en": "PROV-DM"
+    },
     "type": "provenance-model",
     "homepage": "https://www.w3.org/TR/prov-dm/",
-    "description": { "en": "The W3C conceptual data model for provenance, defining the core entities, activities and agents used to describe a resource's history." },
+    "description": {
+      "en": "The W3C conceptual data model for provenance, defining the core entities, activities and agents used to describe a resource's history."
+    },
     "source": "seed"
   },
   {
     "id": "https://openprovenance.org/opm/",
-    "label": { "en": "OPM (Open Provenance Model)" },
+    "label": {
+      "en": "OPM (Open Provenance Model)"
+    },
     "type": "provenance-model",
     "homepage": "https://openprovenance.org/opm/",
-    "description": { "en": "An earlier community model and interchange format for representing the provenance of process and data, precursor to PROV." },
+    "description": {
+      "en": "An earlier community model and interchange format for representing the provenance of process and data, precursor to PROV."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ncbi.nlm.nih.gov/bioproject/",
+    "label": {
+      "en": "NCBI BioProject",
+      "pt-BR": "BioProject"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ncbi.nlm.nih.gov/bioproject/",
+    "aliases": [
+      "BioProject",
+      "Relações BioProject–BioSample–experimento/execução",
+      "BioProject–BioSample–Experiment–Run"
+    ],
+    "description": {
+      "en": "An NCBI archive that organizes metadata for research projects and links their associated experimental data, providing stable accession numbers."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ncbi.nlm.nih.gov/biosample/",
+    "label": {
+      "en": "NCBI BioSample",
+      "pt-BR": "BioSample"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ncbi.nlm.nih.gov/biosample/",
+    "aliases": [
+      "BioSample / SRA / ENA accession",
+      "BioSample"
+    ],
+    "description": {
+      "en": "An NCBI database of descriptive metadata about biological source materials used in experiments, each assigned a stable accession."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ncbi.nlm.nih.gov/sra",
+    "label": {
+      "en": "SRA (Sequence Read Archive)",
+      "pt-BR": "SRA"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ncbi.nlm.nih.gov/sra",
+    "aliases": [
+      "SRA / ENA / DDBJ",
+      "BioSample / SRA / ENA accession"
+    ],
+    "description": {
+      "en": "The NCBI Sequence Read Archive stores raw sequencing data and alignment information, issuing persistent accessions for submitted runs."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ebi.ac.uk/ena/browser/home",
+    "label": {
+      "en": "ENA (European Nucleotide Archive)",
+      "pt-BR": "ENA"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ebi.ac.uk/ena/browser/home",
+    "aliases": [
+      "SRA / ENA / DDBJ",
+      "BioSample / SRA / ENA accession",
+      "NCBI / ENA APIs",
+      "NCBI / GEO / ENA"
+    ],
+    "description": {
+      "en": "EMBL-EBI's comprehensive archive of nucleotide sequencing information, part of the INSDC collaboration with SRA and DDBJ."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ncbi.nlm.nih.gov/geo/",
+    "label": {
+      "en": "GEO (Gene Expression Omnibus)",
+      "pt-BR": "GEO"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ncbi.nlm.nih.gov/geo/",
+    "aliases": [
+      "GEO / BioStudies",
+      "GEO accession",
+      "NCBI / GEO / ENA",
+      "GEO / BioStudies"
+    ],
+    "description": {
+      "en": "An NCBI public functional genomics data repository storing array- and sequence-based expression data with persistent accessions."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ebi.ac.uk/biostudies/",
+    "label": {
+      "en": "BioStudies"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ebi.ac.uk/biostudies/",
+    "aliases": [
+      "GEO / BioStudies"
+    ],
+    "description": {
+      "en": "An EMBL-EBI database that stores descriptions and links to biological studies and their associated data, including multi-omics datasets."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ebi.ac.uk/pride/",
+    "label": {
+      "en": "PRIDE (PRoteomics IDEntifications Database)",
+      "pt-BR": "PRIDE"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ebi.ac.uk/pride/",
+    "aliases": [
+      "PRIDE / MetaboLights",
+      "PRIDE / MetaboLights accession",
+      "PRIDE / ProteomeXchange"
+    ],
+    "description": {
+      "en": "EMBL-EBI's repository for mass spectrometry proteomics data, a core member of the ProteomeXchange consortium."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ebi.ac.uk/metabolights/",
+    "label": {
+      "en": "MetaboLights"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ebi.ac.uk/metabolights/",
+    "aliases": [
+      "PRIDE / MetaboLights",
+      "PRIDE / MetaboLights accession",
+      "MetaboLights / Metabolomics Workbench"
+    ],
+    "description": {
+      "en": "EMBL-EBI's cross-species, cross-platform repository for metabolomics studies and their raw experimental data."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://ega-archive.org/",
+    "label": {
+      "en": "EGA (European Genome-phenome Archive)",
+      "pt-BR": "EGA"
+    },
+    "type": "identifier-service",
+    "homepage": "https://ega-archive.org/",
+    "aliases": [
+      "EGA / dbGaP",
+      "EGA / dbGaP accession"
+    ],
+    "description": {
+      "en": "A permanent archive for controlled-access, identifiable biological and clinical data, jointly run by EMBL-EBI and CRG."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ncbi.nlm.nih.gov/gap/",
+    "label": {
+      "en": "dbGaP (Database of Genotypes and Phenotypes)",
+      "pt-BR": "dbGaP"
+    },
+    "type": "identifier-service",
+    "homepage": "https://www.ncbi.nlm.nih.gov/gap/",
+    "aliases": [
+      "EGA / dbGaP",
+      "EGA / dbGaP accession"
+    ],
+    "description": {
+      "en": "An NIH/NCBI archive of studies investigating the interaction of genotype and phenotype, with controlled-access data governed by Data Access Committees."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://isa-tools.org/format/specification.html",
+    "label": {
+      "en": "ISA-Tab / ISA-JSON",
+      "pt-BR": "ISA-Tab / ISA-JSON"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://isa-tools.org/format/specification.html",
+    "aliases": [
+      "ISA-Tab / ISA-JSON",
+      "ISA",
+      "ISA-Tab / ISA-JSON para integração multiômica",
+      "Relações ISA entre investigação, estudo, ensaio, amostra e arquivo"
+    ],
+    "description": {
+      "en": "The ISA (Investigation-Study-Assay) model and its Tab and JSON serializations describe experimental metadata for life science investigations in a structured, reusable way."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://genomicsstandardsconsortium.github.io/mixs/",
+    "label": {
+      "en": "MIxS (Minimum Information about any (x) Sequence)",
+      "pt-BR": "MIxS"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://genomicsstandardsconsortium.github.io/mixs/",
+    "aliases": [
+      "MIxS (incluindo MIGS/MIMS/MIMARKS)",
+      "MIxS"
+    ],
+    "description": {
+      "en": "A family of checklists from the Genomic Standards Consortium specifying the minimum metadata needed to interpret genomic, metagenomic and marker-gene sequences."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.fged.org/projects/minseqe/",
+    "label": {
+      "en": "MINSEQE"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://www.fged.org/projects/minseqe/",
+    "aliases": [
+      "MIAME / MINSEQE / MIAPE"
+    ],
+    "description": {
+      "en": "Minimum Information about a high-throughput Nucleotide SEQuencing Experiment; specifies the metadata needed to interpret and reproduce sequencing-based experiments."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.psidev.info/miape",
+    "label": {
+      "en": "MIAPE (Minimum Information About a Proteomics Experiment)",
+      "pt-BR": "MIAPE"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://www.psidev.info/miape",
+    "aliases": [
+      "MIAME / MINSEQE / MIAPE"
+    ],
+    "description": {
+      "en": "A set of HUPO-PSI guidelines specifying the minimum information required to report a proteomics experiment."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://bioschemas.org/",
+    "label": {
+      "en": "Bioschemas"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://bioschemas.org/",
+    "aliases": [
+      "DataCite / Bioschemas"
+    ],
+    "description": {
+      "en": "A community effort defining schema.org-compatible markup profiles for life-science resources, making them discoverable by search engines."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://eml.ecoinformatics.org/",
+    "label": {
+      "en": "EML (Ecological Metadata Language)",
+      "pt-BR": "EML"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://eml.ecoinformatics.org/",
+    "aliases": [
+      "Ecological Metadata Language (EML)",
+      "EML"
+    ],
+    "description": {
+      "en": "A community-developed metadata standard for describing ecological and environmental datasets, widely used by biodiversity data repositories."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://abcd.tdwg.org/",
+    "label": {
+      "en": "ABCD (Access to Biological Collection Data)",
+      "pt-BR": "ABCD"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://abcd.tdwg.org/",
+    "aliases": [
+      "ABCD / BioCASe",
+      "ABCD"
+    ],
+    "description": {
+      "en": "A TDWG standard providing a comprehensive, structured schema for exchanging data about natural history collection specimens and observations."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.biocase.org/",
+    "label": {
+      "en": "BioCASe"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://www.biocase.org/",
+    "aliases": [
+      "ABCD / BioCASe"
+    ],
+    "description": {
+      "en": "A generic, provider-side software and protocol framework for publishing biodiversity collection and observational data, commonly used together with the ABCD schema."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.miappe.org/",
+    "label": {
+      "en": "MIAPPE (Minimum Information About a Plant Phenotyping Experiment)",
+      "pt-BR": "MIAPPE"
+    },
+    "type": "metadata-schema",
+    "homepage": "https://www.miappe.org/",
+    "aliases": [
+      "MIAPPE (fenotipagem vegetal)",
+      "MIAPPE"
+    ],
+    "description": {
+      "en": "A community standard specifying the minimum metadata needed to report and reproduce a plant phenotyping experiment."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://schema.datacite.org/meta/kernel-4.6/",
+    "label": {
+      "en": "DataCite relatedIdentifier"
+    },
+    "type": "metadata-data-linking-schema",
+    "homepage": "https://schema.datacite.org/meta/kernel-4.6/",
+    "aliases": [
+      "Relações relatedIdentifier do DataCite",
+      "Página DOI / DataCite relatedIdentifier",
+      "Página de destino associada ao DOI ou PID"
+    ],
+    "description": {
+      "en": "The relatedIdentifier property of the DataCite Metadata Schema records typed, machine-actionable links between a dataset's DOI and its metadata record or other related resources."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "http://www.proteomexchange.org/",
+    "label": {
+      "en": "ProteomeXchange"
+    },
+    "type": "registry",
+    "homepage": "http://www.proteomexchange.org/",
+    "aliases": [
+      "PRIDE / ProteomeXchange"
+    ],
+    "description": {
+      "en": "A consortium of proteomics repositories (including PRIDE) providing a single point of submission and standardized data dissemination."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.omicsdi.org/",
+    "label": {
+      "en": "OmicsDI"
+    },
+    "type": "registry",
+    "homepage": "https://www.omicsdi.org/",
+    "aliases": [
+      "OmicsDI"
+    ],
+    "description": {
+      "en": "An EMBL-EBI index that integrates and cross-links omics datasets from major public repositories across genomics, proteomics and metabolomics."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.fairdatapoint.org/",
+    "label": {
+      "en": "FAIR Data Point"
+    },
+    "type": "registry",
+    "homepage": "https://www.fairdatapoint.org/",
+    "aliases": [
+      "FAIR Data Point"
+    ],
+    "description": {
+      "en": "A metadata-serving REST API and specification that exposes hierarchical, machine-actionable metadata about datasets for discovery and indexing."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://github.com/ncbi/sra-tools",
+    "label": {
+      "en": "SRA Toolkit"
+    },
+    "type": "communication-protocol",
+    "homepage": "https://github.com/ncbi/sra-tools",
+    "aliases": [
+      "SRA Toolkit / ferramentas ENA"
+    ],
+    "description": {
+      "en": "NCBI's command-line tools for accessing and converting sequencing data held in the Sequence Read Archive."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.json.org/json-en.html",
+    "label": {
+      "en": "JSON"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.json.org/json-en.html",
+    "aliases": [
+      "JSON"
+    ],
+    "description": {
+      "en": "A lightweight, language-independent text format for representing structured data, widely used for both metadata records and data interchange."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.w3.org/TR/xml/",
+    "label": {
+      "en": "XML"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.w3.org/TR/xml/",
+    "aliases": [
+      "XML"
+    ],
+    "description": {
+      "en": "The W3C Extensible Markup Language, a widely used text format for encoding structured documents and data."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.rfc-editor.org/rfc/rfc4180",
+    "label": {
+      "en": "CSV (Comma-Separated Values)",
+      "pt-BR": "CSV"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.rfc-editor.org/rfc/rfc4180",
+    "aliases": [
+      "CSV / TSV",
+      "CSV/TSV acompanhado de esquema",
+      "CSV tabular com dicionário de dados"
+    ],
+    "description": {
+      "en": "A simple tabular text format, standardized by RFC 4180, in which values are separated by commas (or, informally, tabs for TSV)."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://en.wikipedia.org/wiki/FASTQ_format",
+    "label": {
+      "en": "FASTQ"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://en.wikipedia.org/wiki/FASTQ_format",
+    "aliases": [
+      "FASTQ / BAM / CRAM",
+      "FASTA / FASTQ para sequências"
+    ],
+    "description": {
+      "en": "A text-based format for storing nucleotide sequences together with their per-base quality scores, the standard output of most sequencers."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://samtools.github.io/hts-specs/SAMv1.pdf",
+    "label": {
+      "en": "SAM/BAM format",
+      "pt-BR": "BAM"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://samtools.github.io/hts-specs/SAMv1.pdf",
+    "aliases": [
+      "FASTQ / BAM / CRAM",
+      "BAM / CRAM para alinhamentos"
+    ],
+    "description": {
+      "en": "The Sequence Alignment/Map specification defines the SAM text format and its compressed binary form BAM for storing aligned sequencing reads."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://samtools.github.io/hts-specs/CRAMv3.pdf",
+    "label": {
+      "en": "CRAM format",
+      "pt-BR": "CRAM"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://samtools.github.io/hts-specs/CRAMv3.pdf",
+    "aliases": [
+      "FASTQ / BAM / CRAM",
+      "BAM / CRAM para alinhamentos"
+    ],
+    "description": {
+      "en": "A compressed, reference-based alignment file format that stores sequencing reads more efficiently than BAM while remaining fully convertible to it."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://samtools.github.io/hts-specs/VCFv4.3.pdf",
+    "label": {
+      "en": "VCF (Variant Call Format)",
+      "pt-BR": "VCF"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://samtools.github.io/hts-specs/VCFv4.3.pdf",
+    "aliases": [
+      "VCF / BCF / gVCF",
+      "VCF / BCF para variantes"
+    ],
+    "description": {
+      "en": "A text format for storing gene sequence variations such as SNPs, indels and structural variants, with a binary variant BCF."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ncbi.nlm.nih.gov/genbank/fastaformat/",
+    "label": {
+      "en": "FASTA format",
+      "pt-BR": "FASTA"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.ncbi.nlm.nih.gov/genbank/fastaformat/",
+    "aliases": [
+      "FASTA / FASTQ para sequências"
+    ],
+    "description": {
+      "en": "A simple text-based format for representing nucleotide or peptide sequences, in which each sequence is preceded by a single-line description."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://anndata.readthedocs.io/",
+    "label": {
+      "en": "AnnData / H5AD",
+      "pt-BR": "H5AD / AnnData"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://anndata.readthedocs.io/",
+    "aliases": [
+      "H5AD / AnnData",
+      "H5AD para célula única"
+    ],
+    "description": {
+      "en": "AnnData is a Python data structure, persisted as the HDF5-based .h5ad format, for storing annotated single-cell omics matrices."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.psidev.info/mzml",
+    "label": {
+      "en": "mzML"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.psidev.info/mzml",
+    "aliases": [
+      "mzML / mzTab",
+      "mzML / mzTab para proteômica ou metabolômica"
+    ],
+    "description": {
+      "en": "An open XML-based HUPO-PSI standard format for storing mass spectrometry data from proteomics and metabolomics experiments."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://geojson.org/",
+    "label": {
+      "en": "GeoJSON"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://geojson.org/",
+    "aliases": [
+      "GeoJSON",
+      "GeoJSON / GeoPackage",
+      "GeoJSON / padrões geoespaciais"
+    ],
+    "description": {
+      "en": "A JSON-based format for encoding geographic data structures such as points, lines and polygons with their properties."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://dwc.tdwg.org/text/",
+    "label": {
+      "en": "Darwin Core Archive (DwC-A)",
+      "pt-BR": "DwC-A"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://dwc.tdwg.org/text/",
+    "aliases": [
+      "Darwin Core Archive (DwC-A)",
+      "Darwin Core / DwC-A"
+    ],
+    "description": {
+      "en": "A self-contained, zipped package format combining Darwin Core-compliant data files with an XML metadata descriptor, used to publish biodiversity datasets."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.geopackage.org/",
+    "label": {
+      "en": "GeoPackage"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.geopackage.org/",
+    "aliases": [
+      "GeoJSON / GeoPackage",
+      "GeoPackage / GeoJSON"
+    ],
+    "description": {
+      "en": "An OGC open, SQLite-based format for storing and exchanging vector and raster geospatial data in a single file."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ogc.org/standard/geotiff/",
+    "label": {
+      "en": "GeoTIFF"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.ogc.org/standard/geotiff/",
+    "aliases": [
+      "GeoTIFF"
+    ],
+    "description": {
+      "en": "An OGC standard that embeds georeferencing metadata within a TIFF image file, widely used for satellite and raster geospatial data."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.unidata.ucar.edu/software/netcdf/",
+    "label": {
+      "en": "NetCDF"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://www.unidata.ucar.edu/software/netcdf/",
+    "aliases": [
+      "NetCDF"
+    ],
+    "description": {
+      "en": "A self-describing, machine-independent binary data format and software library for array-oriented scientific data, common in climate and environmental sciences."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://parquet.apache.org/",
+    "label": {
+      "en": "Apache Parquet",
+      "pt-BR": "Parquet"
+    },
+    "type": "knowledge-representation-language",
+    "homepage": "https://parquet.apache.org/",
+    "aliases": [
+      "Parquet"
+    ],
+    "description": {
+      "en": "An open-source, columnar storage file format optimized for efficient compression and analytical querying of large tabular datasets."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ncbi.nlm.nih.gov/taxonomy",
+    "label": {
+      "en": "NCBI Taxonomy"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.ncbi.nlm.nih.gov/taxonomy",
+    "aliases": [
+      "NCBI Taxonomy"
+    ],
+    "description": {
+      "en": "A curated classification and nomenclature for organisms represented in NCBI's sequence databases."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://obofoundry.org/ontology/obi",
+    "label": {
+      "en": "OBI (Ontology for Biomedical Investigations)",
+      "pt-BR": "OBI"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://obofoundry.org/ontology/obi",
+    "aliases": [
+      "OBI / EFO"
+    ],
+    "description": {
+      "en": "An OBO Foundry ontology providing terms to describe the design, execution and analysis of biological and clinical investigations."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ebi.ac.uk/efo/",
+    "label": {
+      "en": "EFO (Experimental Factor Ontology)",
+      "pt-BR": "EFO"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.ebi.ac.uk/efo/",
+    "aliases": [
+      "OBI / EFO"
+    ],
+    "description": {
+      "en": "An EMBL-EBI application ontology of experimental variables used in genome-wide association studies, expression atlases and biosample annotation."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://geneontology.org/",
+    "label": {
+      "en": "Gene Ontology (GO)",
+      "pt-BR": "Gene Ontology"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://geneontology.org/",
+    "aliases": [
+      "Gene Ontology / Sequence Ontology"
+    ],
+    "description": {
+      "en": "A structured, controlled vocabulary describing gene product function across molecular function, biological process and cellular component."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://obofoundry.org/ontology/so",
+    "label": {
+      "en": "Sequence Ontology (SO)",
+      "pt-BR": "Sequence Ontology"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://obofoundry.org/ontology/so",
+    "aliases": [
+      "Gene Ontology / Sequence Ontology"
+    ],
+    "description": {
+      "en": "An OBO Foundry ontology defining terms used to describe biological sequence features, their attributes and relationships."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ebi.ac.uk/chebi/",
+    "label": {
+      "en": "ChEBI (Chemical Entities of Biological Interest)",
+      "pt-BR": "ChEBI"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.ebi.ac.uk/chebi/",
+    "aliases": [
+      "ChEBI",
+      "ChEBI / HMDB"
+    ],
+    "description": {
+      "en": "A freely available dictionary and ontology of molecular entities focused on small chemical compounds, maintained by EMBL-EBI."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://hpo.jax.org/",
+    "label": {
+      "en": "HPO (Human Phenotype Ontology)",
+      "pt-BR": "HPO"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://hpo.jax.org/",
+    "aliases": [
+      "HPO / Mondo"
+    ],
+    "description": {
+      "en": "A standardized vocabulary of phenotypic abnormalities encountered in human disease, widely used for clinical and genomic annotation."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://mondo.monarchinitiative.org/",
+    "label": {
+      "en": "Mondo Disease Ontology",
+      "pt-BR": "Mondo"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://mondo.monarchinitiative.org/",
+    "aliases": [
+      "HPO / Mondo"
+    ],
+    "description": {
+      "en": "A unified disease ontology that harmonizes and cross-references disease definitions from many source terminologies."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://github.com/EBISPOT/DUO",
+    "label": {
+      "en": "DUO (Data Use Ontology)",
+      "pt-BR": "DUO"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://github.com/EBISPOT/DUO",
+    "aliases": [
+      "Data Use Ontology (DUO)",
+      "DUO"
+    ],
+    "description": {
+      "en": "An ontology of terms for describing the conditions and purposes under which biomedical datasets and samples may be used."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.uniprot.org/",
+    "label": {
+      "en": "UniProt"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.uniprot.org/",
+    "aliases": [
+      "UniProt"
+    ],
+    "description": {
+      "en": "A comprehensive, freely accessible resource of protein sequence and functional annotation data with stable UniProt accessions."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.ensembl.org/",
+    "label": {
+      "en": "Ensembl"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.ensembl.org/",
+    "aliases": [
+      "HGNC / NCBI Gene / Ensembl"
+    ],
+    "description": {
+      "en": "A genome browser and annotation resource providing stable, cross-referenced gene identifiers across vertebrate and other genomes."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://hmdb.ca/",
+    "label": {
+      "en": "HMDB (Human Metabolome Database)",
+      "pt-BR": "HMDB"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://hmdb.ca/",
+    "aliases": [
+      "ChEBI / HMDB"
+    ],
+    "description": {
+      "en": "A freely available database containing detailed information about small-molecule metabolites found in the human body."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+    "label": {
+      "en": "GBIF Backbone Taxonomy",
+      "pt-BR": "GBIF"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
+    "aliases": [
+      "GBIF vocabularies",
+      "GBIF Backbone / Catalogue of Life"
+    ],
+    "description": {
+      "en": "GBIF's synthesized taxonomic backbone that unifies species checklists from many sources into a single searchable classification."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://obofoundry.org/ontology/envo",
+    "label": {
+      "en": "ENVO (Environment Ontology)",
+      "pt-BR": "ENVO"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://obofoundry.org/ontology/envo",
+    "aliases": [
+      "ENVO",
+      "Environment Ontology (ENVO)"
+    ],
+    "description": {
+      "en": "An OBO Foundry ontology of environments, environmental processes and features, used to annotate samples and habitats."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.marinespecies.org/",
+    "label": {
+      "en": "WoRMS (World Register of Marine Species)",
+      "pt-BR": "WoRMS"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.marinespecies.org/",
+    "aliases": [
+      "WoRMS (quando marinho)",
+      "WoRMS"
+    ],
+    "description": {
+      "en": "An authoritative, continuously updated taxonomic register of names of marine organisms."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.catalogueoflife.org/",
+    "label": {
+      "en": "Catalogue of Life"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.catalogueoflife.org/",
+    "aliases": [
+      "GBIF Backbone / Catalogue of Life",
+      "Catalogue of Life",
+      "Catálogo taxonômico reconhecido"
+    ],
+    "description": {
+      "en": "A comprehensive, expert-reviewed index of the world's known species used as a taxonomic backbone by many biodiversity infrastructures."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.cropontology.org/",
+    "label": {
+      "en": "Crop Ontology"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.cropontology.org/",
+    "aliases": [
+      "Crop Ontology"
+    ],
+    "description": {
+      "en": "A repository of structured, standardized vocabularies and trait dictionaries for crop breeding and phenotyping data."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://browser.planteome.org/amigo",
+    "label": {
+      "en": "Plant Ontology",
+      "pt-BR": "Plant Ontology"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://browser.planteome.org/amigo",
+    "aliases": [
+      "Plant Ontology"
+    ],
+    "description": {
+      "en": "A structured vocabulary describing plant anatomy, morphology and growth/developmental stages, part of the Planteome project."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://ucum.org/",
+    "label": {
+      "en": "UCUM (Unified Code for Units of Measure)",
+      "pt-BR": "UCUM"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://ucum.org/",
+    "aliases": [
+      "Sistema Internacional de Unidades / UCUM",
+      "UCUM"
+    ],
+    "description": {
+      "en": "A code system providing a machine-readable, unambiguous syntax for expressing units of measure, widely used in health data exchange such as HL7 FHIR."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.bipm.org/en/measurement-units",
+    "label": {
+      "en": "SI (International System of Units)",
+      "pt-BR": "Sistema Internacional de Unidades (SI)"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.bipm.org/en/measurement-units",
+    "aliases": [
+      "Sistema Internacional de Unidades (SI)"
+    ],
+    "description": {
+      "en": "The internationally agreed system of physical units (metre, kilogram, second, etc.) maintained by the BIPM."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://decs.bvsalud.org/",
+    "label": {
+      "en": "DeCS (Descritores em Ciências da Saúde)",
+      "pt-BR": "DeCS"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://decs.bvsalud.org/",
+    "aliases": [
+      "DeCS / MeSH",
+      "DeCS"
+    ],
+    "description": {
+      "en": "BIREME/PAHO's trilingual health sciences descriptor vocabulary, structurally aligned with MeSH and used to index Latin American and Caribbean health literature."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://loinc.org/",
+    "label": {
+      "en": "LOINC"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://loinc.org/",
+    "aliases": [
+      "LOINC"
+    ],
+    "description": {
+      "en": "A universal coding system for identifying laboratory and clinical observations, enabling standardized exchange of health data."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp",
+    "label": {
+      "en": "ICNP (International Classification for Nursing Practice)",
+      "pt-BR": "ICNP"
+    },
+    "type": "structured-vocabulary",
+    "homepage": "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp",
+    "aliases": [
+      "ICNP integrada ao SNOMED CT",
+      "ICNP / SNOMED CT",
+      "ICNP"
+    ],
+    "description": {
+      "en": "The International Council of Nurses' standardized terminology for describing nursing practice: phenomena, actions and outcomes."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://eco.tdwg.org/",
+    "label": {
+      "en": "Humboldt Extension (Humboldt Core)",
+      "pt-BR": "Humboldt Extension"
+    },
+    "type": "semantic-model",
+    "homepage": "https://eco.tdwg.org/",
+    "aliases": [
+      "Humboldt Extension"
+    ],
+    "description": {
+      "en": "A TDWG Darwin Core extension for describing biodiversity survey and monitoring protocols, enabling standardized ecological inventory data."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://brapi.org/",
+    "label": {
+      "en": "BrAPI (Breeding API)",
+      "pt-BR": "BrAPI"
+    },
+    "type": "semantic-model",
+    "homepage": "https://brapi.org/",
+    "aliases": [
+      "BrAPI (quando aplicável)",
+      "BrAPI"
+    ],
+    "description": {
+      "en": "A community-defined REST API specification and data model standardizing the exchange of plant breeding and phenotyping data between systems."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://cfconventions.org/",
+    "label": {
+      "en": "CF Conventions (NetCDF Climate and Forecast)",
+      "pt-BR": "NetCDF-CF"
+    },
+    "type": "semantic-model",
+    "homepage": "https://cfconventions.org/",
+    "aliases": [
+      "NetCDF-CF para séries ambientais",
+      "NetCDF-CF"
+    ],
+    "description": {
+      "en": "A metadata convention for NetCDF data that gives climate and forecast variables standardized names, units and dimensional semantics."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://www.hl7.org/fhir/",
+    "label": {
+      "en": "HL7 FHIR"
+    },
+    "type": "semantic-model",
+    "homepage": "https://www.hl7.org/fhir/",
+    "aliases": [
+      "HL7 FHIR (quando dados clínicos/assistenciais)",
+      "HL7 FHIR",
+      "JSON / FHIR"
+    ],
+    "description": {
+      "en": "Fast Healthcare Interoperability Resources, an HL7 standard defining a semantic model and API for exchanging electronic health records and clinical data."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://ohdsi.github.io/CommonDataModel/",
+    "label": {
+      "en": "OMOP Common Data Model",
+      "pt-BR": "OMOP Common Data Model"
+    },
+    "type": "semantic-model",
+    "homepage": "https://ohdsi.github.io/CommonDataModel/",
+    "aliases": [
+      "OMOP Common Data Model"
+    ],
+    "description": {
+      "en": "The OHDSI Observational Medical Outcomes Partnership common data model, a standardized relational schema for harmonizing observational health data for research."
+    },
+    "source": "seed"
+  },
+  {
+    "id": "https://git-scm.com/",
+    "label": {
+      "en": "Git"
+    },
+    "type": "provenance-model",
+    "homepage": "https://git-scm.com/",
+    "aliases": [
+      "Git ou sistema equivalente",
+      "Git ou outro controle de versões",
+      "Git / controle de versões",
+      "Git"
+    ],
+    "description": {
+      "en": "A distributed version control system commonly used to track code, workflow and configuration changes as a record of processing provenance."
+    },
     "source": "seed"
   }
 ]
