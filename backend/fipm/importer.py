@@ -170,6 +170,86 @@ def _bootstrap_admin(db: Session, settings: Settings, summary: ImportSummary) ->
     # Password is never overwritten for an existing admin.
 
 
+def import_knowledge_model_doc(
+    db: Session,
+    settings: Settings,
+    summary: ImportSummary,
+    doc: dict,
+    *,
+    known_fer_ids: set[str] | None = None,
+    force: bool = False,
+) -> None:
+    """Validate and upsert a single already-parsed knowledge-model `doc`
+    (plus its `inlineFers` promotion). Factored out of
+    `_import_knowledge_models`'s per-file loop so callers -- notably tests
+    that only want "the real gofair-fip-mini-1.0.0 model" -- can import
+    exactly one document instead of every file currently sitting in
+    `data/knowledge-models/` (which, since the CONFOA 2026 workshop import,
+    also holds several `status: "draft"` forks with their own `inlineFers`).
+    Importing the whole directory for a single-model fixture used to be
+    harmless; now it leaks those forks' promoted `source="model"` FER rows
+    into whatever DB the caller passed, which is exactly the coupling that
+    made tests/test_ac_08_05_anonymous_fers_source_model.py order-dependent
+    on tests that happened to run first and import the full real data/ dir.
+    """
+    if known_fer_ids is None:
+        known_fer_ids = _load_seed_fer_ids(settings)
+    _validate_knowledge_model(doc, settings, known_fer_ids)
+
+    content_sha256 = _sha256(doc)
+    existing = db.get(KnowledgeModel, (doc["id"], doc["version"]))
+    if existing is None:
+        db.add(
+            KnowledgeModel(
+                id=doc["id"],
+                version=doc["version"],
+                owner_id=None,
+                visibility="public",
+                is_system=True,
+                status=doc["status"],
+                license=doc["license"],
+                source=normalize_source(doc["source"]),
+                title=doc["title"],
+                description=doc["description"],
+                changelog=doc.get("changelog", []),
+                content=doc,
+                content_sha256=content_sha256,
+            )
+        )
+        db.commit()
+        summary.knowledge_models.created += 1
+        # spec 08-workshop-picklists.md §1.3: "python -m fipm import-data
+        # ... upsert every inlineFers entry into fers as source=model" --
+        # a system model is owner_id=None.
+        promoted = promote_inline_fers(db, doc, owner_id=None)
+        summary.fers.created += promoted["created"]
+        summary.fers.skipped += promoted["skipped"]
+    elif existing.content_sha256 == content_sha256:
+        summary.knowledge_models.skipped += 1
+    elif not force:
+        logger.warning(
+            "knowledge model %s@%s changed on disk; skipping (rerun with --force)",
+            doc["id"],
+            doc["version"],
+        )
+        summary.knowledge_models.skipped += 1
+    else:
+        existing.is_system = True
+        existing.status = doc["status"]
+        existing.license = doc["license"]
+        existing.source = normalize_source(doc["source"])
+        existing.title = doc["title"]
+        existing.description = doc["description"]
+        existing.changelog = doc.get("changelog", [])
+        existing.content = doc
+        existing.content_sha256 = content_sha256
+        db.commit()
+        summary.knowledge_models.updated += 1
+        promoted = promote_inline_fers(db, doc, owner_id=None)
+        summary.fers.created += promoted["created"]
+        summary.fers.skipped += promoted["skipped"]
+
+
 def _import_knowledge_models(
     db: Session, settings: Settings, summary: ImportSummary, force: bool
 ) -> None:
@@ -180,64 +260,17 @@ def _import_knowledge_models(
     for path in sorted(km_dir.glob("*.json")):
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
-            _validate_knowledge_model(doc, settings, known_fer_ids)
-        except (ValueError, json.JSONDecodeError) as exc:
+        except json.JSONDecodeError as exc:
             logger.warning("skipping invalid knowledge model %s: %s", path, exc)
             summary.knowledge_models.skipped += 1
             continue
-
-        content_sha256 = _sha256(doc)
-        existing = db.get(KnowledgeModel, (doc["id"], doc["version"]))
-        if existing is None:
-            db.add(
-                KnowledgeModel(
-                    id=doc["id"],
-                    version=doc["version"],
-                    owner_id=None,
-                    visibility="public",
-                    is_system=True,
-                    status=doc["status"],
-                    license=doc["license"],
-                    source=normalize_source(doc["source"]),
-                    title=doc["title"],
-                    description=doc["description"],
-                    changelog=doc.get("changelog", []),
-                    content=doc,
-                    content_sha256=content_sha256,
-                )
+        try:
+            import_knowledge_model_doc(
+                db, settings, summary, doc, known_fer_ids=known_fer_ids, force=force
             )
-            db.commit()
-            summary.knowledge_models.created += 1
-            # spec 08-workshop-picklists.md §1.3: "python -m fipm import-data
-            # ... upsert every inlineFers entry into fers as source=model" --
-            # a system model is owner_id=None.
-            promoted = promote_inline_fers(db, doc, owner_id=None)
-            summary.fers.created += promoted["created"]
-            summary.fers.skipped += promoted["skipped"]
-        elif existing.content_sha256 == content_sha256:
+        except ValueError as exc:
+            logger.warning("skipping invalid knowledge model %s: %s", path, exc)
             summary.knowledge_models.skipped += 1
-        elif not force:
-            logger.warning(
-                "knowledge model %s@%s changed on disk; skipping (rerun with --force)",
-                doc["id"],
-                doc["version"],
-            )
-            summary.knowledge_models.skipped += 1
-        else:
-            existing.is_system = True
-            existing.status = doc["status"]
-            existing.license = doc["license"]
-            existing.source = normalize_source(doc["source"])
-            existing.title = doc["title"]
-            existing.description = doc["description"]
-            existing.changelog = doc.get("changelog", [])
-            existing.content = doc
-            existing.content_sha256 = content_sha256
-            db.commit()
-            summary.knowledge_models.updated += 1
-            promoted = promote_inline_fers(db, doc, owner_id=None)
-            summary.fers.created += promoted["created"]
-            summary.fers.skipped += promoted["skipped"]
 
 
 def _import_fers(db: Session, settings: Settings, summary: ImportSummary) -> None:

@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from fipm.config import Settings
-from fipm.importer import ImportSummary, _import_knowledge_models
+from fipm.importer import ImportSummary, import_knowledge_model_doc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REAL_DATA_DIR = REPO_ROOT / "data"
@@ -35,11 +35,15 @@ def test_21_sequential_patches_then_csv_has_22_lines(client, client_factory, db_
     real_settings = Settings(
         data_dir=str(REAL_DATA_DIR), db_path=settings.db_path, base_url=settings.base_url
     )
+    # Import only the real gofair-fip-mini model, not every file under
+    # data/knowledge-models/ (which now also holds CONFOA 2026 draft forks
+    # whose promoted inlineFers would otherwise leak into the shared
+    # session DB -- see test_rdf_export.py's real_km_loaded).
     summary = ImportSummary()
-    _import_knowledge_models(db_session, real_settings, summary, force=False)
+    doc = json.loads(REAL_KM_PATH.read_text(encoding="utf-8"))
+    import_knowledge_model_doc(db_session, real_settings, summary, doc, force=False)
     assert summary.knowledge_models.created + summary.knowledge_models.skipped >= 1
 
-    doc = json.loads(REAL_KM_PATH.read_text(encoding="utf-8"))
     question_ids = [q["id"] for section in doc["sections"] for q in section["questions"]]
     assert len(question_ids) == 21
 

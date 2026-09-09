@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 from fipm.config import Settings
-from fipm.importer import ImportSummary, _import_knowledge_models
+from fipm.importer import ImportSummary, import_knowledge_model_doc
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REAL_DATA_DIR = REPO_ROOT / "data"
@@ -42,8 +42,13 @@ def real_settings(settings):
 
 @pytest.fixture()
 def real_km_loaded(db_session, real_settings):
+    """Import *only* the real gofair-fip-mini model, not every file under
+    data/knowledge-models/ (which now also holds CONFOA 2026 draft forks
+    whose promoted inlineFers would otherwise leak into the shared
+    session DB -- see test_rdf_export.py's real_km_loaded)."""
     summary = ImportSummary()
-    _import_knowledge_models(db_session, real_settings, summary, force=False)
+    doc = json.loads(REAL_KM_PATH.read_text(encoding="utf-8"))
+    import_knowledge_model_doc(db_session, real_settings, summary, doc, force=False)
     return real_settings
 
 

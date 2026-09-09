@@ -7,6 +7,7 @@ test_real_data_smoke.py) and skips cleanly if data/ isn't present.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -16,7 +17,7 @@ from rdflib.compare import isomorphic
 from fipm.config import Settings
 from fipm.exporters import fip_url
 from fipm.ids import short_id
-from fipm.importer import ImportSummary, _import_knowledge_models
+from fipm.importer import ImportSummary, import_knowledge_model_doc
 from fipm.models import Fip, WorkshopSession
 from fipm.rdf import (
     FIP,
@@ -50,9 +51,17 @@ def real_settings(settings):
 
 @pytest.fixture()
 def real_km_loaded(db_session, real_settings):
-    """Import the real knowledge model + FER types into the shared test DB."""
+    """Import *only* the real gofair-fip-mini model into the shared test DB
+    -- not every file under data/knowledge-models/, which since the CONFOA
+    2026 workshop import also holds several draft forks with their own
+    inlineFers. Importing the whole directory here used to be harmless but
+    now promotes those forks' FERs as source="model" rows into the shared
+    session DB, leaking into unrelated tests (e.g.
+    test_ac_08_05_anonymous_fers_source_model.py) that run later and assume
+    a small, predictable "model" catalogue."""
     summary = ImportSummary()
-    _import_knowledge_models(db_session, real_settings, summary, force=False)
+    doc = json.loads(REAL_KM_PATH.read_text(encoding="utf-8"))
+    import_knowledge_model_doc(db_session, real_settings, summary, doc, force=False)
     return real_settings
 
 
