@@ -62,6 +62,47 @@ describe('DmpLinkList.vue', () => {
     expect(wrapper.emitted('update')).toBeUndefined()
   })
 
+  it('does not re-emit an invalid row when its version field changes, and excludes it from the emitted list', async () => {
+    const wrapper = mountList([{ url: 'https://example.org/plan-a', version: null, system: 'other' }])
+    const urlInput = wrapper.get('.dmp-field-url input')
+    await urlInput.setValue('not-a-url')
+    await urlInput.trigger('blur')
+    expect(wrapper.text()).toContain(en.dmp.urlInvalid)
+    expect(wrapper.emitted('update')).toBeUndefined()
+
+    await wrapper.get('.dmp-field-version input').setValue('2')
+    await wrapper.get('.dmp-field-version input').trigger('change')
+
+    const emitted = wrapper.emitted('update')
+    expect(emitted).toBeTruthy()
+    const lastEmit = emitted![emitted!.length - 1][0] as RelatedDmp[]
+    expect(lastEmit).toEqual([])
+    // The invalid text and its error stay visible locally — nothing was reset.
+    expect((urlInput.element as HTMLInputElement).value).toBe('not-a-url')
+    expect(wrapper.text()).toContain(en.dmp.urlInvalid)
+  })
+
+  it('emits only the valid rows when a version field changes elsewhere in the list', async () => {
+    const wrapper = mountList([
+      { url: 'https://example.org/plan-a', version: null, system: 'other' },
+      { url: 'https://example.org/plan-b', version: null, system: 'other' },
+    ])
+    const rows = wrapper.findAll('.dmp-row')
+    await rows[0].get('.dmp-field-url input').setValue('not-a-url')
+    await rows[0].get('.dmp-field-url input').trigger('blur')
+    expect(wrapper.text()).toContain(en.dmp.urlInvalid)
+
+    await rows[1].get('.dmp-field-version input').setValue('3')
+    await rows[1].get('.dmp-field-version input').trigger('change')
+
+    const emitted = wrapper.emitted('update')
+    expect(emitted).toBeTruthy()
+    const lastEmit = emitted![emitted!.length - 1][0] as RelatedDmp[]
+    expect(lastEmit).toHaveLength(1)
+    expect(lastEmit[0].url).toBe('https://example.org/plan-b')
+    expect(lastEmit[0].version).toBe('3')
+  })
+
   it('renders no rows and the "no plans" hint when entries is empty', () => {
     const wrapper = mountList([])
     expect(wrapper.findAll('.dmp-row')).toHaveLength(0)

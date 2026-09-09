@@ -106,9 +106,16 @@ watch(
   }
 )
 
+/**
+ * Only rows with no `error` are sent to the parent (and, via it, the
+ * server): a row still flagged `dmp.urlInvalid`/`dmp.duplicate` stays local
+ * and visible with its inline error, so a version edit elsewhere in the
+ * list (`onFieldChange`) can never re-emit — and PATCH — a malformed or
+ * duplicate URL.
+ */
 function emitUpdate() {
   const result: RelatedDmp[] = rows.value
-    .filter((row) => row.url.trim() !== '')
+    .filter((row) => row.url.trim() !== '' && !row.error)
     .map((row) => ({
       url: row.url,
       version: row.version.trim() ? row.version.trim() : null,

@@ -47,6 +47,12 @@ describe('renderMarkdown', () => {
     expect(html).toContain('href="#"')
   })
 
+  it('never emits a protocol-relative link target', () => {
+    const html = renderMarkdown('[click me](//evil.example/phish)')
+    expect(html).not.toContain('href="//evil.example')
+    expect(html).toContain('href="#"')
+  })
+
   it('escapes an injected <script> tag as text, in a paragraph', () => {
     const html = renderMarkdown('<script>alert(1)</script>')
     expect(html).not.toContain('<script>')

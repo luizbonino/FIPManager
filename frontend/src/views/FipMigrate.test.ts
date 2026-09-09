@@ -97,6 +97,12 @@ describe('FipMigrate.vue', () => {
     expect(wrapper.findAll('tbody tr')).toHaveLength(diff.items.length)
   })
 
+  it('requests the migration preview exactly once on mount', async () => {
+    await mountFipMigrate()
+    expect(getMigrationPreviewMock).toHaveBeenCalledTimes(1)
+    expect(getMigrationPreviewMock).toHaveBeenCalledWith('fip1', '1.1.0', undefined)
+  })
+
   it('defaults the split item’s radios to "both"', async () => {
     const { wrapper } = await mountFipMigrate()
 

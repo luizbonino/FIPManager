@@ -17,6 +17,8 @@
             :state="store.saveState"
             :last-saved-at="store.lastSavedAt"
             :retries-exhausted="store.retryExhausted"
+            :error-kind="store.lastError"
+            :error-detail="store.lastErrorDetail"
             @retry="store.retry"
           />
         </div>

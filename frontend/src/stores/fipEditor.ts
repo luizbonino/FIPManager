@@ -32,7 +32,13 @@ export const AUTOSAVE_DEBOUNCE_MS = 800
 export const RETRY_DELAYS_MS = [2000, 5000, 15000]
 
 export type SaveState = 'saved' | 'saving' | 'unsaved' | 'error'
-export type SaveErrorKind = 'network' | 'forbidden' | 'session_closed' | null
+/**
+ * `'invalid'` is a terminal 4xx (any status other than 403/409) — the
+ * backend rejected the payload itself (e.g. a stale `dmpEvidence.dmpIndex`),
+ * so blindly retrying would just 4xx forever. `lastErrorDetail` carries the
+ * backend's `detail` code for that case so `SaveIndicator` can surface it.
+ */
+export type SaveErrorKind = 'network' | 'forbidden' | 'session_closed' | 'invalid' | null
 
 export const useFipEditorStore = defineStore('fipEditor', () => {
   const fip = ref<FipOut | null>(null)
@@ -43,6 +49,8 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
   const saving = ref(false)
   const lastSavedAt = ref<Date | null>(null)
   const lastError = ref<SaveErrorKind>(null)
+  /** The backend `detail` code behind a `lastError === 'invalid'` (spec 02 §2.3 / spec 06 §2.1). */
+  const lastErrorDetail = ref<string | null>(null)
 
   const loading = ref(false)
   const notFound = ref(false)
@@ -138,6 +146,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
       const updated = await patchFip(current.id, payload, token)
       fip.value = updated
       lastError.value = null
+      lastErrorDetail.value = null
       lastSavedAt.value = new Date()
       retryAttempt.value = 0
       saving.value = false
@@ -153,12 +162,22 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
       dirty.value = true
       if (err instanceof ApiResponseError && err.status === 403) {
         lastError.value = 'forbidden'
+        lastErrorDetail.value = null
         forcedReadOnly.value = true
       } else if (err instanceof ApiResponseError && err.status === 409) {
         lastError.value = 'session_closed'
+        lastErrorDetail.value = null
         forcedReadOnly.value = true
+      } else if (err instanceof ApiResponseError && err.status >= 400 && err.status < 500) {
+        // Any other 4xx (e.g. a stale `dmpEvidence.dmpIndex`, spec 06 §2.1)
+        // means the payload itself is rejected — retrying without the user
+        // changing anything would just 4xx again, forever. Terminal: no
+        // retry, stays dirty so the edit is never silently lost.
+        lastError.value = 'invalid'
+        lastErrorDetail.value = err.data.detail
       } else {
         lastError.value = 'network'
+        lastErrorDetail.value = null
         scheduleRetry()
       }
     }
@@ -182,6 +201,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     }
     retryAttempt.value = 0
     lastError.value = null
+    lastErrorDetail.value = null
     void performSave()
   }
 
@@ -233,6 +253,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     forcedReadOnly.value = false
     facilitatorWrite.value = false
     lastError.value = null
+    lastErrorDetail.value = null
     dirty.value = false
     fip.value = null
     km.value = null
@@ -280,6 +301,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     fip.value = value
     dirty.value = false
     lastError.value = null
+    lastErrorDetail.value = null
     forcedReadOnly.value = false
   }
 
@@ -353,10 +375,37 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
    * `relatedDmps` list. The server's normalised list (casing, derived
    * `system`/`dmpId`) replaces this optimistic value once the autosave
    * response lands, via the usual `fip.value = updated` in `performSave`.
+   *
+   * Removing (or reordering) an entry shifts every later plan's position,
+   * so every `declaration.dmpEvidence.dmpIndex` (spec 06 §2.1) that pointed
+   * at one of the old entries is remapped here by URL identity — matching
+   * the row that moved, or `null`ing the evidence when its plan was
+   * dropped — before the PATCH goes out. Without this, a stale `dmpIndex`
+   * either silently points at the wrong plan or 422s on save.
    */
   function setRelatedDmps(entries: RelatedDmp[]): void {
     if (!fip.value) return
+    const oldList = fip.value.relatedDmps
+    const remap = new Map<number, number | null>()
+    oldList.forEach((old, oldIndex) => {
+      const newIndex = entries.findIndex((e) => e.url === old.url)
+      remap.set(oldIndex, newIndex === -1 ? null : newIndex)
+    })
+
     fip.value.relatedDmps = entries
+    fip.value.answers = fip.value.answers.map((answer) => ({
+      ...answer,
+      declarations: answer.declarations.map((decl) => {
+        const evidence = decl.dmpEvidence
+        if (!evidence) return decl
+        const mapped = remap.has(evidence.dmpIndex) ? remap.get(evidence.dmpIndex) : null
+        if (mapped === null || mapped === undefined) {
+          return { ...decl, dmpEvidence: null }
+        }
+        if (mapped === evidence.dmpIndex) return decl
+        return { ...decl, dmpEvidence: { ...evidence, dmpIndex: mapped } }
+      }),
+    }))
     markDirty()
   }
 
@@ -408,6 +457,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     saving,
     lastSavedAt,
     lastError,
+    lastErrorDetail,
     saveState,
     loading,
     notFound,

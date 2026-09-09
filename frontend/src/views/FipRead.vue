@@ -43,7 +43,8 @@
             <dd>
               <ul class="dmp-list">
                 <li v-for="(dmp, i) in doc.fip.relatedDMPs" :key="i">
-                  <a :href="dmp.url" target="_blank" rel="noopener">{{ dmpDisplayLabel(dmp) }}</a>
+                  <a v-if="isSafeHttpsUrl(dmp.url)" :href="dmp.url" target="_blank" rel="noopener">{{ dmpDisplayLabel(dmp) }}</a>
+                  <span v-else>{{ dmpDisplayLabel(dmp) }}</span>
                   <span v-if="dmp.system === 'FioDMP'" class="dmp-badge">{{ $t('dmp.fiodmp') }}</span>
                   <span v-if="dmp.version" class="dmp-version">v{{ dmp.version }}</span>
                 </li>
@@ -85,9 +86,15 @@
                   <span v-if="decl.note" class="declaration-note">{{ decl.note }}</span>
                   <span v-if="decl.dmpEvidence" class="declaration-evidence">
                     {{ $t('dmp.evidence') }}:
-                    <a :href="decl.dmpEvidence.dmpUrl" target="_blank" rel="noopener">
+                    <a
+                      v-if="dmpEvidenceHref(decl.dmpEvidence)"
+                      :href="dmpEvidenceHref(decl.dmpEvidence) as string"
+                      target="_blank"
+                      rel="noopener"
+                    >
                       {{ dmpEvidenceLabel(decl.dmpEvidence) }}
                     </a>
+                    <span v-else-if="dmpEvidenceLabel(decl.dmpEvidence)">{{ dmpEvidenceLabel(decl.dmpEvidence) }}</span>
                     <template v-if="decl.dmpEvidence.section"> · {{ decl.dmpEvidence.section }}</template>
                     <template v-if="decl.dmpEvidence.questionRef"> · {{ decl.dmpEvidence.questionRef }}</template>
                   </span>
@@ -194,14 +201,31 @@ function dmpDisplayLabel(dmp: RelatedDmp): string {
   }
 }
 
-function dmpEvidenceLabel(evidence: FipExportDmpEvidence): string {
+/** Client-side defence in depth (spec 06 §2.4): only ever a same-scheme `https://` URL becomes a clickable `href`. */
+function isSafeHttpsUrl(url: string | null | undefined): boolean {
+  if (!url) return false
   try {
-    const parsed = new URL(evidence.dmpUrl)
+    return new URL(url).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+/** `null` when there's no safe URL to link to — the evidence's plan was removed, or (legacy) its URL isn't a safe https:// one. */
+function dmpEvidenceHref(evidence: FipExportDmpEvidence): string | null {
+  return isSafeHttpsUrl(evidence.dmpUrl) ? evidence.dmpUrl : null
+}
+
+// Text shown either inside the `<a>` (a safe dmpUrl) or, in its place, as
+// plain text: the unsafe/unresolvable `rawUrl` the backend kept around, or
+// '' (render nothing — the section/question-ref parts, if any, still show).
+function dmpEvidenceLabel(evidence: FipExportDmpEvidence): string {
+  if (isSafeHttpsUrl(evidence.dmpUrl)) {
+    const parsed = new URL(evidence.dmpUrl as string)
     if (evidence.dmpSystem === 'FioDMP') return parsed.pathname.replace(/^\//, '')
     return parsed.host + parsed.pathname
-  } catch {
-    return evidence.dmpUrl
   }
+  return evidence.rawUrl ?? evidence.dmpUrl ?? ''
 }
 
 function printPage() {

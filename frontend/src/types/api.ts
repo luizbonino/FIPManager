@@ -412,12 +412,21 @@ export interface FipExportFer {
  * (index-based) that the editor reads and writes.
  */
 export interface FipExportDmpEvidence {
-  dmpIndex: number
-  dmpUrl: string
-  dmpSystem: string
+  /** `null` once the stored index no longer resolves against `relatedDMPs` (the plan was removed/reordered). */
+  dmpIndex: number | null
+  /**
+   * `null` when the index above didn't resolve, or (legacy `{url,...}`
+   * evidence, spec 06 §2.4) when the stored URL isn't a safe `https://`
+   * one — in that case the raw value is under `rawUrl` instead, never as a
+   * clickable `href` (`resolve_dmp_evidence_for_export`, backend/fipm/dmp.py).
+   */
+  dmpUrl: string | null
+  dmpSystem: string | null
   dmpVersion: string | null
   section: string | null
   questionRef: string | null
+  /** Only present alongside a `dmpUrl: null` from an unsafe legacy URL. */
+  rawUrl?: string
 }
 
 export interface FipExportDeclaration {

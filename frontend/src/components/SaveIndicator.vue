@@ -6,6 +6,7 @@
       <template v-else-if="state === 'saving'">{{ $t('save.saving') }}</template>
       <template v-else-if="state === 'unsaved'">{{ $t('save.unsaved') }}</template>
       <template v-else-if="state === 'conflict'">{{ $t('save.conflict') }}</template>
+      <template v-else-if="errorKind === 'invalid'">{{ $t('save.invalid', { code: errorDetail }) }}</template>
       <template v-else>{{ retriesExhausted ? $t('save.failed') : $t('save.error') }}</template>
     </span>
     <button v-if="state === 'error' && retriesExhausted" type="button" class="retry-btn" @click="$emit('retry')">
@@ -30,6 +31,10 @@ const props = defineProps<{
   state: SaveState
   lastSavedAt: Date | null
   retriesExhausted?: boolean
+  /** `fipEditor`'s `lastError` (spec 02 §2.3): `'invalid'` picks the "check your entries" message over the generic retry one. */
+  errorKind?: string | null
+  /** The backend `detail` code behind an `errorKind === 'invalid'`, interpolated into `save.invalid`. */
+  errorDetail?: string | null
 }>()
 
 defineEmits<{ retry: [] }>()

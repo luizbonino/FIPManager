@@ -58,6 +58,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ApiResponseError } from '@/api/client'
 import { confirmPasswordReset } from '@/api/auth'
+import { useAuthStore } from '@/stores/auth'
 
 /**
  * spec 07 §3: reads `?token=`, new password + confirm, Submit disabled
@@ -69,6 +70,7 @@ import { confirmPasswordReset } from '@/api/auth'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const newPassword = ref('')
 const confirmPassword = ref('')
@@ -89,6 +91,13 @@ async function handleSubmit() {
   error.value = null
   try {
     await confirmPasswordReset(token.value, newPassword.value)
+    // The reset invalidates every existing session server-side (spec 07
+    // §3), but a signed-in browser (e.g. the account owner resetting their
+    // own forgotten password from the same device) still holds a stale
+    // `me` client-side. Clear it before navigating so the `/login` guard
+    // doesn't read `isAuthenticated` as still true and bounce straight
+    // back to a workspace whose cookie no longer works.
+    authStore.state.me = null
     await router.push({ path: '/login', query: { resetOk: '1' } })
   } catch (err) {
     if (err instanceof ApiResponseError && err.status === 410) {

@@ -217,18 +217,27 @@ function onReassignChange(item: MigrationDiffItem, event: Event): void {
   decisions.value.orphanReassign[item.oldQuestionId] = value || null
 }
 
+// Bumped on every call so a response that lands after a newer one was
+// already issued (the target `<select>` changed again mid-request) is
+// ignored instead of clobbering the newer preview.
+let previewSeq = 0
+
 async function loadPreview() {
   if (!selectedVersion.value) return
+  const seq = ++previewSeq
   previewLoading.value = true
   previewError.value = null
   try {
-    diff.value = await getMigrationPreview(fipId.value, selectedVersion.value, editToken.value)
+    const result = await getMigrationPreview(fipId.value, selectedVersion.value, editToken.value)
+    if (seq !== previewSeq) return
+    diff.value = result
     decisions.value = defaultDecisions(diff.value)
   } catch {
+    if (seq !== previewSeq) return
     previewError.value = t('migration.loadError')
     diff.value = null
   } finally {
-    previewLoading.value = false
+    if (seq === previewSeq) previewLoading.value = false
   }
 }
 
@@ -266,8 +275,10 @@ async function init() {
     const targetsResult = await getMigrationTargets(fipId.value, editToken.value)
     targets.value = targetsResult.items
     if (targets.value.length > 0) {
+      // Assigning `selectedVersion` alone is enough — the `watch` above
+      // fires the one and only `loadPreview()` call for it; calling it
+      // again here duplicated the request on every mount.
       selectedVersion.value = targets.value[targets.value.length - 1].version
-      await loadPreview()
     }
   } catch (err) {
     if (err instanceof ApiResponseError && err.status === 404) {

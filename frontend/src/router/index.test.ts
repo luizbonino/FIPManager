@@ -80,6 +80,19 @@ describe('router — /admin and mustChangePassword guards', () => {
     expect(router.currentRoute.value.name).toBe('ChangePassword')
   })
 
+  it.each(['/privacy', '/forgot-password', '/reset-password', '/verify'])(
+    'lets a mustChangePassword user reach %s without being bounced to /account/password',
+    async (path) => {
+      getMock.mockResolvedValue(makeUser({ mustChangePassword: true }))
+      const { default: router } = await import('./index')
+
+      await router.push(path)
+      await router.isReady()
+
+      expect(router.currentRoute.value.path).toBe(path)
+    }
+  )
+
   it('does not force a public route for a mustChangePassword user off course before login (anonymous is unaffected)', async () => {
     getMock.mockRejectedValue(new Error('not signed in'))
     const { default: router } = await import('./index')

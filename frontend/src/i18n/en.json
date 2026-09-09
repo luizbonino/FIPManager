@@ -202,7 +202,8 @@
     "error": "Not saved — retrying",
     "failed": "Not saved",
     "retry": "Retry",
-    "conflict": "Not saved — changed elsewhere"
+    "conflict": "Not saved — changed elsewhere",
+    "invalid": "Not saved — check your entries ({code})"
   },
   "declarationStatus": {
     "current": "Currently used",

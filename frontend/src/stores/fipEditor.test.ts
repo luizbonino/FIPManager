@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { FipOut } from '@/types/api'
+import { ApiResponseError } from '@/api/client'
+import type { Answer, FipOut } from '@/types/api'
 
 vi.mock('@/api/fips', () => ({
   patchFip: vi.fn(),
@@ -135,6 +136,100 @@ describe('fipEditor store — autosave', () => {
 
     await vi.advanceTimersByTimeAsync(RETRY_DELAYS_MS[0])
     expect(patchFipMock).toHaveBeenCalledTimes(2)
+  })
+
+  // Finding 1: removing a linked DMP must remap every
+  // `declaration.dmpEvidence.dmpIndex` that pointed past it, or null the
+  // evidence whose plan was dropped — otherwise a stale index either
+  // silently points at the wrong plan or 422s on save.
+  it('a rejected request with a non-403/409/network 4xx becomes a terminal "invalid" error, stays dirty, and never retries', async () => {
+    patchFipMock.mockRejectedValueOnce(
+      new ApiResponseError(422, { detail: 'dmp_evidence_invalid_index' })
+    )
+    patchFipMock.mockResolvedValue(makeFip())
+
+    const store = useFipEditorStore()
+    store.setFip(makeFip())
+    store.setDeclaration('F1-metadata', 0, { status: 'current' })
+
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS)
+    expect(patchFipMock).toHaveBeenCalledTimes(1)
+    expect(store.dirty).toBe(true)
+    expect(store.lastError).toBe('invalid')
+    expect(store.lastErrorDetail).toBe('dmp_evidence_invalid_index')
+    expect(store.saveState).toBe('error')
+
+    // No auto-retry schedule for a terminal 4xx (spec 02 §2.3's backoff is
+    // for transient/network failures only) — advancing past every backoff
+    // delay must not issue a second request on its own.
+    await vi.advanceTimersByTimeAsync(RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1] + 1000)
+    expect(patchFipMock).toHaveBeenCalledTimes(1)
+
+    // The next edit still autosaves normally once the user has changed something.
+    store.setDeclaration('F1-metadata', 0, { status: 'planned' })
+    await vi.advanceTimersByTimeAsync(AUTOSAVE_DEBOUNCE_MS)
+    expect(patchFipMock).toHaveBeenCalledTimes(2)
+    expect(store.lastError).toBeNull()
+  })
+})
+
+describe('fipEditor store — setRelatedDmps dmpIndex remap', () => {
+  function fipWithEvidence(): FipOut {
+    const answers: Answer[] = [
+      {
+        questionId: 'F1-metadata',
+        comment: null,
+        declarations: [
+          { status: 'current', dmpEvidence: { dmpIndex: 1, section: 'Storage' } },
+          { status: 'current', dmpEvidence: null },
+        ],
+      },
+    ]
+    return makeFip({
+      relatedDmps: [
+        { url: 'https://example.org/plan-a', system: 'other' },
+        { url: 'https://example.org/plan-b', system: 'other' },
+        { url: 'https://example.org/plan-c', system: 'other' },
+      ],
+      answers,
+    })
+  }
+
+  it('remaps dmpIndex by URL identity when an earlier plan is removed', () => {
+    const store = useFipEditorStore()
+    store.setFip(fipWithEvidence())
+
+    // Drop plan-a (index 0): plan-b (the evidence's plan) shifts from index 1 to 0.
+    store.setRelatedDmps([
+      { url: 'https://example.org/plan-b', system: 'other' },
+      { url: 'https://example.org/plan-c', system: 'other' },
+    ])
+
+    const decl = store.fip!.answers[0].declarations[0]
+    expect(decl.dmpEvidence).toEqual({ dmpIndex: 0, section: 'Storage' })
+  })
+
+  it('nulls the dmpEvidence whose own plan was removed', () => {
+    const store = useFipEditorStore()
+    store.setFip(fipWithEvidence())
+
+    // Drop plan-b (index 1): the referencing declaration's evidence is orphaned.
+    store.setRelatedDmps([
+      { url: 'https://example.org/plan-a', system: 'other' },
+      { url: 'https://example.org/plan-c', system: 'other' },
+    ])
+
+    const decl = store.fip!.answers[0].declarations[0]
+    expect(decl.dmpEvidence).toBeNull()
+  })
+
+  it('leaves an untouched declaration (dmpEvidence: null) alone', () => {
+    const store = useFipEditorStore()
+    store.setFip(fipWithEvidence())
+
+    store.setRelatedDmps([{ url: 'https://example.org/plan-a', system: 'other' }])
+
+    expect(store.fip!.answers[0].declarations[1].dmpEvidence).toBeNull()
   })
 })
 

@@ -229,8 +229,25 @@ router.beforeEach(async (to, from) => {
 
   // spec 05 §1: an admin-set temporary password forces every authenticated
   // navigation except ChangePassword itself to /account/password, until a
-  // successful `POST /api/auth/password` clears the flag.
-  if (authStore.isAuthenticated && authStore.user?.mustChangePassword && to.name !== 'ChangePassword') {
+  // successful `POST /api/auth/password` clears the flag. A handful of
+  // routes stay reachable regardless: ChangePassword's own dependencies
+  // (Privacy, whose notice it may need to re-read) and the account-recovery
+  // flow (ForgotPassword/ResetPassword/VerifyEmail) — none of them let the
+  // caller do anything but read the privacy notice, reset a password, or
+  // verify an email, so forcing them through the temporary-password gate
+  // first would just lock a still-verifying or -recovering account out.
+  const MUST_CHANGE_PASSWORD_EXEMPT = new Set([
+    'ChangePassword',
+    'Privacy',
+    'ForgotPassword',
+    'ResetPassword',
+    'VerifyEmail',
+  ])
+  if (
+    authStore.isAuthenticated &&
+    authStore.user?.mustChangePassword &&
+    !MUST_CHANGE_PASSWORD_EXEMPT.has(String(to.name))
+  ) {
     return { path: '/account/password', query: { redirect: to.fullPath } }
   }
 

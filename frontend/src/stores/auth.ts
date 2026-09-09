@@ -43,21 +43,29 @@ export const useAuthStore = defineStore('auth', () => {
     () => state.value.verificationRequired && !state.value.me?.emailVerifiedAt
   )
 
-  async function restoreSession() {
-    state.value.isLoading = true
-    state.value.error = null
-
+  /** `GET /auth/me`, applied to `state` on success. Returns whether it succeeded. */
+  async function fetchMe(): Promise<boolean> {
     try {
       const { verificationRequired, ...userFields } = await get<MeOut>('/auth/me')
       state.value.me = userFields
       state.value.verificationRequired = verificationRequired
+      return true
     } catch {
+      return false
+    }
+  }
+
+  async function restoreSession() {
+    state.value.isLoading = true
+    state.value.error = null
+
+    const ok = await fetchMe()
+    if (!ok) {
       // Not signed in is a normal state, not an error.
       state.value.me = null
       state.value.verificationRequired = false
-    } finally {
-      state.value.isLoading = false
     }
+    state.value.isLoading = false
   }
 
   async function login(email: string, password: string) {
@@ -70,7 +78,15 @@ export const useAuthStore = defineStore('auth', () => {
         password,
       })
       state.value.me = response
-      await restoreSession()
+      // A follow-up `/auth/me` hiccup right after a successful login is not
+      // "not signed in" the way it is at app boot (`restoreSession` above) —
+      // silently nulling `me` here would sign a just-authenticated user back
+      // out from under them. Keep the `me` the login response already gave
+      // us and surface an error instead.
+      const ok = await fetchMe()
+      if (!ok) {
+        state.value.error = 'Signed in, but could not load your profile. Please try again.'
+      }
     } catch (error) {
       state.value.error = 'Invalid email or password'
       state.value.me = null
@@ -123,10 +139,14 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       await post<void>('/auth/logout')
-      state.value.me = null
     } catch (error) {
+      // The client is signing out either way — a failed `POST /auth/logout`
+      // (network blip, already-expired cookie) must not leave `me` set, or
+      // every guard/component that reads `isAuthenticated` keeps treating
+      // this browser as still signed in.
       state.value.error = 'Failed to logout'
     } finally {
+      state.value.me = null
       state.value.isLoading = false
     }
   }

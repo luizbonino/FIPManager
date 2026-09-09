@@ -16,9 +16,16 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;')
 }
 
-/** Only `http(s)://` and same-origin `/...` targets are ever linked. */
+/**
+ * Only `http(s)://` and same-origin `/...` targets are ever linked. A
+ * leading `//` is a protocol-relative URL (`//evil.example`, resolved by
+ * the browser against whatever scheme the page is served over) — it starts
+ * with `/` but is not same-origin, so it's rejected same as any other
+ * off-allowlist scheme.
+ */
 function safeHref(url: string): string {
-  if (/^https?:\/\//i.test(url) || url.startsWith('/')) return url
+  if (/^https?:\/\//i.test(url)) return url
+  if (url.startsWith('/') && !url.startsWith('//')) return url
   return '#'
 }
 
