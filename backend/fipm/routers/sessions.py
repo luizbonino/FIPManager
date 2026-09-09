@@ -4,21 +4,30 @@ import json
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from fipm.authz import can_read, get_readable_published_km, require_user
+from fipm.authz import get_readable_published_km, require_user
 from fipm.config import Settings, get_settings
 from fipm.db import get_db
-from fipm.exporters import build_session_export_csv, build_session_export_json
+from fipm.exporters import (
+    build_session_export_csv,
+    build_session_export_json,
+    resolve_session_questionnaire_refs,
+)
 from fipm.ids import join_code as gen_join_code
 from fipm.ids import short_id
+from fipm.km_content import ContentError, validate_langmap
 from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
 from fipm.rdf import session_graph, to_turtle
 from fipm.schemas import (
+    QuestionnaireRef,
+    QuestionnaireRefLabelled,
     SessionCreateRequest,
     SessionPatchRequest,
     SessionPublicOut,
+    area_label_for_refs,
     fip_out_dict,
     known_question_ids_for_km,
     session_to_out,
@@ -53,23 +62,80 @@ def _get_owned_session(session_id: str, db: Session, user: User) -> WorkshopSess
     return row
 
 
+def _prepare_questionnaire_refs(
+    db: Session,
+    user: User,
+    questionnaire_ref: QuestionnaireRef | None,
+    questionnaire_refs: list[QuestionnaireRefLabelled] | None,
+) -> tuple[list[dict[str, Any]] | None, str, str, list[ContentError]]:
+    """spec 08-workshop-picklists.md §3.1: validate and resolve a session's
+    ref(s), shared by `create_session` and `patch_session`. Returns
+    `(refs_to_store, primary_id, primary_version, label_errors)`:
+    `refs_to_store` is None when the caller only sent the legacy single
+    `questionnaireRef` (the `questionnaire_refs` column stays NULL, derived
+    at read time -- spec §0); `primary_id`/`primary_version` always name
+    refs[0], for the `questionnaire_id`/`questionnaire_version` FK columns.
+    Raises 400 `questionnaire_ref_conflict`/`duplicate_questionnaire_ref`
+    and 404 (via `get_readable_published_km`) directly; a non-empty
+    `label_errors` is the caller's cue to return the `invalid_content`
+    envelope instead of committing."""
+    if questionnaire_refs:
+        first = questionnaire_refs[0]
+        if questionnaire_ref is not None and (
+            questionnaire_ref.id != first.id or questionnaire_ref.version != first.version
+        ):
+            raise HTTPException(status_code=400, detail="questionnaire_ref_conflict")
+        seen: set[tuple[str, str]] = set()
+        errors: list[ContentError] = []
+        for idx, ref in enumerate(questionnaire_refs):
+            key = (ref.id, ref.version)
+            if key in seen:
+                raise HTTPException(status_code=400, detail="duplicate_questionnaire_ref")
+            seen.add(key)
+            get_readable_published_km(db, ref.id, ref.version, user)
+            errors += validate_langmap(
+                ref.label, f"questionnaireRefs[{idx}].label", require_en=False, max_len=80
+            )
+        refs_to_store = [
+            {"id": ref.id, "version": ref.version, "label": ref.label} for ref in questionnaire_refs
+        ]
+        return refs_to_store, first.id, first.version, errors
+
+    if questionnaire_ref is None:
+        # SessionCreateRequest's own model validator already 422s this
+        # before the router runs; reachable from patch_session only if it
+        # ever calls this helper with both args None, which it doesn't.
+        raise HTTPException(status_code=422, detail="questionnaire_ref_required")
+
+    get_readable_published_km(db, questionnaire_ref.id, questionnaire_ref.version, user)
+    return None, questionnaire_ref.id, questionnaire_ref.version, []
+
+
 @router.post("", status_code=201)
 def create_session(
     body: SessionCreateRequest, db: Session = Depends(get_db), user: User = Depends(require_user)
-) -> dict[str, Any]:
+) -> Any:
     settings = get_settings()
-    get_readable_published_km(db, body.questionnaire_ref.id, body.questionnaire_ref.version, user)
+    refs_to_store, primary_id, primary_version, errors = _prepare_questionnaire_refs(
+        db, user, body.questionnaire_ref, body.questionnaire_refs
+    )
+    if errors:
+        return JSONResponse(
+            status_code=400, content={"detail": "invalid_content", "errors": errors}
+        )
     row = _insert_session(
         db,
         settings,
         owner_id=user.id,
-        questionnaire_id=body.questionnaire_ref.id,
-        questionnaire_version=body.questionnaire_ref.version,
+        questionnaire_id=primary_id,
+        questionnaire_version=primary_version,
+        questionnaire_refs=refs_to_store,
         default_language=body.default_language,
         title=body.title,
         status="open",
     )
-    return session_to_out(row, settings.base_url).model_dump(mode="json", by_alias=True)
+    refs_out = resolve_session_questionnaire_refs(db, row)
+    return session_to_out(row, settings.base_url, refs_out).model_dump(mode="json", by_alias=True)
 
 
 @router.get("/by-code/{join_code}", response_model=SessionPublicOut)
@@ -78,14 +144,14 @@ def get_session_by_code(join_code: str, db: Session = Depends(get_db)) -> Sessio
     if row is None:
         raise HTTPException(status_code=404, detail="not_found")
     owner = db.get(User, row.owner_id)
-    km = db.get(KnowledgeModel, (row.questionnaire_id, row.questionnaire_version))
-    # Review finding 4: the join-by-code lookup is public and unauthenticated,
-    # so only surface the KM's title when it would itself be readable by an
-    # anonymous caller (published and public/link) — never leak a private
-    # KM's title through the session's public join code.
-    questionnaire_title: dict[str, str] = {}
-    if km is not None and km.status == "published" and can_read(km.owner_id, km.visibility, None):
-        questionnaire_title = km.title or {}
+    # Review finding 4 / spec 08-workshop-picklists.md §5.8: the join-by-code
+    # lookup is public and unauthenticated, so only surface a ref's title
+    # when it would itself be readable by an anonymous caller (published and
+    # public/link) -- never leak a private KM's title through the session's
+    # public join code. `resolve_session_questionnaire_refs` applies exactly
+    # that filter per ref.
+    refs_out = resolve_session_questionnaire_refs(db, row)
+    questionnaire_title = refs_out[0]["title"] if refs_out else {}
     return SessionPublicOut(
         id=row.id,
         title=row.title,
@@ -94,6 +160,7 @@ def get_session_by_code(join_code: str, db: Session = Depends(get_db)) -> Sessio
         default_language=row.default_language,
         facilitator_name=owner.display_name if owner else "",
         questionnaire_title=questionnaire_title,
+        questionnaire_refs=refs_out,
     )
 
 
@@ -103,7 +170,8 @@ def get_session(
 ) -> dict[str, Any]:
     row = _get_owned_session(session_id, db, user)
     settings = get_settings()
-    return session_to_out(row, settings.base_url).model_dump(mode="json", by_alias=True)
+    refs_out = resolve_session_questionnaire_refs(db, row)
+    return session_to_out(row, settings.base_url, refs_out).model_dump(mode="json", by_alias=True)
 
 
 @router.patch("/{session_id}")
@@ -112,7 +180,7 @@ def patch_session(
     body: SessionPatchRequest,
     db: Session = Depends(get_db),
     user: User = Depends(require_user),
-) -> dict[str, Any]:
+) -> Any:
     row = _get_owned_session(session_id, db, user)
     if body.title is not None:
         row.title = body.title
@@ -120,10 +188,26 @@ def patch_session(
         row.status = body.status
     if body.default_language is not None:
         row.default_language = body.default_language
+    if body.questionnaire_refs is not None:
+        # spec 08 §3.1/§5.7: replaceable only while the session has no FIPs.
+        has_fips = db.query(Fip.id).filter(Fip.session_id == row.id).first() is not None
+        if has_fips:
+            raise HTTPException(status_code=409, detail="session_has_fips")
+        refs_to_store, primary_id, primary_version, errors = _prepare_questionnaire_refs(
+            db, user, None, body.questionnaire_refs
+        )
+        if errors:
+            return JSONResponse(
+                status_code=400, content={"detail": "invalid_content", "errors": errors}
+            )
+        row.questionnaire_refs = refs_to_store
+        row.questionnaire_id = primary_id
+        row.questionnaire_version = primary_version
     db.commit()
     db.refresh(row)
     settings = get_settings()
-    return session_to_out(row, settings.base_url).model_dump(mode="json", by_alias=True)
+    refs_out = resolve_session_questionnaire_refs(db, row)
+    return session_to_out(row, settings.base_url, refs_out).model_dump(mode="json", by_alias=True)
 
 
 @router.delete("/{session_id}", status_code=204)
@@ -163,6 +247,7 @@ def list_session_fips(
     # fetch each distinct knowledge model referenced by these FIPs once
     # (not once per FIP) and pass its question count/ids through.
     km_cache: dict[tuple[str, str], KnowledgeModel | None] = {}
+    refs = resolve_session_questionnaire_refs(db, row)
     items = []
     for f in rows:
         km_key = (f.questionnaire_id, f.questionnaire_version)
@@ -174,6 +259,7 @@ def list_session_fips(
                 f,
                 total_questions=total_questions_for_km(km),
                 known_question_ids=known_question_ids_for_km(km),
+                area_label=area_label_for_refs(refs, f.questionnaire_id, f.questionnaire_version),
             )
         )
     return {"items": items, "total": len(items)}

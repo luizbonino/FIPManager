@@ -343,6 +343,9 @@ def test_ensure_columns_swallows_concurrent_duplicate_column(tmp_path):
         CREATE TABLE fips (
             id VARCHAR NOT NULL PRIMARY KEY
         );
+        CREATE TABLE workshop_sessions (
+            id VARCHAR NOT NULL PRIMARY KEY
+        );
         """
     )
     conn.commit()
@@ -368,7 +371,7 @@ def test_ensure_columns_swallows_concurrent_duplicate_column(tmp_path):
     conn2 = _sqlite3.connect(str(db_path))
     cols_by_table = {
         table: {row[1] for row in conn2.execute(f"PRAGMA table_info({table})")}
-        for table in ("users", "knowledge_models", "fips")
+        for table in ("users", "knowledge_models", "fips", "workshop_sessions")
     }
     conn2.close()
 

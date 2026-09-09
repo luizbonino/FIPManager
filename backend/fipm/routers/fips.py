@@ -52,8 +52,11 @@ from fipm.schemas import (
     OrphanedAnswerImport,
     PrefillFromDmpRequest,
     Visibility,
+    answer_dump,
+    area_label_for_refs,
     fip_out_dict,
     known_question_ids_for_km,
+    session_questionnaire_refs,
     total_questions_for_km,
 )
 
@@ -65,22 +68,42 @@ def _out(
     edit_token: str | None = None,
     total_questions: int | None = None,
     known_question_ids: set[str] | None = None,
+    area_label: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     return fip_out_dict(
-        fip, edit_token, total_questions=total_questions, known_question_ids=known_question_ids
+        fip,
+        edit_token,
+        total_questions=total_questions,
+        known_question_ids=known_question_ids,
+        area_label=area_label,
     )
 
 
+def _area_label_for_fip(db: Session, fip: Fip) -> dict[str, str] | None:
+    """spec 08-workshop-picklists.md §3.2: `FipOut.areaLabel` -- non-null
+    only for a FIP in a multi-ref session, looked up from the session's ref
+    list at read/export time (never copied onto the FIP row) so a label fix
+    propagates."""
+    if fip.session_id is None:
+        return None
+    session_row = db.get(WorkshopSession, fip.session_id)
+    if session_row is None:
+        return None
+    refs = session_questionnaire_refs(session_row)
+    return area_label_for_refs(refs, fip.questionnaire_id, fip.questionnaire_version)
+
+
 def _out_for_km(
-    fip: Fip, km: KnowledgeModel | None, edit_token: str | None = None
+    fip: Fip, km: KnowledgeModel | None, db: Session, edit_token: str | None = None
 ) -> dict[str, Any]:
-    """`_out`, deriving `total_questions`/`known_question_ids` from `km` in
-    one place (review findings 3/5)."""
+    """`_out`, deriving `total_questions`/`known_question_ids`/`area_label`
+    from `km`/`db` in one place (review findings 3/5)."""
     return _out(
         fip,
         edit_token,
         total_questions=total_questions_for_km(km),
         known_question_ids=known_question_ids_for_km(km),
+        area_label=_area_label_for_fip(db, fip),
     )
 
 
@@ -169,19 +192,28 @@ def _get_readable_fip(fip_id: str, request: Request, db: Session, user: User | N
     raise HTTPException(status_code=404, detail="not_found")
 
 
-def _known_question_ids(km: KnowledgeModel) -> set[str]:
+def _questions_by_id(km: KnowledgeModel) -> dict[str, dict[str, Any]]:
     content = km.content or {}
     return {
-        question["id"]
+        question["id"]: question
         for section in content.get("sections", [])
         for question in section.get("questions", [])
     }
 
 
 def _validate_question_ids(answers: list[Answer], km: KnowledgeModel) -> None:
-    valid_ids = _known_question_ids(km)
-    if any(a.question_id not in valid_ids for a in answers):
+    """400 `unknown_question_id` for an answer whose question id the model
+    doesn't have; spec 08-workshop-picklists.md §1.1/§5.4: 422
+    `free_text_not_allowed` for a `ferFreeText` declaration on a question
+    with `allowFreeText: false`."""
+    questions = _questions_by_id(km)
+    if any(a.question_id not in questions for a in answers):
         raise HTTPException(status_code=400, detail="unknown_question_id")
+    for a in answers:
+        if questions[a.question_id].get("allowFreeText") is False and any(
+            d.fer_free_text for d in a.declarations
+        ):
+            raise HTTPException(status_code=422, detail="free_text_not_allowed")
 
 
 @router.post("", status_code=201)
@@ -201,15 +233,18 @@ def create_fip(
             raise HTTPException(status_code=403, detail="invalid_join_code")
         if session_row.status != "open":
             raise HTTPException(status_code=409, detail="session_closed")
-        # The session already pins a questionnaire; a body ref that disagrees
-        # with it is a client error rather than something to silently override.
-        if (
-            body.questionnaire_ref.id != session_row.questionnaire_id
-            or body.questionnaire_ref.version != session_row.questionnaire_version
-        ):
+        # spec 08-workshop-picklists.md §3.2: a multi-ref session offers
+        # several questionnaires (one per area); the body ref must match
+        # *one of* the session's refs (was: must equal the session's single
+        # ref) -- the chosen ref becomes the FIP's questionnaire_id/version,
+        # no new FIP column.
+        allowed_refs = {
+            (ref["id"], ref["version"]) for ref in session_questionnaire_refs(session_row)
+        }
+        if (body.questionnaire_ref.id, body.questionnaire_ref.version) not in allowed_refs:
             raise HTTPException(status_code=400, detail="questionnaire_ref_mismatch")
-        questionnaire_id = session_row.questionnaire_id
-        questionnaire_version = session_row.questionnaire_version
+        questionnaire_id = body.questionnaire_ref.id
+        questionnaire_version = body.questionnaire_ref.version
     else:
         questionnaire_id = body.questionnaire_ref.id
         questionnaire_version = body.questionnaire_ref.version
@@ -217,7 +252,7 @@ def create_fip(
     km = get_readable_published_km(db, questionnaire_id, questionnaire_version, user)
     _validate_question_ids(body.answers, km)
 
-    answers = [a.model_dump(mode="json", by_alias=True) for a in body.answers]
+    answers = [answer_dump(a) for a in body.answers]
     community = body.community.model_dump(mode="json", by_alias=True) if body.community else None
     related_dmps = normalise_related_dmps(
         [d.model_dump(mode="json", by_alias=True) for d in body.related_dmps], settings
@@ -248,7 +283,7 @@ def create_fip(
             visibility=body.visibility or "link",
             **common,
         )
-        return _out_for_km(fip, km, edit_token=edit_token)
+        return _out_for_km(fip, km, db, edit_token=edit_token)
 
     if user is not None:
         visibility = body.visibility or "private"
@@ -262,7 +297,7 @@ def create_fip(
             visibility=visibility,
             **common,
         )
-        return _out_for_km(fip, km)
+        return _out_for_km(fip, km, db)
 
     raise HTTPException(status_code=400, detail="session_id_or_login_required")
 
@@ -303,7 +338,7 @@ def import_fip(
     _validate_question_ids(answers, km)
     community = fip_data.get("community")
 
-    answer_dicts = [a.model_dump(mode="json", by_alias=True) for a in answers]
+    answer_dicts = [answer_dump(a) for a in answers]
     apply_dmp_evidence(answer_dicts, related_dmps)
 
     # spec 07 §6: `orphanedAnswers` is absent on a v1 document (empty list
@@ -357,7 +392,7 @@ def import_fip(
         language=language,
         license=fip_data.get("license") or "CC0-1.0",
     )
-    return _out_for_km(fip, km)
+    return _out_for_km(fip, km, db)
 
 
 @router.get("/{fip_id}")
@@ -369,7 +404,7 @@ def get_fip(
 ) -> dict[str, Any]:
     fip = _get_readable_fip(fip_id, request, db, user)
     km = _km_for_fip(db, fip)
-    return _out_for_km(fip, km)
+    return _out_for_km(fip, km, db)
 
 
 @router.patch("/{fip_id}")
@@ -398,7 +433,7 @@ def patch_fip(
     if body.answers is not None:
         if km is not None:
             _validate_question_ids(body.answers, km)
-        new_answers = [a.model_dump(mode="json", by_alias=True) for a in body.answers]
+        new_answers = [answer_dump(a) for a in body.answers]
     else:
         # A copy, not the ORM-tracked list itself: mutated in place below
         # only by the legacy-dmpEvidence normalisation pass, never
@@ -445,7 +480,7 @@ def patch_fip(
 
     db.commit()
     db.refresh(fip)
-    return _out_for_km(fip, km)
+    return _out_for_km(fip, km, db)
 
 
 @router.delete("/{fip_id}", status_code=204)
@@ -487,7 +522,7 @@ def claim_fip(
     db.commit()
     db.refresh(fip)
     km = _km_for_fip(db, fip)
-    return _out_for_km(fip, km)
+    return _out_for_km(fip, km, db)
 
 
 # ---------------------------------------------------------------------------
@@ -656,7 +691,7 @@ def migrate_fip(
     fip.updated_at = now
     db.commit()
     db.refresh(fip)
-    return _out_for_km(fip, target)
+    return _out_for_km(fip, target, db)
 
 
 @router.post("/{fip_id}/prefill-from-dmp")

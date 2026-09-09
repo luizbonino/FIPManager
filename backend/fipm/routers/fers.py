@@ -26,14 +26,18 @@ def list_fers(
     user: User | None = Depends(optional_user),
 ) -> ListOut:
     # spec 05-v1-completion.md §1: a promoted FER (source="user-promoted") is
-    # catalogue content, globally visible like a seed FER.
+    # catalogue content, globally visible like a seed FER. spec
+    # 08-workshop-picklists.md §1.3/§5.3: source="model" (an inlineFers
+    # promotion) joins that globally-visible set too, anonymous callers
+    # included -- a workshop participant has no account and must still see
+    # the options their model suggests.
     query = db.query(Fer)
     if user is not None:
         query = query.filter(
-            (Fer.source.in_(("seed", "user-promoted"))) | (Fer.owner_id == user.id)
+            (Fer.source.in_(("seed", "user-promoted", "model"))) | (Fer.owner_id == user.id)
         )
     else:
-        query = query.filter(Fer.source.in_(("seed", "user-promoted")))
+        query = query.filter(Fer.source.in_(("seed", "user-promoted", "model")))
     if type:
         query = query.filter(Fer.type == type)
     if source:

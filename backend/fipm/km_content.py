@@ -16,8 +16,9 @@ import logging
 import re
 import secrets
 from typing import Any, TypedDict
+from urllib.parse import urlparse
 
-from fipm.config import Settings, get_settings
+from fipm.config import DECLARATION_STATUSES, Settings, get_settings
 from fipm.fer_types import allowed_fer_type_keys
 
 logger = logging.getLogger(__name__)
@@ -62,8 +63,14 @@ MAX_QUESTIONS = 300
 MAX_TEXT_LEN = 4000
 MAX_ERRORS = 50
 
+# spec 08-workshop-picklists.md §1.1/§1.2.
+MAX_SUGGESTED_FER_IDS = 12
+MAX_INLINE_FERS = 300
+
 _CROCKFORD_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
 
 
 class ContentError(TypedDict):
@@ -76,17 +83,43 @@ def _err(errors: list[ContentError], path: str, code: str, message: str) -> None
     errors.append({"path": path, "code": code, "message": message})
 
 
+def _is_absolute_http_iri(value: Any) -> bool:
+    """spec 08 §1.2 rule 9/12: an absolute `http(s)` IRI, no whitespace or
+    control characters."""
+    if not isinstance(value, str) or not value or _CONTROL_CHAR_RE.search(value):
+        return False
+    try:
+        parsed = urlparse(value)
+    except ValueError:
+        return False
+    return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+
+
 def _check_langmap(
-    value: Any, path: str, errors: list[ContentError], *, required: bool = True
+    value: Any,
+    path: str,
+    errors: list[ContentError],
+    *,
+    required: bool = True,
+    require_en: bool = True,
+    max_len: int | None = None,
 ) -> None:
     """Rule 3: a LangMap is an object of `str -> non-empty str` whose keys
-    are within {en, pt-PT, pt-BR, es} and contains `en`."""
+    are within {en, pt-PT, pt-BR, es}. By default it must contain `en`
+    (`require_en=True`); spec 08 §1.2 rule 12 / §3.1 relax that for an
+    `inlineFers` label or a session area label (pt-BR-only sources), where
+    the LangMap need only be non-empty. `max_len` overrides `MAX_TEXT_LEN`
+    per-language (spec 08 §3.1: an area label is capped at 80 chars)."""
+    limit = max_len if max_len is not None else MAX_TEXT_LEN
     if value is None:
         if required:
             _err(errors, path, "missing_key", f"{path} is required")
         return
     if not isinstance(value, dict):
         _err(errors, path, "missing_key", f"{path} must be an object")
+        return
+    if not require_en and not value:
+        _err(errors, path, "missing_key", f"{path} must be non-empty")
         return
     for lang, text in value.items():
         if lang not in LANGUAGES:
@@ -95,36 +128,176 @@ def _check_langmap(
         if not isinstance(text, str) or text == "":
             _err(errors, f"{path}.{lang}", "empty_string", f"{path}.{lang} must be non-empty")
             continue
-        if len(text) > MAX_TEXT_LEN:
-            _err(
-                errors,
-                f"{path}.{lang}",
-                "too_long",
-                f"{path}.{lang} exceeds {MAX_TEXT_LEN} characters",
-            )
-    if "en" not in value:
+        if len(text) > limit:
+            _err(errors, f"{path}.{lang}", "too_long", f"{path}.{lang} exceeds {limit} characters")
+    if require_en and "en" not in value:
         _err(errors, path, "missing_en", f"{path} must include an 'en' entry")
 
 
-def validate_langmap(value: Any, path: str, *, required: bool = True) -> list[ContentError]:
+def validate_langmap(
+    value: Any,
+    path: str,
+    *,
+    required: bool = True,
+    require_en: bool = True,
+    max_len: int | None = None,
+) -> list[ContentError]:
     """Public single-field entry point (used by PATCH metadata updates that
-    don't carry a full `content` document to run through `validate_content`)."""
+    don't carry a full `content` document to run through `validate_content`,
+    and by spec 08 §3.1 session `questionnaireRefs[].label` validation)."""
     errors: list[ContentError] = []
-    _check_langmap(value, path, errors, required=required)
+    _check_langmap(value, path, errors, required=required, require_en=require_en, max_len=max_len)
     return errors
 
 
+def _validate_inline_fers(
+    doc: dict[str, Any],
+    errors: list[ContentError],
+    *,
+    fer_types: set[str],
+    skip_fer_type_check: bool,
+    known_fer_ids: set[str] | None,
+) -> set[str]:
+    """spec 08-workshop-picklists.md §1.2 rule 12: `model.inlineFers`.
+    Returns the set of ids declared (valid or not -- used by rule 10 to
+    resolve `suggestedFerIds` against, so a malformed entry's id, if it has
+    one, still counts as "declared" for that purpose)."""
+    inline_fers = doc.get("inlineFers")
+    ids: set[str] = set()
+    if inline_fers is None:
+        return ids
+    if not isinstance(inline_fers, list):
+        _err(errors, "inlineFers", "invalid_value", "inlineFers must be a list")
+        return ids
+    if len(inline_fers) > MAX_INLINE_FERS:
+        _err(errors, "inlineFers", "too_many", f"more than {MAX_INLINE_FERS} inlineFers entries")
+
+    seen_ids: set[str] = set()
+    for idx, entry in enumerate(inline_fers):
+        path = f"inlineFers[{idx}]"
+        if not isinstance(entry, dict):
+            _err(errors, path, "missing_key", "inlineFers entry must be an object")
+            continue
+
+        entry_id = entry.get("id")
+        if not isinstance(entry_id, str) or not entry_id:
+            _err(errors, f"{path}.id", "missing_key", "inlineFers entry id is required")
+        elif not _is_absolute_http_iri(entry_id):
+            _err(errors, f"{path}.id", "invalid_fer_iri", f"invalid inlineFers id {entry_id!r}")
+        elif entry_id in seen_ids:
+            _err(
+                errors, f"{path}.id", "duplicate_inline_fer", f"duplicate inlineFers id {entry_id}"
+            )
+        else:
+            seen_ids.add(entry_id)
+            ids.add(entry_id)
+            if known_fer_ids is not None and entry_id in known_fer_ids:
+                _err(
+                    errors,
+                    f"{path}.id",
+                    "inline_fer_duplicates_catalogue",
+                    f"{entry_id} already exists in the catalogue; reference it via "
+                    "suggestedFerIds instead",
+                )
+
+        # spec §1.2 rule 12: `label` is a LangMap, non-empty, `en` NOT
+        # required (an area FER may be pt-BR only -- spec §7 A7).
+        _check_langmap(entry.get("label"), f"{path}.label", errors, require_en=False)
+
+        entry_type = entry.get("type")
+        if not skip_fer_type_check and entry_type not in fer_types:
+            _err(errors, f"{path}.type", "unknown_fer_type", f"unknown fer type {entry_type!r}")
+
+        homepage = entry.get("homepage")
+        if homepage is not None and not _is_absolute_http_iri(homepage):
+            _err(errors, f"{path}.homepage", "invalid_value", "homepage must be an absolute IRI")
+
+    return ids
+
+
+def _validate_suggested_fer_ids(
+    question: dict[str, Any],
+    q_path: str,
+    errors: list[ContentError],
+    *,
+    known_ids: set[str] | None,
+) -> None:
+    """spec 08-workshop-picklists.md §1.2 rule 9/10: `question.
+    suggestedFerIds`."""
+    suggested = question.get("suggestedFerIds")
+    if suggested is None:
+        return
+    path = f"{q_path}.suggestedFerIds"
+    if not isinstance(suggested, list):
+        _err(errors, path, "invalid_value", "suggestedFerIds must be a list")
+        return
+    if len(suggested) > MAX_SUGGESTED_FER_IDS:
+        _err(errors, path, "too_many", f"more than {MAX_SUGGESTED_FER_IDS} suggestedFerIds")
+
+    seen: set[str] = set()
+    for idx, fer_id in enumerate(suggested):
+        item_path = f"{path}[{idx}]"
+        if not isinstance(fer_id, str) or not _is_absolute_http_iri(fer_id):
+            _err(errors, item_path, "invalid_fer_iri", f"invalid suggested FER id {fer_id!r}")
+            continue
+        if fer_id in seen:
+            _err(errors, item_path, "duplicate_suggested_fer", f"duplicate suggested FER {fer_id}")
+            continue
+        seen.add(fer_id)
+        # Rule 10: resolution is only checked when a catalogue snapshot was
+        # supplied; `known_ids is None` means "skip resolution entirely"
+        # (the importer/TS mirror/routers each supply their own known_ids).
+        if known_ids is not None and fer_id not in known_ids:
+            _err(errors, item_path, "unknown_suggested_fer", f"unresolved suggested FER {fer_id}")
+
+
 def validate_content(
-    doc: dict[str, Any], *, publishing: bool = False, settings: Settings | None = None
+    doc: dict[str, Any],
+    *,
+    publishing: bool = False,
+    settings: Settings | None = None,
+    known_fer_ids: set[str] | None = None,
 ) -> list[ContentError]:
     """Validate a knowledge-model `content` document. Rules per spec 04
-    §3.3. Returns at most `MAX_ERRORS` entries. `publishing=True` also
-    enforces rule 8 (at least one non-hidden question)."""
+    §3.3 and spec 08-workshop-picklists.md §1.2 (rules 9-13). Returns at
+    most `MAX_ERRORS` entries. `publishing=True` also enforces rule 8 (at
+    least one non-hidden question) and rule 13 (every question must have an
+    answer path). `known_fer_ids` is the caller's catalogue snapshot (a
+    `SELECT id FROM fers` for the routers, `seed.json` for the importer,
+    the picker's cached map for the TS mirror) used to resolve
+    `suggestedFerIds`/`inlineFers` against; this function stays pure and
+    does no I/O of its own -- `known_fer_ids=None` (the default) skips that
+    resolution check entirely."""
     settings = settings or get_settings()
     errors: list[ContentError] = []
 
     _check_langmap(doc.get("title"), "title", errors)
     _check_langmap(doc.get("description"), "description", errors)
+
+    fer_types_for_inline = allowed_fer_type_keys(settings)
+    inline_fer_ids = _validate_inline_fers(
+        doc,
+        errors,
+        fer_types=fer_types_for_inline,
+        skip_fer_type_check=not fer_types_for_inline,
+        known_fer_ids=known_fer_ids,
+    )
+
+    default_status = doc.get("defaultDeclarationStatus")
+    if default_status is not None and default_status not in DECLARATION_STATUSES:
+        _err(
+            errors,
+            "defaultDeclarationStatus",
+            "invalid_value",
+            f"defaultDeclarationStatus must be one of {DECLARATION_STATUSES}",
+        )
+
+    for bool_field in ("compactDeclarations",):
+        v = doc.get(bool_field)
+        if v is not None and not isinstance(v, bool):
+            _err(errors, bool_field, "invalid_value", f"{bool_field} must be a boolean")
+
+    known_suggested_ids = None if known_fer_ids is None else (inline_fer_ids | known_fer_ids)
 
     sections = doc.get("sections")
     if not isinstance(sections, list):
@@ -134,7 +307,7 @@ def validate_content(
     if len(sections) > MAX_SECTIONS:
         _err(errors, "sections", "too_many", f"more than {MAX_SECTIONS} sections")
 
-    fer_types = allowed_fer_type_keys(settings)
+    fer_types = fer_types_for_inline
     skip_fer_type_check = not fer_types
     if skip_fer_type_check:
         # Review finding 8: an empty taxonomy (data/fers/fer-types.json
@@ -231,7 +404,7 @@ def validate_content(
             if scope is not None and scope not in SCOPES:
                 _err(errors, f"{q_path}.scope", "invalid_value", f"invalid scope {scope!r}")
 
-            for bool_field in ("required", "allowMultiple", "hidden"):
+            for bool_field in ("required", "allowMultiple", "hidden", "allowFreeText"):
                 v = question.get(bool_field)
                 if v is not None and not isinstance(v, bool):
                     _err(
@@ -239,6 +412,20 @@ def validate_content(
                         f"{q_path}.{bool_field}",
                         "invalid_value",
                         f"{bool_field} must be a boolean",
+                    )
+
+            _validate_suggested_fer_ids(question, q_path, errors, known_ids=known_suggested_ids)
+
+            if publishing:
+                allow_free_text = question.get("allowFreeText")
+                suggested_ids = question.get("suggestedFerIds") or []
+                if allow_free_text is False and not suggested_ids:
+                    _err(
+                        errors,
+                        q_path,
+                        "no_answer_path",
+                        "a question with allowFreeText: false needs at least one "
+                        "suggestedFerIds entry to be answerable",
                     )
 
     if total_questions > MAX_QUESTIONS:

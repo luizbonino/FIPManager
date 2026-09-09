@@ -22,6 +22,7 @@ from fipm.authz import (
 )
 from fipm.config import get_settings
 from fipm.db import get_db
+from fipm.importer import promote_inline_fers
 from fipm.km_content import (
     MODEL_ID_PATTERN,
     ContentError,
@@ -32,7 +33,7 @@ from fipm.km_content import (
     validate_content,
     validate_langmap,
 )
-from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
+from fipm.models import Fer, Fip, KnowledgeModel, User, WorkshopSession
 from fipm.schemas import (
     KnowledgeModelContentPutRequest,
     KnowledgeModelCreateRequest,
@@ -81,6 +82,32 @@ def _km_out(row: KnowledgeModel) -> dict[str, Any]:
 
 def _invalid_content_response(errors: list[ContentError]) -> JSONResponse:
     return JSONResponse(status_code=400, content={"detail": "invalid_content", "errors": errors})
+
+
+def _known_fer_ids_for_content(db: Session, content: dict[str, Any]) -> set[str]:
+    """spec 08-workshop-picklists.md §1.2 rules 10/12: the router's
+    catalogue snapshot for `validate_content(known_fer_ids=...)` -- one
+    `SELECT id FROM fers WHERE id IN (...)`, restricted to the ids a
+    question actually suggests plus the ids `inlineFers` itself declares
+    (needed to detect `inline_fer_duplicates_catalogue`), never the whole
+    table."""
+    ids: set[str] = set()
+    for section in content.get("sections") or []:
+        if not isinstance(section, dict):
+            continue
+        for question in section.get("questions") or []:
+            if not isinstance(question, dict):
+                continue
+            suggested = question.get("suggestedFerIds")
+            if isinstance(suggested, list):
+                ids.update(x for x in suggested if isinstance(x, str))
+    for entry in content.get("inlineFers") or []:
+        if isinstance(entry, dict) and isinstance(entry.get("id"), str):
+            ids.add(entry["id"])
+    if not ids:
+        return set()
+    rows = db.query(Fer.id).filter(Fer.id.in_(ids)).all()
+    return {r[0] for r in rows}
 
 
 def _id_in_use(db: Session, km_id: str) -> bool:
@@ -313,7 +340,9 @@ def create_knowledge_model(
         "changelog": [],
         "sections": sections,
     }
-    errors = validate_content(content, settings=settings)
+    errors = validate_content(
+        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+    )
     if errors:
         return _invalid_content_response(errors)
 
@@ -413,7 +442,9 @@ async def import_knowledge_model(
     if "forkedFrom" in document:
         content["forkedFrom"] = document["forkedFrom"]
 
-    errors = validate_content(content, settings=settings)
+    errors = validate_content(
+        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+    )
     if not isinstance(changelog, list):
         # validate_content (km_content.py) has no opinion on `changelog`
         # (spec 04 §3.3 doesn't list it), so a wrong-typed value is checked
@@ -497,7 +528,9 @@ def fork_knowledge_model(
     content["version"] = new_version
     content["status"] = "draft"
 
-    errors = validate_content(content, settings=settings)
+    errors = validate_content(
+        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+    )
     if errors:
         return _invalid_content_response(errors)
 
@@ -628,11 +661,22 @@ def put_knowledge_model_content(
         content["title"] = body.title
     if body.description is not None:
         content["description"] = body.description
+    # spec 08-workshop-picklists.md §1.1/§1.4: siblings of `sections`, same
+    # whole-document PUT. Absent (None) leaves the row's current value
+    # untouched; an explicit value (including `[]`/`false`) sets it.
+    if body.inline_fers is not None:
+        content["inlineFers"] = body.inline_fers
+    if body.default_declaration_status is not None:
+        content["defaultDeclarationStatus"] = body.default_declaration_status
+    if body.compact_declarations is not None:
+        content["compactDeclarations"] = body.compact_declarations
     content["id"] = row.id
     content["version"] = row.version
     content["status"] = row.status
 
-    errors = validate_content(content, settings=settings)
+    errors = validate_content(
+        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+    )
     if errors:
         return _invalid_content_response(errors)
 
@@ -682,7 +726,12 @@ def publish_knowledge_model(
         raise HTTPException(status_code=400, detail="changelog_notes_required")
 
     content = dict(row.content or {})
-    errors = validate_content(content, publishing=True, settings=settings)
+    errors = validate_content(
+        content,
+        publishing=True,
+        settings=settings,
+        known_fer_ids=_known_fer_ids_for_content(db, content),
+    )
     if errors:
         return _invalid_content_response(errors)
 
@@ -699,9 +748,16 @@ def publish_knowledge_model(
     row.status = "published"
     row.content = content
     row.content_sha256 = content_sha256(content)
+    # spec 08-workshop-picklists.md §1.3/§5.2: promote every `inlineFers`
+    # entry into `fers` as source="model", owner_id = this model's owner
+    # (None for a system model); idempotent, never overwrites an existing
+    # row of any source.
+    promoted = promote_inline_fers(db, content, row.owner_id)
     db.commit()
     db.refresh(row)
-    return _km_out(row)
+    result = _km_out(row)
+    result["promotedFers"] = promoted
+    return result
 
 
 @router.post("/{km_id}/{version}/new-version", status_code=201)

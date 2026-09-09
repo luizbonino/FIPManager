@@ -82,13 +82,17 @@ def _en_text(q: dict[str, Any]) -> str:
 
 def _build_answered_index(answers: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """spec §4.1: "a question id carrying at least one declaration or a
-    non-empty comment counts as answered"."""
+    non-empty comment counts as answered". spec 08-workshop-picklists.md
+    §2.3: a `notApplicable: true` answer is also non-empty -- otherwise it
+    would be silently dropped by a migration instead of being kept or
+    orphaned like any other answer."""
     index: dict[str, dict[str, Any]] = {}
     for answer in answers or []:
         has_declarations = bool(answer.get("declarations"))
         comment = answer.get("comment")
         has_comment = bool(comment and str(comment).strip())
-        if has_declarations or has_comment:
+        has_not_applicable = bool(answer.get("notApplicable"))
+        if has_declarations or has_comment or has_not_applicable:
             index[answer["questionId"]] = answer
     return index
 
@@ -335,6 +339,9 @@ def _orphan_entry(
         "questionText": {"en": question_text_en} if question_text_en else {},
         "declarations": answer.get("declarations") or [],
         "comment": answer.get("comment"),
+        # spec 08-workshop-picklists.md §2.3: an orphaned answer carries its
+        # "not applicable" flag along, same as `declarations`/`comment`.
+        "notApplicable": bool(answer.get("notApplicable")),
         "fromVersion": from_version,
         "at": at_iso,
     }

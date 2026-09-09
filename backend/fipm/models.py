@@ -179,6 +179,13 @@ class WorkshopSession(Base):
     )
     questionnaire_id: Mapped[str] = mapped_column(String, nullable=False)
     questionnaire_version: Mapped[str] = mapped_column(String, nullable=False)
+    # v6 (spec 08-workshop-picklists.md §0/§3): `[{"id","version","label":
+    # {lang:str}}]`, 1..12 entries. NULL on a pre-v6 row (or one created
+    # without `questionnaireRefs`) means "derive the single-entry list from
+    # questionnaire_id/questionnaire_version" -- see
+    # fipm.routers.sessions.effective_questionnaire_refs. questionnaire_id/
+    # questionnaire_version always hold refs[0] and stay the FK.
+    questionnaire_refs: Mapped[list | None] = mapped_column(JSON, nullable=True)
     default_language: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False, default="open")

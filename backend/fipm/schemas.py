@@ -120,6 +120,27 @@ class QuestionnaireRef(CamelModel):
     version: str
 
 
+# spec 08-workshop-picklists.md §3.1: one entry of a session's
+# `questionnaireRefs`, as accepted on write -- `label` is facilitator-
+# authored (no `en` requirement, capped at 80 chars/language by
+# `km_content.validate_langmap`, checked in the router alongside id/version
+# resolution).
+class QuestionnaireRefLabelled(CamelModel):
+    id: str
+    version: str
+    label: dict[str, str] = Field(default_factory=dict)
+
+
+# spec 08 §3.1: one entry of a session's `questionnaireRefs` as returned on
+# read -- `title` is the model's own title, filtered by the same
+# anonymous-readability rule that guards `questionnaireTitle` today.
+class QuestionnaireRefOut(CamelModel):
+    id: str
+    version: str
+    label: dict[str, str]
+    title: dict[str, str]
+
+
 class KnowledgeModelSummary(CamelModel):
     id: str
     version: str
@@ -198,6 +219,15 @@ class KnowledgeModelContentPutRequest(CamelModel):
     sections: list[dict[str, Any]]
     title: dict[str, str] | None = None
     description: dict[str, str] | None = None
+    # spec 08-workshop-picklists.md §1.1/§1.4: siblings of `sections`, edited
+    # through this same whole-document PUT (no new endpoint). `None` means
+    # "leave this field as it is on the row" (an editor session that never
+    # touched the settings panel must not silently clear it); an explicit
+    # `[]`/`false`/status string does update it, including "unset" writes
+    # coming from the editor UI.
+    inline_fers: list[dict[str, Any]] | None = None
+    default_declaration_status: str | None = None
+    compact_declarations: bool | None = None
 
 
 class KnowledgeModelPublishRequest(CamelModel):
@@ -328,6 +358,30 @@ class Answer(CamelModel):
     question_id: str
     declarations: list[Declaration] = Field(default_factory=list)
     comment: str | None = None
+    # spec 08-workshop-picklists.md §2.1: a per-answer "not applicable" flag,
+    # mutually exclusive with declarations -- 422 on both
+    # `POST /api/fips`, `PATCH /api/fips/{id}` and `POST /api/fips/import`.
+    not_applicable: bool = False
+
+    @model_validator(mode="after")
+    def _not_applicable_excludes_declarations(self) -> Answer:
+        if self.not_applicable and self.declarations:
+            raise ValueError(
+                "notApplicable and declarations are mutually exclusive "
+                "(not_applicable_with_declarations)"
+            )
+        return self
+
+
+def answer_dump(answer: Answer) -> dict[str, Any]:
+    """`Answer` -> the stored/exported dict shape, with `notApplicable`
+    entirely absent (never merely `false`) unless it's actually `true` --
+    spec 08 §2.1: "notApplicable: false is never stored ... keeping old
+    `answers` blobs byte-identical"."""
+    data = answer.model_dump(mode="json", by_alias=True)
+    if data.get("notApplicable") is False:
+        data.pop("notApplicable", None)
+    return data
 
 
 class MigratedFromImport(CamelModel):
@@ -357,6 +411,9 @@ class OrphanedAnswerImport(CamelModel):
     question_text: dict[str, str] = Field(default_factory=dict)
     declarations: list[Declaration] = Field(default_factory=list)
     comment: str | None = None
+    # spec 08-workshop-picklists.md §2.3: an orphaned answer carries its
+    # "not applicable" flag along, same as an active one.
+    not_applicable: bool = False
     from_version: str | None = None
     at: str | None = None
 
@@ -420,6 +477,10 @@ class FipSummary(CamelModel):
     total_questions: int | None
     declarations: int
     by_status: dict[str, int]
+    # spec 08-workshop-picklists.md §2.2: count of answers flagged
+    # `notApplicable: true` (a subset of `answeredQuestions`; `byStatus`
+    # stays about declaration statuses only).
+    not_applicable: int = 0
 
 
 class FipOut(CamelModel):
@@ -444,6 +505,11 @@ class FipOut(CamelModel):
     # spec 07-mail-and-migration.md §0/§4.3: the version migrated *from* on
     # the last migration, or null.
     migrated_from: dict[str, Any] | None = None
+    # spec 08-workshop-picklists.md §3.2: the label of the session ref this
+    # FIP was created against, looked up from the session's ref list at
+    # read/export time (never copied onto the FIP row) -- non-null only for
+    # a FIP in a multi-ref session.
+    area_label: dict[str, str] | None = None
 
 
 class PrefillFromDmpRequest(CamelModel):
@@ -492,14 +558,32 @@ class FipImportDoc(CamelModel):
 
 class SessionCreateRequest(CamelModel):
     title: str
-    questionnaire_ref: QuestionnaireRef
+    # spec 08-workshop-picklists.md §3.1: `questionnaire_ref` stays
+    # "required-ish" -- optional here so a client may send only
+    # `questionnaireRefs` instead, but the model validator below rejects a
+    # body that supplies neither (422).
+    questionnaire_ref: QuestionnaireRef | None = None
+    questionnaire_refs: list[QuestionnaireRefLabelled] | None = Field(
+        default=None, min_length=1, max_length=12
+    )
     default_language: Language
+
+    @model_validator(mode="after")
+    def _at_least_one_ref(self) -> SessionCreateRequest:
+        if self.questionnaire_ref is None and not self.questionnaire_refs:
+            raise ValueError("questionnaire_ref or questionnaire_refs is required")
+        return self
 
 
 class SessionPatchRequest(CamelModel):
     title: str | None = None
     status: SessionStatus | None = None
     default_language: Language | None = None
+    # spec 08 §3.1/§5.7: replaceable only while the session has no FIPs
+    # (checked in the router -- 409 `session_has_fips`).
+    questionnaire_refs: list[QuestionnaireRefLabelled] | None = Field(
+        default=None, min_length=1, max_length=12
+    )
 
 
 class SessionOut(CamelModel):
@@ -514,6 +598,9 @@ class SessionOut(CamelModel):
     status: str
     created_at: datetime
     updated_at: datetime
+    # spec 08 §3.1/§5.8: the session's full ref list, each with its own
+    # label and (anonymously-readability-filtered) title.
+    questionnaire_refs: list[QuestionnaireRefOut] = Field(default_factory=list)
 
 
 class SessionPublicOut(CamelModel):
@@ -526,6 +613,8 @@ class SessionPublicOut(CamelModel):
     # spec 02-core-flows.md §5.1: the knowledge model's own `title` LangMap,
     # so the join screen can render it without a ~60 kB knowledge-model fetch.
     questionnaire_title: dict[str, str]
+    # spec 08 §3.1/§5.8: as SessionOut.questionnaireRefs.
+    questionnaire_refs: list[QuestionnaireRefOut] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -584,12 +673,18 @@ def _fip_summary(
     by_status: dict[str, int] = dict.fromkeys(DECLARATION_STATUSES, 0)
     answered_questions = 0
     declarations = 0
+    not_applicable = 0
     for answer in answers:
         if known_question_ids is not None and answer.get("questionId") not in known_question_ids:
             continue
         decls = answer.get("declarations") or []
-        if decls:
+        is_not_applicable = bool(answer.get("notApplicable"))
+        # spec 08-workshop-picklists.md §2.2: a notApplicable answer counts
+        # as answered even though it carries no declarations.
+        if decls or is_not_applicable:
             answered_questions += 1
+        if is_not_applicable:
+            not_applicable += 1
         for decl in decls:
             declarations += 1
             status = decl.get("status")
@@ -600,6 +695,7 @@ def _fip_summary(
         total_questions=total_questions,
         declarations=declarations,
         by_status=by_status,
+        not_applicable=not_applicable,
     )
 
 
@@ -610,6 +706,7 @@ def fip_to_out(
     settings: Settings | None = None,
     total_questions: int | None = None,
     known_question_ids: set[str] | None = None,
+    area_label: dict[str, str] | None = None,
 ) -> FipOut:
     if settings is None:
         settings = get_settings()
@@ -633,6 +730,7 @@ def fip_to_out(
         embed_url=f"{settings.base_url}/fips/{fip.id}/embed",
         summary=_fip_summary(answers, total_questions, known_question_ids),
         migrated_from=fip.migrated_from,
+        area_label=area_label,
     )
 
 
@@ -643,6 +741,7 @@ def fip_out_dict(
     settings: Settings | None = None,
     total_questions: int | None = None,
     known_question_ids: set[str] | None = None,
+    area_label: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """FipOut as a camelCase dict, with the editToken key entirely absent
     (never merely null) unless it was actually issued."""
@@ -652,10 +751,43 @@ def fip_out_dict(
         settings=settings,
         total_questions=total_questions,
         known_question_ids=known_question_ids,
+        area_label=area_label,
     ).model_dump(mode="json", by_alias=True)
     if data.get("editToken") is None:
         data.pop("editToken", None)
     return data
+
+
+# ---------------------------------------------------------------------------
+# Session questionnaire refs (spec 08-workshop-picklists.md §0/§3)
+# ---------------------------------------------------------------------------
+
+
+def session_questionnaire_refs(row: Any) -> list[dict[str, Any]]:
+    """The session's effective ref list: `row.questionnaire_refs` verbatim
+    when set, else a single-entry list derived from
+    `questionnaire_id`/`questionnaire_version` (NULL on a pre-v6 row, or a
+    row created via the single-ref path -- spec §0). Pure (no DB access);
+    callers that need a `title`/resolved `label` look those up against the
+    referenced `KnowledgeModel` rows themselves."""
+    refs = row.questionnaire_refs
+    if refs:
+        return refs
+    return [{"id": row.questionnaire_id, "version": row.questionnaire_version, "label": {}}]
+
+
+def area_label_for_refs(
+    refs: list[dict[str, Any]], questionnaire_id: str, questionnaire_version: str
+) -> dict[str, str] | None:
+    """spec 08 §3.2: `FipOut.areaLabel` -- non-null only when `refs` has
+    more than one entry (a multi-ref session); the label of the ref
+    matching `questionnaire_id`/`questionnaire_version`, else None."""
+    if len(refs) <= 1:
+        return None
+    for ref in refs:
+        if ref.get("id") == questionnaire_id and ref.get("version") == questionnaire_version:
+            return ref.get("label") or {}
+    return None
 
 
 def km_summary_dict(row: Any) -> dict[str, Any]:
@@ -768,7 +900,9 @@ class FeedbackSummaryOut(CamelModel):
     comments: list[FeedbackCommentOut]
 
 
-def session_to_out(row: Any, base_url: str) -> SessionOut:
+def session_to_out(
+    row: Any, base_url: str, questionnaire_refs: list[dict[str, Any]] | None = None
+) -> SessionOut:
     return SessionOut(
         id=row.id,
         join_code=row.join_code,
@@ -781,4 +915,5 @@ def session_to_out(row: Any, base_url: str) -> SessionOut:
         status=row.status,
         created_at=row.created_at,
         updated_at=row.updated_at,
+        questionnaire_refs=questionnaire_refs or [],
     )

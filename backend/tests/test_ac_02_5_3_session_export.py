@@ -113,8 +113,9 @@ def test_session_export_csv_header_and_rows(client_factory):
     lines = raw.split("\r\n")
     header = lines[0].split(",")
     assert header == SESSION_CSV_HEADER
-    assert header[:2] == ["session_id", "fip_title"]
-    assert header[2:] == CSV_HEADER
+    # spec 08-workshop-picklists.md §3.3: `area` is the third prefix column.
+    assert header[:3] == ["session_id", "fip_title", "area"]
+    assert header[3:] == CSV_HEADER
 
     data_lines = [line for line in lines[1:] if line]
     # 2 FIPs x 2 questions (F1 answered with 1 declaration, F2 unanswered) = 4 rows.
@@ -122,3 +123,7 @@ def test_session_export_csv_header_and_rows(client_factory):
     assert all(line.startswith(session["id"] + ",") for line in data_lines)
     titles = {line.split(",")[1] for line in data_lines}
     assert titles == {"Group A", "Group B"}
+    # This session has a single questionnaireRef, so `area` is empty on
+    # every row (non-null only for a FIP in a multi-ref session).
+    areas = {line.split(",")[2] for line in data_lines}
+    assert areas == {""}

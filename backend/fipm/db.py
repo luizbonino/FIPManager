@@ -64,7 +64,12 @@ logger = logging.getLogger(__name__)
 # `fips.migrated_from`, `fips.orphaned_answers`. All nullable, so a NULL
 # default for a pre-existing row is the correct "not verified / never
 # migrated" value with no data loss.
-SCHEMA_VERSION = 5
+# v6 (spec 08-workshop-picklists.md §0): one nullable, additive column --
+# `workshop_sessions.questionnaire_refs` (JSON, `[{"id","version","label"}]`,
+# 1..12 entries). NULL on a pre-v6 row means "derive the single-entry list
+# from questionnaire_id/questionnaire_version" (fipm.routers.sessions), so
+# no data migration/backfill is needed here.
+SCHEMA_VERSION = 6
 
 _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("users", "must_change_password", "BOOLEAN NOT NULL DEFAULT 0"),
@@ -75,6 +80,7 @@ _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("users", "email_verified_at", "DATETIME"),
     ("fips", "migrated_from", "JSON"),
     ("fips", "orphaned_answers", "JSON"),
+    ("workshop_sessions", "questionnaire_refs", "JSON"),
 )
 
 settings = get_settings()

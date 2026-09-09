@@ -1,6 +1,7 @@
 """AC13 (spec 05-v1-completion.md §8): export.csv's header is exactly the 21
 spec-01 columns plus dmp_url/dmp_section/dmp_question plus successor_fer_id/
-successor_fer_label (26; session CSV 28), the label resolves in the FIP's
+successor_fer_label (26; session CSV 29 -- spec 08-workshop-picklists.md §3.3
+prepends an `area` third prefix column), the label resolves in the FIP's
 language, and export.json -> POST /api/fips/import round-trips both
 successor fields."""
 
@@ -28,7 +29,7 @@ def _register(client, email):
 def test_csv_and_session_csv_header_lengths():
     assert len(CSV_HEADER) == 26
     assert CSV_HEADER[-2:] == ["successor_fer_id", "successor_fer_label"]
-    assert len(SESSION_CSV_HEADER) == 28
+    assert len(SESSION_CSV_HEADER) == 29
     assert SESSION_CSV_HEADER[-2:] == ["successor_fer_id", "successor_fer_label"]
 
 

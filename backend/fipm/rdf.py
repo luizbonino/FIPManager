@@ -579,7 +579,14 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
             g.add((fip_iri, fipmx["has-declaration"], decl_iri))
 
         comment = answer.get("comment")
-        if comment:
+        not_applicable = bool(answer.get("notApplicable"))
+        # spec 08-workshop-picklists.md §2.3: an answer node is now also
+        # emitted for a `notApplicable: true` answer with no comment (was:
+        # only when a comment existed) -- `fipmx:not-applicable true`, no
+        # `fip:FIP-Declaration`, no `fipmx:has-declaration`, no `declares-*`
+        # predicate, no FER node. Like a comment-only answer node, it is not
+        # linked from the FIP node.
+        if comment or not_applicable:
             answer_iri = URIRef(f"{fip_iri}#answer-{_frag(qid)}")
             g.add((answer_iri, RDF.type, fipmx["Answer"]))
             g.add((answer_iri, fipmx["question-id"], Literal(qid)))
@@ -589,7 +596,10 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
                 # fipmx:Answer comment node as a declaration too. Use the
                 # fipmx equivalent instead.
                 g.add((answer_iri, fipmx["refers-to-question"], FIP[f"FIP-Question-{q_local}"]))
-            g.add((answer_iri, fipmx["answer-comment"], Literal(comment, lang=language)))
+            if not_applicable:
+                g.add((answer_iri, fipmx["not-applicable"], Literal(True)))
+            if comment:
+                g.add((answer_iri, fipmx["answer-comment"], Literal(comment, lang=language)))
 
     return g
 
@@ -701,6 +711,9 @@ def _jsonld_context(g: Graph) -> dict[str, Any]:
         # spec 07-mail-and-migration.md §6: the one new fipmx term this spec
         # adds to spec 03 §2.1's closed term list.
         "migratedFrom": {"@id": "fipmx:migrated-from", "@type": "@id"},
+        # spec 08-workshop-picklists.md §2.3: amends spec 03 §2.1's closed
+        # term list.
+        "notApplicable": {"@id": "fipmx:not-applicable", "@type": "xsd:boolean"},
         "declaredBy": {"@id": "fip:declared-by", "@type": "@id"},
         "declaredByCommunity": {"@id": "fipmx:declared-by-community", "@type": "@id"},
         "hasDeclaration": {"@id": "fipmx:has-declaration", "@type": "@id"},

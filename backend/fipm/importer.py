@@ -59,18 +59,83 @@ class ImportSummary:
         print(f"fer_types: loaded={self.fer_types_loaded}")
 
 
-def _validate_knowledge_model(doc: dict, settings: Settings) -> None:
+def _validate_knowledge_model(
+    doc: dict, settings: Settings, known_fer_ids: set[str] | None
+) -> None:
     """Structural top-level keys, then delegate the `content` shape (sections/
     questions/LangMaps) to `fipm.km_content.validate_content` -- spec
     04-knowledge-model-editor.md §3.3: "The importer's
     `_validate_knowledge_model` is replaced by a call to this module so disk
-    and API agree." """
+    and API agree." `known_fer_ids` (spec 08-workshop-picklists.md §1.2 rule
+    10) is the importer's `seed.json` snapshot, used to resolve
+    `suggestedFerIds`/`inlineFers`."""
     missing = REQUIRED_KM_KEYS - doc.keys()
     if missing:
         raise ValueError(f"missing keys: {sorted(missing)}")
-    errors = validate_content(doc, settings=settings)
+    errors = validate_content(doc, settings=settings, known_fer_ids=known_fer_ids)
     if errors:
         raise ValueError(f"invalid content ({len(errors)} error(s)): {errors[:3]}")
+
+
+def _load_seed_fer_ids(settings: Settings) -> set[str]:
+    """spec 08-workshop-picklists.md §1.2 rule 10: the importer's catalogue
+    snapshot is `data/fers/seed.json` itself (read directly, not via the DB
+    -- `_import_knowledge_models` runs before `_import_fers` in
+    `run_import`)."""
+    seed_path = Path(settings.data_dir) / "fers" / "seed.json"
+    if not seed_path.is_file():
+        return set()
+    try:
+        entries = json.loads(seed_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return set()
+    return {e["id"] for e in entries if isinstance(e, dict) and e.get("id")}
+
+
+def _upsert_fer(db: Session, entry: dict, *, source: str, owner_id: str | None) -> bool:
+    """spec 08-workshop-picklists.md §1.3: insert `entry` (an `inlineFers`-
+    shaped `{id, label, type, homepage}`) into `fers` if its id is not
+    already present. An existing row of *any* source is left untouched --
+    promotion never overwrites seed, `user`, `user-promoted` or `model`
+    content, and is idempotent. Returns True if a row was created, False if
+    skipped. Shared by `_import_knowledge_models` (a system model's
+    `inlineFers` are promoted the same way at import time) and
+    `routers.knowledge_models.publish_knowledge_model`."""
+    fer_id = entry["id"]
+    if db.get(Fer, fer_id) is not None:
+        return False
+    label = entry.get("label") or {}
+    label_search = "|".join(str(v).lower() for v in label.values())
+    db.add(
+        Fer(
+            id=fer_id,
+            label=label,
+            label_search=label_search,
+            type=entry.get("type"),
+            homepage=entry.get("homepage"),
+            owner_id=owner_id,
+            source=source,
+        )
+    )
+    db.commit()
+    return True
+
+
+def promote_inline_fers(db: Session, content: dict, owner_id: str | None) -> dict[str, int]:
+    """spec 08-workshop-picklists.md §1.3: upsert every `content["inlineFers"]`
+    entry into `fers` as `source="model"`, `owner_id` = the model's owner
+    (None for a system model). Returns `{"created", "skipped"}` for the
+    publish response / import summary."""
+    created = 0
+    skipped = 0
+    for entry in content.get("inlineFers") or []:
+        if not isinstance(entry, dict) or not entry.get("id"):
+            continue
+        if _upsert_fer(db, entry, source="model", owner_id=owner_id):
+            created += 1
+        else:
+            skipped += 1
+    return {"created": created, "skipped": skipped}
 
 
 def _sha256(doc: dict) -> str:
@@ -111,10 +176,11 @@ def _import_knowledge_models(
     km_dir = Path(settings.data_dir) / "knowledge-models"
     if not km_dir.is_dir():
         return
+    known_fer_ids = _load_seed_fer_ids(settings)
     for path in sorted(km_dir.glob("*.json")):
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
-            _validate_knowledge_model(doc, settings)
+            _validate_knowledge_model(doc, settings, known_fer_ids)
         except (ValueError, json.JSONDecodeError) as exc:
             logger.warning("skipping invalid knowledge model %s: %s", path, exc)
             summary.knowledge_models.skipped += 1
@@ -142,6 +208,12 @@ def _import_knowledge_models(
             )
             db.commit()
             summary.knowledge_models.created += 1
+            # spec 08-workshop-picklists.md §1.3: "python -m fipm import-data
+            # ... upsert every inlineFers entry into fers as source=model" --
+            # a system model is owner_id=None.
+            promoted = promote_inline_fers(db, doc, owner_id=None)
+            summary.fers.created += promoted["created"]
+            summary.fers.skipped += promoted["skipped"]
         elif existing.content_sha256 == content_sha256:
             summary.knowledge_models.skipped += 1
         elif not force:
@@ -163,6 +235,9 @@ def _import_knowledge_models(
             existing.content_sha256 = content_sha256
             db.commit()
             summary.knowledge_models.updated += 1
+            promoted = promote_inline_fers(db, doc, owner_id=None)
+            summary.fers.created += promoted["created"]
+            summary.fers.skipped += promoted["skipped"]
 
 
 def _import_fers(db: Session, settings: Settings, summary: ImportSummary) -> None:

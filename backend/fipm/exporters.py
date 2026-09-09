@@ -9,9 +9,11 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from fipm.authz import can_read
 from fipm.config import Settings
 from fipm.dmp import resolve_dmp_evidence_for_export
 from fipm.models import Fer, Fip, KnowledgeModel, WorkshopSession
+from fipm.schemas import session_questionnaire_refs
 
 CSV_HEADER = [
     "fip_id",
@@ -167,8 +169,10 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
             stored = answers_by_qid.get(qid)
             declarations: list[dict[str, Any]] = []
             comment = None
+            not_applicable = False
             if stored:
                 comment = stored.get("comment")
+                not_applicable = bool(stored.get("notApplicable"))
                 declarations = _enrich_declarations(
                     db, stored.get("declarations", []), language, default_language, related_dmps
                 )
@@ -183,6 +187,11 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
                     "ferType": question.get("ferType"),
                     "declarations": declarations,
                     "comment": comment,
+                    # spec 08-workshop-picklists.md §2.3: always present (like
+                    # `comment`), true only for a per-answer "not applicable"
+                    # flag; mutually exclusive with `declarations` (schema
+                    # validator).
+                    "notApplicable": not_applicable,
                 }
             )
 
@@ -199,6 +208,7 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
                     db, entry.get("declarations", []), language, default_language, related_dmps
                 ),
                 "comment": entry.get("comment"),
+                "notApplicable": bool(entry.get("notApplicable")),
                 "fromVersion": entry.get("fromVersion"),
                 "at": entry.get("at"),
             }
@@ -257,7 +267,31 @@ def _fip_csv_rows(fip: Fip, doc: dict[str, Any]) -> list[list[Any]]:
             answer["ferType"] or "",
         ]
         declarations = answer["declarations"]
-        if not declarations:
+        if answer.get("notApplicable"):
+            # spec 08-workshop-picklists.md §2.3: a single row, `status` =
+            # "not-applicable" (a CSV rendering only -- never a stored
+            # declaration status), the 10 declaration/dmp/successor columns
+            # empty, `comment` as usual. Mutually exclusive with
+            # `declarations` (schema validator), so this never runs
+            # alongside the per-declaration branch below.
+            rows.append(
+                base
+                + [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "not-applicable",
+                    "",
+                    answer["comment"] or "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                ]
+            )
+        elif not declarations:
             rows.append(
                 base + ["", "", "", "", "", "", answer["comment"] or "", "", "", "", "", ""]
             )
@@ -299,7 +333,50 @@ def build_export_csv(db: Session, fip: Fip, settings: Settings) -> str:
 
 # spec 02-core-flows.md §5.3: session-wide export, columns prefixed by
 # `session_id, fip_title` (= community.name), all FIPs under one header row.
-SESSION_CSV_HEADER = ["session_id", "fip_title", *CSV_HEADER]
+# spec 08-workshop-picklists.md §3.3: an `area` column is prepended as the
+# third prefix column for a multi-ref session; the single-FIP CSV
+# (CSV_HEADER) is untouched.
+SESSION_CSV_HEADER = ["session_id", "fip_title", "area", *CSV_HEADER]
+
+
+def resolve_session_questionnaire_refs(
+    db: Session, session: WorkshopSession
+) -> list[dict[str, Any]]:
+    """spec 08-workshop-picklists.md §3.1/§3.3/§5.8: the session's ref list,
+    each resolved to `{id, version, label, title}` -- `title` is the
+    referenced model's own title, filtered by the same anonymous-
+    readability rule that guards `questionnaireTitle` today (published AND
+    anonymously readable, else `{}`); `label` falls back to that title when
+    the ref itself carries none (the NULL-column derived single-ref case).
+    Shared by `routers.sessions` (`SessionOut`/`SessionPublicOut`) and the
+    session export builders below."""
+    refs = session_questionnaire_refs(session)
+    out: list[dict[str, Any]] = []
+    for ref in refs:
+        km = db.get(KnowledgeModel, (ref["id"], ref["version"]))
+        title: dict[str, Any] = {}
+        if (
+            km is not None
+            and km.status == "published"
+            and can_read(km.owner_id, km.visibility, None)
+        ):
+            title = km.title or {}
+        label = ref.get("label") or title
+        out.append(
+            {"id": ref["id"], "version": ref["version"], "label": label or {}, "title": title}
+        )
+    return out
+
+
+def _fip_area(refs: list[dict[str, Any]], fip: Fip) -> dict[str, Any] | None:
+    """spec 08 §3.2/§3.3: non-null only for a FIP in a multi-ref session,
+    looked up from the session's ref list (never copied onto the FIP row)."""
+    if len(refs) <= 1:
+        return None
+    for ref in refs:
+        if ref["id"] == fip.questionnaire_id and ref["version"] == fip.questionnaire_version:
+            return {"id": ref["id"], "version": ref["version"], "label": ref["label"]}
+    return None
 
 
 def build_session_export_json(
@@ -309,6 +386,12 @@ def build_session_export_json(
     settings: Settings,
     facilitator_name: str,
 ) -> dict[str, Any]:
+    refs = resolve_session_questionnaire_refs(db, session)
+    fip_docs: list[dict[str, Any]] = []
+    for fip in fips:
+        doc = build_export_json(db, fip, settings)
+        doc["area"] = _fip_area(refs, fip)
+        fip_docs.append(doc)
     return {
         "exportVersion": 1,
         "generatedAt": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
@@ -323,24 +406,33 @@ def build_session_export_json(
                 "id": session.questionnaire_id,
                 "version": session.questionnaire_version,
             },
+            # spec 08 §3.3: the full ref list, first entry == questionnaireRef.
+            "questionnaireRefs": [
+                {"id": r["id"], "version": r["version"], "label": r["label"]} for r in refs
+            ],
             "facilitatorName": facilitator_name,
             "createdAt": _iso_utc(session.created_at),
         },
-        "fips": [build_export_json(db, fip, settings) for fip in fips],
+        "fips": fip_docs,
     }
 
 
 def build_session_export_csv(
     db: Session, session: WorkshopSession, fips: list[Fip], settings: Settings
 ) -> str:
+    refs = resolve_session_questionnaire_refs(db, session)
     buf = io.StringIO()
     writer = csv.writer(buf, lineterminator="\r\n")
     _write_csv_row(writer, SESSION_CSV_HEADER)
     for fip in fips:
         doc = build_export_json(db, fip, settings)
         fip_title = (fip.community or {}).get("name") if fip.community else None
+        area = _fip_area(refs, fip)
+        area_label = (
+            resolve_lang(area["label"], fip.language, settings.default_language) if area else ""
+        )
         for row in _fip_csv_rows(fip, doc):
-            _write_csv_row(writer, [session.id, fip_title or "", *row])
+            _write_csv_row(writer, [session.id, fip_title or "", area_label or "", *row])
     return "﻿" + buf.getvalue()
 
 
@@ -408,15 +500,20 @@ def reconstruct_answers_from_export(
     url_to_index = {d["url"]: i for i, d in enumerate(related_dmps or [])}
     answers: list[dict[str, Any]] = []
     for answer in export_answers:
-        answers.append(
-            {
-                "questionId": answer["questionId"],
-                "declarations": _reconstruct_declarations(
-                    answer.get("declarations", []), language, url_to_index
-                ),
-                "comment": answer.get("comment"),
-            }
-        )
+        entry: dict[str, Any] = {
+            "questionId": answer["questionId"],
+            "declarations": _reconstruct_declarations(
+                answer.get("declarations", []), language, url_to_index
+            ),
+            "comment": answer.get("comment"),
+        }
+        # spec 08-workshop-picklists.md §2.3: POST /fips/import round-trips
+        # `notApplicable`; the `Answer` schema (fipm.schemas) itself drops a
+        # `false` value before it's stored, keeping old blobs unchanged, so
+        # only pass it through when true.
+        if answer.get("notApplicable"):
+            entry["notApplicable"] = True
+        answers.append(entry)
     return answers
 
 
@@ -440,6 +537,7 @@ def reconstruct_orphaned_answers_from_export(
                     entry.get("declarations", []), language, url_to_index
                 ),
                 "comment": entry.get("comment"),
+                "notApplicable": bool(entry.get("notApplicable")),
                 "fromVersion": entry.get("fromVersion"),
                 "at": entry.get("at"),
             }
