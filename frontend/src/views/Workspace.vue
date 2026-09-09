@@ -2,6 +2,19 @@
   <div class="workspace-view">
     <h1>{{ $t('workspace.title') }}</h1>
 
+    <div v-if="showVerifyBanner" class="verify-banner">
+      <p>{{ $t('auth.verifyBanner') }}</p>
+      <div class="verify-banner-actions">
+        <button type="button" class="btn btn-secondary" :disabled="resending" @click="onResend">
+          {{ $t('auth.resend') }}
+        </button>
+        <button type="button" class="dismiss-btn" :aria-label="$t('common.close')" @click="bannerDismissed = true">
+          {{ $t('common.close') }}
+        </button>
+      </div>
+      <p v-if="resent" class="verify-banner-sent">{{ $t('auth.verifySent') }}</p>
+    </div>
+
     <div v-if="isLoading" class="loading">
       <p>{{ $t('workspace.loading') }}</p>
     </div>
@@ -99,11 +112,12 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { myFips as apiMyFips, myKnowledgeModels as apiMyKms, mySessions as apiMySessions } from '@/api/me'
 import { deleteFip, fipExportCsvUrl, fipExportJsonUrl } from '@/api/fips'
+import { resendVerification } from '@/api/auth'
 import {
   deleteKnowledgeModel,
   forkKnowledgeModel,
@@ -113,12 +127,36 @@ import {
 } from '@/api/knowledgeModels'
 import { answeredCount, TOTAL_QUESTIONS } from '@/lib/progress'
 import { resolveLang } from '@/lib/lang'
+import { useAuthStore } from '@/stores/auth'
 import ProgressBar from '@/components/ProgressBar.vue'
 import type { FipOut, KnowledgeModelSummary, SessionOut } from '@/types/api'
 
 // Spec 02 §3: three lists from GET /api/me/{fips,sessions,knowledge-models}.
 const { locale, t } = useI18n()
 const router = useRouter()
+const authStore = useAuthStore()
+
+// spec 07 §3: `verificationRequired && !emailVerifiedAt` (criterion 10),
+// dismissible for this visit only — it comes back on the next load while
+// still true, same as any other unread-state banner.
+const bannerDismissed = ref(false)
+const resending = ref(false)
+const resent = ref(false)
+const showVerifyBanner = computed(() => authStore.needsEmailVerification && !bannerDismissed.value)
+
+async function onResend() {
+  resending.value = true
+  resent.value = false
+  try {
+    await resendVerification()
+    resent.value = true
+  } catch {
+    // 429 rate-limited or a network error: silently no-op: the banner and
+    // its button stay available to try again.
+  } finally {
+    resending.value = false
+  }
+}
 
 const myFips = ref<FipOut[]>([])
 const mySessions = ref<SessionOut[]>([])
@@ -210,6 +248,45 @@ onMounted(fetchData)
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+.verify-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-user-info);
+  color: var(--color-user-info-text);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.verify-banner p {
+  margin: 0;
+}
+
+.verify-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.verify-banner-sent {
+  width: 100%;
+  font-weight: var(--font-weight-medium);
+}
+
+.dismiss-btn {
+  min-height: 44px;
+  padding: 0.3rem 0.6rem;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
 }
 
 .workspace-section {
@@ -357,15 +434,27 @@ onMounted(fetchData)
 .btn {
   min-height: 44px;
   padding: 0.5rem 1rem;
+  border: none;
   border-radius: var(--border-radius-sm);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .btn-primary {
   background-color: var(--color-primary);
   color: var(--color-primary-text);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-text);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {

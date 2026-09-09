@@ -34,6 +34,10 @@
           <dd>{{ formatDate(doc.fip.createdAt) }}</dd>
           <dt>{{ $t('common.updated') }}</dt>
           <dd>{{ formatDate(doc.fip.updatedAt) }}</dd>
+          <template v-if="doc.fip.migratedFrom">
+            <dt>{{ $t('migration.migratedFromLabel') }}</dt>
+            <dd>{{ $t('migration.migratedFromNote', { id: doc.fip.migratedFrom.id, version: doc.fip.migratedFrom.version }) }}</dd>
+          </template>
           <template v-if="doc.fip.relatedDMPs.length > 0">
             <dt>{{ $t('dmp.heading') }}</dt>
             <dd>
@@ -49,6 +53,8 @@
         </dl>
         <p class="print-only fip-url-print">{{ doc.fip.url }}</p>
       </header>
+
+      <MigrationBanner class="no-print" :fip-id="doc.fip.id" :edit-token="editToken" />
 
       <div class="sections">
         <section v-for="section in sections" :key="section.id" class="section">
@@ -93,6 +99,27 @@
         </section>
       </div>
 
+      <section v-if="doc.orphanedAnswers && doc.orphanedAnswers.length > 0" class="section orphaned-section">
+        <h2>{{ $t('migration.orphanedTitle') }}</h2>
+        <p class="orphaned-hint">{{ $t('migration.orphanedHint') }}</p>
+        <div class="questions">
+          <article v-for="orphan in doc.orphanedAnswers" :key="orphan.questionId" class="question">
+            <div class="question-head">
+              <span class="question-id">{{ orphan.questionId }}</span>
+              <span class="orphaned-from">{{ $t('migration.migratedFromNote', { id: doc.questionnaireRef.id, version: orphan.fromVersion }) }}</span>
+            </div>
+            <p class="question-text">{{ orphan.questionText }}</p>
+            <ul class="declarations">
+              <li v-for="(decl, i) in orphan.declarations" :key="i" class="declaration">
+                <span class="declaration-label">{{ decl.fer?.label || decl.ferFreeText || decl.fer?.id }}</span>
+                <StatusBadge :status="decl.status" />
+              </li>
+            </ul>
+            <p v-if="orphan.comment" class="question-comment">{{ orphan.comment }}</p>
+          </article>
+        </div>
+      </section>
+
       <div class="actions no-print">
         <ExportButtons
           :json-url="fipExportJsonUrl(doc.fip.id)"
@@ -114,9 +141,11 @@ import { useRoute } from 'vue-router'
 import { ApiResponseError } from '@/api/client'
 import { fipExportCsvUrl, fipExportJsonldUrl, fipExportJsonUrl, fipExportTtlUrl, getFipExport } from '@/api/fips'
 import { getKnowledgeModel } from '@/api/knowledgeModels'
+import { getToken } from '@/lib/editTokens'
 import StatusBadge from '@/components/StatusBadge.vue'
 import ExportButtons from '@/components/ExportButtons.vue'
 import AttributionFooter from '@/components/AttributionFooter.vue'
+import MigrationBanner from '@/components/MigrationBanner.vue'
 import '@/assets/print.css'
 import type { FipExportDmpEvidence, FipExportDoc, RelatedDmp } from '@/types/api'
 
@@ -129,6 +158,10 @@ const loading = ref(true)
 const notFound = ref(false)
 const doc = ref<FipExportDoc | null>(null)
 const questionnaireLicense = ref<string | null>(null)
+
+// spec 07 §5: an edit token in this browser's storage, if any — passed to
+// MigrationBanner so a token-holding non-owner still sees it.
+const editToken = computed(() => (doc.value ? (getToken(doc.value.fip.id) ?? undefined) : undefined))
 
 const sections = computed(() => {
   if (!doc.value) return []
@@ -374,6 +407,22 @@ onMounted(load)
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   font-style: italic;
+}
+
+.orphaned-section h2 {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.4rem;
+}
+
+.orphaned-hint {
+  margin: 0 0 0.75rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.orphaned-from {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 .actions {

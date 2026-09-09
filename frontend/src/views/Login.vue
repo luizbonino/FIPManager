@@ -1,7 +1,9 @@
 <template>
   <div class="auth-form">
     <h1>{{ $t('auth.loginTitle') }}</h1>
-    
+
+    <p v-if="resetOk" class="form-success">{{ $t('auth.resetOk') }}</p>
+
     <form @submit.prevent="handleSubmit" class="form">
       <div class="form-group">
         <label for="email">{{ $t('auth.emailLabel') }}</label>
@@ -40,6 +42,7 @@
     </form>
 
     <div class="auth-footer">
+      <router-link to="/forgot-password">{{ $t('auth.forgotPassword') }}</router-link>
       <router-link to="/register">{{ $t('auth.dontHaveAccount') }} {{ $t('auth.submitRegister') }}</router-link>
     </div>
   </div>
@@ -62,6 +65,8 @@ const isLoading = ref(false)
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+// spec 07 §3: ResetPassword.vue routes here with `?resetOk=1` on success.
+const resetOk = !!route.query.resetOk
 
 const validateEmail = () => {
   if (!email.value) {
@@ -157,6 +162,15 @@ const handleSubmit = async () => {
   border-radius: 4px;
 }
 
+.form-success {
+  color: var(--color-success);
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--color-success-bg);
+  border-radius: 4px;
+  margin: 0 0 1rem;
+}
+
 .form-actions {
   display: flex;
   justify-content: center;
@@ -182,6 +196,9 @@ const handleSubmit = async () => {
 .auth-footer {
   text-align: center;
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .auth-footer a {

@@ -47,6 +47,20 @@
   --status-unanswered-bg: #e5e7eb;
   --status-unanswered-fg: #374151;
 
+  /* Migration diff status colours (spec 07 §4.1/§5), also read by
+     StatusBadge.vue — distinct from the declaration-status set above,
+     none of the five values overlap. */
+  --status-unchanged-bg: #6b7280;
+  --status-unchanged-fg: #ffffff;
+  --status-added-bg: #0a7d33;
+  --status-added-fg: #ffffff;
+  --status-removed-bg: #b3261e;
+  --status-removed-fg: #ffffff;
+  --status-hidden-bg: #9ca3af;
+  --status-hidden-fg: #ffffff;
+  --status-split-bg: #b45f06;
+  --status-split-fg: #ffffff;
+
   --color-chip-bg: #eef2ff;
   --color-chip-text: #3730a3;
 

@@ -13,12 +13,19 @@ export type User = {
   /** spec 05 §1: forces `/account/password` until cleared by a successful `POST /api/auth/password`. */
   mustChangePassword: boolean
   privacyAcceptedVersion: string | null
+  /** spec 07 §2: null until `POST /api/auth/verify-email` succeeds. */
+  emailVerifiedAt: string | null
 }
+
+/** `GET /api/auth/me` (spec 07 §2): `UserOut` plus the `FIPM_REQUIRE_EMAIL_VERIFICATION` setting. */
+type MeOut = User & { verificationRequired: boolean }
 
 type AuthState = {
   me: User | null
   isLoading: boolean
   error: string | null
+  /** spec 07 §2: the `FIPM_REQUIRE_EMAIL_VERIFICATION` setting, read off `GET /api/auth/me`; `false` while signed out. */
+  verificationRequired: boolean
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -26,21 +33,28 @@ export const useAuthStore = defineStore('auth', () => {
     me: null,
     isLoading: false,
     error: null,
+    verificationRequired: false,
   })
 
   const isAuthenticated = computed(() => state.value.me !== null)
   const user = computed(() => state.value.me)
+  /** spec 07 §3: Workspace's verify banner condition, `verificationRequired && !emailVerifiedAt`. */
+  const needsEmailVerification = computed(
+    () => state.value.verificationRequired && !state.value.me?.emailVerifiedAt
+  )
 
   async function restoreSession() {
     state.value.isLoading = true
     state.value.error = null
 
     try {
-      const response = await get<User>('/auth/me')
-      state.value.me = response
+      const { verificationRequired, ...userFields } = await get<MeOut>('/auth/me')
+      state.value.me = userFields
+      state.value.verificationRequired = verificationRequired
     } catch {
       // Not signed in is a normal state, not an error.
       state.value.me = null
+      state.value.verificationRequired = false
     } finally {
       state.value.isLoading = false
     }
@@ -121,6 +135,7 @@ export const useAuthStore = defineStore('auth', () => {
     state,
     isAuthenticated,
     user,
+    needsEmailVerification,
     restoreSession,
     login,
     register,

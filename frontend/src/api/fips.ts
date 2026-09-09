@@ -1,5 +1,13 @@
 import { del, get, patch, post } from './client'
-import type { FipCreateRequest, FipExportDoc, FipOut, FipPatchRequest } from '@/types/api'
+import type {
+  FipCreateRequest,
+  FipExportDoc,
+  FipOut,
+  FipPatchRequest,
+  MigrateRequest,
+  MigrationDiff,
+  MigrationTargetsOut,
+} from '@/types/api'
 
 export function createFip(body: FipCreateRequest) {
   return post<FipOut>('/fips', body)
@@ -52,4 +60,20 @@ export function fipExportJsonldUrl(id: string): string {
 
 export function fipReadUrl(id: string): string {
   return `/fips/${id}`
+}
+
+// ---------------------------------------------------------------------------
+// Migration (spec 07 §4.3): same auth as write (owner, admin, or `X-Edit-Token`).
+// ---------------------------------------------------------------------------
+
+export function getMigrationTargets(id: string, editToken?: string) {
+  return get<MigrationTargetsOut>(`/fips/${id}/migration-targets`, editToken)
+}
+
+export function getMigrationPreview(id: string, to: string, editToken?: string) {
+  return get<MigrationDiff>(`/fips/${id}/migration-preview?to=${encodeURIComponent(to)}`, editToken)
+}
+
+export function migrateFip(id: string, body: MigrateRequest, editToken?: string) {
+  return post<FipOut>(`/fips/${id}/migrate`, body, editToken)
 }

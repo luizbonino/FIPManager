@@ -76,6 +76,7 @@
           :model-value="(store.model.visibility as Visibility)"
           @update:model-value="onVisibilityChange"
         />
+        <p v-if="visibilityError" class="visibility-error">{{ visibilityError }}</p>
       </section>
 
       <KmSectionList :sections="store.content.sections" :fer-type-options="ferTypes" :read-only="store.readOnly" />
@@ -118,6 +119,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useKmEditorStore } from '@/stores/kmEditor'
 import { getFerTypes } from '@/api/ferTypes'
 import { kmExportJsonUrl } from '@/api/knowledgeModels'
+import { ApiResponseError } from '@/api/client'
 import { resolveLang } from '@/lib/lang'
 import { setText } from '@/lib/kmContent'
 import SaveIndicator from '@/components/SaveIndicator.vue'
@@ -145,6 +147,7 @@ const showValidation = ref(false)
 const publishOpen = ref(false)
 const publishing = ref(false)
 const newVersionBump = ref<'minor' | 'patch' | 'major'>('minor')
+const visibilityError = ref<string | null>(null)
 
 function meterFor(lang: string) {
   return store.completeness(lang)
@@ -166,7 +169,16 @@ async function onReload() {
 }
 
 async function onVisibilityChange(visibility: Visibility) {
-  await store.patchMeta({ visibility })
+  visibilityError.value = null
+  try {
+    await store.patchMeta({ visibility })
+  } catch (err) {
+    // spec 07 §2 gate rule: same 403 `email_verification_required` as a
+    // FIP's public-visibility write, surfaced the same way.
+    if (err instanceof ApiResponseError && err.data.detail === 'email_verification_required') {
+      visibilityError.value = t('errors.emailVerificationRequired')
+    }
+  }
 }
 
 async function onFork() {
@@ -310,6 +322,15 @@ onBeforeUnmount(() => {
 }
 
 .readonly-banner {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.visibility-error {
   margin: 0;
   padding: 0.5rem 0.75rem;
   background-color: var(--color-error-bg);

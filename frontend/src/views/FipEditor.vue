@@ -26,10 +26,18 @@
         </div>
         <p v-if="store.readOnly" class="readonly-banner">{{ readOnlyMessage }}</p>
         <p v-if="store.facilitatorWrite" class="facilitator-banner">{{ $t('editor.facilitatorBanner') }}</p>
+        <MigrationBanner
+          v-if="store.canEdit"
+          class="no-print"
+          :fip-id="store.fip.id"
+          :edit-token="getToken(store.fip.id) ?? undefined"
+          :session-id="store.fip.sessionId"
+        />
         <div v-if="isOwner" class="owner-row no-print">
           <VisibilitySelect v-model="visibilityModel" />
           <button type="button" class="delete-btn" @click="onDelete">{{ $t('common.delete') }}</button>
         </div>
+        <p v-if="visibilityError" class="visibility-error no-print">{{ visibilityError }}</p>
         <button v-if="canClaim" type="button" class="claim-btn no-print" @click="onClaim">
           {{ $t('editor.claim') }}
         </button>
@@ -102,6 +110,7 @@ import { answeredCount as computeAnsweredCount, visibleQuestionCount } from '@/l
 import { resolveLang } from '@/lib/lang'
 import { getToken } from '@/lib/editTokens'
 import { getFerTypes } from '@/api/ferTypes'
+import { ApiResponseError } from '@/api/client'
 import { fipExportCsvUrl, fipExportJsonldUrl, fipExportJsonUrl, fipExportTtlUrl } from '@/api/fips'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
@@ -113,6 +122,7 @@ import FeedbackForm from '@/components/FeedbackForm.vue'
 import AttributionFooter from '@/components/AttributionFooter.vue'
 import VisibilitySelect from '@/components/VisibilitySelect.vue'
 import DmpLinkList from '@/components/DmpLinkList.vue'
+import MigrationBanner from '@/components/MigrationBanner.vue'
 import type { FerType, RelatedDmp, Visibility } from '@/types/api'
 
 // Spec 02 §2.2/§2.3/§2.4: the participant + owner editor.
@@ -147,10 +157,21 @@ const readOnlyMessage = computed(() => {
   return t('editor.readOnly')
 })
 
+const visibilityError = ref<string | null>(null)
+
 const visibilityModel = computed<Visibility>({
   get: () => store.fip?.visibility ?? 'private',
   set: (v) => {
-    void store.updateVisibility(v)
+    visibilityError.value = null
+    store.updateVisibility(v).catch((err: unknown) => {
+      // spec 07 §2 gate rule: a write that would set `visibility: "public"`
+      // 403s as `email_verification_required` while verification is
+      // required and the account is unverified — every other write (and
+      // private/link visibility) is unaffected.
+      if (err instanceof ApiResponseError && err.data.detail === 'email_verification_required') {
+        visibilityError.value = t('errors.emailVerificationRequired')
+      }
+    })
   },
 })
 
@@ -296,6 +317,15 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.visibility-error {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
 }
 
 .delete-btn {

@@ -26,6 +26,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     updatedAt: '2026-01-01T00:00:00Z',
     mustChangePassword: false,
     privacyAcceptedVersion: '1.0',
+    emailVerifiedAt: null,
     ...overrides,
   }
 }

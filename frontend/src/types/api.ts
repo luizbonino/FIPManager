@@ -124,6 +124,102 @@ export interface FipOut {
   updatedAt: string
   /** Present exactly once, on the response to `POST /api/fips` for an anonymous FIP. */
   editToken?: string
+  /** spec 07 §0/§4.3: the version migrated *from* on the last migration, or absent/null otherwise. */
+  migratedFrom?: MigratedFrom | null
+}
+
+// ---------------------------------------------------------------------------
+// Mail flows / migration (spec 07)
+// ---------------------------------------------------------------------------
+
+/** `fips.migrated_from` (spec 07 §0): `{"id","version","at"}` of the version migrated from. */
+export interface MigratedFrom {
+  id: string
+  version: string
+  at: string
+}
+
+/** `GET /api/fips/{id}/migration-targets` (spec 07 §4.3). */
+export interface MigrationTargetItem {
+  id: string
+  version: string
+  title: LangMap
+  changelog: Array<Record<string, unknown>>
+  publishedAt: string
+}
+
+export interface MigrationTargetsOut {
+  current: { id: string; version: string }
+  items: MigrationTargetItem[]
+  total: number
+}
+
+export type MigrationItemStatus = 'unchanged' | 'added' | 'removed' | 'hidden' | 'split'
+
+export interface MigrationSplitDecision {
+  kind: 'splitCopies'
+  options: string[]
+  default: string[]
+}
+
+export interface MigrationOrphanDecision {
+  kind: 'orphanReassign'
+  options: string[]
+  default: string | null
+}
+
+export type MigrationDecisionSpec = MigrationSplitDecision | MigrationOrphanDecision | null
+
+/** One row of the §4.2 diff document. */
+export interface MigrationDiffItem {
+  status: MigrationItemStatus
+  oldQuestionId: string | null
+  newQuestionId: string | null
+  oldText?: string | null
+  newText?: string | null
+  oldFerType?: string | null
+  newFerType?: string | null
+  /** Non-exclusive: `text-changed`, `fer-type-changed`, `scope-changed`. */
+  flags: string[]
+  answered: boolean
+  declarationCount: number
+  /** Present only on a `split` item: the two target ids it splits into. */
+  splitInto?: string[]
+  decision: MigrationDecisionSpec
+}
+
+export interface MigrationCounts {
+  unchanged: number
+  added: number
+  removed: number
+  hidden: number
+  split: number
+  textChanged: number
+  ferTypeChanged: number
+  answersKept: number
+  answersOrphaned: number
+  decisionsRequired: number
+}
+
+/** `GET /api/fips/{id}/migration-preview` (spec 07 §4.2), `diffVersion: 1`. */
+export interface MigrationDiff {
+  diffVersion: 1
+  generatedAt: string
+  from: { id: string; version: string }
+  to: { id: string; version: string; changelog: Array<Record<string, unknown>> }
+  counts: MigrationCounts
+  items: MigrationDiffItem[]
+}
+
+/** `POST /api/fips/{id}/migrate` request body (spec 07 §4.3). */
+export interface MigrateDecisions {
+  splitCopies?: Record<string, string[]>
+  orphanReassign?: Record<string, string>
+}
+
+export interface MigrateRequest {
+  to: string
+  decisions?: MigrateDecisions
 }
 
 // ---------------------------------------------------------------------------
@@ -358,6 +454,18 @@ export interface FipExportFip {
   community: Community | null
   /** Sic: capitalised `DMPs`, matching `exporters.py`'s hand-built export dict verbatim. */
   relatedDMPs: RelatedDmp[]
+  /** spec 07 §6: set on the last migration, otherwise `null`. */
+  migratedFrom?: MigratedFrom | null
+}
+
+/** `fips.orphaned_answers` (spec 07 §4.4), FER-enriched like `FipExportAnswer.declarations`. */
+export interface FipExportOrphanedAnswer {
+  questionId: string
+  questionText: string
+  declarations: FipExportDeclaration[]
+  comment: string | null
+  fromVersion: string
+  at: string
 }
 
 export interface FipExportQuestionnaireRef {
@@ -374,6 +482,8 @@ export interface FipExportDoc {
   fip: FipExportFip
   questionnaireRef: FipExportQuestionnaireRef
   answers: FipExportAnswer[]
+  /** spec 07 §6: `exportVersion: 2` only; absent on an export made before this spec. */
+  orphanedAnswers?: FipExportOrphanedAnswer[]
 }
 
 // ---------------------------------------------------------------------------

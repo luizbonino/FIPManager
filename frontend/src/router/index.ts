@@ -18,6 +18,10 @@ import KnowledgeModelPrint from '@/views/KnowledgeModelPrint.vue'
 import Admin from '@/views/Admin.vue'
 import ChangePassword from '@/views/ChangePassword.vue'
 import Privacy from '@/views/Privacy.vue'
+import ForgotPassword from '@/views/ForgotPassword.vue'
+import ResetPassword from '@/views/ResetPassword.vue'
+import VerifyEmail from '@/views/VerifyEmail.vue'
+import FipMigrate from '@/views/FipMigrate.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useFipEditorStore } from '@/stores/fipEditor'
 import { useKmEditorStore } from '@/stores/kmEditor'
@@ -57,6 +61,25 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false },
   },
   {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: ForgotPassword,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: ResetPassword,
+    meta: { requiresAuth: false },
+  },
+  {
+    // spec 07 §2: matches the link the backend mails, `{FIPM_BASE_URL}/verify?token=…`.
+    path: '/verify',
+    name: 'VerifyEmail',
+    component: VerifyEmail,
+    meta: { requiresAuth: false },
+  },
+  {
     // spec 05 §1: the view itself renders `common.notFound` for a
     // signed-in non-admin and calls no `/api/admin/*` route.
     path: '/admin',
@@ -93,6 +116,14 @@ const routes: RouteRecordRaw[] = [
     name: 'Workspace',
     component: Workspace,
     meta: { requiresAuth: true },
+  },
+  {
+    // spec 07 §5: write rights checked inside the view, like FipEditor.
+    path: '/fips/:id/migrate',
+    name: 'FipMigrate',
+    component: FipMigrate,
+    meta: { requiresAuth: false },
+    props: true,
   },
   {
     path: '/fips/new',
