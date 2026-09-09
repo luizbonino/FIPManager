@@ -1,9 +1,9 @@
 # Spec 05 – v1 completion: admin, privacy, print, feedback, successor FER, facilitator writes
 
 Status: approved for implementation, 2026-09-09. Covers ROADMAP week 4 (admin pages, privacy notice, printed questionnaire, feedback form) plus two
-audit gaps pulled into v1: the successor FER of spec 03 §6 and the facilitator write affordance. Authority: PLAN §5 v1, §7 Identity, §8 Risks, §9.
-Builds on specs 00–04. Two builders work in parallel: **backend** (§1–§5 API) and **frontend** (§1–§6 UI); §7 splits the files. Existing endpoints
-are unchanged except `RegisterRequest`, `UserOut`, `Declaration` and the CSV header — all additive. Each section's AC numbers point at §8.
+audit gaps pulled into v1: the successor FER of spec 03 §6 and the facilitator write affordance. Authority: PLAN §5 v1, §7 Identity, §8 Risks, §9;
+builds on specs 00–04. Two builders work in parallel: **backend** (§1–§5 API) and **frontend** (§1–§6 UI); §7 splits the files. Existing endpoints are
+unchanged except `RegisterRequest`, `UserOut`, `Declaration` and the CSV header — all additive; each section's AC numbers point at §8.
 
 **One schema change for all six features.** `SCHEMA_VERSION` 3 → **4**. `users` gains `must_change_password` (Boolean, NOT NULL, default False) and
 `privacy_accepted_version` (String, nullable); one new table `feedback` (§4). `create_all()` adds tables but never columns, so `db.init_db()` gains
@@ -14,7 +14,8 @@ idempotent, logged, run before the `schema_version` reconciliation. No other tab
 
 New router `backend/fipm/routers/admin.py`, prefix `/admin`, mounted in `main.py`, depending on `require_admin_404` (new in `authz.py`): like
 `require_admin` but raising `404 not_found` for anonymous and for signed-in non-admins, so `/api/admin/*` never confirms its own existence
-(spec 01 §5's leak rule). `FerSource` gains `user-promoted`; `importer.py` still touches only `source="seed"` rows.
+(spec 01 §5's leak rule). `FerSource` gains `user-promoted`; `importer.py` still touches only `source="seed"` rows. Managing system knowledge models
+needs no endpoint: `authz` already grants admins write on `owner_id IS NULL` models through the spec 04 routes.
 
 | Method | Path | Body / query | Returns | Codes |
 |---|---|---|---|---|
@@ -34,7 +35,6 @@ New router `backend/fipm/routers/admin.py`, prefix `/admin`, mounted in `main.py
 - **Merge**: the target must exist with `source in {seed, user-promoted}` (else `409 invalid_merge_target`); `targetFerId == ferId` → `400 same_fer`.
   Rewrite every FIP's `answers` in Python, replacing `ferId` **and** `successorFerId` (§5) equal to the source with the target, commit only changed
   rows, then `db.delete()` the source. `updated_at` bumps on rewritten FIPs — harmless, the poll re-renders. Irreversible; the UI double-confirms.
-- Managing system knowledge models needs no endpoint: `authz` already grants admins write on `owner_id IS NULL` models through the spec 04 routes.
 
 **`mustChangePassword` enforcement.** `UserOut` gains `mustChangePassword: bool` and `privacyAcceptedVersion: str | None`; `POST /api/auth/password`
 clears the flag on success. `require_user` rejects any **non-GET** `/api/*` request from a flagged user with `403 password_change_required`, except
@@ -46,7 +46,7 @@ navigation except `ChangePassword` to `/account/password` (new route, `requiresA
 `authStore.user?.role !== 'admin'`, and the nav shows "Admin" only for admins. Two panels: **Users** (search box, table of the eight fields, per row
 "Reset password" → confirm → dialog with the temporary password in a `readonly` input, copy button, `admin.tempPasswordOnce`); **FER promotions**
 (pending list with type, owner email, usage count; per row "Promote" and "Merge into…", the latter opening `FerPicker` filtered to that FER's type
-over `GET /api/fers?limit=500`, then a double confirm). AC 1–4, 15.
+over `GET /api/fers?limit=500`, then a double confirm). AC 1–4, 14.
 
 ```text
 admin: title "Administration" · users "Users" · search "Search users" · role "Role" · created "Created" · fips "FIPs" · sessions "Sessions" ·
@@ -76,7 +76,7 @@ through the usual chain (`pt-PT ⇄ pt-BR`, `es → en`) and anything unknown fa
 no raw HTML ever inserted. Shows `privacy.version` and re-renders on a language switch. Linked from (a) `Register.vue`: a **required** checkbox
 `privacy.accept` with an inline link, submit disabled until ticked, the fetched version sent as `privacyAcceptedVersion`;
 (b) `JoinSession.vue`: the `privacy.joinNotice` line with the link directly above "Start a FIP" (no checkbox — participants have no account, A2);
-(c) `components/SiteFooter.vue`, rendered by `App.vue` under `<router-view>`, holding the privacy link and `appName` (class `no-print`). AC 5–7, 16.
+(c) `components/SiteFooter.vue`, rendered by `App.vue` under `<router-view>`, holding the privacy link and `appName` (class `no-print`). AC 5–7, 15.
 
 ```text
 privacy: title "Privacy notice" · version "Version {version}, {date}" · link "Privacy notice" · accept "I have read the privacy notice." ·
@@ -127,11 +127,10 @@ No API change: `GET /api/knowledge-models/{id}/{version}` is the only call. Publ
 4. **Footer** — the two `attribution.*` strings plus `print.footerTool`, `position: fixed; bottom: 0` so it repeats on every sheet; no page numbers.
 
 New `src/assets/print-questionnaire.css`, imported by the view: `@page { size: A4 portrait; margin: 14mm }`; hides `.app-header`, `.app-nav`,
-`.site-footer`, `.no-print`; `body { background:#fff; color:#000; font-size:10pt }`; `.question, .decl-block { break-inside: avoid; page-break-inside:
-avoid }`; `.section { break-before: page }`; ruled lines `border-bottom:1px solid #000; height:6mm`; tick boxes `display:inline-block; width:3.5mm;
-height:3.5mm; border:1px solid #000`. On screen the same DOM shows with a Print button calling `window.print()`. Target: 21 questions × 3 blocks ≈ 12
-A4 pages, × 1 block ≈ 6. Entry points: the action rows of `KnowledgeModelRead.vue` and of `SessionDetail.vue` (which builds the link from
-`session.questionnaireRef`) each gain a `router-link`. AC 8, 14, 17.
+`.site-footer`, `.no-print`; `body { background:#fff; color:#000; font-size:10pt }`; `break-inside: avoid` on `.question, .decl-block` and
+`break-before: page` on `.section`; ruled lines `border-bottom:1px solid #000; height:6mm`; tick boxes 3.5 mm with a 1 px black border. On screen the
+same DOM shows with a Print button calling `window.print()`. Target ≈ 12 A4 pages at 3 blocks, ≈ 6 at 1. Entry points: the action rows of
+`KnowledgeModelRead.vue` and of `SessionDetail.vue` (building the link from `session.questionnaireRef`) each gain a `router-link`. AC 8, 16.
 
 ```text
 print: questionnaire "Print questionnaire" · handoutTitle "FIP questionnaire — paper fallback" · group "Group / table" · date "Date" ·
@@ -145,7 +144,8 @@ print: questionnaire "Print questionnaire" · handoutTitle "FIP questionnaire �
 New table `feedback`: `id` str(26) pk (`secrets.token_hex(13)`), `session_id` FK `workshop_sessions.id ON DELETE SET NULL` nullable, `fip_id` FK
 `fips.id ON DELETE SET NULL` nullable, `q1`/`q2`/`q3` Integer NOT NULL, `comment` Text nullable, `language` String, `created_at`; index on
 `session_id`. **Anonymous by construction**: no `user_id`, no IP, no edit token stored — the client IP is used by the rate limiter and discarded.
-New config `FIPM_FEEDBACK_ENABLED: bool = True`.
+New config `FIPM_FEEDBACK_ENABLED: bool = True`. **The three questions are the `feedback.q1`–`q3` strings below**, on a 1–5 Likert scale (1 = strongly
+disagree, 5 = strongly agree), with the free text `feedback.comment`; that block is their authoritative English wording.
 
 | Method | Path | Auth | Essentials | Codes |
 |---|---|---|---|---|
@@ -158,16 +158,11 @@ CSRF applies as to every write (spec 01 §4). Rate limit **5 per hour per client
 `FIPM_FEEDBACK_ENABLED=false` the POST returns `403 feedback_disabled` while both GETs keep working, so collected data stays readable; the session
 routes reuse `sessions._get_owned_session`.
 
-**The three questions** (Likert 1 = strongly disagree … 5 = strongly agree; keys `q1`–`q3`): `q1` "The questionnaire was easy to understand." · `q2`
-"The tool was easy to use on my device." · `q3` "I understand better now what a FAIR Implementation Profile is." Free text: "What should we change?
-(optional)".
-
 **UI.** `components/FeedbackForm.vue` (props `sessionId?`, `fipId?`): three radio groups of five with the two anchor labels shown once, a textarea,
 submit → thank-you state. After a `201` it writes `localStorage['fipm.feedback.<sessionId ?? fipId ?? "global">'] = 'done'` (try/catch) and stays
-hidden on that device; there is deliberately no server-side de-duplication, and a `403 feedback_disabled` hides the form entirely. Placed (a) in
-`FipEditor.vue` as a `<details>` under `ExportButtons`, rendered once `answeredCount > 0 && store.saveState === 'saved'`, and (b) on
-`SessionDetail.vue`, which also renders `components/FeedbackSummary.vue` (owner-only view): response count, a horizontal 1–5 bar row plus mean per
-question, the comment list, and an `<a>` to `/api/sessions/{id}/feedback.csv`. AC 9–11, 18.
+hidden on that device; there is deliberately no server-side de-duplication, and a `403 feedback_disabled` hides the form entirely. It sits (a) in
+`FipEditor.vue` as a `<details>` under `ExportButtons`, once `answeredCount > 0 && store.saveState === 'saved'`, and (b) on `SessionDetail.vue`, which
+also renders `components/FeedbackSummary.vue`: response count, a 1–5 bar row plus mean per question, the comments, and an `<a>` to the CSV. AC 9–11, 17.
 
 ```text
 feedback: title "Two minutes of feedback?" · intro "Anonymous. It helps us improve the tool and the workshop." ·
@@ -201,7 +196,7 @@ change, fully backwards compatible** (absent keys read as `None`; old FIPs valid
   The old `editor.replacementHint` string is replaced by `editor.successorHint`.
 - **Matrix**: `MatrixChip` gains `successorLabel: string | null`, resolved in `lib/matrix.ts` like `label`; `MatrixCell.vue` appends
   `matrix.successor` to the chip's `title`/`aria-label` and shows it under the chip when the note is toggled. `FipRead.vue` shows `→ label` after the
-  status badge. AC 12–13, 18.
+  status badge. AC 12–13, 17.
 
 ```text
 editor: successor "Replaced by" · successorHint "Name the resource that will replace it."
@@ -210,8 +205,7 @@ matrix: successor "→ replaced by {label}"
 
 ## 6. Facilitator write affordance (no API change)
 
-The backend already lets a session owner write any FIP of their session, before and after close (`fips._authorize_fip_write` /
-`_session_owner_has_access`); only the UI was missing.
+The backend already lets a session owner write any FIP of their session, before and after close (`fips._authorize_fip_write`); only the UI was missing.
 
 - `SessionFipList.vue` gains a prop `canOpen?: boolean`; when true each row also renders an **Open** `router-link` to `/fips/{id}/edit` beside
   **View**. `SessionDetail.vue` passes it (that view is owner-only, so always true there).
@@ -220,7 +214,7 @@ The backend already lets a session owner write any FIP of their session, before 
   once: `200` → `true`, anything else → false. That endpoint is owner/admin-only and already 404s otherwise, so it *is* the permission check.
   `canEdit` becomes `owner || storedToken || facilitatorWrite`, which also stops `FipEditor.init()` from bouncing the facilitator to the read view.
 - `FipEditor.vue` shows `editor.facilitatorBanner` while `facilitatorWrite` is true; claim, visibility and delete stay gated on real ownership, and
-  a closed session still blocks anonymous and non-owner writes exactly as before. AC 15, 18.
+  a closed session still blocks anonymous and non-owner writes exactly as before. AC 14, 17.
 
 ```text
 sessionAdmin: open "Open"
@@ -233,8 +227,8 @@ editor: facilitatorBanner "You are editing as the facilitator."
 `authz.require_admin_404`, `routers/{admin,privacy,feedback}.py` + the two session feedback routes and `main.py` mounts, `schemas`, `exporters.py`,
 `rdf.py`, `config.feedback_enabled`, the `require_user` guard, `data/i18n/privacy/*`. **Frontend (vitest + one manual pass):**
 `views/{Admin,ChangePassword,Privacy,KnowledgeModelPrint}.vue`, `components/{SiteFooter,FeedbackForm,FeedbackSummary}.vue`, `lib/markdown.ts`,
-`assets/print-questionnaire.css`, and edits to `Register.vue`, `JoinSession.vue`, `App.vue`, `SessionDetail.vue`, `SessionFipList.vue`,
-`FipEditor.vue`, `FipRead.vue`, `DeclarationEditor.vue`, `MatrixCell.vue`, `lib/matrix.ts`, `stores/fipEditor.ts`, `router/index.ts`, `i18n/en.json`.
+`assets/print-questionnaire.css`, and edits to `Register.vue`, `JoinSession.vue`, `App.vue`, `SessionDetail.vue`, `SessionFipList.vue`, `FipEditor.vue`,
+`FipRead.vue`, `DeclarationEditor.vue`, `MatrixCell.vue`, `lib/matrix.ts`, `stores/fipEditor.ts`, `router/index.ts`, `i18n/en.json`.
 
 ## 8. Acceptance criteria
 
@@ -259,7 +253,7 @@ editor: facilitatorBanner "You are editing as the facilitator."
    `429` with `Retry-After`; an unknown `sessionId` → `404`; with `FIPM_FEEDBACK_ENABLED=false` → `403 feedback_disabled`.
 9. `GET /api/sessions/{id}/feedback` returns `404` for a non-owner and, for the owner, the exact counts, 2-dp means and free texts of the posted rows
    (`responses: 0`, `mean: null` when empty); `feedback.csv` returns the six columns with a BOM and CRLF.
-10. Deleting a session (or a FIP) leaves its feedback rows in place with `sessionId`/`fipId` `NULL`.
+10. Deleting a session (or a FIP) leaves its feedback rows with `sessionId`/`fipId` `NULL`, and its FIPs' feedback stays exportable from the CSV route.
 11. A declaration with `successorFerId` and `status != "planned-replacement"` returns `422`, as does one with both successor fields; a
     `planned-replacement` declaration with neither still saves.
 12. `export.ttl` of a `planned-replacement` declaration with a successor carries, on the **same** declaration node, both
@@ -267,20 +261,19 @@ editor: facilitatorBanner "You are editing as the facilitator."
     stored before this change serialises byte-identically to before.
 13. `export.csv`'s header is exactly the 21 spec-01 columns plus `successor_fer_id, successor_fer_label` (23; session CSV 25), the label resolves in
     the FIP's language, and `export.json` → `POST /api/fips/import` round-trips both successor fields.
-14. The print route adds no backend endpoint: the OpenAPI schema gains nothing under `/api/knowledge-models/*`.
 
 **Frontend (vitest unit + one manual pass)**
 
-15. Manual: a non-admin visiting `/admin` sees `common.notFound` with no `/api/admin/*` request in the network log and no "Admin" nav link, while an
+14. Manual: a non-admin visiting `/admin` sees `common.notFound` with no `/api/admin/*` request in the network log and no "Admin" nav link, while an
     admin sees the user table, resets a password and gets the temporary password once in a dialog with a working copy button. A facilitator uses "Open"
     on `SessionDetail`, lands in the editor with the `editor.facilitatorBanner` banner, edits, and the change saves — also after close.
-16. `Register.vue`: submit stays disabled until the privacy checkbox is ticked and the POST body carries the version from `GET /api/privacy` (vitest,
+15. `Register.vue`: submit stays disabled until the privacy checkbox is ticked and the POST body carries the version from `GET /api/privacy` (vitest,
     mocked API). `/privacy` renders headings, lists and links and escapes an injected `<script>` tag as text (`lib/markdown.ts` unit test), and a
     language switch re-renders it in `pt-BR`.
-17. Manual: `/knowledge-models/gofair-fip-mini/1.0.0/print` prints from Chrome as A4 portrait with the title page, every non-hidden question with its
+16. Manual: `/knowledge-models/gofair-fip-mini/1.0.0/print` prints from Chrome as A4 portrait with the title page, every non-hidden question with its
     help text, three declaration blocks of five tick boxes, the attribution footer on every sheet, no app chrome and no question split across a page
     break; `?declarations=1` roughly halves the page count; the switcher changes the printed language.
-18. `FeedbackForm` posts once and stays hidden on reload of the same device (vitest, stubbed `localStorage`); `buildMatrix` returns
+17. `FeedbackForm` posts once and stays hidden on reload of the same device (vitest, stubbed `localStorage`); `buildMatrix` returns
     `successorLabel` for a `planned-replacement` chip and `null` otherwise and `MatrixCell` puts it in the chip's `title` (vitest);
     `DeclarationEditor` shows the second picker only for `planned-replacement` and clears both successor fields when the status changes away.
 
@@ -304,5 +297,8 @@ editor: facilitatorBanner "You are editing as the facilitator."
 
 1. Contact point in the notice: L. O. Bonino's UT address (assumed) or a Fiocruz/ICTIC one once hosting is decided (PLAN §9.3)?
 2. Should the feedback form also appear on `FipRead.vue` (for a group that closed the editor), or are the editor and session pages enough?
-3. Is a 12-month retention ceiling right for CONFOA, or should session data go as soon as the workshop report is written?
-4. Promotion policy: may an admin promote a user FER whose IRI does not resolve, or should promotion require a resolvable homepage? v1 does not check.
+3. Is the 12-month retention ceiling right (A1), or should session data go once the report is written? And may an admin promote a FER whose IRI does not resolve?
+
+## Reconciliation note (9 Sep 2026, orchestrator)
+
+Spec 06 (DMP linkage) is implemented before this spec and appends three CSV columns (`dmp_url`, `dmp_section`, `dmp_question`) to the FIP export, making 24. This spec's two successor columns (`successor_fer_id`, `successor_fer_label`) are appended **after** those, so the final FIP CSV header has 26 columns and the session CSV 28 (session_id, fip_title + 26). Spec 01 §3.2 and §9.11 describe the original 21 columns, which remain the first 21 in the same order.
