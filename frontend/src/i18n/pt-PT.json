@@ -157,7 +157,8 @@
     "continueFip": "Continuar o seu FIP",
     "invalidCode": "Não reconhecemos esse código de acesso.",
     "closed": "Esta sessão está fechada. Ainda pode consultar os FIPs que criou.",
-    "questionnaireUnavailable": "O questionário desta sessão já não está disponível. Peça ao facilitador para verificar a sua visibilidade."
+    "questionnaireUnavailable": "O questionário desta sessão já não está disponível. Peça ao facilitador para verificar a sua visibilidade.",
+    "chooseArea": "Qual área?"
   },
   "community": {
     "heading": "A sua comunidade",
@@ -193,7 +194,13 @@
     "notAnswered": "Sem resposta",
     "successor": "Substituído por",
     "successorHint": "Indique o recurso que o irá substituir.",
-    "facilitatorBanner": "Está a editar como facilitador."
+    "facilitatorBanner": "Está a editar como facilitador.",
+    "suggestedOptions": "Opções sugeridas",
+    "more": "Mais",
+    "notApplicable": "Não se aplica",
+    "notApplicableWhy": "Porque é que isto não se aplica? (opcional)",
+    "notApplicableConfirm": "Marcar esta pergunta como não se aplica? Os seus recursos serão removidos.",
+    "dropAnnotatedDeclaration": "Remover este recurso? Tem uma nota, evidência, um substituto ou um estado não predefinido que serão perdidos."
   },
   "save": {
     "saved": "Guardado {time}",
@@ -278,7 +285,11 @@
     "dangerZone": "Zona de perigo",
     "delete": "Eliminar sessão",
     "deleteConfirm": "Eliminar esta sessão? Os FIPs anónimos criados nesta sessão serão eliminados permanentemente. Os FIPs guardados serão mantidos, mas desassociados da sessão.",
-    "deleted": "Sessão eliminada."
+    "deleted": "Sessão eliminada.",
+    "addQuestionnaire": "Adicionar outro questionário",
+    "removeQuestionnaire": "Remover",
+    "areaLabel": "Etiqueta da área",
+    "areaLabelPlaceholder": "p. ex. Saúde pública"
   },
   "fipRead": {
     "notShared": "Este FIP não existe ou não está partilhado.",
@@ -313,7 +324,10 @@
     "print": "Imprimir (A3 horizontal)",
     "showNote": "Mostrar motivo",
     "otherGroup": "Outro",
-    "successor": "→ substituído por {label}"
+    "successor": "→ substituído por {label}",
+    "notApplicableShort": "N/A",
+    "notApplicableFull": "Não se aplica",
+    "absent": "Não faz parte deste questionário"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -388,7 +402,18 @@
     "reload": "Recarregar",
     "idTaken": "Esse identificador já está em uso.",
     "importFailed": "Este ficheiro não é um modelo de conhecimento válido.",
-    "noModels": "Ainda não há modelos."
+    "noModels": "Ainda não há modelos.",
+    "suggestedOptions": "Opções sugeridas",
+    "removeSuggested": "Remover",
+    "showAllTypes": "Mostrar todos os tipos",
+    "addInlineFer": "Adicionar um recurso que ainda não está no catálogo",
+    "inlineFerId": "Identificador (URL)",
+    "inlineFerLabel": "Etiqueta",
+    "inlineFerHomepage": "Página inicial (opcional)",
+    "allowFreeText": "Permitir que os participantes usem as suas próprias palavras",
+    "defaultDeclarationStatus": "Estado predefinido para recursos de seleção rápida",
+    "compactDeclarations": "Declarações compactas (ocultar o estado atrás de \"Mais\")",
+    "unusedInlineFers": "Recursos não utilizados (não sugeridos por nenhuma pergunta)"
   },
   "admin": {
     "title": "Administração",
