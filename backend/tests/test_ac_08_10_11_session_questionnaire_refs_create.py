@@ -141,6 +141,26 @@ def test_pre_v6_body_with_only_questionnaire_ref_still_201s_with_derived_ref(cli
     assert ref["title"] == ref["label"]
 
 
+def test_multi_ref_with_no_label_falls_back_to_model_title(client):
+    """Review finding 10: an entry in `questionnaireRefs` with no `label`
+    (the field defaults to `{}`) must not 400 -- it falls back to that ref's
+    own model title, same as the legacy single-`questionnaireRef` path
+    does."""
+    _register(client, "ac08-10e@example.com")
+    _publish_fork(client, "ac0810e-area-a", "Area A No Label")
+    r = client.post(
+        "/api/sessions",
+        json={
+            "title": "No label session",
+            "defaultLanguage": "en",
+            "questionnaireRefs": [{"id": "ac0810e-area-a", "version": "1.0.0"}],
+        },
+    )
+    assert r.status_code == 201, r.text
+    ref = r.json()["questionnaireRefs"][0]
+    assert ref["label"] == {"en": "Area A No Label"}
+
+
 def test_neither_ref_field_is_422(client):
     _register(client, "ac08-11b@example.com")
     r = client.post("/api/sessions", json={"title": "No ref session", "defaultLanguage": "en"})

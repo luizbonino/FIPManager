@@ -8,7 +8,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.datastructures import Headers
@@ -115,6 +117,30 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="FIP Manager", lifespan=lifespan)
+
+
+@app.exception_handler(RequestValidationError)
+async def _not_applicable_with_declarations_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """Review finding 7: `Answer._not_applicable_excludes_declarations`
+    (fipm.schemas) raises inside pydantic's own model validation, which
+    FastAPI turns into a generic 422 `{"detail": [...pydantic errors...]}`
+    for any request body typed directly as a pydantic model parameter --
+    `POST /api/fips`, `PATCH /api/fips/{id}`, `POST /api/fips/import`
+    included. Recognise that one specific error (by the message the
+    validator raises, which embeds the stable code
+    `not_applicable_with_declarations`) and report it the same way every
+    other business-rule rejection in this API is reported: a 422 with a
+    plain string `detail`. Anything else falls through to FastAPI's default
+    validation-error response, unchanged."""
+    for error in exc.errors():
+        if "not_applicable_with_declarations" in str(error.get("msg", "")):
+            return JSONResponse(
+                status_code=422, content={"detail": "not_applicable_with_declarations"}
+            )
+    return await request_validation_exception_handler(request, exc)
+
 
 app.add_middleware(BodySizeLimitMiddleware, max_bytes=get_settings().max_body_bytes)
 # Review finding 9: Starlette's `.middleware("http")` inserts each new

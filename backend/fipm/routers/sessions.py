@@ -93,9 +93,16 @@ def _prepare_questionnaire_refs(
                 raise HTTPException(status_code=400, detail="duplicate_questionnaire_ref")
             seen.add(key)
             get_readable_published_km(db, ref.id, ref.version, user)
-            errors += validate_langmap(
-                ref.label, f"questionnaireRefs[{idx}].label", require_en=False, max_len=80
-            )
+            # Review finding 10: no label supplied (the field defaults to
+            # `{}`) must not 400 on an empty LangMap -- leave it unvalidated
+            # and unstored (`{}`), same as the legacy single-`questionnaire
+            # Ref` path's NULL column, so `resolve_session_questionnaire_
+            # refs`'s existing `ref.get("label") or title` already falls
+            # back to the model's own title at read time.
+            if ref.label:
+                errors += validate_langmap(
+                    ref.label, f"questionnaireRefs[{idx}].label", require_en=False, max_len=80
+                )
         refs_to_store = [
             {"id": ref.id, "version": ref.version, "label": ref.label} for ref in questionnaire_refs
         ]

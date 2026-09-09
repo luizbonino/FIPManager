@@ -182,6 +182,57 @@ def test_validate_content_does_not_mutate_input(settings):
     assert doc == before
 
 
+def test_importer_known_fer_ids_include_db_rows_not_just_seed_json(db_session, settings):
+    """Review finding 6: `_load_seed_fer_ids` used to be `data/fers/seed.json`
+    alone -- a shipped model suggesting a FER that was promoted into the DB
+    (source="model"/"user-promoted", not in seed.json) would fail import
+    with `unknown_suggested_fer`. It must now resolve against the union of
+    seed.json and whatever is already in `fers`."""
+    from fipm.importer import ImportSummary, import_knowledge_model_doc
+    from fipm.models import Fer
+
+    promoted_id = "https://example.org/fers/finding-6-promoted"
+    db_session.add(
+        Fer(
+            id=promoted_id,
+            label={"en": "Promoted, not in seed.json"},
+            label_search="promoted, not in seed.json",
+            type="identifier-service",
+            homepage=None,
+            owner_id=None,
+            source="model",
+        )
+    )
+    db_session.commit()
+
+    doc = {
+        "id": "finding-6-doc",
+        "version": "1.0.0",
+        "status": "draft",
+        "license": "CC0-1.0",
+        "source": "Test",
+        "title": {"en": "Finding 6 doc"},
+        "description": {"en": "Finding 6 doc"},
+        "sections": [
+            {
+                "id": "sec1",
+                "title": {"en": "Section 1"},
+                "questions": [
+                    {
+                        "id": "q1",
+                        "text": {"en": "Question 1"},
+                        "suggestedFerIds": [promoted_id],
+                    }
+                ],
+            }
+        ],
+    }
+    summary = ImportSummary()
+    # Must not raise ValueError("invalid content ... unknown_suggested_fer").
+    import_knowledge_model_doc(db_session, settings, summary, doc, force=False)
+    assert summary.knowledge_models.created == 1
+
+
 @pytest.mark.skipif(
     not REAL_KM_PATH.is_file(),
     reason="data/knowledge-models/gofair-fip-mini-1.0.0.json not present",

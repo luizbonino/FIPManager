@@ -60,36 +60,54 @@ class ImportSummary:
 
 
 def _validate_knowledge_model(
-    doc: dict, settings: Settings, known_fer_ids: set[str] | None
+    doc: dict,
+    settings: Settings,
+    known_fer_ids: set[str] | None,
+    known_fer_sources: dict[str, str] | None = None,
 ) -> None:
     """Structural top-level keys, then delegate the `content` shape (sections/
     questions/LangMaps) to `fipm.km_content.validate_content` -- spec
     04-knowledge-model-editor.md §3.3: "The importer's
     `_validate_knowledge_model` is replaced by a call to this module so disk
     and API agree." `known_fer_ids` (spec 08-workshop-picklists.md §1.2 rule
-    10) is the importer's `seed.json` snapshot, used to resolve
-    `suggestedFerIds`/`inlineFers`."""
+    10) is the importer's `seed.json` + DB snapshot, used to resolve
+    `suggestedFerIds`/`inlineFers`; `known_fer_sources` (review finding 1) is
+    the same snapshot's `{id: source}` map."""
     missing = REQUIRED_KM_KEYS - doc.keys()
     if missing:
         raise ValueError(f"missing keys: {sorted(missing)}")
-    errors = validate_content(doc, settings=settings, known_fer_ids=known_fer_ids)
+    errors = validate_content(
+        doc, settings=settings, known_fer_ids=known_fer_ids, known_fer_sources=known_fer_sources
+    )
     if errors:
         raise ValueError(f"invalid content ({len(errors)} error(s)): {errors[:3]}")
 
 
-def _load_seed_fer_ids(settings: Settings) -> set[str]:
+def _load_seed_fer_ids(db: Session, settings: Settings) -> set[str]:
     """spec 08-workshop-picklists.md §1.2 rule 10: the importer's catalogue
-    snapshot is `data/fers/seed.json` itself (read directly, not via the DB
-    -- `_import_knowledge_models` runs before `_import_fers` in
-    `run_import`)."""
+    snapshot is `data/fers/seed.json` (read directly, not via the DB --
+    `_import_knowledge_models` runs before `_import_fers` in `run_import`)
+    unioned with whatever is already in `fers` (review finding 6): a shipped
+    model may legitimately suggest a FER that was promoted (source="model"
+    or "user-promoted") by an earlier import/publish and so is not itself in
+    seed.json."""
     seed_path = Path(settings.data_dir) / "fers" / "seed.json"
-    if not seed_path.is_file():
-        return set()
-    try:
-        entries = json.loads(seed_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return set()
-    return {e["id"] for e in entries if isinstance(e, dict) and e.get("id")}
+    seed_ids: set[str] = set()
+    if seed_path.is_file():
+        try:
+            entries = json.loads(seed_path.read_text(encoding="utf-8"))
+            seed_ids = {e["id"] for e in entries if isinstance(e, dict) and e.get("id")}
+        except json.JSONDecodeError:
+            pass
+    db_ids = {row[0] for row in db.query(Fer.id).all()}
+    return seed_ids | db_ids
+
+
+def _load_fer_sources(db: Session) -> dict[str, str]:
+    """The `{id: source}` half of the same snapshot (review finding 1),
+    letting `validate_content` tell an already-promoted inlineFers entry
+    apart from a genuine catalogue collision."""
+    return dict(db.query(Fer.id, Fer.source).all())
 
 
 def _upsert_fer(db: Session, entry: dict, *, source: str, owner_id: str | None) -> bool:
@@ -177,6 +195,7 @@ def import_knowledge_model_doc(
     doc: dict,
     *,
     known_fer_ids: set[str] | None = None,
+    known_fer_sources: dict[str, str] | None = None,
     force: bool = False,
 ) -> None:
     """Validate and upsert a single already-parsed knowledge-model `doc`
@@ -193,8 +212,9 @@ def import_knowledge_model_doc(
     on tests that happened to run first and import the full real data/ dir.
     """
     if known_fer_ids is None:
-        known_fer_ids = _load_seed_fer_ids(settings)
-    _validate_knowledge_model(doc, settings, known_fer_ids)
+        known_fer_ids = _load_seed_fer_ids(db, settings)
+        known_fer_sources = _load_fer_sources(db)
+    _validate_knowledge_model(doc, settings, known_fer_ids, known_fer_sources)
 
     content_sha256 = _sha256(doc)
     existing = db.get(KnowledgeModel, (doc["id"], doc["version"]))
@@ -256,7 +276,8 @@ def _import_knowledge_models(
     km_dir = Path(settings.data_dir) / "knowledge-models"
     if not km_dir.is_dir():
         return
-    known_fer_ids = _load_seed_fer_ids(settings)
+    known_fer_ids = _load_seed_fer_ids(db, settings)
+    known_fer_sources = _load_fer_sources(db)
     for path in sorted(km_dir.glob("*.json")):
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
@@ -266,7 +287,13 @@ def _import_knowledge_models(
             continue
         try:
             import_knowledge_model_doc(
-                db, settings, summary, doc, known_fer_ids=known_fer_ids, force=force
+                db,
+                settings,
+                summary,
+                doc,
+                known_fer_ids=known_fer_ids,
+                known_fer_sources=known_fer_sources,
+                force=force,
             )
         except ValueError as exc:
             logger.warning("skipping invalid knowledge model %s: %s", path, exc)

@@ -332,7 +332,18 @@ def import_fip(
     try:
         reconstructed = reconstruct_answers_from_export(body.answers, language, related_dmps)
         answers = [Answer.model_validate(a) for a in reconstructed]
-    except (KeyError, ValidationError) as exc:
+    except ValidationError as exc:
+        # Review finding 7: same rule as create/patch (spec 08 §2.1) --
+        # notApplicable + declarations on one answer is specifically 422
+        # `not_applicable_with_declarations`, not the generic 400
+        # `invalid_answers` every other reconstruction failure gets.
+        if any(
+            "not_applicable_with_declarations" in str(error.get("msg", ""))
+            for error in exc.errors()
+        ):
+            raise HTTPException(status_code=422, detail="not_applicable_with_declarations") from exc
+        raise HTTPException(status_code=400, detail="invalid_answers") from exc
+    except KeyError as exc:
         raise HTTPException(status_code=400, detail="invalid_answers") from exc
 
     _validate_question_ids(answers, km)

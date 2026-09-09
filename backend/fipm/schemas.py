@@ -854,6 +854,9 @@ class AdminFerMergeRequest(CamelModel):
 class AdminFerMergeOut(CamelModel):
     repointed_declarations: int
     repointed_fips: int
+    # Review finding 2: knowledge-model rows (any id/version) whose content
+    # had a question's suggestedFerIds re-pointed away from the merged FER.
+    repointed_knowledge_models: int = 0
 
 
 # ---------------------------------------------------------------------------

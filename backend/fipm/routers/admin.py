@@ -19,6 +19,7 @@ from fipm.authz import require_admin_404
 from fipm.config import get_settings
 from fipm.db import get_db
 from fipm.ids import temp_password
+from fipm.km_content import content_sha256
 from fipm.mail import queue_mail, render_mail
 from fipm.models import Fer, Fip, KnowledgeModel, User, WorkshopSession
 from fipm.schemas import (
@@ -136,7 +137,11 @@ def _fer_usage_counts(db: Session) -> dict[str, int]:
     """One Python pass over `db.query(Fer.answers)`-equivalent
     (`Fip.answers`): counts declarations referencing each FER by `ferId` or
     `successorFerId` (spec 05 §1 -- merge re-points both, so "usage" counts
-    both). O(rows), fine at v1 scale; documented, not indexed."""
+    both), plus (review finding 2) every knowledge-model question that
+    suggests it via `suggestedFerIds` (all models, all versions) -- a FER an
+    editor has curated into a question's picklist is "in use" even before
+    any FIP declares it, and `merge_fer` repoints exactly this same set.
+    O(rows), fine at v1 scale; documented, not indexed."""
     counts: dict[str, int] = {}
     for (answers,) in db.query(Fip.answers).all():
         for answer in answers or []:
@@ -145,7 +150,60 @@ def _fer_usage_counts(db: Session) -> dict[str, int]:
                     fer_id = decl.get(key)
                     if fer_id:
                         counts[fer_id] = counts.get(fer_id, 0) + 1
+    for (content,) in db.query(KnowledgeModel.content).all():
+        for section in (content or {}).get("sections") or []:
+            if not isinstance(section, dict):
+                continue
+            for question in section.get("questions") or []:
+                if not isinstance(question, dict):
+                    continue
+                for fer_id in question.get("suggestedFerIds") or []:
+                    if fer_id:
+                        counts[fer_id] = counts.get(fer_id, 0) + 1
     return counts
+
+
+def _repoint_suggested_fer_ids(db: Session, fer_id: str, target_id: str) -> int:
+    """Review finding 2: `merge_fer` re-points `Fip.answers` declarations
+    but, until now, left every knowledge model's `content.sections[].
+    questions[].suggestedFerIds` still naming the just-deleted `fer_id` --
+    a published questionnaire would keep offering an id `GET /api/fers`
+    (and every other read path) no longer knows about. Walks every
+    `KnowledgeModel` row (all ids, all versions), rewrites `fer_id` ->
+    `target_id` wherever it appears in a question's `suggestedFerIds`
+    (de-duplicating, since the question may already suggest both), and
+    returns the number of rows changed."""
+    changed_rows = 0
+    for km in db.query(KnowledgeModel).all():
+        content = copy.deepcopy(km.content or {})
+        sections = content.get("sections")
+        if not isinstance(sections, list):
+            continue
+        changed = False
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+            questions = section.get("questions")
+            if not isinstance(questions, list):
+                continue
+            for question in questions:
+                if not isinstance(question, dict):
+                    continue
+                suggested = question.get("suggestedFerIds")
+                if not isinstance(suggested, list) or fer_id not in suggested:
+                    continue
+                new_suggested: list[str] = []
+                for sid in suggested:
+                    new_id = target_id if sid == fer_id else sid
+                    if new_id not in new_suggested:
+                        new_suggested.append(new_id)
+                question["suggestedFerIds"] = new_suggested
+                changed = True
+        if changed:
+            km.content = content
+            km.content_sha256 = content_sha256(content)
+            changed_rows += 1
+    return changed_rows
 
 
 @router.get("/fers", response_model=ListOut)
@@ -160,7 +218,11 @@ def list_pending_fers(
 ) -> ListOut:
     query = db.query(Fer)
     if pending:
-        query = query.filter(Fer.source == "user")
+        # Review finding 8: a promoted inlineFers row (source="model") is
+        # just as much awaiting curation as a plain user submission -- an
+        # admin promoting it sets source="user-promoted" via the existing
+        # /promote route, same as any other pending FER.
+        query = query.filter(Fer.source.in_(("user", "model")))
     if q:
         query = query.filter(Fer.label_search.ilike(f"%{q.lower()}%"))
     total = query.count()
@@ -261,8 +323,12 @@ def merge_fer(
             fip.answers = new_answers
             repointed_fips += 1
 
+    repointed_knowledge_models = _repoint_suggested_fer_ids(db, fer_id, target.id)
+
     db.delete(source)
     db.commit()
     return AdminFerMergeOut(
-        repointed_declarations=repointed_declarations, repointed_fips=repointed_fips
+        repointed_declarations=repointed_declarations,
+        repointed_fips=repointed_fips,
+        repointed_knowledge_models=repointed_knowledge_models,
     )

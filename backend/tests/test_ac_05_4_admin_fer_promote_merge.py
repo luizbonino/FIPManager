@@ -227,6 +227,116 @@ def test_merge_rejects_seed_source_and_mismatched_type(client_factory):
     assert mismatched.json()["detail"] == "invalid_merge_target"
 
 
+def test_pending_fers_include_source_model(client_factory):
+    """Review finding 8: a promoted inlineFers row (source="model") is just
+    as pending curation as a plain source="user" submission -- the admin
+    pending list (`?pending=1`) must include it so it can be curated
+    (promoted to source="user-promoted" via the existing /promote route)."""
+    admin = client_factory()
+    _register(admin, "ac05-4-pending-admin@example.com")
+    _promote_to_admin("ac05-4-pending-admin@example.com")
+
+    from fipm.db import SessionLocal
+    from fipm.models import Fer
+
+    fer_id = "https://example.org/fers/ac05-4-model-source"
+    with SessionLocal() as db:
+        db.add(
+            Fer(
+                id=fer_id,
+                label={"en": "Model-promoted FER"},
+                label_search="model-promoted fer",
+                type="metadata-schema",
+                homepage=None,
+                owner_id=None,
+                source="model",
+            )
+        )
+        db.commit()
+
+    pending = admin.get("/api/admin/fers", params={"pending": 1, "limit": 200})
+    assert pending.status_code == 200, pending.text
+    ids = {item["id"] for item in pending.json()["items"]}
+    assert fer_id in ids
+
+    promote = admin.post(f"/api/admin/fers/{fer_id}/promote")
+    assert promote.status_code == 200, promote.text
+    assert promote.json()["source"] == "user-promoted"
+
+
+def test_merge_repoints_suggested_fer_ids_in_knowledge_model_content_and_usage_count(
+    client_factory,
+):
+    """Review finding 2: `merge_fer` must also repoint `suggestedFerIds`
+    inside every knowledge model's `content` (all ids/versions), not just
+    `Fip.answers`; and `_fer_usage_counts` must count those suggestions
+    too."""
+    admin = client_factory()
+    _register(admin, "ac05-4-km-merge-admin@example.com")
+    _promote_to_admin("ac05-4-km-merge-admin@example.com")
+
+    contributor = client_factory()
+    _register(contributor, "ac05-4-km-merge-contrib@example.com")
+    source = contributor.post(
+        "/api/fers",
+        json={
+            "id": "https://example.org/fers/ac05-4-km-source",
+            "label": {"en": "KM source registry"},
+            "type": "identifier-service",
+        },
+    ).json()
+    target = contributor.post(
+        "/api/fers",
+        json={
+            "id": "https://example.org/fers/ac05-4-km-target",
+            "label": {"en": "KM target registry"},
+            "type": "identifier-service",
+        },
+    ).json()
+    admin.post(f"/api/admin/fers/{target['id']}/promote")
+
+    created = contributor.post("/api/knowledge-models", json={"title": {"en": "Merge KM"}})
+    assert created.status_code == 201, created.text
+    km_id = created.json()["id"]
+    get1 = contributor.get(f"/api/knowledge-models/{km_id}/1.0.0")
+    etag1 = get1.headers["etag"]
+    sections = [
+        {
+            "id": "sec1",
+            "title": {"en": "Section 1"},
+            "questions": [
+                {
+                    "id": "q1",
+                    "text": {"en": "Question 1"},
+                    "ferType": "identifier-service",
+                    "suggestedFerIds": [source["id"]],
+                }
+            ],
+        }
+    ]
+    put1 = contributor.put(
+        f"/api/knowledge-models/{km_id}/1.0.0/content",
+        headers={"If-Match": etag1},
+        json={"sections": sections},
+    )
+    assert put1.status_code == 200, put1.text
+
+    # The suggestion is "in use" before any FIP declares it.
+    usage_before = admin.get(
+        "/api/admin/fers", params={"q": "km source registry", "limit": 50}
+    ).json()["items"]
+    assert usage_before[0]["usageCount"] == 1
+
+    merged = admin.post(f"/api/admin/fers/{source['id']}/merge", json={"targetFerId": target["id"]})
+    assert merged.status_code == 200, merged.text
+    body = merged.json()
+    assert body["repointedKnowledgeModels"] == 1
+
+    after = contributor.get(f"/api/knowledge-models/{km_id}/1.0.0")
+    suggested = after.json()["content"]["sections"][0]["questions"][0]["suggestedFerIds"]
+    assert suggested == [target["id"]]
+
+
 def test_admin_fers_limit_and_offset_are_clamped(client_factory):
     """Review finding 12: same limit=1..200/offset>=0 clamp as
     GET /api/admin/users."""

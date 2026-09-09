@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from copy import deepcopy
 from datetime import UTC, datetime
 from typing import Any
@@ -48,6 +49,8 @@ from fipm.schemas import (
     km_summary_dict,
 )
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/knowledge-models", tags=["knowledge-models"])
 
 # spec 04 §1: MODEL_ID_PATTERN is `^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])$`, so a
@@ -84,13 +87,27 @@ def _invalid_content_response(errors: list[ContentError]) -> JSONResponse:
     return JSONResponse(status_code=400, content={"detail": "invalid_content", "errors": errors})
 
 
-def _known_fer_ids_for_content(db: Session, content: dict[str, Any]) -> set[str]:
+def _known_fer_snapshot(
+    db: Session, content: dict[str, Any], user: User
+) -> tuple[set[str], dict[str, str]]:
     """spec 08-workshop-picklists.md §1.2 rules 10/12: the router's
-    catalogue snapshot for `validate_content(known_fer_ids=...)` -- one
-    `SELECT id FROM fers WHERE id IN (...)`, restricted to the ids a
-    question actually suggests plus the ids `inlineFers` itself declares
-    (needed to detect `inline_fer_duplicates_catalogue`), never the whole
-    table."""
+    catalogue snapshot for `validate_content(known_fer_ids=...,
+    known_fer_sources=...)` -- one `SELECT id, source FROM fers WHERE id IN
+    (...)`, restricted to the ids a question actually suggests plus the ids
+    `inlineFers` itself declares (needed to detect
+    `inline_fer_duplicates_catalogue`), never the whole table.
+
+    Review finding 5: a FER row is only "known" here under the same
+    visibility rule `routers.fers.list_fers` applies -- source seed,
+    user-promoted or model (globally visible catalogue content), or one the
+    caller owns (source "user"). Without this, a model could resolve
+    `suggestedFerIds`/`inlineFers` against another user's still-private
+    `source="user"` FER, which no one else can actually see.
+
+    Returns `(ids, sources)`: `ids` is the known-id set `validate_content`
+    resolves against, `sources` is the same rows' `{id: source}` (review
+    finding 1: lets an already-promoted "model" inlineFers entry re-validate
+    without tripping `inline_fer_duplicates_catalogue`)."""
     ids: set[str] = set()
     for section in content.get("sections") or []:
         if not isinstance(section, dict):
@@ -105,9 +122,15 @@ def _known_fer_ids_for_content(db: Session, content: dict[str, Any]) -> set[str]
         if isinstance(entry, dict) and isinstance(entry.get("id"), str):
             ids.add(entry["id"])
     if not ids:
-        return set()
-    rows = db.query(Fer.id).filter(Fer.id.in_(ids)).all()
-    return {r[0] for r in rows}
+        return set(), {}
+    rows = (
+        db.query(Fer.id, Fer.source)
+        .filter(Fer.id.in_(ids))
+        .filter((Fer.source.in_(("seed", "user-promoted", "model"))) | (Fer.owner_id == user.id))
+        .all()
+    )
+    sources = {r[0]: r[1] for r in rows}
+    return set(sources), sources
 
 
 def _id_in_use(db: Session, km_id: str) -> bool:
@@ -340,8 +363,12 @@ def create_knowledge_model(
         "changelog": [],
         "sections": sections,
     }
+    known_fer_ids, known_fer_sources = _known_fer_snapshot(db, content, user)
     errors = validate_content(
-        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+        content,
+        settings=settings,
+        known_fer_ids=known_fer_ids,
+        known_fer_sources=known_fer_sources,
     )
     if errors:
         return _invalid_content_response(errors)
@@ -442,8 +469,12 @@ async def import_knowledge_model(
     if "forkedFrom" in document:
         content["forkedFrom"] = document["forkedFrom"]
 
+    known_fer_ids, known_fer_sources = _known_fer_snapshot(db, content, user)
     errors = validate_content(
-        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+        content,
+        settings=settings,
+        known_fer_ids=known_fer_ids,
+        known_fer_sources=known_fer_sources,
     )
     if not isinstance(changelog, list):
         # validate_content (km_content.py) has no opinion on `changelog`
@@ -528,8 +559,12 @@ def fork_knowledge_model(
     content["version"] = new_version
     content["status"] = "draft"
 
+    known_fer_ids, known_fer_sources = _known_fer_snapshot(db, content, user)
     errors = validate_content(
-        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+        content,
+        settings=settings,
+        known_fer_ids=known_fer_ids,
+        known_fer_sources=known_fer_sources,
     )
     if errors:
         return _invalid_content_response(errors)
@@ -674,8 +709,12 @@ def put_knowledge_model_content(
     content["version"] = row.version
     content["status"] = row.status
 
+    known_fer_ids, known_fer_sources = _known_fer_snapshot(db, content, user)
     errors = validate_content(
-        content, settings=settings, known_fer_ids=_known_fer_ids_for_content(db, content)
+        content,
+        settings=settings,
+        known_fer_ids=known_fer_ids,
+        known_fer_sources=known_fer_sources,
     )
     if errors:
         return _invalid_content_response(errors)
@@ -726,11 +765,13 @@ def publish_knowledge_model(
         raise HTTPException(status_code=400, detail="changelog_notes_required")
 
     content = dict(row.content or {})
+    known_fer_ids, known_fer_sources = _known_fer_snapshot(db, content, user)
     errors = validate_content(
         content,
         publishing=True,
         settings=settings,
-        known_fer_ids=_known_fer_ids_for_content(db, content),
+        known_fer_ids=known_fer_ids,
+        known_fer_sources=known_fer_sources,
     )
     if errors:
         return _invalid_content_response(errors)
@@ -744,15 +785,36 @@ def publish_knowledge_model(
     content["changelog"] = changelog
     content["status"] = "published"
 
+    # Review finding 4: inlineFers is only promoted into the globally-shared
+    # `fers` catalogue when the model is (or is about to be) visible to more
+    # than its owner -- a private model's staged FERs stay inline, never
+    # leaking into the catalogue anonymous/other-user callers can see.
+    if row.visibility in ("public", "link"):
+        # spec 08-workshop-picklists.md §1.3/§5.2: promote every `inlineFers`
+        # entry into `fers` as source="model", owner_id = this model's owner
+        # (None for a system model); idempotent, never overwrites an
+        # existing row of any source.
+        promoted = promote_inline_fers(db, content, row.owner_id)
+        # Review finding 1: every promoted entry now exists in the
+        # catalogue under the same id, so strip it out of `inlineFers` --
+        # otherwise the very next `validate_content` call (new-version, PUT
+        # .../content, publish again, fork) sees it as a duplicate
+        # (`inline_fer_duplicates_catalogue`) of the row it was just
+        # promoted into.
+        if content.get("inlineFers"):
+            content["inlineFers"] = []
+    else:
+        promoted = {"created": 0, "skipped": 0}
+        logger.info(
+            "publish_knowledge_model: skipping inlineFers promotion for private model %s@%s",
+            row.id,
+            row.version,
+        )
+
     row.changelog = changelog
     row.status = "published"
     row.content = content
     row.content_sha256 = content_sha256(content)
-    # spec 08-workshop-picklists.md §1.3/§5.2: promote every `inlineFers`
-    # entry into `fers` as source="model", owner_id = this model's owner
-    # (None for a system model); idempotent, never overwrites an existing
-    # row of any source.
-    promoted = promote_inline_fers(db, content, row.owner_id)
     db.commit()
     db.refresh(row)
     result = _km_out(row)

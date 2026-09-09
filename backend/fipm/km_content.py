@@ -157,6 +157,7 @@ def _validate_inline_fers(
     fer_types: set[str],
     skip_fer_type_check: bool,
     known_fer_ids: set[str] | None,
+    known_fer_sources: dict[str, str] | None = None,
 ) -> set[str]:
     """spec 08-workshop-picklists.md §1.2 rule 12: `model.inlineFers`.
     Returns the set of ids declared (valid or not -- used by rule 10 to
@@ -191,7 +192,16 @@ def _validate_inline_fers(
         else:
             seen_ids.add(entry_id)
             ids.add(entry_id)
-            if known_fer_ids is not None and entry_id in known_fer_ids:
+            # Review finding 1: a catalogue row with source "model" is
+            # itself the product of a *previous* publish promoting this
+            # exact inlineFers entry -- flagging it again would make a
+            # resubmitted (idempotent) publish/PUT permanently un-publishable
+            # once promotion has happened once. Any other source (seed,
+            # user, user-promoted) is still a genuine collision.
+            already_promoted = (
+                known_fer_sources is not None and known_fer_sources.get(entry_id) == "model"
+            )
+            if known_fer_ids is not None and entry_id in known_fer_ids and not already_promoted:
                 _err(
                     errors,
                     f"{path}.id",
@@ -257,6 +267,7 @@ def validate_content(
     publishing: bool = False,
     settings: Settings | None = None,
     known_fer_ids: set[str] | None = None,
+    known_fer_sources: dict[str, str] | None = None,
 ) -> list[ContentError]:
     """Validate a knowledge-model `content` document. Rules per spec 04
     §3.3 and spec 08-workshop-picklists.md §1.2 (rules 9-13). Returns at
@@ -267,7 +278,10 @@ def validate_content(
     the picker's cached map for the TS mirror) used to resolve
     `suggestedFerIds`/`inlineFers` against; this function stays pure and
     does no I/O of its own -- `known_fer_ids=None` (the default) skips that
-    resolution check entirely."""
+    resolution check entirely. `known_fer_sources` is the same snapshot's
+    `{id: source}` map, optional, used only to let an already-promoted
+    (source "model") inlineFers entry re-validate without tripping
+    `inline_fer_duplicates_catalogue` (review finding 1)."""
     settings = settings or get_settings()
     errors: list[ContentError] = []
 
@@ -281,6 +295,7 @@ def validate_content(
         fer_types=fer_types_for_inline,
         skip_fer_type_check=not fer_types_for_inline,
         known_fer_ids=known_fer_ids,
+        known_fer_sources=known_fer_sources,
     )
 
     default_status = doc.get("defaultDeclarationStatus")
@@ -416,7 +431,9 @@ def validate_content(
 
             _validate_suggested_fer_ids(question, q_path, errors, known_ids=known_suggested_ids)
 
-            if publishing:
+            # Review finding 11: a hidden question is never shown to a
+            # respondent, so it needs no answer path of its own to publish.
+            if publishing and question.get("hidden") is not True:
                 allow_free_text = question.get("allowFreeText")
                 suggested_ids = question.get("suggestedFerIds") or []
                 if allow_free_text is False and not suggested_ids:

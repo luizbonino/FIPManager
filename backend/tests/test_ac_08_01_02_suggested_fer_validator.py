@@ -167,6 +167,66 @@ def test_inline_fer_duplicates_catalogue_rejected(settings):
     assert hit is not None, errors
 
 
+def test_inline_fer_duplicates_catalogue_still_rejected_without_sources(settings):
+    """No `known_fer_sources` supplied at all (the importer/TS-mirror shape)
+    behaves exactly as before: still flagged."""
+    known_id = "https://fipm.example.org/fers/draft/already-seed"
+    doc = _base_doc()
+    doc["inlineFers"] = [{"id": known_id, "label": {"en": "X"}, "type": "identifier-service"}]
+    errors = validate_content(doc, settings=settings, known_fer_ids={known_id})
+    assert _find(errors, "inlineFers[0].id", "inline_fer_duplicates_catalogue") is not None
+
+
+def test_inline_fer_duplicates_catalogue_rejected_when_source_is_not_model(settings):
+    """Review finding 1: the bypass is specific to source="model" -- a
+    catalogue collision with a seed/user/user-promoted row is still a
+    genuine duplicate."""
+    known_id = "https://fipm.example.org/fers/draft/seed-clash"
+    doc = _base_doc()
+    doc["inlineFers"] = [{"id": known_id, "label": {"en": "X"}, "type": "identifier-service"}]
+    errors = validate_content(
+        doc,
+        settings=settings,
+        known_fer_ids={known_id},
+        known_fer_sources={known_id: "seed"},
+    )
+    assert _find(errors, "inlineFers[0].id", "inline_fer_duplicates_catalogue") is not None
+
+
+def test_inline_fer_duplicates_catalogue_bypassed_when_source_is_model(settings):
+    """Review finding 1: re-validating a model whose own inlineFers entry
+    was already promoted into the catalogue (source="model", same id) must
+    not treat that as a fresh duplicate -- this is what makes a re-publish
+    (or a PUT .../content resubmitting the same, already-promoted, entry)
+    idempotent instead of permanently 400ing."""
+    promoted_id = "https://fipm.example.org/fers/draft/already-promoted"
+    doc = _base_doc()
+    doc["inlineFers"] = [
+        {"id": promoted_id, "label": {"en": "Already promoted"}, "type": "identifier-service"}
+    ]
+    errors = validate_content(
+        doc,
+        settings=settings,
+        known_fer_ids={promoted_id},
+        known_fer_sources={promoted_id: "model"},
+    )
+    assert _find(errors, "inlineFers[0].id", "inline_fer_duplicates_catalogue") is None
+    assert errors == [], errors
+
+
+def test_no_answer_path_skips_hidden_questions(settings):
+    """Review finding 11: a hidden question is never shown to a respondent,
+    so `allowFreeText: false` with no `suggestedFerIds` must not block
+    publish for it."""
+    doc = _base_doc()
+    doc["sections"][0]["questions"][0]["allowFreeText"] = False
+    doc["sections"][0]["questions"][0]["suggestedFerIds"] = []
+    doc["sections"][0]["questions"][0]["hidden"] = True
+
+    errors_publish = validate_content(doc, publishing=True, settings=settings)
+    assert _find(errors_publish, "sections[0].questions[0]", "no_answer_path") is None
+
+
 def test_default_declaration_status_and_compact_declarations_validated(settings):
     doc = _base_doc()
     doc["defaultDeclarationStatus"] = "not-a-real-status"
