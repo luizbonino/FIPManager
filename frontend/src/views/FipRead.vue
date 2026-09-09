@@ -34,6 +34,18 @@
           <dd>{{ formatDate(doc.fip.createdAt) }}</dd>
           <dt>{{ $t('common.updated') }}</dt>
           <dd>{{ formatDate(doc.fip.updatedAt) }}</dd>
+          <template v-if="doc.fip.relatedDMPs.length > 0">
+            <dt>{{ $t('dmp.heading') }}</dt>
+            <dd>
+              <ul class="dmp-list">
+                <li v-for="(dmp, i) in doc.fip.relatedDMPs" :key="i">
+                  <a :href="dmp.url" target="_blank" rel="noopener">{{ dmpDisplayLabel(dmp) }}</a>
+                  <span v-if="dmp.system === 'FioDMP'" class="dmp-badge">{{ $t('dmp.fiodmp') }}</span>
+                  <span v-if="dmp.version" class="dmp-version">v{{ dmp.version }}</span>
+                </li>
+              </ul>
+            </dd>
+          </template>
         </dl>
         <p class="print-only fip-url-print">{{ doc.fip.url }}</p>
       </header>
@@ -62,6 +74,14 @@
                   <span class="declaration-label">{{ decl.fer?.label || decl.ferFreeText || decl.fer?.id }}</span>
                   <StatusBadge :status="decl.status" />
                   <span v-if="decl.note" class="declaration-note">{{ decl.note }}</span>
+                  <span v-if="decl.dmpEvidence" class="declaration-evidence">
+                    {{ $t('dmp.evidence') }}:
+                    <a :href="decl.dmpEvidence.dmpUrl" target="_blank" rel="noopener">
+                      {{ dmpEvidenceLabel(decl.dmpEvidence) }}
+                    </a>
+                    <template v-if="decl.dmpEvidence.section"> · {{ decl.dmpEvidence.section }}</template>
+                    <template v-if="decl.dmpEvidence.questionRef"> · {{ decl.dmpEvidence.questionRef }}</template>
+                  </span>
                 </li>
               </ul>
               <p v-if="answer.comment" class="question-comment">{{ answer.comment }}</p>
@@ -95,7 +115,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import ExportButtons from '@/components/ExportButtons.vue'
 import AttributionFooter from '@/components/AttributionFooter.vue'
 import '@/assets/print.css'
-import type { FipExportDoc } from '@/types/api'
+import type { FipExportDmpEvidence, FipExportDoc, RelatedDmp } from '@/types/api'
 
 // Spec 02 §4.3: replaces FipDetail.vue. Single data source is the export
 // document; the knowledge model is fetched only for AttributionFooter's
@@ -123,6 +143,29 @@ const sections = computed(() => {
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString()
+}
+
+// Spec 06 §1.3/§2.3: a linked plan shows its `dmpId` (FioDMP) or host+path
+// (any other system); a declaration's resolved evidence shows the same for
+// its own plan URL, plus section and question ref when stored.
+function dmpDisplayLabel(dmp: RelatedDmp): string {
+  if (dmp.dmpId) return dmp.dmpId
+  try {
+    const parsed = new URL(dmp.url)
+    return parsed.host + parsed.pathname
+  } catch {
+    return dmp.url
+  }
+}
+
+function dmpEvidenceLabel(evidence: FipExportDmpEvidence): string {
+  try {
+    const parsed = new URL(evidence.dmpUrl)
+    if (evidence.dmpSystem === 'FioDMP') return parsed.pathname.replace(/^\//, '')
+    return parsed.host + parsed.pathname
+  } catch {
+    return evidence.dmpUrl
+  }
 }
 
 function printPage() {
@@ -196,6 +239,30 @@ onMounted(load)
 
 .community-meta dd {
   margin: 0;
+}
+
+.dmp-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dmp-badge {
+  margin-left: 0.4rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-chip-text);
+  background-color: var(--color-chip-bg);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+.dmp-version {
+  margin-left: 0.4rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 .print-only {
@@ -286,6 +353,12 @@ onMounted(load)
 .declaration-note {
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
+}
+
+.declaration-evidence {
+  width: 100%;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 .question-comment {

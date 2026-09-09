@@ -12,21 +12,50 @@
         <QrCode :text="url" :size="160" />
         <p class="qr-hint">{{ $t('share.qrHint') }}</p>
       </div>
+      <div class="share-embed">
+        <p class="embed-label">{{ $t('share.embed') }}</p>
+        <div class="embed-row">
+          <textarea
+            readonly
+            rows="2"
+            class="embed-snippet"
+            :value="embedSnippet"
+            @click="selectEmbed"
+          ></textarea>
+          <button type="button" class="copy-btn" @click="copyEmbed">
+            {{ embedCopied ? $t('share.copied') : $t('share.copyEmbed') }}
+          </button>
+        </div>
+      </div>
     </div>
   </details>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import QrCode from './QrCode.vue'
 
-/** `<details>` labelled "Share" (spec 02 §2.4): the absolute FIP URL, copy button, QR. */
-const props = defineProps<{ url: string }>()
+/**
+ * `<details>` labelled "Share" (spec 02 §2.4): the absolute FIP URL, copy
+ * button, QR, and (spec 06 §3) an "Embed" item with the `<iframe>` snippet
+ * for `GET /fips/{id}/embed`.
+ */
+const props = defineProps<{ url: string; fipId: string }>()
 
 const copied = ref(false)
+const embedCopied = ref(false)
+
+const embedUrl = computed(() => `${location.origin}/fips/${props.fipId}/embed`)
+const embedSnippet = computed(
+  () => `<iframe src="${embedUrl.value}" width="100%" height="600" loading="lazy" title="FIP"></iframe>`
+)
 
 function selectAll(event: Event) {
   ;(event.target as HTMLInputElement).select()
+}
+
+function selectEmbed(event: Event) {
+  ;(event.target as HTMLTextAreaElement).select()
 }
 
 async function copy() {
@@ -40,6 +69,19 @@ async function copy() {
   copied.value = true
   setTimeout(() => {
     copied.value = false
+  }, 2000)
+}
+
+async function copyEmbed() {
+  try {
+    await navigator.clipboard.writeText(embedSnippet.value)
+  } catch {
+    const textarea = document.querySelector<HTMLTextAreaElement>('.embed-snippet')
+    textarea?.select()
+  }
+  embedCopied.value = true
+  setTimeout(() => {
+    embedCopied.value = false
   }, 2000)
 }
 </script>
@@ -105,5 +147,36 @@ async function copy() {
   margin: 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+}
+
+.share-embed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.embed-label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.embed-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.embed-snippet {
+  flex: 1;
+  min-width: 10rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-hover);
+  color: var(--color-text);
+  font-family: monospace;
+  font-size: var(--font-size-xs);
+  resize: vertical;
 }
 </style>

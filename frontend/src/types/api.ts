@@ -21,8 +21,16 @@ export type DeclarationStatus =
   | 'planned-replacement'
   | 'none'
 
+/**
+ * Stored/write shape (spec 06 §2.1): `dmpIndex` is the 0-based position of
+ * the plan in this FIP's `relatedDmps`, required whenever the object is
+ * present. The legacy `{url, questionRef}` shape (spec 01, never actually
+ * populated in v1) is a backend-only read concern (exporters/import) and is
+ * not modelled here — the editor never creates or edits it.
+ */
 export interface DmpEvidence {
-  url?: string | null
+  dmpIndex: number
+  section?: string | null
   questionRef?: string | null
 }
 
@@ -57,6 +65,8 @@ export interface RelatedDmp {
   url: string
   version?: string | null
   system?: string | null
+  /** Set server-side only when `system === 'FioDMP'` (spec 06 §1.1); a client-sent value is ignored. */
+  dmpId?: string | null
 }
 
 export interface QuestionnaireRef {
@@ -291,12 +301,27 @@ export interface FipExportFer {
   homepage: string | null
 }
 
+/**
+ * `dmpEvidence` resolved at export time (spec 06 §2.4): a consumer never
+ * needs the index, so `export.json` sends the plan's own URL/system/version
+ * alongside `section`/`questionRef`. Distinct from the stored `DmpEvidence`
+ * (index-based) that the editor reads and writes.
+ */
+export interface FipExportDmpEvidence {
+  dmpIndex: number
+  dmpUrl: string
+  dmpSystem: string
+  dmpVersion: string | null
+  section: string | null
+  questionRef: string | null
+}
+
 export interface FipExportDeclaration {
   fer: FipExportFer | null
   ferFreeText: string | null
   status: DeclarationStatus
   note: string | null
-  dmpEvidence: DmpEvidence | null
+  dmpEvidence: FipExportDmpEvidence | null
 }
 
 export interface FipExportAnswer {

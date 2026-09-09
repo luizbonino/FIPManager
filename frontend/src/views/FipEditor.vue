@@ -39,6 +39,19 @@
       </header>
 
       <div class="sections" @blur.capture="onFieldBlur">
+        <details class="section dmp-section" @toggle="onSectionToggle">
+          <summary>
+            <span class="section-title">{{ $t('dmp.heading') }}</span>
+          </summary>
+          <div class="section-body">
+            <DmpLinkList
+              :entries="store.fip.relatedDmps"
+              :read-only="store.readOnly"
+              @update="onDmpUpdate"
+            />
+          </div>
+        </details>
+
         <details
           v-for="section in km.content.sections"
           :key="section.id"
@@ -60,7 +73,7 @@
         </details>
       </div>
 
-      <ShareBox v-if="store.fip.visibility !== 'private'" :url="shareUrl" />
+      <ShareBox v-if="store.fip.visibility !== 'private'" :url="shareUrl" :fip-id="store.fip.id" />
       <ExportButtons
         :json-url="fipExportJsonUrl(store.fip.id)"
         :csv-url="fipExportCsvUrl(store.fip.id)"
@@ -92,7 +105,8 @@ import ShareBox from '@/components/ShareBox.vue'
 import ExportButtons from '@/components/ExportButtons.vue'
 import AttributionFooter from '@/components/AttributionFooter.vue'
 import VisibilitySelect from '@/components/VisibilitySelect.vue'
-import type { FerType, Visibility } from '@/types/api'
+import DmpLinkList from '@/components/DmpLinkList.vue'
+import type { FerType, RelatedDmp, Visibility } from '@/types/api'
 
 // Spec 02 §2.2/§2.3/§2.4: the participant + owner editor.
 const route = useRoute()
@@ -138,6 +152,10 @@ function ferTypeLabel(key: string | null): string | null {
   const entry = ferTypes.value[key]
   if (!entry) return key
   return resolveLang(entry.label, locale.value) ?? key
+}
+
+function onDmpUpdate(entries: RelatedDmp[]) {
+  store.setRelatedDmps(entries)
 }
 
 function onLocaleChanged(newLocale: string) {

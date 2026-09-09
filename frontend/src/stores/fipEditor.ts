@@ -11,10 +11,12 @@ import type {
   Answer,
   Community,
   Declaration,
+  DmpEvidence,
   FerOut,
   FipOut,
   FipPatchRequest,
   KnowledgeModelOut,
+  RelatedDmp,
   Visibility,
 } from '@/types/api'
 
@@ -115,6 +117,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     const payload: FipPatchRequest = {
       answers: current.answers,
       community: current.community ?? undefined,
+      relatedDmps: current.relatedDmps,
       language: current.language,
     }
     dirty.value = false
@@ -191,6 +194,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
       const body = JSON.stringify({
         answers: fip.value.answers,
         community: fip.value.community,
+        relatedDmps: fip.value.relatedDmps,
         language: fip.value.language,
       })
       // `sendBeacon` cannot carry the `X-Edit-Token` header, hence `fetch` with `keepalive`.
@@ -310,6 +314,28 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     markDirty()
   }
 
+  /**
+   * `DmpLinkList.vue`'s `update` event (spec 06 §1.2): replaces the whole
+   * `relatedDmps` list. The server's normalised list (casing, derived
+   * `system`/`dmpId`) replaces this optimistic value once the autosave
+   * response lands, via the usual `fip.value = updated` in `performSave`.
+   */
+  function setRelatedDmps(entries: RelatedDmp[]): void {
+    if (!fip.value) return
+    fip.value.relatedDmps = entries
+    markDirty()
+  }
+
+  /**
+   * `DeclarationEditor.vue`'s "Evidence in DMP" panel (spec 06 §2.3): a thin
+   * named wrapper so callers don't need to know evidence is just another
+   * `Declaration` field — internally routes through `setDeclaration`, which
+   * already marks dirty and autosaves.
+   */
+  function setDmpEvidence(questionId: string, index: number, evidence: DmpEvidence | null): void {
+    setDeclaration(questionId, index, { dmpEvidence: evidence })
+  }
+
   /** Switching the locale while `canEdit` also sets `fip.language` (spec 02 §2.3), so exports resolve correctly. */
   function setLanguage(language: string): void {
     if (!fip.value) return
@@ -362,6 +388,8 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     removeDeclaration,
     setComment,
     setCommunity,
+    setRelatedDmps,
+    setDmpEvidence,
     setLanguage,
     updateVisibility,
     claim,

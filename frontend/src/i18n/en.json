@@ -194,7 +194,30 @@
     "title": "Share",
     "copyLink": "Copy link",
     "copied": "Copied",
-    "qrHint": "Scan to open this FIP"
+    "qrHint": "Scan to open this FIP",
+    "embed": "Embed",
+    "copyEmbed": "Copy embed code"
+  },
+  "dmp": {
+    "heading": "Related data management plans",
+    "add": "Add a DMP link",
+    "url": "Plan URL",
+    "version": "Version",
+    "system": "System",
+    "fiodmp": "FioDMP",
+    "other": "Other",
+    "remove": "Remove",
+    "maxReached": "At most 10 plans per FIP.",
+    "urlInvalid": "Use a full https:// URL of a plan.",
+    "duplicate": "That plan is already linked.",
+    "none": "No plans linked.",
+    "evidence": "Evidence in DMP",
+    "evidencePlan": "Plan",
+    "evidenceSection": "Section",
+    "evidenceQuestion": "Question or field",
+    "evidenceHint": "Where in the plan is this answer written down?",
+    "sectionOther": "Other",
+    "prefill": "Prefill from this plan"
   },
   "visibility": {
     "label": "Who can see this FIP",
