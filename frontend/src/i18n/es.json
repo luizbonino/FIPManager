@@ -273,7 +273,11 @@
     "matrixSoon": "La matriz de comparación llega en la semana 3.",
     "hideChrome": "Modo proyector",
     "reconnecting": "Reconectando…",
-    "open": "Abierta"
+    "open": "Abierta",
+    "dangerZone": "Zona de peligro",
+    "delete": "Eliminar sesión",
+    "deleteConfirm": "¿Eliminar esta sesión? Los FIP anónimos creados en esta sesión se eliminarán de forma permanente. Los FIP guardados se conservarán, pero se desvincularán de la sesión.",
+    "deleted": "Sesión eliminada."
   },
   "fipRead": {
     "notShared": "Este FIP no existe o no está compartido.",
