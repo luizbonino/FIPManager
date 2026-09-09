@@ -1,0 +1,626 @@
+{
+  "a licenca ou condicao de uso ainda nao foi definida": {
+    "ferId": "skip"
+  },
+  "a vinculacao ocorre apenas por links manuais": {
+    "ferId": "skip"
+  },
+  "abcd": {
+    "ferId": "https://abcd.tdwg.org/"
+  },
+  "abcd / biocase": {
+    "ferId": "https://abcd.tdwg.org/"
+  },
+  "acesso apenas mediante solicitacao formal": {
+    "ferId": "skip"
+  },
+  "acesso controlado mediante termo/acordo": {
+    "ferId": "skip"
+  },
+  "acesso controlado por dac / dua / termo de uso": {
+    "ferId": "skip"
+  },
+  "acesso publico sem autenticacao": {
+    "ferId": "skip"
+  },
+  "agrovoc": {
+    "ferId": "https://agrovoc.fao.org/"
+  },
+  "ainda nao definido": {
+    "ferId": "skip",
+    "stale": true
+  },
+  "ainda nao e utilizado esquema formal": {
+    "ferId": "skip"
+  },
+  "ainda nao e utilizado modelo ou padrao formal": {
+    "ferId": "skip"
+  },
+  "ainda nao sao utilizados vocabularios controlados": {
+    "ferId": "skip"
+  },
+  "ambiente seguro / acesso remoto sem download": {
+    "ferId": "skip"
+  },
+  "ambiente seguro de analise": {
+    "ferId": "skip"
+  },
+  "ambiente seguro ou acesso remoto controlado": {
+    "ferId": "skip"
+  },
+  "apenas autoria e data sao registradas": {
+    "ferId": "skip"
+  },
+  "apenas formato proprietario": {
+    "ferId": "skip"
+  },
+  "apenas os principais metodos sao documentados": {
+    "ferId": "skip"
+  },
+  "apenas palavras-chave livres": {
+    "ferId": "skip"
+  },
+  "apenas texto nao estruturado": {
+    "ferId": "skip"
+  },
+  "api rest": {
+    "ferId": "skip"
+  },
+  "aprovacao por comite de acesso a dados": {
+    "ferId": "skip"
+  },
+  "aprovacao por comite ou instancia responsavel": {
+    "ferId": "skip"
+  },
+  "armazenamento em nuvem ou objetos": {
+    "ferId": "skip"
+  },
+  "autenticacao federada e/ou multifator": {
+    "ferId": "skip"
+  },
+  "backups, checksums e controle de versoes": {
+    "ferId": "skip"
+  },
+  "bam / cram para alinhamentos": {
+    "ferId": "https://samtools.github.io/hts-specs/CRAMv3.pdf"
+  },
+  "bioproject": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/"
+  },
+  "bioproject–biosample–experiment–run": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/"
+  },
+  "biosample / sra / ena accession": {
+    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
+  },
+  "brapi": {
+    "ferId": "https://brapi.org/"
+  },
+  "campos de autoria e contribuicao do datacite": {
+    "ferId": "https://schema.datacite.org/"
+  },
+  "catalogo institucional": {
+    "ferId": "skip"
+  },
+  "catalogo ou indice da area": {
+    "ferId": "skip"
+  },
+  "catalogo taxonomico reconhecido": {
+    "ferId": "https://www.catalogueoflife.org/"
+  },
+  "cc by 4.0": {
+    "ferId": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "cc by-nc 4.0": {
+    "ferId": "https://creativecommons.org/licenses/by-nc/4.0/"
+  },
+  "cc0 1.0": {
+    "ferId": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "chave de api": {
+    "ferId": "skip"
+  },
+  "chebi": {
+    "ferId": "https://www.ebi.ac.uk/chebi/"
+  },
+  "chebi / hmdb": {
+    "ferId": "https://hmdb.ca/"
+  },
+  "checksums e relacao entre entradas e saidas": {
+    "ferId": "skip"
+  },
+  "conta do repositorio": {
+    "ferId": "skip"
+  },
+  "conta do repositorio / institucional": {
+    "ferId": "skip"
+  },
+  "conta do repositorio ou institucional": {
+    "ferId": "skip"
+  },
+  "conta institucional ou autenticacao federada": {
+    "ferId": "skip"
+  },
+  "crop ontology": {
+    "ferId": "https://www.cropontology.org/"
+  },
+  "csv / tsv": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc4180"
+  },
+  "csv tabular com dicionario de dados": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc4180"
+  },
+  "csv/tsv acompanhado de esquema": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc4180"
+  },
+  "darwin core": {
+    "ferId": "https://dwc.tdwg.org/"
+  },
+  "darwin core / dwc-a": {
+    "ferId": "https://dwc.tdwg.org/"
+  },
+  "darwin core archive": {
+    "ferId": "https://dwc.tdwg.org/text/"
+  },
+  "darwin core terms": {
+    "ferId": "https://dwc.tdwg.org/"
+  },
+  "darwin core terms / tdwg vocabularies": {
+    "ferId": "https://dwc.tdwg.org/"
+  },
+  "data use ontology": {
+    "ferId": "https://github.com/EBISPOT/DUO"
+  },
+  "datacite": {
+    "ferId": "https://schema.datacite.org/"
+  },
+  "datacite / bioschemas": {
+    "ferId": "https://bioschemas.org/"
+  },
+  "datacite commons": {
+    "ferId": "https://commons.datacite.org/"
+  },
+  "datacite commons / google dataset search": {
+    "ferId": "https://commons.datacite.org/"
+  },
+  "datacite commons ou google dataset search": {
+    "ferId": "https://commons.datacite.org/"
+  },
+  "datacite metadata schema": {
+    "ferId": "https://schema.datacite.org/"
+  },
+  "dataverse ou zenodo": {
+    "ferId": "https://dataverse.org/"
+  },
+  "ddi": {
+    "ferId": "https://ddialliance.org/"
+  },
+  "ddi para microdados": {
+    "ferId": "https://ddialliance.org/"
+  },
+  "ddi para questionarios": {
+    "ferId": "https://ddialliance.org/"
+  },
+  "decs / mesh": {
+    "ferId": "https://decs.bvsalud.org/"
+  },
+  "dicionario de dados, metodos e protocolos": {
+    "ferId": "skip"
+  },
+  "doi": {
+    "ferId": "https://www.doi.org/"
+  },
+  "doi do conjunto de dados": {
+    "ferId": "https://www.doi.org/"
+  },
+  "dublin core": {
+    "ferId": "https://purl.org/dc/terms/"
+  },
+  "dwc event para amostragem": {
+    "ferId": "https://dwc.tdwg.org/"
+  },
+  "ecological metadata language": {
+    "ferId": "https://eml.ecoinformatics.org/"
+  },
+  "ega / dbgap": {
+    "ferId": "https://ega-archive.org/"
+  },
+  "ega / dbgap accession": {
+    "ferId": "https://ega-archive.org/"
+  },
+  "eml": {
+    "ferId": "https://eml.ecoinformatics.org/"
+  },
+  "environment ontology": {
+    "ferId": "https://obofoundry.org/ontology/envo"
+  },
+  "envo": {
+    "ferId": "https://obofoundry.org/ontology/envo"
+  },
+  "esquema do repositorio omico utilizado": {
+    "ferId": "skip"
+  },
+  "esquema proprio com dicionario de dados": {
+    "ferId": "skip"
+  },
+  "existem apenas rotinas de backup": {
+    "ferId": "skip"
+  },
+  "fair data point": {
+    "ferId": "https://www.fairdatapoint.org/"
+  },
+  "fasta / fastq para sequencias": {
+    "ferId": "https://en.wikipedia.org/wiki/FASTQ_format"
+  },
+  "fastq / bam / cram": {
+    "ferId": "https://en.wikipedia.org/wiki/FASTQ_format"
+  },
+  "formato proprietario acompanhado de exportacao aberta": {
+    "ferId": "skip"
+  },
+  "formato proprietario acompanhado de formato aberto": {
+    "ferId": "skip"
+  },
+  "ftp/sftp": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc959"
+  },
+  "gbif backbone / catalogue of life": {
+    "ferId": "https://www.catalogueoflife.org/"
+  },
+  "gbif vocabularies": {
+    "ferId": "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c"
+  },
+  "gene ontology / sequence ontology": {
+    "ferId": "https://geneontology.org/"
+  },
+  "geo / biostudies": {
+    "ferId": "https://www.ebi.ac.uk/biostudies/"
+  },
+  "geo accession": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/geo/"
+  },
+  "geojson": {
+    "ferId": "https://geojson.org/"
+  },
+  "geojson / geopackage": {
+    "ferId": "https://geojson.org/"
+  },
+  "geojson / padroes geoespaciais": {
+    "ferId": "https://geojson.org/"
+  },
+  "geopackage / geojson": {
+    "ferId": "https://www.geopackage.org/"
+  },
+  "geotiff": {
+    "ferId": "https://www.ogc.org/standard/geotiff/"
+  },
+  "git / controle de versoes": {
+    "ferId": "https://git-scm.com/"
+  },
+  "git ou outro controle de versoes": {
+    "ferId": "https://git-scm.com/"
+  },
+  "git ou sistema equivalente": {
+    "ferId": "https://git-scm.com/"
+  },
+  "google dataset search": {
+    "ferId": "https://datasetsearch.research.google.com/"
+  },
+  "h5ad / anndata": {
+    "ferId": "https://anndata.readthedocs.io/"
+  },
+  "h5ad para celula unica": {
+    "ferId": "https://anndata.readthedocs.io/"
+  },
+  "handle ou ark": {
+    "ferId": "https://arks.org/"
+  },
+  "hgnc / ncbi gene / ensembl": {
+    "ferId": "https://www.ensembl.org/"
+  },
+  "historico de versoes e datas de atualizacao": {
+    "ferId": "skip"
+  },
+  "hl7 fhir": {
+    "ferId": "https://www.hl7.org/fhir/"
+  },
+  "hpo / mondo": {
+    "ferId": "https://hpo.jax.org/"
+  },
+  "https": {
+    "ferId": "https://www.rfc-editor.org/rfc/rfc9110"
+  },
+  "humboldt extension": {
+    "ferId": "https://eco.tdwg.org/"
+  },
+  "icd-11": {
+    "ferId": "https://icd.who.int/en"
+  },
+  "icnp / snomed ct": {
+    "ferId": "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp"
+  },
+  "icnp integrada ao snomed ct": {
+    "ferId": "https://www.icn.ch/how-we-do-it/projects/ehealth-icnp"
+  },
+  "identificador institucional persistente": {
+    "ferId": "skip"
+  },
+  "identificador persistente do repositorio ou infraestrutura tematica": {
+    "ferId": "skip"
+  },
+  "identificador/accession do repositorio tematico": {
+    "ferId": "skip"
+  },
+  "interface web sem api": {
+    "ferId": "skip"
+  },
+  "isa": {
+    "ferId": "https://isa-tools.org/format/specification.html"
+  },
+  "isa-tab / isa-json": {
+    "ferId": "https://isa-tools.org/format/specification.html"
+  },
+  "isa-tab / isa-json para integracao multiomica": {
+    "ferId": "https://isa-tools.org/format/specification.html"
+  },
+  "iso 19115": {
+    "ferId": "https://www.iso.org/standard/53798.html"
+  },
+  "json": {
+    "ferId": "https://www.json.org/json-en.html"
+  },
+  "json / fhir": {
+    "ferId": "https://www.hl7.org/fhir/"
+  },
+  "json / rdf": {
+    "ferId": "https://www.w3.org/TR/json-ld11/"
+  },
+  "json schema": {
+    "ferId": "https://json-schema.org/"
+  },
+  "json-ld / rdf": {
+    "ferId": "https://www.w3.org/TR/json-ld11/"
+  },
+  "json-ld ou rdf": {
+    "ferId": "https://www.w3.org/TR/json-ld11/"
+  },
+  "licenca institucional": {
+    "ferId": "skip"
+  },
+  "licenca ou termos adotados pelo repositorio": {
+    "ferId": "skip"
+  },
+  "licenca ou termos do repositorio": {
+    "ferId": "skip"
+  },
+  "loinc": {
+    "ferId": "https://loinc.org/"
+  },
+  "manifesto, tabela de relacionamento ou dicionario de dados": {
+    "ferId": "skip"
+  },
+  "metabolights / metabolomics workbench": {
+    "ferId": "https://www.ebi.ac.uk/metabolights/"
+  },
+  "metadados publicos sem licenca explicitamente declarada": {
+    "ferId": "skip"
+  },
+  "miame / minseqe / miape": {
+    "ferId": "https://www.fged.org/projects/miame"
+  },
+  "miappe": {
+    "ferId": "https://www.miappe.org/"
+  },
+  "migracao de formatos": {
+    "ferId": "skip"
+  },
+  "mixs": {
+    "ferId": "https://genomicsstandardsconsortium.github.io/mixs/"
+  },
+  "mzml / mztab": {
+    "ferId": "https://www.psidev.info/mzml"
+  },
+  "mzml / mztab para proteomica ou metabolomica": {
+    "ferId": "https://www.psidev.info/mzml"
+  },
+  "nao se aplica": {
+    "ferId": "skip",
+    "stale": true
+  },
+  "ncbi / ena apis": {
+    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
+  },
+  "ncbi / geo / ena": {
+    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
+  },
+  "ncbi taxonomy": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/taxonomy"
+  },
+  "netcdf": {
+    "ferId": "https://www.unidata.ucar.edu/software/netcdf/"
+  },
+  "netcdf-cf para series ambientais": {
+    "ferId": "https://cfconventions.org/"
+  },
+  "o registro detalhado ainda esta em desenvolvimento": {
+    "ferId": "skip"
+  },
+  "oai-pmh": {
+    "ferId": "https://www.openarchives.org/pmh/"
+  },
+  "oauth 2.0 ou openid connect": {
+    "ferId": "https://openid.net/specs/openid-connect-core-1_0.html"
+  },
+  "obi / efo": {
+    "ferId": "https://obofoundry.org/ontology/obi"
+  },
+  "omicsdi": {
+    "ferId": "https://www.omicsdi.org/"
+  },
+  "omop common data model": {
+    "ferId": "https://ohdsi.github.io/CommonDataModel/"
+  },
+  "orcid e ror": {
+    "ferId": "https://orcid.org/"
+  },
+  "os dados ainda nao estao acessiveis externamente": {
+    "ferId": "skip"
+  },
+  "outro": {
+    "ferId": "skip",
+    "stale": true
+  },
+  "pagina de destino associada ao doi ou pid": {
+    "ferId": "https://schema.datacite.org/meta/kernel-4.6/"
+  },
+  "pagina doi / datacite relatedidentifier": {
+    "ferId": "https://schema.datacite.org/meta/kernel-4.6/"
+  },
+  "parquet": {
+    "ferId": "https://parquet.apache.org/"
+  },
+  "perfil proprio documentado": {
+    "ferId": "skip"
+  },
+  "plano de gestao de dados ou politica institucional": {
+    "ferId": "skip"
+  },
+  "plano de recuperacao de desastres": {
+    "ferId": "skip"
+  },
+  "plant ontology": {
+    "ferId": "https://browser.planteome.org/amigo"
+  },
+  "politica do repositorio": {
+    "ferId": "skip"
+  },
+  "pride / metabolights": {
+    "ferId": "https://www.ebi.ac.uk/metabolights/"
+  },
+  "pride / metabolights accession": {
+    "ferId": "https://www.ebi.ac.uk/metabolights/"
+  },
+  "pride / proteomexchange": {
+    "ferId": "http://www.proteomexchange.org/"
+  },
+  "protocolo experimental e metricas de qualidade": {
+    "ferId": "skip"
+  },
+  "rdf / grafo de conhecimento": {
+    "ferId": "https://www.w3.org/TR/rdf11-concepts/"
+  },
+  "rdf / json-ld": {
+    "ferId": "https://www.w3.org/TR/json-ld11/"
+  },
+  "referencias cruzadas do repositorio": {
+    "ferId": "skip"
+  },
+  "referencias cruzadas entre repositorios": {
+    "ferId": "skip"
+  },
+  "relacoes bioproject–biosample–experimento/execucao": {
+    "ferId": "https://www.ncbi.nlm.nih.gov/bioproject/"
+  },
+  "relacoes isa entre investigacao, estudo, ensaio, amostra e arquivo": {
+    "ferId": "https://isa-tools.org/format/specification.html"
+  },
+  "relacoes relatedidentifier do datacite": {
+    "ferId": "https://schema.datacite.org/meta/kernel-4.6/"
+  },
+  "repositorio institucional": {
+    "ferId": "skip"
+  },
+  "repositorio tematico da area": {
+    "ferId": "skip"
+  },
+  "representacao especifica da area": {
+    "ferId": "skip"
+  },
+  "responsaveis definidos pela preservacao": {
+    "ferId": "skip"
+  },
+  "reutilizacao nao permitida": {
+    "ferId": "skip"
+  },
+  "ro-crate": {
+    "ferId": "https://www.researchobject.org/ro-crate/"
+  },
+  "ro-crate / rdf / json-ld": {
+    "ferId": "https://www.researchobject.org/ro-crate/"
+  },
+  "ro-crate, rdf ou json-ld": {
+    "ferId": "https://www.researchobject.org/ro-crate/"
+  },
+  "sistema internacional de unidades": {
+    "ferId": "https://www.bipm.org/en/measurement-units"
+  },
+  "sistema internacional de unidades / ucum": {
+    "ferId": "https://ucum.org/"
+  },
+  "snomed ct": {
+    "ferId": "https://www.snomed.org/"
+  },
+  "sparql": {
+    "ferId": "https://www.w3.org/TR/sparql11-protocol/"
+  },
+  "sra / ena / ddbj": {
+    "ferId": "https://www.ebi.ac.uk/ena/browser/home"
+  },
+  "sra toolkit / ferramentas ena": {
+    "ferId": "https://github.com/ncbi/sra-tools"
+  },
+  "termo de uso / data use agreement": {
+    "ferId": "skip"
+  },
+  "termo de uso / dua / consentimento compativel": {
+    "ferId": "skip"
+  },
+  "termos do repositorio tematico": {
+    "ferId": "skip"
+  },
+  "uniprot": {
+    "ferId": "https://www.uniprot.org/"
+  },
+  "uso apenas em ambiente seguro": {
+    "ferId": "skip"
+  },
+  "uso compativel com consentimento e aprovacao etica": {
+    "ferId": "skip"
+  },
+  "uso limitado a finalidade aprovada": {
+    "ferId": "skip"
+  },
+  "vcf / bcf / gvcf": {
+    "ferId": "https://samtools.github.io/hts-specs/VCFv4.3.pdf"
+  },
+  "vcf / bcf para variantes": {
+    "ferId": "https://samtools.github.io/hts-specs/VCFv4.3.pdf"
+  },
+  "versoes de software, genoma de referencia e parametros": {
+    "ferId": "skip"
+  },
+  "versoes de software, parametros e configuracoes": {
+    "ferId": "skip"
+  },
+  "vocabulario institucional documentado": {
+    "ferId": "skip"
+  },
+  "vocabulario proprio documentado": {
+    "ferId": "skip"
+  },
+  "w3c prov / prov-o": {
+    "ferId": "https://www.w3.org/TR/prov-o/"
+  },
+  "w3c prov / ro-crate": {
+    "ferId": "https://www.researchobject.org/ro-crate/"
+  },
+  "workflow, scripts ou notebooks": {
+    "ferId": "skip"
+  },
+  "worms": {
+    "ferId": "https://www.marinespecies.org/"
+  },
+  "xml": {
+    "ferId": "https://www.w3.org/TR/xml/"
+  }
+}
