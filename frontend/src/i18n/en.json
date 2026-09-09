@@ -157,7 +157,8 @@
     "continueFip": "Continue your FIP",
     "invalidCode": "We don't know that join code.",
     "closed": "This session is closed. You can still read the FIPs you created.",
-    "questionnaireUnavailable": "This session's questionnaire is no longer available. Ask the facilitator to check its visibility."
+    "questionnaireUnavailable": "This session's questionnaire is no longer available. Ask the facilitator to check its visibility.",
+    "chooseArea": "Which area?"
   },
   "community": {
     "heading": "Your community",
@@ -193,7 +194,13 @@
     "notAnswered": "Not answered",
     "successor": "Replaced by",
     "successorHint": "Name the resource that will replace it.",
-    "facilitatorBanner": "You are editing as the facilitator."
+    "facilitatorBanner": "You are editing as the facilitator.",
+    "suggestedOptions": "Suggested options",
+    "more": "More",
+    "notApplicable": "Not applicable",
+    "notApplicableWhy": "Why doesn't this apply? (optional)",
+    "notApplicableConfirm": "Mark this question as not applicable? Its resources will be removed.",
+    "dropAnnotatedDeclaration": "Remove this resource? It has a note, evidence, a successor or a non-default status that will be lost."
   },
   "save": {
     "saved": "Saved {time}",
@@ -278,7 +285,11 @@
     "dangerZone": "Danger zone",
     "delete": "Delete session",
     "deleteConfirm": "Delete this session? Anonymous FIPs created in this session will be permanently deleted. Claimed FIPs will be kept, but detached from the session.",
-    "deleted": "Session deleted."
+    "deleted": "Session deleted.",
+    "addQuestionnaire": "Add another questionnaire",
+    "removeQuestionnaire": "Remove",
+    "areaLabel": "Area label",
+    "areaLabelPlaceholder": "e.g. Public health"
   },
   "fipRead": {
     "notShared": "This FIP does not exist or is not shared.",
@@ -313,7 +324,10 @@
     "print": "Print (A3 landscape)",
     "showNote": "Show reason",
     "otherGroup": "Other",
-    "successor": "→ replaced by {label}"
+    "successor": "→ replaced by {label}",
+    "notApplicableShort": "N/A",
+    "notApplicableFull": "Not applicable",
+    "absent": "Not part of this questionnaire"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -388,7 +402,18 @@
     "reload": "Reload",
     "idTaken": "That identifier is already in use.",
     "importFailed": "This file is not a valid knowledge model.",
-    "noModels": "No models yet."
+    "noModels": "No models yet.",
+    "suggestedOptions": "Suggested options",
+    "removeSuggested": "Remove",
+    "showAllTypes": "Show all types",
+    "addInlineFer": "Add a resource not yet in the catalogue",
+    "inlineFerId": "Identifier (URL)",
+    "inlineFerLabel": "Label",
+    "inlineFerHomepage": "Homepage (optional)",
+    "allowFreeText": "Allow participants to use their own wording",
+    "defaultDeclarationStatus": "Default status for quick-pick resources",
+    "compactDeclarations": "Compact declarations (hide status behind \"More\")",
+    "unusedInlineFers": "Unused resources (not suggested by any question)"
   },
   "admin": {
     "title": "Administration",

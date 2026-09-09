@@ -77,6 +77,40 @@
           @update:model-value="onVisibilityChange"
         />
         <p v-if="visibilityError" class="visibility-error">{{ visibilityError }}</p>
+
+        <div class="declaration-defaults-block">
+          <label class="field-group">
+            <span class="field-label">{{ $t('km.defaultDeclarationStatus') }}</span>
+            <select
+              :value="store.content.defaultDeclarationStatus ?? 'current'"
+              :disabled="store.readOnly"
+              @change="onDefaultStatusChange"
+            >
+              <option v-for="s in DECLARATION_STATUSES" :key="s" :value="s">{{ $t(`declarationStatus.${statusKey(s)}`) }}</option>
+            </select>
+          </label>
+          <label class="checkbox-field">
+            <input
+              type="checkbox"
+              :checked="store.content.compactDeclarations === true"
+              :disabled="store.readOnly"
+              @change="onCompactDeclarationsChange"
+            />
+            <span>{{ $t('km.compactDeclarations') }}</span>
+          </label>
+        </div>
+
+        <div v-if="unusedInlineFersList.length > 0" class="unused-inline-fers">
+          <span class="field-label">{{ $t('km.unusedInlineFers') }}</span>
+          <ul>
+            <li v-for="fer in unusedInlineFersList" :key="fer.id">
+              <span>{{ resolveLang(fer.label, locale) ?? fer.id }}</span>
+              <button type="button" class="ghost-btn danger" :disabled="store.readOnly" @click="onRemoveInlineFer(fer.id)">
+                {{ $t('common.delete') }}
+              </button>
+            </li>
+          </ul>
+        </div>
       </section>
 
       <KmSectionList :sections="store.content.sections" :fer-type-options="ferTypes" :read-only="store.readOnly" />
@@ -121,7 +155,7 @@ import { getFerTypes } from '@/api/ferTypes'
 import { kmExportJsonUrl } from '@/api/knowledgeModels'
 import { ApiResponseError } from '@/api/client'
 import { resolveLang } from '@/lib/lang'
-import { setText } from '@/lib/kmContent'
+import { DECLARATION_STATUSES, removeInlineFer, setCompactDeclarations, setDefaultDeclarationStatus, setText, unusedInlineFers } from '@/lib/kmContent'
 import SaveIndicator from '@/components/SaveIndicator.vue'
 import TranslationMeter from '@/components/TranslationMeter.vue'
 import VisibilitySelect from '@/components/VisibilitySelect.vue'
@@ -129,7 +163,7 @@ import KmSectionList from '@/components/KmSectionList.vue'
 import KmLangTabs from '@/components/KmLangTabs.vue'
 import KmValidationList from '@/components/KmValidationList.vue'
 import KmPublishDialog from '@/components/KmPublishDialog.vue'
-import type { FerType, Visibility } from '@/types/api'
+import type { DeclarationStatus, FerType, Visibility } from '@/types/api'
 
 /**
  * Desktop-first, phone-safe (spec 04 §5 A1: single column, no drag). Sticky
@@ -166,6 +200,33 @@ function onValidate() {
 
 async function onReload() {
   await store.reload()
+}
+
+const STATUS_KEYS: Record<DeclarationStatus, string> = {
+  current: 'current',
+  planned: 'planned',
+  'planned-development': 'plannedDevelopment',
+  'planned-replacement': 'plannedReplacement',
+  none: 'none',
+}
+function statusKey(status: DeclarationStatus): string {
+  return STATUS_KEYS[status]
+}
+
+const unusedInlineFersList = computed(() => (store.content ? unusedInlineFers(store.content) : []))
+
+function onDefaultStatusChange(event: Event) {
+  const value = (event.target as HTMLSelectElement).value as DeclarationStatus
+  store.apply((c) => setDefaultDeclarationStatus(c, value))
+}
+
+function onCompactDeclarationsChange(event: Event) {
+  const value = (event.target as HTMLInputElement).checked
+  store.apply((c) => setCompactDeclarations(c, value))
+}
+
+function onRemoveInlineFer(ferId: string) {
+  store.apply((c) => removeInlineFer(c, ferId))
 }
 
 async function onVisibilityChange(visibility: Visibility) {
@@ -366,6 +427,77 @@ onBeforeUnmount(() => {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
+}
+
+.declaration-defaults-block {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.declaration-defaults-block select {
+  min-height: 44px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-size: var(--font-size-sm);
+}
+
+.unused-inline-fers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.unused-inline-fers ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.unused-inline-fers li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.ghost-btn {
+  min-height: 44px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.ghost-btn.danger {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.ghost-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .footer-actions {

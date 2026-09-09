@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { ApiResponseError } from '@/api/client'
 import { getFerTypes } from '@/api/ferTypes'
+import { listFers } from '@/api/fers'
 import {
   deleteKnowledgeModel,
   forkKnowledgeModel,
@@ -20,7 +21,7 @@ import {
   visibleQuestionCount as computeVisibleQuestionCount,
   type ContentError,
 } from '@/lib/kmContent'
-import type { KnowledgeModelContent, KnowledgeModelOut } from '@/types/api'
+import type { FerOut, KnowledgeModelContent, KnowledgeModelOut } from '@/types/api'
 
 /** Idle debounce before an autosave `PUT .../content` (spec 04 §5: "an 2 s idle debounce"). */
 export const AUTOSAVE_DEBOUNCE_MS = 2000
@@ -33,6 +34,14 @@ export const useKmEditorStore = defineStore('kmEditor', () => {
   const content = ref<KnowledgeModelContent | null>(null)
   const etag = ref<string | null>(null)
   const ferTypeKeys = ref<string[]>([])
+  /**
+   * spec 08 §1.2 rule 10/§1.4: the "picker's cached catalogue map" —
+   * fetched once per `load()` like `fipEditor`'s own FER cache, used to
+   * resolve suggested-FER labels before promotion and to supply
+   * `validateContent`'s `knownFerIds`.
+   */
+  const fers = ref<Record<string, FerOut>>({})
+  const knownFerIds = computed(() => new Set(Object.keys(fers.value)))
 
   const dirty = ref(false)
   const saving = ref(false)
@@ -124,16 +133,19 @@ export const useKmEditorStore = defineStore('kmEditor', () => {
     model.value = null
     content.value = null
     etag.value = null
+    fers.value = {}
 
     try {
-      const [loaded, ferTypesResult] = await Promise.all([
+      const [loaded, ferTypesResult, fersResult] = await Promise.all([
         getKnowledgeModel(id, version),
         getFerTypes().catch(() => ({ items: [], total: 0 })),
+        listFers({ limit: 500 }).catch(() => ({ items: [], total: 0 })),
       ])
       model.value = loaded
       content.value = loaded.content
       etag.value = loaded.etag ?? null
       ferTypeKeys.value = ferTypesResult.items.map((f) => f.key)
+      fers.value = Object.fromEntries(fersResult.items.map((f) => [f.id, f]))
       if (loaded.status === 'published') readOnlyReason.value = 'published'
     } catch (err) {
       if (err instanceof ApiResponseError && err.status === 404) {
@@ -178,6 +190,11 @@ export const useKmEditorStore = defineStore('kmEditor', () => {
       sections: content.value.sections,
       title: content.value.title,
       description: content.value.description,
+      // spec 08 §1.4: no dedicated endpoint — these three ride along on the
+      // same whole-document PUT as everything else.
+      inlineFers: content.value.inlineFers,
+      defaultDeclarationStatus: content.value.defaultDeclarationStatus,
+      compactDeclarations: content.value.compactDeclarations,
     }
     const sentEtag = etag.value
     dirty.value = false
@@ -219,9 +236,13 @@ export const useKmEditorStore = defineStore('kmEditor', () => {
     await save()
   }
 
+  /** `publishing: true` also runs rule 13 (`no_answer_path`) — the manual "Check model" button uses it too, matching what Publish itself will enforce. */
   function validate(): ContentError[] {
     if (!content.value) return []
-    errors.value = runValidateContent(content.value, ferTypeKeys.value)
+    errors.value = runValidateContent(content.value, ferTypeKeys.value, {
+      knownFerIds: knownFerIds.value,
+      publishing: true,
+    })
     return errors.value
   }
 
@@ -263,6 +284,8 @@ export const useKmEditorStore = defineStore('kmEditor', () => {
     model,
     content,
     etag,
+    fers,
+    knownFerIds,
     dirty,
     saving,
     lastSavedAt,

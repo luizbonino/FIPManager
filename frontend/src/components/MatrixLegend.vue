@@ -10,6 +10,14 @@
         <span class="swatch status-unanswered" aria-hidden="true" />
         {{ $t('matrix.unanswered') }}
       </li>
+      <li class="legend-item">
+        <span class="swatch status-not-applicable" aria-hidden="true" />
+        {{ $t('matrix.notApplicableFull') }}
+      </li>
+      <li class="legend-item">
+        <span class="swatch status-absent" aria-hidden="true" />
+        {{ $t('matrix.absent') }}
+      </li>
     </ul>
     <ul class="legend-scopes">
       <li class="legend-item"><span class="scope-badge">{{ $t('matrix.scopeMetadata') }}</span></li>
@@ -90,6 +98,11 @@ function statusKey(status: DeclarationStatus): string {
 .swatch.status-unanswered {
   background-color: #f3f4f6;
   border: 1px dashed #9ca3af;
+}
+.swatch.status-not-applicable { background-color: var(--color-status-not-applicable); }
+.swatch.status-absent {
+  background-image: repeating-linear-gradient(45deg, #e5e7eb, #e5e7eb 3px, #f3f4f6 3px, #f3f4f6 6px);
+  border: 1px solid #9ca3af;
 }
 
 .scope-badge {

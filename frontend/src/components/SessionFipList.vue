@@ -9,9 +9,10 @@
       <li v-for="fip in sorted" :key="fip.id" class="fip-row">
         <div class="fip-row-main">
           <span class="fip-name">{{ displayName(fip) }}</span>
+          <span v-if="areaLabelOf(fip)" class="area-chip">{{ areaLabelOf(fip) }}</span>
           <span class="visibility-chip">{{ $t(`visibility.${fip.visibility}`) }}</span>
         </div>
-        <ProgressBar :answered="answeredCount(fip.answers)" :total="21" />
+        <ProgressBar :answered="answeredCount(fip.answers)" :total="totalFor(fip)" />
         <span class="updated">{{ $t('sessionAdmin.lastUpdate') }}: {{ relativeTime(fip.updatedAt) }}</span>
         <span class="row-links">
           <router-link :to="`/fips/${fip.id}`" class="view-link">{{ $t('common.view') }}</router-link>
@@ -23,18 +24,23 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { answeredCount } from '@/lib/progress'
+import { getKnowledgeModel } from '@/api/knowledgeModels'
+import { resolveLang } from '@/lib/lang'
+import { visibleQuestionCount, TOTAL_QUESTIONS, answeredCount } from '@/lib/progress'
 import ProgressBar from './ProgressBar.vue'
 import type { FipOut } from '@/types/api'
 
 const { locale } = useI18n()
 
 /**
- * `GET /api/sessions/{id}/fips` rendering (spec 02 §4.2): display name,
- * `answered / 21` bar, `updatedAt` as relative time, visibility, View link;
- * sorted by `createdAt`.
+ * `GET /api/sessions/{id}/fips` rendering (spec 02 §4.2, extended by spec 08
+ * §3.2): display name, an area-label chip (multi-ref sessions only), a
+ * per-FIP `answered / N` bar — `N` is that FIP's own model's visible
+ * question count, fetched once per distinct `id@version` and cached, so a
+ * multi-questionnaire session doesn't show every FIP against a hardcoded 21
+ * — `updatedAt` as relative time, visibility, View link; sorted by `createdAt`.
  */
 const props = defineProps<{ fips: FipOut[]; reconnecting?: boolean; canOpen?: boolean }>()
 
@@ -43,6 +49,46 @@ const sorted = computed(() => [...props.fips].sort((a, b) => a.createdAt.localeC
 function displayName(fip: FipOut): string {
   return fip.community?.name || fip.id
 }
+
+function areaLabelOf(fip: FipOut): string | null {
+  return fip.areaLabel ? resolveLang(fip.areaLabel, locale.value) : null
+}
+
+// refKey -> visible question count, fetched lazily and kept for the
+// component's lifetime — a session's questionnaire refs don't change under
+// a running list.
+const questionCounts = ref<Record<string, number>>({})
+const pendingRefKeys = new Set<string>()
+
+function refKeyOf(fip: FipOut): string {
+  return `${fip.questionnaireId}@${fip.questionnaireVersion}`
+}
+
+function totalFor(fip: FipOut): number {
+  return questionCounts.value[refKeyOf(fip)] ?? TOTAL_QUESTIONS
+}
+
+async function ensureQuestionCount(fip: FipOut): Promise<void> {
+  const key = refKeyOf(fip)
+  if (key in questionCounts.value || pendingRefKeys.has(key)) return
+  pendingRefKeys.add(key)
+  try {
+    const km = await getKnowledgeModel(fip.questionnaireId, fip.questionnaireVersion)
+    questionCounts.value = { ...questionCounts.value, [key]: visibleQuestionCount(km) }
+  } catch {
+    // Leave it out of the cache — `totalFor` falls back to TOTAL_QUESTIONS.
+  } finally {
+    pendingRefKeys.delete(key)
+  }
+}
+
+watch(
+  () => props.fips,
+  (fips) => {
+    for (const fip of fips) void ensureQuestionCount(fip)
+  },
+  { immediate: true }
+)
 
 // `Intl.RelativeTimeFormat` covers localisation natively for en/pt-PT/pt-BR
 // (spec 02 §4.2's "relative time"), so no extra i18n strings are needed.
@@ -113,6 +159,14 @@ function relativeTime(iso: string): string {
   font-size: var(--font-size-xs);
   color: var(--color-chip-text);
   background-color: var(--color-chip-bg);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+}
+
+.area-chip {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary-text);
+  background-color: var(--color-primary);
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
 }

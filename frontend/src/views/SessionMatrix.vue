@@ -60,7 +60,7 @@ import { sessionExportTtlUrl } from '@/api/sessions'
 import { getKnowledgeModel } from '@/api/knowledgeModels'
 import { listFers } from '@/api/fers'
 import { getFerTypes } from '@/api/ferTypes'
-import { applyMatrixOptions, buildMatrix, type MatrixOptions } from '@/lib/matrix'
+import { applyMatrixOptions, buildMatrix, refKey, type MatrixRef, type MatrixOptions } from '@/lib/matrix'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import MatrixLegend from '@/components/MatrixLegend.vue'
 import MatrixView from '@/components/MatrixView.vue'
@@ -81,7 +81,8 @@ const store = useSessionStore()
 
 const loading = ref(true)
 const notFound = ref(false)
-const km = ref<KnowledgeModelOut | null>(null)
+const kms = ref<Map<string, KnowledgeModelOut>>(new Map())
+const refs = ref<MatrixRef[]>([])
 const fers = ref<Map<string, FerOut>>(new Map())
 const ferTypes = ref<Map<string, FerType>>(new Map())
 
@@ -124,8 +125,8 @@ const session = computed(() => store.session)
 // Re-derived whenever the poll refreshes `store.fips` or the locale
 // switches — no refetch either way (spec 03 §1.4).
 const rawMatrix = computed(() => {
-  if (!km.value) return null
-  return buildMatrix(store.fips, km.value, fers.value, ferTypes.value, locale.value)
+  if (kms.value.size === 0 || refs.value.length === 0) return null
+  return buildMatrix(store.fips, kms.value, fers.value, ferTypes.value, locale.value, refs.value)
 })
 
 const matrixOptions = computed<MatrixOptions>(() => ({
@@ -154,17 +155,40 @@ async function init() {
   await store.loadFips()
   store.startPolling()
   try {
-    const [kmResult, fersResult, ferTypesResult] = await Promise.all([
-      getKnowledgeModel(store.session!.questionnaireId, store.session!.questionnaireVersion),
+    const session = store.session!
+    // spec 08 §3.1: `questionnaireRefs` is always populated server-side
+    // (derived from `questionnaireRef` on a pre-v6 row) — fall back to a
+    // single-entry list here too, for a session loaded before that field
+    // existed on this deployment.
+    const sessionRefs: MatrixRef[] =
+      session.questionnaireRefs && session.questionnaireRefs.length > 0
+        ? session.questionnaireRefs.map((r) => ({ id: r.id, version: r.version, label: r.label }))
+        : [{ id: session.questionnaireId, version: session.questionnaireVersion, label: {} }]
+    refs.value = sessionRefs
+
+    const [kmResults, fersResult, ferTypesResult] = await Promise.all([
+      Promise.all(
+        sessionRefs.map(async (ref) => {
+          try {
+            return await getKnowledgeModel(ref.id, ref.version)
+          } catch {
+            return null
+          }
+        })
+      ),
       listFers({ limit: 500 }),
       getFerTypes(),
     ])
-    km.value = kmResult
+    const loadedKms = new Map<string, KnowledgeModelOut>()
+    kmResults.forEach((result, index) => {
+      if (result) loadedKms.set(refKey(sessionRefs[index].id, sessionRefs[index].version), result)
+    })
+    kms.value = loadedKms
     fers.value = new Map(fersResult.items.map((f) => [f.id, f]))
     ferTypes.value = new Map(ferTypesResult.items.map((f) => [f.key, f]))
   } catch {
     // The FIP list still renders via SessionFipList-style fallback; the
-    // matrix body simply cannot draw without the knowledge model.
+    // matrix body simply cannot draw without at least one knowledge model.
   }
   loading.value = false
 }

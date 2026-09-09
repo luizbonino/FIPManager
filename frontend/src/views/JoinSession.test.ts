@@ -41,10 +41,10 @@ function makeSession(): SessionPublicOut {
   }
 }
 
-async function mountJoin() {
+async function mountJoin(session: SessionPublicOut = makeSession()) {
   const pinia = createPinia()
   setActivePinia(pinia)
-  getSessionByCodeMock.mockResolvedValue(makeSession())
+  getSessionByCodeMock.mockResolvedValue(session)
 
   const router: Router = createRouter({
     history: createMemoryHistory(),
@@ -100,5 +100,55 @@ describe('JoinSession.vue', () => {
     await submitCommunityForm(wrapper)
 
     expect(wrapper.text()).toContain(en.join.closed)
+  })
+
+  it('a one-ref session (questionnaireRefs absent) shows no area radio group', async () => {
+    const wrapper = await mountJoin()
+    expect(wrapper.text()).not.toContain(en.join.chooseArea)
+    expect(wrapper.find('input[type="radio"]').exists()).toBe(false)
+  })
+
+  // Spec 08 §3.2/criterion 17: a multi-ref session shows the required area
+  // radio group, remembers the choice, and the created FIP conforms to the
+  // chosen model.
+  describe('multi-ref session (spec 08 §3.2)', () => {
+    function multiRefSession(): SessionPublicOut {
+      return {
+        ...makeSession(),
+        questionnaireRefs: [
+          { id: 'area-a', version: '1.0.0', label: { en: 'Area A' }, title: { en: 'Area A model' } },
+          { id: 'area-b', version: '1.0.0', label: { en: 'Area B' }, title: { en: 'Area B model' } },
+        ],
+      }
+    }
+
+    beforeEach(() => {
+      localStorage.clear()
+    })
+
+    it('shows the required radio group with one label per ref, defaulting to the first', async () => {
+      const wrapper = await mountJoin(multiRefSession())
+
+      expect(wrapper.text()).toContain(en.join.chooseArea)
+      const radios = wrapper.findAll('input[type="radio"]')
+      expect(radios).toHaveLength(2)
+      expect(wrapper.text()).toContain('Area A')
+      expect(wrapper.text()).toContain('Area B')
+      expect((radios[0].element as HTMLInputElement).checked).toBe(true)
+    })
+
+    it('the created FIP conforms to the chosen area, and the choice is remembered in localStorage', async () => {
+      createFipMock.mockResolvedValue({ id: 'fip-1', editToken: 'tok' } as never)
+
+      const wrapper = await mountJoin(multiRefSession())
+      const radios = wrapper.findAll('input[type="radio"]')
+      await radios[1].setValue()
+      await submitCommunityForm(wrapper)
+
+      expect(createFipMock).toHaveBeenCalledWith(
+        expect.objectContaining({ questionnaireRef: { id: 'area-b', version: '1.0.0' } })
+      )
+      expect(localStorage.getItem('fipm.join.session-1.area')).toBe('area-b@1.0.0')
+    })
   })
 })

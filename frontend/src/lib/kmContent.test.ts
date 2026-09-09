@@ -1,18 +1,27 @@
 import { describe, expect, it } from 'vitest'
 import {
   KmContentOpError,
+  addInlineFer,
   addQuestion,
   addSection,
+  addSuggestedFer,
   completeness,
   deleteQuestion,
   deleteSection,
   hideQuestion,
   moveQuestion,
   moveSection,
+  moveSuggestedFer,
+  removeInlineFer,
+  removeSuggestedFer,
+  resolveSuggestedFer,
+  setAllowFreeText,
   setFerType,
   setText,
   splitQuestion,
+  suggestedFersFor,
   unhideQuestion,
+  unusedInlineFers,
   validateContent,
   visibleQuestionCount,
 } from './kmContent'
@@ -326,5 +335,276 @@ describe('kmContent — validateContent', () => {
       code: 'too_many',
       message: expect.any(String),
     })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Spec 08 §1.4 — pure ops on suggestedFerIds / inlineFers / declaration defaults.
+// ---------------------------------------------------------------------------
+
+describe('kmContent — suggested FERs and inline FERs (ops)', () => {
+  it('addSuggestedFer appends once, is a no-op on a duplicate id, and caps at 12', () => {
+    let content = fixture()
+    content = addSuggestedFer(content, 'F1-metadata', 'https://www.doi.org/')
+    content = addSuggestedFer(content, 'F1-metadata', 'https://www.doi.org/')
+    expect(content.sections[0].questions[0].suggestedFerIds).toEqual(['https://www.doi.org/'])
+
+    for (let i = 0; i < 12; i += 1) {
+      content = addSuggestedFer(content, 'F1-metadata', `https://example.org/fer/${i}`)
+    }
+    expect(content.sections[0].questions[0].suggestedFerIds).toHaveLength(12)
+  })
+
+  it('removeSuggestedFer removes exactly the given id', () => {
+    let content = addSuggestedFer(fixture(), 'F1-metadata', 'https://www.doi.org/')
+    content = addSuggestedFer(content, 'F1-metadata', 'https://www.handle.net/')
+    content = removeSuggestedFer(content, 'F1-metadata', 'https://www.doi.org/')
+    expect(content.sections[0].questions[0].suggestedFerIds).toEqual(['https://www.handle.net/'])
+  })
+
+  it('moveSuggestedFer reorders within the list and no-ops at the ends', () => {
+    let content = addSuggestedFer(fixture(), 'F1-metadata', 'https://a.example.org/')
+    content = addSuggestedFer(content, 'F1-metadata', 'https://b.example.org/')
+    const moved = moveSuggestedFer(content, 'F1-metadata', 'https://b.example.org/', 'up')
+    expect(moved.sections[0].questions[0].suggestedFerIds).toEqual(['https://b.example.org/', 'https://a.example.org/'])
+    const noop = moveSuggestedFer(content, 'F1-metadata', 'https://a.example.org/', 'up')
+    expect(noop.sections[0].questions[0].suggestedFerIds).toEqual(content.sections[0].questions[0].suggestedFerIds)
+  })
+
+  it('setAllowFreeText sets only the targeted question', () => {
+    const content = setAllowFreeText(fixture(), 'F1-metadata', false)
+    expect(content.sections[0].questions[0].allowFreeText).toBe(false)
+    expect(content.sections[0].questions[1].allowFreeText).toBeUndefined()
+  })
+
+  it('addInlineFer appends to model.inlineFers and to the question suggestedFerIds in one op', () => {
+    const content = addInlineFer(fixture(), 'F1-metadata', {
+      id: 'https://fipm.example.org/fers/draft/abc123',
+      label: { 'pt-BR': 'Vocabulário' },
+      type: 'structured-vocabulary',
+      homepage: null,
+    })
+    expect(content.inlineFers).toHaveLength(1)
+    expect(content.sections[0].questions[0].suggestedFerIds).toEqual(['https://fipm.example.org/fers/draft/abc123'])
+  })
+
+  it('addInlineFer is a no-op on a duplicate inline id', () => {
+    let content = addInlineFer(fixture(), 'F1-metadata', {
+      id: 'https://fipm.example.org/fers/draft/abc123',
+      label: { en: 'A' },
+      type: 'structured-vocabulary',
+      homepage: null,
+    })
+    content = addInlineFer(content, 'F1-data', {
+      id: 'https://fipm.example.org/fers/draft/abc123',
+      label: { en: 'A' },
+      type: 'structured-vocabulary',
+      homepage: null,
+    })
+    expect(content.inlineFers).toHaveLength(1)
+    expect(content.sections[0].questions[1].suggestedFerIds ?? []).toEqual([])
+  })
+
+  it('removeInlineFer deletes the entry; unusedInlineFers lists only unreferenced ones', () => {
+    let content = addInlineFer(fixture(), 'F1-metadata', {
+      id: 'https://fipm.example.org/fers/draft/used',
+      label: { en: 'Used' },
+      type: 'structured-vocabulary',
+      homepage: null,
+    })
+    content = { ...content, inlineFers: [...(content.inlineFers ?? []), { id: 'https://fipm.example.org/fers/draft/unused', label: { en: 'Unused' }, type: 'structured-vocabulary', homepage: null }] }
+    expect(unusedInlineFers(content).map((f) => f.id)).toEqual(['https://fipm.example.org/fers/draft/unused'])
+    content = removeInlineFer(content, 'https://fipm.example.org/fers/draft/unused')
+    expect(content.inlineFers?.map((f) => f.id)).toEqual(['https://fipm.example.org/fers/draft/used'])
+  })
+
+  it('resolveSuggestedFer resolves from inlineFers before the catalogue map', () => {
+    const content = addInlineFer(fixture(), 'F1-metadata', {
+      id: 'https://fipm.example.org/fers/draft/x',
+      label: { 'pt-BR': 'X' },
+      type: 'identifier-service',
+      homepage: null,
+    })
+    const fers = new Map([['https://fipm.example.org/fers/draft/x', { id: 'https://fipm.example.org/fers/draft/x', label: { en: 'Catalogue X' }, type: 'identifier-service', homepage: null, source: 'seed' }]])
+    const resolved = resolveSuggestedFer('https://fipm.example.org/fers/draft/x', content, fers)
+    expect(resolved?.label).toEqual({ 'pt-BR': 'X' })
+    expect(resolved?.source).toBe('model')
+  })
+
+  it('suggestedFersFor returns the resolved list in suggestedFerIds order, dropping unresolved ids', () => {
+    let content = addSuggestedFer(fixture(), 'F1-metadata', 'https://www.doi.org/')
+    content = addSuggestedFer(content, 'F1-metadata', 'https://unresolved.example.org/')
+    const fers = new Map([['https://www.doi.org/', { id: 'https://www.doi.org/', label: { en: 'DOI' }, type: 'identifier-service', homepage: null, source: 'seed' }]])
+    const list = suggestedFersFor(content, 'F1-metadata', fers)
+    expect(list.map((f) => f.id)).toEqual(['https://www.doi.org/'])
+  })
+})
+
+// Criterion 15 — `kmContent.ts` mirrors AC 1 and AC 2 exactly (same codes,
+// same paths) for the same shapes: suggestedFerIds, inlineFers, publish-time
+// no_answer_path, and the pt-BR-only inline label exemption.
+describe('kmContent — validateContent (spec 08 §1.2 rules 9-13)', () => {
+  const FER_TYPES = FER_TYPE_KEYS
+
+  function withSuggested(ids: string[]) {
+    const content = fixture()
+    content.sections[0].questions[0].suggestedFerIds = ids
+    return content
+  }
+
+  it('rejects 13 suggested ids with too_many', () => {
+    const ids = Array.from({ length: 13 }, (_, i) => `https://example.org/fer/${i}`)
+    const errors = validateContent(withSuggested(ids), FER_TYPES)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedFerIds',
+      code: 'too_many',
+      message: expect.any(String),
+    })
+  })
+
+  it('rejects a duplicate suggested id with duplicate_suggested_fer', () => {
+    const errors = validateContent(withSuggested(['https://example.org/a', 'https://example.org/a']), FER_TYPES)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedFerIds[1]',
+      code: 'duplicate_suggested_fer',
+      message: expect.any(String),
+    })
+  })
+
+  it('rejects a non-IRI suggested id with invalid_fer_iri', () => {
+    const errors = validateContent(withSuggested(['not-an-iri']), FER_TYPES)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedFerIds[0]',
+      code: 'invalid_fer_iri',
+      message: expect.any(String),
+    })
+  })
+
+  it('rejects an id absent from both inlineFers and knownFerIds with unknown_suggested_fer', () => {
+    const errors = validateContent(withSuggested(['https://example.org/unresolved']), FER_TYPES, {
+      knownFerIds: new Set(['https://www.doi.org/']),
+    })
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedFerIds[0]',
+      code: 'unknown_suggested_fer',
+      message: expect.any(String),
+    })
+  })
+
+  it('accepts the same unresolved id when knownFerIds is null/omitted (catalogue check skipped)', () => {
+    const errors = validateContent(withSuggested(['https://example.org/unresolved']), FER_TYPES)
+    expect(errors).toEqual([])
+  })
+
+  it('accepts a suggested id that resolves against inlineFers even with knownFerIds set and not containing it', () => {
+    let content = withSuggested(['https://fipm.example.org/fers/draft/x'])
+    content = { ...content, inlineFers: [{ id: 'https://fipm.example.org/fers/draft/x', label: { en: 'X' }, type: 'identifier-service', homepage: null }] }
+    const errors = validateContent(content, FER_TYPES, { knownFerIds: new Set() })
+    expect(errors.filter((e) => e.code === 'unknown_suggested_fer')).toEqual([])
+  })
+
+  it('publishing=true returns no_answer_path for allowFreeText:false and no suggestions', () => {
+    const content = fixture()
+    content.sections[0].questions[0].allowFreeText = false
+    const errors = validateContent(content, FER_TYPES, { publishing: true })
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0]',
+      code: 'no_answer_path',
+      message: expect.any(String),
+    })
+  })
+
+  it('publishing=true does not flag no_answer_path once suggestions exist', () => {
+    let content = fixture()
+    content.sections[0].questions[0].allowFreeText = false
+    content.sections[0].questions[0].suggestedFerIds = ['https://www.doi.org/']
+    const errors = validateContent(content, FER_TYPES, { publishing: true })
+    expect(errors.filter((e) => e.code === 'no_answer_path')).toEqual([])
+  })
+
+  it('no_answer_path is not raised outside of publishing', () => {
+    const content = fixture()
+    content.sections[0].questions[0].allowFreeText = false
+    const errors = validateContent(content, FER_TYPES)
+    expect(errors.filter((e) => e.code === 'no_answer_path')).toEqual([])
+  })
+
+  it('accepts a pt-BR-only inlineFers label (no en required)', () => {
+    const content = { ...fixture(), inlineFers: [{ id: 'https://fipm.example.org/fers/draft/x', label: { 'pt-BR': 'Vocabulário do Ministério da Saúde' }, type: 'structured-vocabulary', homepage: null }] }
+    const errors = validateContent(content, FER_TYPES, { publishing: true })
+    expect(errors).toEqual([])
+  })
+
+  it('flags an inlineFers label with no non-empty value at all with missing_key', () => {
+    const content = { ...fixture(), inlineFers: [{ id: 'https://fipm.example.org/fers/draft/x', label: {}, type: 'structured-vocabulary', homepage: null }] }
+    const errors = validateContent(content, FER_TYPES)
+    expect(errors).toContainEqual({
+      path: 'inlineFers[0].label',
+      code: 'missing_key',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags a duplicate inline FER id with duplicate_inline_fer', () => {
+    const fer = { id: 'https://fipm.example.org/fers/draft/x', label: { en: 'X' }, type: 'structured-vocabulary', homepage: null }
+    const content = { ...fixture(), inlineFers: [fer, { ...fer }] }
+    const errors = validateContent(content, FER_TYPES)
+    expect(errors).toContainEqual({
+      path: 'inlineFers[1].id',
+      code: 'duplicate_inline_fer',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags an inline FER with an unknown type with unknown_fer_type', () => {
+    const content = { ...fixture(), inlineFers: [{ id: 'https://fipm.example.org/fers/draft/x', label: { en: 'X' }, type: 'not-a-real-type', homepage: null }] }
+    const errors = validateContent(content, FER_TYPES)
+    expect(errors).toContainEqual({
+      path: 'inlineFers[0].type',
+      code: 'unknown_fer_type',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags an inline FER id already in knownFerIds at publish time with inline_fer_duplicates_catalogue', () => {
+    const content = { ...fixture(), inlineFers: [{ id: 'https://www.doi.org/', label: { en: 'DOI' }, type: 'identifier-service', homepage: null }] }
+    const errors = validateContent(content, FER_TYPES, { publishing: true, knownFerIds: new Set(['https://www.doi.org/']) })
+    expect(errors).toContainEqual({
+      path: 'inlineFers[0].id',
+      code: 'inline_fer_duplicates_catalogue',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags more than 300 inlineFers entries with too_many', () => {
+    const inlineFers = Array.from({ length: 301 }, (_, i) => ({
+      id: `https://fipm.example.org/fers/draft/${i}`,
+      label: { en: `F${i}` },
+      type: 'structured-vocabulary',
+      homepage: null,
+    }))
+    const errors = validateContent({ ...fixture(), inlineFers }, FER_TYPES)
+    expect(errors).toContainEqual({ path: 'inlineFers', code: 'too_many', message: expect.any(String) })
+  })
+
+  it('flags an invalid homepage IRI on an inline FER', () => {
+    const content = { ...fixture(), inlineFers: [{ id: 'https://fipm.example.org/fers/draft/x', label: { en: 'X' }, type: 'structured-vocabulary', homepage: 'not-a-url' }] }
+    const errors = validateContent(content, FER_TYPES)
+    expect(errors).toContainEqual({
+      path: 'inlineFers[0].homepage',
+      code: 'invalid_value',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags an invalid defaultDeclarationStatus and a non-boolean compactDeclarations', () => {
+    const content = { ...fixture(), defaultDeclarationStatus: 'not-a-status' as never, compactDeclarations: 'yes' as never }
+    const errors = validateContent(content, FER_TYPES)
+    expect(errors).toContainEqual({ path: 'defaultDeclarationStatus', code: 'invalid_value', message: expect.any(String) })
+    expect(errors).toContainEqual({ path: 'compactDeclarations', code: 'invalid_value', message: expect.any(String) })
+  })
+
+  it('accepts the real fixture unchanged with the five new fields all absent', () => {
+    expect(validateContent(fixture(), FER_TYPES, { publishing: true })).toEqual([])
   })
 })

@@ -1,10 +1,12 @@
 /**
  * Pure, unit-tested derivation of the session comparison matrix (spec 03
- * §1.2) from data the app already fetches: `GET /api/sessions/{id}/fips`,
- * the knowledge model, the FER catalogue and the FER-type taxonomy. No
+ * §1.2, extended by spec 08 §3.3 for a multi-questionnaire session) from
+ * data the app already fetches: `GET /api/sessions/{id}/fips`, the
+ * knowledge model(s), the FER catalogue and the FER-type taxonomy. No
  * network call lives here — `SessionMatrix.vue` is the only caller.
  */
 import { resolveLang } from './lang'
+import { allQuestions } from './kmContent'
 import type {
   Declaration,
   DeclarationStatus,
@@ -12,6 +14,7 @@ import type {
   FerType,
   FipOut,
   KnowledgeModelOut,
+  LangMap,
 } from '@/types/api'
 
 export type CellStatus = DeclarationStatus | 'unanswered'
@@ -39,6 +42,16 @@ export interface MatrixCell {
   chips: MatrixChip[]
   comment: string | null
   unanswered: boolean
+  /** spec 08 §2.2: the answer is marked "not applicable" — `chips` is always `[]`; `unanswered` stays `false` (it *is* answered). */
+  notApplicable: boolean
+  /**
+   * spec 08 §3.3: the column's own questionnaire model does not have this
+   * row's question at all (a multi-ref session where forks diverge).
+   * Rendered as a hatched placeholder distinct from both `unanswered` and
+   * `notApplicable`; `unanswered` is kept `true` alongside it so the
+   * existing "row has no data"/`hideUnanswered` aggregates stay correct.
+   */
+  absent: boolean
 }
 
 /** `agreed` = `declaringFips >= 2 && distinctCurrent === 1` (spec 03 §1.2). */
@@ -50,6 +63,8 @@ export interface Convergence {
   topLabel: string | null
   topCount: number
   agreed: boolean
+  /** spec 08 §2.2: FIPs whose cell on this row is `notApplicable` — never a `current` declaration, so untouched above. */
+  notApplicableFips: number
 }
 
 export interface MatrixRow {
@@ -68,6 +83,8 @@ export interface MatrixRow {
    * `principle === null` collects under `'Other'`.
    */
   principleGroup: string
+  /** spec 08 §3.3: refKeys (`id@version`) of the models that actually have this question id. */
+  presentIn: string[]
 }
 
 /** One per knowledge-model section — not necessarily F/A/I/R once custom models exist (spec 04). */
@@ -92,15 +109,39 @@ export interface MatrixColumn {
   url: string
   answeredCount: number
   updatedAt: string
+  /** spec 08 §3.3: `id@version` of this FIP's own questionnaire ref — which column group it belongs to. */
+  refKey: string
+  /** spec 08 §3.3: the ref's resolved area label, or `null` on a single-ref session. */
+  areaLabel: string | null
+}
+
+/** One `<th colspan>` group header per questionnaire ref (spec 08 §3.3). */
+export interface MatrixColumnGroup {
+  refKey: string
+  label: string | null
+  columnCount: number
 }
 
 export interface Matrix {
   columns: MatrixColumn[]
+  columnGroups: MatrixColumnGroup[]
   groups: MatrixGroup[]
   questionCount: number
 }
 
+/** A session's labelled questionnaire ref (spec 08 §3.1's `QuestionnaireRefLabelled`), the caller's `refs` argument. */
+export interface MatrixRef {
+  id: string
+  version: string
+  label: LangMap
+}
+
 const LABEL_MAX_LENGTH = 24
+
+/** `id@version` — the key both `kms` and `MatrixColumn.refKey`/`MatrixColumnGroup.refKey` use. */
+export function refKey(id: string, version: string): string {
+  return `${id}@${version}`
+}
 
 /**
  * NFC-normalise, trim, collapse internal whitespace and casefold — the
@@ -166,24 +207,36 @@ function buildChip(declaration: Declaration, fers: Map<string, FerOut>, locale: 
   }
 }
 
-function buildCell(fip: FipOut, questionId: string, fers: Map<string, FerOut>, locale: string): MatrixCell {
+function buildCell(
+  fip: FipOut,
+  questionId: string,
+  fers: Map<string, FerOut>,
+  locale: string,
+  absent: boolean
+): MatrixCell {
+  if (absent) {
+    return { fipId: fip.id, chips: [], comment: null, unanswered: true, notApplicable: false, absent: true }
+  }
   const answer = fip.answers.find((a) => a.questionId === questionId)
+  const notApplicable = answer?.notApplicable === true
   const declarations = answer?.declarations ?? []
   return {
     fipId: fip.id,
     chips: declarations.map((d) => buildChip(d, fers, locale)),
-    comment: resolveLang(
-      answer?.comment ? { [fip.language]: answer.comment } : null,
-      locale
-    ),
-    unanswered: declarations.length === 0,
+    comment: resolveLang(answer?.comment ? { [fip.language]: answer.comment } : null, locale),
+    // spec 08 §2.2: N/A *is* answered — never `unanswered`, even though it carries no chips.
+    unanswered: !notApplicable && declarations.length === 0,
+    notApplicable,
+    absent: false,
   }
 }
 
 function buildConvergence(cells: MatrixCell[]): Convergence {
   const counts = new Map<string, { count: number; label: string }>()
   let declaringFips = 0
+  let notApplicableFips = 0
   for (const cell of cells) {
+    if (cell.notApplicable) notApplicableFips += 1
     const currentChips = cell.chips.filter((c) => c.status === 'current')
     if (currentChips.length > 0) declaringFips += 1
     for (const chip of currentChips) {
@@ -213,64 +266,146 @@ function buildConvergence(cells: MatrixCell[]): Convergence {
     topLabel,
     topCount,
     agreed: declaringFips >= 2 && distinctCurrent === 1,
+    notApplicableFips,
   }
 }
 
+/**
+ * `buildMatrix(fips, kms, fers, ferTypes, locale, refs)` (spec 08 §3.3):
+ * `kms` is keyed by `refKey(id, version)`; `refs` is the session's ordered,
+ * labelled questionnaire-ref list (a single-entry array for an ordinary
+ * one-questionnaire session — the multi-ref case is additive, not a
+ * separate code path). A ref whose model hasn't loaded (yet) into `kms` is
+ * skipped rather than crashing the render.
+ */
 export function buildMatrix(
   fips: FipOut[],
-  km: KnowledgeModelOut,
+  kms: Map<string, KnowledgeModelOut>,
   fers: Map<string, FerOut>,
   ferTypes: Map<string, FerType>,
-  locale: string
+  locale: string,
+  refs: MatrixRef[]
 ): Matrix {
-  // Columns follow `createdAt`, the order `GET /api/sessions/{id}/fips`
-  // returns — never re-sorted here (spec 03 §1.2).
-  const columns: MatrixColumn[] = fips.map((fip) => {
-    const fullLabel = fip.community?.name || fip.id
-    return {
-      fipId: fip.id,
-      label: truncateLabel(fullLabel),
-      fullLabel,
-      url: `/fips/${fip.id}`,
-      answeredCount: fip.answers.filter((a) => (a.declarations?.length ?? 0) > 0).length,
-      updatedAt: fip.updatedAt,
-    }
+  const fipsById = new Map(fips.map((f) => [f.id, f]))
+
+  const refEntries = refs
+    .map((ref) => ({ ref, key: refKey(ref.id, ref.version), km: kms.get(refKey(ref.id, ref.version)) }))
+    .filter((e): e is { ref: MatrixRef; key: string; km: KnowledgeModelOut } => !!e.km)
+
+  // Columns follow `createdAt` within each ref's group, groups in `refs`
+  // order (spec 08 §3.3); never re-sorted across groups.
+  const columnsByRef = refEntries.map(({ ref, key }) => {
+    const refFips = fips
+      .filter((f) => f.questionnaireId === ref.id && f.questionnaireVersion === ref.version)
+      .slice()
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    return { ref, key, fips: refFips }
   })
 
-  let questionCount = 0
-  const groups: MatrixGroup[] = km.content.sections.map((section) => {
-    const rows: MatrixRow[] = section.questions.map((question) => {
-      questionCount += 1
-      const cells = fips.map((fip) => buildCell(fip, question.id, fers, locale))
-      const ferType = question.ferType
-      const ferTypeLabel = ferType ? (resolveLang(ferTypes.get(ferType)?.label, locale) ?? ferType) : null
+  const areaLabelByRefKey = new Map(columnsByRef.map(({ key, ref }) => [key, resolveLang(ref.label, locale)]))
+
+  const columns: MatrixColumn[] = columnsByRef.flatMap(({ key, fips: refFips }) =>
+    refFips.map((fip) => {
+      const fullLabel = fip.community?.name || fip.id
       return {
-        questionId: question.id,
-        principle: question.principle,
-        scope: question.scope,
-        ferType,
-        ferTypeLabel,
-        text: resolveLang(question.text, locale) ?? question.id,
+        fipId: fip.id,
+        label: truncateLabel(fullLabel),
+        fullLabel,
+        url: `/fips/${fip.id}`,
+        answeredCount: fip.answers.filter((a) => (a.declarations?.length ?? 0) > 0 || a.notApplicable === true).length,
+        updatedAt: fip.updatedAt,
+        refKey: key,
+        areaLabel: areaLabelByRefKey.get(key) ?? null,
+      }
+    })
+  )
+
+  const columnGroups: MatrixColumnGroup[] = columnsByRef.map(({ key, fips: refFips }) => ({
+    refKey: key,
+    label: areaLabelByRefKey.get(key) ?? null,
+    columnCount: refFips.length,
+  }))
+
+  // Which question ids each ref's model actually has, for `presentIn`/`absent`.
+  const questionIdsByRef = new Map<string, Set<string>>(
+    refEntries.map(({ key, km }) => [key, new Set(allQuestions(km.content).map((q) => q.id))])
+  )
+
+  // Merge sections and rows across refs: first ref to introduce a section
+  // or question id owns its title/text/principle/scope/ferType (spec 08
+  // §3.3 — "in practice the base order" since the forks share the 21 ids).
+  const sectionOrder: string[] = []
+  const sectionTitleById = new Map<string, string | null>()
+  const questionIdsBySection = new Map<string, string[]>()
+  const seenQuestionIds = new Set<string>()
+  interface RowMeta {
+    principle: string | null
+    scope: 'metadata' | 'data' | null
+    ferType: string | null
+    ferTypeLabel: string | null
+    text: string
+    principleGroup: string
+  }
+  const rowMetaById = new Map<string, RowMeta>()
+
+  for (const { km } of refEntries) {
+    for (const section of km.content.sections) {
+      if (!sectionTitleById.has(section.id)) {
+        sectionOrder.push(section.id)
+        sectionTitleById.set(section.id, resolveLang(section.title, locale))
+        questionIdsBySection.set(section.id, [])
+      }
+      for (const question of section.questions) {
+        if (seenQuestionIds.has(question.id)) continue
+        seenQuestionIds.add(question.id)
+        questionIdsBySection.get(section.id)!.push(question.id)
+        const ferType = question.ferType
+        rowMetaById.set(question.id, {
+          principle: question.principle,
+          scope: question.scope,
+          ferType,
+          ferTypeLabel: ferType ? (resolveLang(ferTypes.get(ferType)?.label, locale) ?? ferType) : null,
+          text: resolveLang(question.text, locale) ?? question.id,
+          principleGroup: question.principle?.[0] ?? 'Other',
+        })
+      }
+    }
+  }
+
+  let questionCount = 0
+  const groups: MatrixGroup[] = sectionOrder.map((sectionId) => {
+    const questionIds = questionIdsBySection.get(sectionId) ?? []
+    const rows: MatrixRow[] = questionIds.map((questionId) => {
+      questionCount += 1
+      const meta = rowMetaById.get(questionId)!
+      const presentIn = columnsByRef.filter(({ key }) => questionIdsByRef.get(key)?.has(questionId)).map(({ key }) => key)
+      const presentSet = new Set(presentIn)
+      const cells = columns.map((column) =>
+        buildCell(fipsById.get(column.fipId)!, questionId, fers, locale, !presentSet.has(column.refKey))
+      )
+      return {
+        questionId,
+        principle: meta.principle,
+        scope: meta.scope,
+        ferType: meta.ferType,
+        ferTypeLabel: meta.ferTypeLabel,
+        text: meta.text,
         cells,
         convergence: buildConvergence(cells),
-        // Spec 04 §4: the FAIR-letter group derived from the principle
-        // code itself, not the section — every untagged row is 'Other'.
-        principleGroup: question.principle?.[0] ?? 'Other',
+        principleGroup: meta.principleGroup,
+        presentIn,
       }
     })
     return {
-      sectionId: section.id,
-      // Spec 04 §4: `null` (not the internal section id) when the title
-      // resolves to nothing, so the renderer can show the translated
-      // `matrix.otherGroup` label instead of a raw id.
-      title: resolveLang(section.title, locale),
+      sectionId,
+      title: sectionTitleById.get(sectionId) ?? null,
       rows,
       rowsWithData: rows.filter((r) => r.cells.some((c) => !c.unanswered)).length,
       rowsAgreed: rows.filter((r) => r.convergence.agreed).length,
     }
   })
 
-  return { columns, groups, questionCount }
+  return { columns, columnGroups, groups, questionCount }
 }
 
 export interface MatrixOptions {
@@ -290,7 +425,10 @@ export function applyMatrixOptions(matrix: Matrix, opts: MatrixOptions): Matrix 
     let rows = group.rows.map((row) => {
       if (!opts.onlyCurrent) return row
       const cells = row.cells.map((cell) => {
-        if (cell.unanswered) return cell
+        // spec 08 §2.2/§3.3: neither an absent nor a notApplicable cell has
+        // "current" chips to filter — leave both exactly as they are so
+        // onlyCurrent never turns either into a plain "unanswered" cell.
+        if (cell.unanswered || cell.notApplicable) return cell
         const chips = cell.chips.filter((c) => c.status === 'current')
         return { ...cell, chips, unanswered: chips.length === 0 }
       })

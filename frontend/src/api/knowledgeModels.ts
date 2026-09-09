@@ -1,5 +1,7 @@
 import { del, get, getWithEtag, patch, post, putWithEtag } from './client'
 import type {
+  DeclarationStatus,
+  InlineFer,
   KnowledgeModelContent,
   KnowledgeModelOut,
   KnowledgeModelSummary,
@@ -88,6 +90,10 @@ export interface PutKnowledgeModelContentRequest {
   sections: KnowledgeModelContent['sections']
   title?: LangMap
   description?: LangMap
+  /** spec 08 §1.1/§1.4: whole-document PUT — no dedicated endpoint for these five fields. */
+  inlineFers?: InlineFer[]
+  defaultDeclarationStatus?: DeclarationStatus
+  compactDeclarations?: boolean
 }
 
 /**

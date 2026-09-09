@@ -59,6 +59,11 @@
           @update-fer-type="(value) => applyOp((c) => setFerType(c, question.id, value))"
           @update-required="(value) => applyOp((c) => setRequired(c, question.id, value))"
           @update-allow-multiple="(value) => applyOp((c) => setAllowMultiple(c, question.id, value))"
+          @add-suggested="(ferId) => applyOp((c) => addSuggestedFer(c, question.id, ferId))"
+          @remove-suggested="(ferId) => applyOp((c) => removeSuggestedFer(c, question.id, ferId))"
+          @move-suggested="(ferId, direction) => applyOp((c) => moveSuggestedFer(c, question.id, ferId, direction))"
+          @add-inline-fer="(fer) => applyOp((c) => addInlineFer(c, question.id, fer))"
+          @update-allow-free-text="(value) => applyOp((c) => setAllowFreeText(c, question.id, value))"
         />
 
         <button type="button" class="btn btn-secondary no-print" :disabled="readOnly" @click="onAddQuestion(section.id)">
@@ -75,13 +80,18 @@ import { useI18n } from 'vue-i18n'
 import { resolveLang } from '@/lib/lang'
 import { useKmEditorStore } from '@/stores/kmEditor'
 import {
+  addInlineFer,
   addQuestion,
   addSection,
+  addSuggestedFer,
   deleteQuestion,
   deleteSection,
   hideQuestion,
   moveQuestion,
   moveSection,
+  moveSuggestedFer,
+  removeSuggestedFer,
+  setAllowFreeText,
   setFerType,
   setText,
   splitQuestion,

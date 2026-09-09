@@ -85,6 +85,23 @@
         <span>{{ $t('km.allowMultiple') }}</span>
       </label>
     </div>
+
+    <KmSuggestedFers
+      v-if="content"
+      :content="content"
+      :question-id="question.id"
+      :fer-type="question.ferType"
+      :suggested-fer-ids="question.suggestedFerIds ?? []"
+      :fers="fers"
+      :fer-type-options="ferTypeOptions"
+      :allow-free-text="question.allowFreeText ?? true"
+      :read-only="readOnly"
+      @add="(ferId) => $emit('addSuggested', ferId)"
+      @remove="(ferId) => $emit('removeSuggested', ferId)"
+      @move="(ferId, direction) => $emit('moveSuggested', ferId, direction)"
+      @add-inline="(fer) => $emit('addInlineFer', fer)"
+      @update-allow-free-text="(value) => $emit('updateAllowFreeText', value)"
+    />
   </div>
 </template>
 
@@ -92,16 +109,20 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { resolveLang } from '@/lib/lang'
-import { PRINCIPLES } from '@/lib/kmContent'
+import { PRINCIPLES, type MoveDirection } from '@/lib/kmContent'
+import { useKmEditorStore } from '@/stores/kmEditor'
 import MoveButtons from './MoveButtons.vue'
 import KmLangTabs from './KmLangTabs.vue'
-import type { FerType, KnowledgeModelQuestion } from '@/types/api'
+import KmSuggestedFers from './KmSuggestedFers.vue'
+import type { FerType, InlineFer, KnowledgeModelQuestion } from '@/types/api'
 
 /**
- * One question of the editor's sections accordion (spec 04 §5): id badge,
- * up/down, hide/unhide, split, delete, `KmLangTabs` over `text` and
- * `help`, and controls for principle/scope/FER type/required/allowMultiple.
- * A hidden question stays editable but dims and carries a "Hidden" chip.
+ * One question of the editor's sections accordion (spec 04 §5, extended by
+ * spec 08 §1.4): id badge, up/down, hide/unhide, split, delete, `KmLangTabs`
+ * over `text` and `help`, controls for principle/scope/FER
+ * type/required/allowMultiple, and the "Suggested options" block
+ * (`KmSuggestedFers`). A hidden question stays editable but dims and
+ * carries a "Hidden" chip.
  */
 const props = defineProps<{
   question: KnowledgeModelQuestion
@@ -125,9 +146,20 @@ const emit = defineEmits<{
   updateFerType: [value: string | null]
   updateRequired: [value: boolean]
   updateAllowMultiple: [value: boolean]
+  addSuggested: [ferId: string]
+  removeSuggested: [ferId: string]
+  moveSuggested: [ferId: string, direction: MoveDirection]
+  addInlineFer: [fer: InlineFer]
+  updateAllowFreeText: [value: boolean]
 }>()
 
 const { locale, t } = useI18n()
+// Read-only lookups this card needs to *resolve* (inlineFers labels, the
+// cached catalogue) — mutations still flow up through the emits above and
+// KmSectionList.vue's `applyOp`, matching every other field on this card.
+const store = useKmEditorStore()
+const content = computed(() => store.content)
+const fers = computed(() => store.fers)
 
 const alreadySplit = computed(
   () => props.question.id.endsWith('-metadata') || props.question.id.endsWith('-data')

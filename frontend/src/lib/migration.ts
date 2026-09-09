@@ -43,13 +43,19 @@ function enText(q: FlatQuestion): string {
   return q.text.en ?? ''
 }
 
-/** spec 07 §4.1: "a question id carrying at least one declaration or a non-empty comment counts as answered". */
+/**
+ * spec 07 §4.1: "a question id carrying at least one declaration or a
+ * non-empty comment counts as answered". spec 08 §2.3: `notApplicable: true`
+ * must also count as non-empty, or such answers are silently dropped on
+ * migration instead of landing in `orphanedAnswers`.
+ */
 function buildAnsweredIndex(answers: Answer[]): Map<string, Answer> {
   const index = new Map<string, Answer>()
   for (const answer of answers) {
     const hasDeclarations = (answer.declarations?.length ?? 0) > 0
     const hasComment = !!(answer.comment && answer.comment.trim())
-    if (hasDeclarations || hasComment) index.set(answer.questionId, answer)
+    const isNotApplicable = answer.notApplicable === true
+    if (hasDeclarations || hasComment || isNotApplicable) index.set(answer.questionId, answer)
   }
   return index
 }

@@ -364,6 +364,26 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     markDirty()
   }
 
+  /**
+   * The "Not applicable" toggle (spec 08 §2.1/§2.2): `true` clears any
+   * declarations first — the two are mutually exclusive, both the backend
+   * validator and `QuestionCard.vue`'s own confirm enforce it, this just
+   * makes the store itself never produce the illegal combination. `false`
+   * deletes the key entirely rather than storing it — `notApplicable: false`
+   * is never sent (spec §2.1), keeping old `answers` blobs byte-identical.
+   */
+  function setNotApplicable(questionId: string, value: boolean): void {
+    const answer = ensureAnswer(questionId)
+    if (!answer) return
+    if (value) {
+      answer.notApplicable = true
+      answer.declarations = []
+    } else {
+      delete answer.notApplicable
+    }
+    markDirty()
+  }
+
   function setCommunity(patch: Partial<Community>): void {
     if (!fip.value) return
     fip.value.community = { links: [], ...fip.value.community, ...patch }
@@ -472,6 +492,7 @@ export const useFipEditorStore = defineStore('fipEditor', () => {
     addDeclaration,
     removeDeclaration,
     setComment,
+    setNotApplicable,
     setCommunity,
     setRelatedDmps,
     setDmpEvidence,

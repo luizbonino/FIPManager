@@ -65,7 +65,7 @@
               v-for="answer in section.answers"
               :key="answer.questionId"
               class="question"
-              :class="{ unanswered: answer.declarations.length === 0 }"
+              :class="{ unanswered: answer.declarations.length === 0 && !answer.notApplicable }"
             >
               <div class="question-head">
                 <span class="question-id">{{ answer.questionId }}</span>
@@ -73,7 +73,10 @@
               </div>
               <p class="question-text">{{ answer.questionText }}</p>
 
-              <p v-if="answer.declarations.length === 0" class="not-answered">
+              <p v-if="answer.notApplicable" class="not-applicable">
+                {{ $t('editor.notApplicable') }}
+              </p>
+              <p v-else-if="answer.declarations.length === 0" class="not-answered">
                 {{ $t('editor.notAnswered') }}
               </p>
               <ul v-else class="declarations">
@@ -391,6 +394,17 @@ onMounted(load)
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   font-style: italic;
+}
+
+.not-applicable {
+  margin: 0;
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background-color: var(--color-status-not-applicable);
+  color: #ffffff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .declarations {

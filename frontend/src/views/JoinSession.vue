@@ -30,6 +30,22 @@
         </router-link>
 
         <form class="community-form" @submit.prevent="onSubmit">
+          <!-- spec 08 §3.2: a required area choice, only for a multi-ref
+               session — length 1 (the ordinary case) looks exactly as before. -->
+          <fieldset v-if="hasMultipleAreas" class="area-fieldset">
+            <legend>{{ $t('join.chooseArea') }}</legend>
+            <label v-for="ref in questionnaireRefs" :key="areaKeyOf(ref)" class="area-option">
+              <input
+                v-model="selectedAreaKey"
+                type="radio"
+                name="area"
+                :value="areaKeyOf(ref)"
+                required
+              />
+              <span>{{ resolveLang(ref.label, locale) ?? resolveLang(ref.title, locale) ?? ref.id }}</span>
+            </label>
+          </fieldset>
+
           <h2>{{ $t('community.heading') }}</h2>
 
           <label class="field">
@@ -86,7 +102,7 @@ import { resolveLang } from '@/lib/lang'
 import { SUPPORTED_LOCALES } from '@/i18n'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { useSessionStore } from '@/stores/session'
-import type { SessionPublicOut } from '@/types/api'
+import type { QuestionnaireRefWithTitle, SessionPublicOut } from '@/types/api'
 
 // Spec 02 §2.1: replaces the JoinSession scaffold.
 const route = useRoute()
@@ -114,6 +130,37 @@ const knownFipId = computed(() => {
   return s ? getSessionFip(s.id) : null
 })
 
+// spec 08 §3.2: a multi-ref session (`questionnaireRefs.length > 1`) shows a
+// required area radio group; a one-ref (or absent, pre-v6) session is
+// visually unchanged.
+const questionnaireRefs = computed<QuestionnaireRefWithTitle[]>(() => session.value?.questionnaireRefs ?? [])
+const hasMultipleAreas = computed(() => questionnaireRefs.value.length > 1)
+const selectedAreaKey = ref('')
+
+function areaKeyOf(ref: { id: string; version: string }): string {
+  return `${ref.id}@${ref.version}`
+}
+
+function areaStorageKey(sessionId: string): string {
+  return `fipm.join.${sessionId}.area`
+}
+
+function loadStoredArea(sessionId: string): string | null {
+  try {
+    return localStorage.getItem(areaStorageKey(sessionId))
+  } catch {
+    return null
+  }
+}
+
+function storeArea(sessionId: string, key: string): void {
+  try {
+    localStorage.setItem(areaStorageKey(sessionId), key)
+  } catch {
+    // Storage unavailable: the choice simply isn't remembered next visit.
+  }
+}
+
 const ORCID_PATTERN = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/
 
 function validateOrcid() {
@@ -139,6 +186,13 @@ async function load() {
     if (!stored && defaultLang && (SUPPORTED_LOCALES as string[]).includes(defaultLang)) {
       locale.value = defaultLang as (typeof SUPPORTED_LOCALES)[number]
     }
+
+    // spec 08 §3.2: remembered choice wins, else the first ref, once this is a multi-ref session.
+    if (session.value && hasMultipleAreas.value) {
+      const storedArea = loadStoredArea(session.value.id)
+      const validKeys = questionnaireRefs.value.map(areaKeyOf)
+      selectedAreaKey.value = storedArea && validKeys.includes(storedArea) ? storedArea : validKeys[0]
+    }
   } catch (err) {
     if (err instanceof ApiResponseError && err.status === 404) {
       notFound.value = true
@@ -158,9 +212,16 @@ async function onSubmit() {
   submitError.value = null
   const joinCode = String(route.params.joinCode ?? '').toUpperCase()
 
+  // spec 08 §3.2: the chosen ref on a multi-ref session, else the session's
+  // single ref unchanged — `POST /api/fips` accepts either.
+  const chosenRef = hasMultipleAreas.value
+    ? questionnaireRefs.value.find((ref) => areaKeyOf(ref) === selectedAreaKey.value)
+    : null
+  const questionnaireRef = chosenRef ? { id: chosenRef.id, version: chosenRef.version } : s.questionnaireRef
+
   try {
     const created = await createFip({
-      questionnaireRef: s.questionnaireRef,
+      questionnaireRef,
       sessionId: s.id,
       joinCode,
       language: locale.value,
@@ -178,6 +239,7 @@ async function onSubmit() {
       setToken(created.id, created.editToken)
     }
     rememberSessionFip(s.id, created.id)
+    if (chosenRef) storeArea(s.id, areaKeyOf(chosenRef))
     await router.replace(`/fips/${created.id}/edit`)
   } catch (err) {
     submitError.value = createFipErrorMessage(err)
@@ -274,6 +336,28 @@ onMounted(load)
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.area-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+}
+
+.area-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+}
+
+.area-option input {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .field {

@@ -22,6 +22,8 @@ describe('MatrixCell', () => {
   it('renders one chip per declaration, each with its status class and status text', () => {
     const cell: MatrixCellType = {
       fipId: 'fip-1',
+      notApplicable: false,
+      absent: false,
       unanswered: false,
       comment: null,
       chips: [
@@ -54,7 +56,14 @@ describe('MatrixCell', () => {
   })
 
   it('renders the status-unanswered placeholder for an empty cell, no chip buttons', () => {
-    const cell: MatrixCellType = { fipId: 'fip-1', unanswered: true, comment: null, chips: [] }
+    const cell: MatrixCellType = {
+      fipId: 'fip-1',
+      notApplicable: false,
+      absent: false,
+      unanswered: true,
+      comment: null,
+      chips: [],
+    }
     const wrapper = mountCell(cell)
     expect(wrapper.findAll('button.chip')).toHaveLength(0)
     const placeholder = wrapper.get('.status-unanswered')
@@ -62,9 +71,35 @@ describe('MatrixCell', () => {
     expect(placeholder.attributes('aria-label')).toBe(en.matrix.unanswered)
   })
 
+  // Spec 08 §2.2: a notApplicable cell renders its own distinct chip, never
+  // the plain "unanswered" placeholder, even though it carries no chips.
+  it('renders the not-applicable chip, not the unanswered placeholder, for a notApplicable cell', () => {
+    const cell: MatrixCellType = { fipId: 'fip-1', notApplicable: true, absent: false, unanswered: false, comment: null, chips: [] }
+    const wrapper = mountCell(cell)
+    expect(wrapper.find('.status-unanswered').exists()).toBe(false)
+    expect(wrapper.findAll('button.chip')).toHaveLength(0)
+    const naChip = wrapper.get('.status-not-applicable')
+    expect(naChip.text()).toBe(en.matrix.notApplicableShort)
+    expect(naChip.attributes('title')).toBe(en.matrix.notApplicableFull)
+    expect(naChip.attributes('aria-label')).toBe(en.matrix.notApplicableFull)
+  })
+
+  // Spec 08 §3.3: an absent cell (the column's model lacks this row) is
+  // distinct from both unanswered and notApplicable.
+  it('renders the absent placeholder, distinct from unanswered and notApplicable', () => {
+    const cell: MatrixCellType = { fipId: 'fip-1', notApplicable: false, absent: true, unanswered: true, comment: null, chips: [] }
+    const wrapper = mountCell(cell)
+    expect(wrapper.find('.status-unanswered').exists()).toBe(false)
+    expect(wrapper.find('.status-not-applicable').exists()).toBe(false)
+    const absentEl = wrapper.get('.status-absent')
+    expect(absentEl.attributes('aria-label')).toBe(en.matrix.absent)
+  })
+
   it('compact mode abbreviates the status text to three letters but keeps it in full in the title', () => {
     const cell: MatrixCellType = {
       fipId: 'fip-1',
+      notApplicable: false,
+      absent: false,
       unanswered: false,
       comment: null,
       chips: [{ key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: null, successorLabel: null }],
@@ -79,6 +114,8 @@ describe('MatrixCell', () => {
   it('a chip with a note toggles the note text under the chips on click', async () => {
     const cell: MatrixCellType = {
       fipId: 'fip-1',
+      notApplicable: false,
+      absent: false,
       unanswered: false,
       comment: null,
       chips: [
@@ -107,6 +144,8 @@ describe('MatrixCell', () => {
   it('puts a successor label in the chip title and reveals it on click', async () => {
     const cell: MatrixCellType = {
       fipId: 'fip-1',
+      notApplicable: false,
+      absent: false,
       unanswered: false,
       comment: null,
       chips: [
@@ -132,6 +171,8 @@ describe('MatrixCell', () => {
   it('a chip with neither note nor successor label is not clickable to expand anything', async () => {
     const cell: MatrixCellType = {
       fipId: 'fip-1',
+      notApplicable: false,
+      absent: false,
       unanswered: false,
       comment: null,
       chips: [{ key: 'a', label: 'DOI', iri: 'a', freeText: false, status: 'current', note: null, successorLabel: null }],

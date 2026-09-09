@@ -54,6 +54,8 @@ export interface Answer {
   questionId: string
   declarations: Declaration[]
   comment?: string | null
+  /** spec 08 §2.1: mutually exclusive with `declarations` — never stored `false` (dropped from the payload). */
+  notApplicable?: boolean
 }
 
 export interface DataSteward {
@@ -80,6 +82,18 @@ export interface RelatedDmp {
 export interface QuestionnaireRef {
   id: string
   version: string
+}
+
+/** spec 08 §3.1: a session's questionnaire ref plus its per-session area label. */
+export interface QuestionnaireRefLabelled {
+  id: string
+  version: string
+  label: LangMap
+}
+
+/** `SessionOut`/`SessionPublicOut`'s per-ref entry (spec 08 §3.1): the labelled ref plus the model's own title. */
+export interface QuestionnaireRefWithTitle extends QuestionnaireRefLabelled {
+  title: LangMap
 }
 
 // ---------------------------------------------------------------------------
@@ -126,6 +140,8 @@ export interface FipOut {
   editToken?: string
   /** spec 07 §0/§4.3: the version migrated *from* on the last migration, or absent/null otherwise. */
   migratedFrom?: MigratedFrom | null
+  /** spec 08 §3.2: the session ref's area label, non-null only for a FIP in a multi-ref session. */
+  areaLabel?: LangMap | null
 }
 
 // ---------------------------------------------------------------------------
@@ -237,6 +253,18 @@ export interface KnowledgeModelQuestion {
   allowMultiple: boolean
   /** spec 04 §2: present (`true`) only while hidden; absent/undefined otherwise, never stored `false`. */
   hidden?: boolean
+  /** spec 08 §1.1: 0..12 unique absolute IRIs, display order, resolving against `inlineFers` or the catalogue. */
+  suggestedFerIds?: string[]
+  /** spec 08 §1.1: default `true`; `false` hides free text and rejects `ferFreeText` server-side. */
+  allowFreeText?: boolean
+}
+
+/** spec 08 §1.1: an area-specific FER a fork carries before it exists in the global catalogue. */
+export interface InlineFer {
+  id: string
+  label: LangMap
+  type: string
+  homepage?: string | null
 }
 
 export interface KnowledgeModelSection {
@@ -272,6 +300,12 @@ export interface KnowledgeModelContent {
   forkedFrom?: KnowledgeModelForkedFrom | null
   /** spec 04 §1/spec 00 §6: the GO FAIR CC-BY-SA credit line, set automatically on such a fork. */
   attribution?: string | null
+  /** spec 08 §1.1: 0..300 area-specific FERs staged before catalogue promotion. */
+  inlineFers?: InlineFer[]
+  /** spec 08 §1.1: the status a quick-pick checkbox assigns; default `current`. */
+  defaultDeclarationStatus?: DeclarationStatus
+  /** spec 08 §1.1/§1.5: collapses the status control behind "more" in the participant editor. */
+  compactDeclarations?: boolean
 }
 
 export interface KnowledgeModelOut {
@@ -350,12 +384,16 @@ export interface SessionCreateRequest {
   title: string
   questionnaireRef: QuestionnaireRef
   defaultLanguage: string
+  /** spec 08 §3.1: 1..12 labelled refs; a pre-v6 client omits this and `questionnaireRef` alone still works. */
+  questionnaireRefs?: QuestionnaireRefLabelled[]
 }
 
 export interface SessionPatchRequest {
   title?: string
   status?: SessionStatus
   defaultLanguage?: string
+  /** spec 08 §3.1: replaceable only while the session has no FIPs yet (409 `session_has_fips` otherwise). */
+  questionnaireRefs?: QuestionnaireRefLabelled[]
 }
 
 export interface SessionOut {
@@ -370,6 +408,8 @@ export interface SessionOut {
   status: SessionStatus
   createdAt: string
   updatedAt: string
+  /** spec 08 §3.1: always populated (derived from `questionnaireRef` on a pre-v6 row) — the first entry mirrors it. */
+  questionnaireRefs?: QuestionnaireRefWithTitle[]
 }
 
 /** `GET /api/sessions/by-code/{joinCode}` (spec 02 §5.1) — public, pre-join metadata. */
@@ -382,6 +422,8 @@ export interface SessionPublicOut {
   facilitatorName: string
   /** Additive per spec 02 §5.1: the knowledge model's `title`, so the join screen skips a KM fetch. */
   questionnaireTitle: LangMap
+  /** spec 08 §3.1: present on a multi-ref session; length 1 means "no visual change" for `JoinSession.vue`. */
+  questionnaireRefs?: QuestionnaireRefWithTitle[]
 }
 
 // ---------------------------------------------------------------------------
@@ -450,6 +492,8 @@ export interface FipExportAnswer {
   ferType: string | null
   declarations: FipExportDeclaration[]
   comment: string | null
+  /** spec 08 §2.3: `true` only when the answer is marked "not applicable" — `declarations` is then always `[]`. */
+  notApplicable?: boolean
 }
 
 export interface FipExportFip {
@@ -465,6 +509,8 @@ export interface FipExportFip {
   relatedDMPs: RelatedDmp[]
   /** spec 07 §6: set on the last migration, otherwise `null`. */
   migratedFrom?: MigratedFrom | null
+  /** spec 08 §3.3: present only inside a session export, on a FIP from a multi-ref session. */
+  area?: QuestionnaireRefLabelled | null
 }
 
 /** `fips.orphaned_answers` (spec 07 §4.4), FER-enriched like `FipExportAnswer.declarations`. */
@@ -538,6 +584,8 @@ export interface SessionExportDoc {
     questionnaireRef: QuestionnaireRef
     facilitatorName: string
     createdAt: string
+    /** spec 08 §3.3: the full labelled ref list; `questionnaireRef` above stays the first entry. */
+    questionnaireRefs?: QuestionnaireRefLabelled[]
   }
   fips: FipExportDoc[]
 }

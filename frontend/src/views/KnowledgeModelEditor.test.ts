@@ -34,6 +34,13 @@ vi.mock('@/api/ferTypes', () => ({
   getFerTypes: vi.fn(),
 }))
 
+// spec 08 §1.4: `kmEditor.load()` also prefetches the FER catalogue (the
+// picker's cached label/known-id source) — mocked here for the same reason
+// as the other two, even though most of this suite's tests never touch it.
+vi.mock('@/api/fers', () => ({
+  listFers: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+}))
+
 import { getKnowledgeModel } from '@/api/knowledgeModels'
 import { getFerTypes } from '@/api/ferTypes'
 import { useKmEditorStore } from '@/stores/kmEditor'

@@ -10,13 +10,14 @@ import type { Answer, KnowledgeModelContent, KnowledgeModelOut } from '@/types/a
 export const TOTAL_QUESTIONS = 21
 
 /**
- * "Answered" = the FIP's `answers` entry has >= 1 declaration; a lone
- * `status: "none"` declaration still counts (spec 02 §1 — the ontology
- * treats "no choice yet" as a real declaration, spec 02 §7 A6).
+ * "Answered" = the FIP's `answers` entry has >= 1 declaration, or is marked
+ * `notApplicable` (spec 08 §2.2): a lone `status: "none"` declaration still
+ * counts (spec 02 §1 — the ontology treats "no choice yet" as a real
+ * declaration, spec 02 §7 A6), and so does "this question does not apply".
  */
 export function answeredCount(answers: Answer[] | null | undefined): number {
   if (!answers) return 0
-  return answers.filter((answer) => (answer.declarations?.length ?? 0) > 0).length
+  return answers.filter((answer) => (answer.declarations?.length ?? 0) > 0 || answer.notApplicable === true).length
 }
 
 /**

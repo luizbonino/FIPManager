@@ -2,6 +2,18 @@
   <div class="matrix-scroll">
     <table class="matrix-table">
       <thead>
+        <!-- spec 08 §3.3: a second header row grouping columns by
+             questionnaire ref, only while a session actually offers more
+             than one (a single-ref session looks exactly as before). -->
+        <tr v-if="matrix.columnGroups.length > 1" class="column-group-row">
+          <th scope="col" class="sticky-col group-header-fill"></th>
+          <template v-for="group in matrix.columnGroups" :key="group.refKey">
+            <th v-if="group.columnCount > 0" scope="colgroup" :colspan="group.columnCount" class="column-group-head">
+              {{ group.label ?? group.refKey }}
+            </th>
+          </template>
+          <th scope="col" class="group-header-fill"></th>
+        </tr>
         <tr>
           <th scope="col" class="sticky-col question-head">{{ $t('matrix.question') }}</th>
           <th v-for="column in matrix.columns" :key="column.fipId" scope="col" class="fip-head">
@@ -100,6 +112,17 @@ thead .sticky-col {
 
 .fip-head {
   min-width: 8rem;
+}
+
+.column-group-row th {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.group-header-fill {
+  background-color: var(--color-hover);
 }
 
 .fip-name {

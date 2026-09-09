@@ -5,28 +5,37 @@
       :fer-id="declaration.ferId ?? null"
       :fer-free-text="declaration.ferFreeText ?? null"
       :disabled="readOnly"
+      :suggested="suggested"
+      :allow-free-text="allowFreeText"
+      :show-suggested="showSuggested"
+      :checked-fer-ids="checkedFerIds"
       @change="onFerChange"
+      @toggle-suggested="(ferId, checked) => $emit('toggleSuggested', ferId, checked)"
     />
-    <StatusSelect
-      :model-value="declaration.status"
-      :disabled="readOnly"
-      @update:model-value="onStatusChange"
-    />
-    <label class="note-field">
-      <span class="sr-only">{{ $t('editor.note') }}</span>
-      <input
-        :value="noteValue"
-        type="text"
-        :placeholder="$t('editor.note')"
+
+    <template v-if="!compact">
+      <StatusSelect
+        :model-value="declaration.status"
         :disabled="readOnly"
-        @change="onNoteChange"
+        @update:model-value="onStatusChange"
       />
-    </label>
+      <label class="note-field">
+        <span class="sr-only">{{ $t('editor.note') }}</span>
+        <input
+          :value="noteValue"
+          type="text"
+          :placeholder="$t('editor.note')"
+          :disabled="readOnly"
+          @change="onNoteChange"
+        />
+      </label>
+    </template>
+
     <button v-if="!readOnly" type="button" class="remove-btn" @click="$emit('remove')">
       {{ $t('editor.removeDeclaration') }}
     </button>
 
-    <div v-if="showSuccessor" class="successor-row">
+    <div v-if="showSuccessor && !compact" class="successor-row">
       <label class="successor-label">{{ $t('editor.successor') }}</label>
       <FerPicker
         :options="options"
@@ -37,6 +46,45 @@
       />
       <p class="successor-hint">{{ $t('editor.successorHint') }}</p>
     </div>
+
+    <!-- spec 08 §1.5: compactDeclarations collapses the status control (and
+         note/successor) behind "more", closed by default, with the status
+         still visible as a badge on the summary line (spec 02 §4.3: colour
+         is never the only signal). -->
+    <details v-if="compact" class="more-details">
+      <summary class="more-summary">
+        <StatusBadge :status="declaration.status" />
+        <span class="more-label">{{ $t('editor.more') }}</span>
+      </summary>
+      <div class="more-body">
+        <StatusSelect
+          :model-value="declaration.status"
+          :disabled="readOnly"
+          @update:model-value="onStatusChange"
+        />
+        <label class="note-field">
+          <span class="sr-only">{{ $t('editor.note') }}</span>
+          <input
+            :value="noteValue"
+            type="text"
+            :placeholder="$t('editor.note')"
+            :disabled="readOnly"
+            @change="onNoteChange"
+          />
+        </label>
+        <div v-if="showSuccessor" class="successor-row">
+          <label class="successor-label">{{ $t('editor.successor') }}</label>
+          <FerPicker
+            :options="options"
+            :fer-id="declaration.successorFerId ?? null"
+            :fer-free-text="declaration.successorFreeText ?? null"
+            :disabled="readOnly"
+            @change="onSuccessorChange"
+          />
+          <p class="successor-hint">{{ $t('editor.successorHint') }}</p>
+        </div>
+      </div>
+    </details>
 
     <details v-if="hasRelatedDmps" class="evidence">
       <summary>{{ $t('dmp.evidence') }}</summary>
@@ -94,6 +142,7 @@ import { useFipEditorStore } from '@/stores/fipEditor'
 import { resolveLang } from '@/lib/lang'
 import FerPicker from './FerPicker.vue'
 import StatusSelect from './StatusSelect.vue'
+import StatusBadge from './StatusBadge.vue'
 import type { Declaration, DeclarationStatus, FerOut, RelatedDmp } from '@/types/api'
 
 /**
@@ -101,15 +150,30 @@ import type { Declaration, DeclarationStatus, FerOut, RelatedDmp } from '@/types
  * Reads/writes the shared editor store directly rather than round-tripping
  * events through `QuestionCard`, since the store is the single source of
  * truth for the whole editor.
+ *
+ * spec 08 §1.5: `suggested`/`allowFreeText`/`showSuggested`/`checkedFerIds`
+ * forward straight through to the (first, non-successor) `FerPicker`, and
+ * `toggleSuggested` bubbles up unchanged for `QuestionCard.vue` to apply
+ * against the store. `compact` (the model's `compactDeclarations`) hides
+ * the status control, note and successor picker behind a "more" `<details>`,
+ * closed by default, with the status still visible as a `StatusBadge`.
  */
-const props = defineProps<{
-  questionId: string
-  index: number
-  declaration: Declaration
-  options: FerOut[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    questionId: string
+    index: number
+    declaration: Declaration
+    options: FerOut[]
+    suggested?: FerOut[]
+    allowFreeText?: boolean
+    showSuggested?: boolean
+    checkedFerIds?: string[]
+    compact?: boolean
+  }>(),
+  { suggested: () => [], allowFreeText: true, showSuggested: false, checkedFerIds: () => [], compact: false }
+)
 
-defineEmits<{ remove: [] }>()
+defineEmits<{ remove: []; toggleSuggested: [ferId: string, checked: boolean] }>()
 
 const store = useFipEditorStore()
 const readOnly = computed(() => store.readOnly)
@@ -258,6 +322,34 @@ function onQuestionRefChange(event: Event) {
   background: none;
   color: var(--color-error);
   font-size: var(--font-size-sm);
+}
+
+.more-details {
+  grid-column: 1 / -1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-background);
+}
+
+.more-summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.more-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-link);
+}
+
+.more-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.75rem;
 }
 
 .successor-row {

@@ -8,6 +8,9 @@
  * two cannot silently drift (spec 04 §3.3).
  */
 import type {
+  DeclarationStatus,
+  FerOut,
+  InlineFer,
   KnowledgeModelContent,
   KnowledgeModelQuestion,
   KnowledgeModelSection,
@@ -44,6 +47,33 @@ export const MAX_TEXT_LENGTH = 4000
 const MAX_ERRORS = 50
 
 // ---------------------------------------------------------------------------
+// Spec 08 §1 — suggested options / inline FERs / declaration defaults.
+// ---------------------------------------------------------------------------
+
+/** `fipm.config.DECLARATION_STATUSES` (spec 02 §1) — kept here too since the model-level default needs it. */
+export const DECLARATION_STATUSES: readonly DeclarationStatus[] = [
+  'current',
+  'planned',
+  'planned-development',
+  'planned-replacement',
+  'none',
+]
+
+export const MAX_SUGGESTED_FERS = 12
+export const MAX_INLINE_FERS = 300
+
+/** An absolute `http(s)` IRI (spec 08 §1.2 rule 9/12): a same-shape check the backend's `httpx`-style parse mirrors. */
+export function isAbsoluteHttpIri(value: unknown): value is string {
+  if (typeof value !== 'string' || value === '') return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Errors thrown by the edit ops (mirroring the API's error codes, spec §3)
 // ---------------------------------------------------------------------------
 
@@ -74,6 +104,7 @@ function cloneQuestion(question: KnowledgeModelQuestion): KnowledgeModelQuestion
     ...question,
     text: cloneLangMap(question.text),
     help: question.help ? cloneLangMap(question.help) : null,
+    suggestedFerIds: question.suggestedFerIds ? [...question.suggestedFerIds] : question.suggestedFerIds,
   }
 }
 
@@ -85,6 +116,10 @@ function cloneSection(section: KnowledgeModelSection): KnowledgeModelSection {
   }
 }
 
+function cloneInlineFer(fer: InlineFer): InlineFer {
+  return { ...fer, label: cloneLangMap(fer.label) }
+}
+
 /** Deep-enough clone: every section, question and LangMap gets its own copy. */
 export function cloneContent(content: KnowledgeModelContent): KnowledgeModelContent {
   return {
@@ -94,6 +129,7 @@ export function cloneContent(content: KnowledgeModelContent): KnowledgeModelCont
     changelog: content.changelog.map((entry) => ({ ...entry })),
     sections: content.sections.map(cloneSection),
     forkedFrom: content.forkedFrom ? { ...content.forkedFrom } : content.forkedFrom,
+    inlineFers: content.inlineFers ? content.inlineFers.map(cloneInlineFer) : content.inlineFers,
   }
 }
 
@@ -350,6 +386,162 @@ export function setFerType(
 }
 
 // ---------------------------------------------------------------------------
+// Spec 08 §1.4 — suggested options, inline FERs, model-level declaration defaults.
+// ---------------------------------------------------------------------------
+
+/** Replaces a question's whole `suggestedFerIds` list (e.g. after a `MoveButtons` reorder). */
+export function setSuggestedFerIds(
+  content: KnowledgeModelContent,
+  questionId: string,
+  ids: string[]
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  next.sections[sectionIndex].questions[questionIndex].suggestedFerIds = [...ids]
+  return next
+}
+
+/** Appends `ferId` to the question's suggestions, a no-op if already present or at the 12 cap. */
+export function addSuggestedFer(
+  content: KnowledgeModelContent,
+  questionId: string,
+  ferId: string
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  const current = question.suggestedFerIds ?? []
+  if (current.includes(ferId) || current.length >= MAX_SUGGESTED_FERS) return next
+  question.suggestedFerIds = [...current, ferId]
+  return next
+}
+
+/** Removes `ferId` from the question's suggestions, if present. */
+export function removeSuggestedFer(
+  content: KnowledgeModelContent,
+  questionId: string,
+  ferId: string
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  question.suggestedFerIds = (question.suggestedFerIds ?? []).filter((id) => id !== ferId)
+  return next
+}
+
+/** Moves one suggested id one step up/down within its question's list (`MoveButtons.vue`, spec §1.4). */
+export function moveSuggestedFer(
+  content: KnowledgeModelContent,
+  questionId: string,
+  ferId: string,
+  direction: MoveDirection
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  const ids = question.suggestedFerIds ?? []
+  const index = ids.indexOf(ferId)
+  if (index === -1) return next
+  question.suggestedFerIds = moveWithinArray(ids, index, direction)
+  return next
+}
+
+/** The `allowFreeText` checkbox (spec §1.1/§1.4); `undefined` means "true" (the spec default). */
+export function setAllowFreeText(
+  content: KnowledgeModelContent,
+  questionId: string,
+  value: boolean
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  next.sections[sectionIndex].questions[questionIndex].allowFreeText = value
+  return next
+}
+
+/**
+ * "Add inline FER" (spec §1.4): appends `fer` to `model.inlineFers` *and* to
+ * `questionId`'s `suggestedFerIds` in one op, matching the editor's single
+ * sub-form action. A no-op on a duplicate inline id (the caller should
+ * validate first; this stays a pure, throw-free op like its siblings).
+ */
+export function addInlineFer(
+  content: KnowledgeModelContent,
+  questionId: string,
+  fer: InlineFer
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const existingInline = next.inlineFers ?? []
+  if (existingInline.some((f) => f.id === fer.id)) return next
+  next.inlineFers = [...existingInline, cloneInlineFer(fer)]
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  const suggested = question.suggestedFerIds ?? []
+  if (!suggested.includes(fer.id) && suggested.length < MAX_SUGGESTED_FERS) {
+    question.suggestedFerIds = [...suggested, fer.id]
+  }
+  return next
+}
+
+/** Deletes an `inlineFers` entry (the settings panel's delete button on an "unused" one, spec §1.4). */
+export function removeInlineFer(content: KnowledgeModelContent, ferId: string): KnowledgeModelContent {
+  const next = cloneContent(content)
+  next.inlineFers = (next.inlineFers ?? []).filter((f) => f.id !== ferId)
+  return next
+}
+
+/** `model.inlineFers` entries no question's `suggestedFerIds` references (spec §1.2 rule 13's "unused" note). */
+export function unusedInlineFers(content: KnowledgeModelContent): InlineFer[] {
+  const referenced = new Set(allQuestions(content).flatMap((q) => q.suggestedFerIds ?? []))
+  return (content.inlineFers ?? []).filter((f) => !referenced.has(f.id))
+}
+
+/**
+ * Resolves one suggested id to a `FerOut`-shaped option (spec §1.3): an
+ * `inlineFers` entry first (so a draft model / offline laptop can render its
+ * own quick-pick before publish promotes anything), then the catalogue map;
+ * `null` when neither has it (a stale suggestion, not rendered).
+ */
+export function resolveSuggestedFer(
+  ferId: string,
+  content: KnowledgeModelContent,
+  fers: Record<string, FerOut> | Map<string, FerOut>
+): FerOut | null {
+  const inline = (content.inlineFers ?? []).find((f) => f.id === ferId)
+  if (inline) {
+    return { id: inline.id, label: inline.label, type: inline.type, homepage: inline.homepage ?? null, source: 'model' }
+  }
+  const catalogued = fers instanceof Map ? fers.get(ferId) : fers[ferId]
+  return catalogued ?? null
+}
+
+/** The full, ordered, resolved suggested-FER list for one question (spec §1.5's `suggested` prop). */
+export function suggestedFersFor(
+  content: KnowledgeModelContent,
+  questionId: string,
+  fers: Record<string, FerOut> | Map<string, FerOut>
+): FerOut[] {
+  const question = allQuestions(content).find((q) => q.id === questionId)
+  const ids = question?.suggestedFerIds ?? []
+  const resolved: FerOut[] = []
+  for (const id of ids) {
+    const fer = resolveSuggestedFer(id, content, fers)
+    if (fer) resolved.push(fer)
+  }
+  return resolved
+}
+
+export function setDefaultDeclarationStatus(
+  content: KnowledgeModelContent,
+  value: DeclarationStatus
+): KnowledgeModelContent {
+  return { ...cloneContent(content), defaultDeclarationStatus: value }
+}
+
+export function setCompactDeclarations(content: KnowledgeModelContent, value: boolean): KnowledgeModelContent {
+  return { ...cloneContent(content), compactDeclarations: value }
+}
+
+// ---------------------------------------------------------------------------
 // Delete
 // ---------------------------------------------------------------------------
 
@@ -412,26 +604,42 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+/** Options mirroring the backend's `validate_content` keyword args (spec 08 §1.2 rule 10/13). */
+export interface ValidateContentOptions {
+  /**
+   * The picker's cached catalogue map — `undefined`/`null` **skips** the
+   * catalogue half of rule 10 (resolution still checks `inlineFers`), same
+   * as the backend's `known_fer_ids=None`.
+   */
+  knownFerIds?: Set<string> | null
+  /** Rule 13 (`no_answer_path`, `inline_fer_duplicates_catalogue`) applies publish-time only. */
+  publishing?: boolean
+}
+
 /**
- * `validate_content(doc) -> list[ContentError]` (spec §3.3). Collects up to
- * 50 errors (the API's own cap) rather than stopping at the first one, so
- * `KmValidationList.vue` can show the whole picture at once.
+ * `validate_content(doc) -> list[ContentError]` (spec §3.3, extended by spec
+ * 08 §1.2 rules 9-13). Collects up to 50 errors (the API's own cap) rather
+ * than stopping at the first one, so `KmValidationList.vue` can show the
+ * whole picture at once.
  */
 export function validateContent(
   content: KnowledgeModelContent,
-  ferTypeKeys: readonly string[]
+  ferTypeKeys: readonly string[],
+  options: ValidateContentOptions = {}
 ): ContentError[] {
+  const { knownFerIds = null, publishing = false } = options
   const errors: ContentError[] = []
   function push(path: string, code: string, message: string) {
     if (errors.length < MAX_ERRORS) errors.push({ path, code, message })
   }
 
-  function validateLangMap(value: unknown, path: string) {
+  function validateLangMap(value: unknown, path: string, requireEn = true) {
     if (!isPlainObject(value)) {
       push(path, 'missing_en', `${path} must be an object containing "en"`)
       return
     }
     let hasEn = false
+    let hasAny = false
     for (const [key, langValue] of Object.entries(value)) {
       if (!(SUPPORTED_LANGUAGES as readonly string[]).includes(key)) {
         push(`${path}.${key}`, 'unknown_language', `unknown language "${key}"`)
@@ -440,11 +648,20 @@ export function validateContent(
       if (key === 'en') hasEn = true
       if (typeof langValue !== 'string' || langValue === '') {
         push(`${path}.${key}`, 'empty_string', `${path}.${key} must be a non-empty string`)
-      } else if (langValue.length > MAX_TEXT_LENGTH) {
-        push(`${path}.${key}`, 'too_long', `${path}.${key} exceeds ${MAX_TEXT_LENGTH} characters`)
+      } else {
+        hasAny = true
+        if (langValue.length > MAX_TEXT_LENGTH) {
+          push(`${path}.${key}`, 'too_long', `${path}.${key} exceeds ${MAX_TEXT_LENGTH} characters`)
+        }
       }
     }
-    if (!hasEn) push(path, 'missing_en', `${path} must include "en"`)
+    if (requireEn) {
+      if (!hasEn) push(path, 'missing_en', `${path} must include "en"`)
+    } else if (!hasAny) {
+      // spec §1.2 rule 12 / §7 A7: an area/inline-FER label needs no `en`,
+      // just >= 1 non-empty language value.
+      push(path, 'missing_key', `${path} must have at least one non-empty language value`)
+    }
   }
 
   if (!Array.isArray(content.sections)) {
@@ -520,10 +737,52 @@ export function validateContent(
         push(`${questionPath}.scope`, 'invalid_value', `invalid scope "${question.scope}"`)
       }
 
-      for (const field of ['required', 'allowMultiple', 'hidden'] as const) {
+      for (const field of ['required', 'allowMultiple', 'hidden', 'allowFreeText'] as const) {
         const value = question[field]
         if (value !== undefined && typeof value !== 'boolean') {
           push(`${questionPath}.${field}`, 'invalid_value', `${field} must be a boolean`)
+        }
+      }
+
+      // Spec 08 §1.2 rule 9: suggestedFerIds — unique absolute http(s) IRIs, <= 12.
+      const suggested = question.suggestedFerIds
+      if (suggested !== undefined) {
+        if (!Array.isArray(suggested)) {
+          push(`${questionPath}.suggestedFerIds`, 'invalid_value', 'suggestedFerIds must be a list')
+        } else {
+          if (suggested.length > MAX_SUGGESTED_FERS) {
+            push(`${questionPath}.suggestedFerIds`, 'too_many', `more than ${MAX_SUGGESTED_FERS} suggested FERs`)
+          }
+          const seen = new Set<string>()
+          suggested.forEach((id, idIndex) => {
+            const idPath = `${questionPath}.suggestedFerIds[${idIndex}]`
+            if (!isAbsoluteHttpIri(id)) {
+              push(idPath, 'invalid_fer_iri', `"${id}" is not an absolute http(s) IRI`)
+              return
+            }
+            if (seen.has(id)) {
+              push(idPath, 'duplicate_suggested_fer', `duplicate suggested FER "${id}"`)
+              return
+            }
+            seen.add(id)
+            // Rule 10: resolve against inlineFers ∪ knownFerIds; the
+            // catalogue half is skipped entirely when knownFerIds is null,
+            // exactly like the backend's known_fer_ids=None.
+            const inlineIds = new Set((content.inlineFers ?? []).map((f) => f.id))
+            const resolvable = inlineIds.has(id) || knownFerIds === null || knownFerIds.has(id)
+            if (!resolvable) {
+              push(idPath, 'unknown_suggested_fer', `suggested FER "${id}" does not resolve`)
+            }
+          })
+        }
+      }
+
+      // Spec 08 §1.2 rule 13 (publish only): no suggestions and no free text -> unanswerable.
+      if (publishing) {
+        const allowFreeText = question.allowFreeText ?? true
+        const hasSuggestions = Array.isArray(suggested) && suggested.length > 0
+        if (!allowFreeText && !hasSuggestions) {
+          push(`${questionPath}`, 'no_answer_path', `question "${question.id}" has no way to be answered`)
         }
       }
     })
@@ -531,6 +790,50 @@ export function validateContent(
 
   if (questionCount > MAX_QUESTIONS) {
     push('sections', 'too_many', `more than ${MAX_QUESTIONS} questions`)
+  }
+
+  // Spec 08 §1.2 rule 11: model-level declaration defaults.
+  if (content.defaultDeclarationStatus !== undefined && !DECLARATION_STATUSES.includes(content.defaultDeclarationStatus)) {
+    push('defaultDeclarationStatus', 'invalid_value', `invalid defaultDeclarationStatus "${content.defaultDeclarationStatus}"`)
+  }
+  if (content.compactDeclarations !== undefined && typeof content.compactDeclarations !== 'boolean') {
+    push('compactDeclarations', 'invalid_value', 'compactDeclarations must be a boolean')
+  }
+
+  // Spec 08 §1.2 rule 12: inlineFers — <= 300, unique absolute IRI ids, known type, non-empty label, valid homepage.
+  const inlineFers = content.inlineFers
+  if (inlineFers !== undefined) {
+    if (!Array.isArray(inlineFers)) {
+      push('inlineFers', 'invalid_value', 'inlineFers must be a list')
+    } else {
+      if (inlineFers.length > MAX_INLINE_FERS) {
+        push('inlineFers', 'too_many', `more than ${MAX_INLINE_FERS} inline FERs`)
+      }
+      const seenIds = new Set<string>()
+      inlineFers.forEach((fer, ferIndex) => {
+        const ferPath = `inlineFers[${ferIndex}]`
+        if (!isAbsoluteHttpIri(fer.id)) {
+          push(`${ferPath}.id`, 'invalid_fer_iri', `"${fer.id}" is not an absolute http(s) IRI`)
+        } else if (seenIds.has(fer.id)) {
+          push(`${ferPath}.id`, 'duplicate_inline_fer', `duplicate inline FER id "${fer.id}"`)
+        } else {
+          seenIds.add(fer.id)
+          if (publishing && knownFerIds?.has(fer.id)) {
+            push(`${ferPath}.id`, 'inline_fer_duplicates_catalogue', `"${fer.id}" already exists in the catalogue`)
+          }
+        }
+
+        if (!ferTypeKeys.includes(fer.type)) {
+          push(`${ferPath}.type`, 'unknown_fer_type', `unknown FER type "${fer.type}"`)
+        }
+
+        validateLangMap(fer.label, `${ferPath}.label`, false)
+
+        if (fer.homepage !== null && fer.homepage !== undefined && !isAbsoluteHttpIri(fer.homepage)) {
+          push(`${ferPath}.homepage`, 'invalid_value', `"${fer.homepage}" is not an absolute http(s) IRI`)
+        }
+      })
+    }
   }
 
   return errors

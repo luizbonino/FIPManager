@@ -1,5 +1,21 @@
 <template>
   <div class="fer-picker">
+    <fieldset v-if="showSuggested && suggested.length > 0" class="suggested-fieldset">
+      <legend>{{ $t('editor.suggestedOptions') }}</legend>
+      <label v-for="opt in suggested" :key="opt.id" class="suggested-option">
+        <input
+          type="checkbox"
+          :checked="checkedFerIds.includes(opt.id)"
+          :disabled="disabled"
+          @change="onToggleSuggested(opt, ($event.target as HTMLInputElement).checked)"
+        />
+        <span class="suggested-option-text">
+          <span class="suggested-option-label">{{ labelOf(opt) }}</span>
+          <span v-if="opt.homepage" class="suggested-option-homepage">{{ opt.homepage }}</span>
+        </span>
+      </label>
+    </fieldset>
+
     <div v-if="mode === 'catalogue'" class="catalogue-mode">
       <label class="sr-only" :for="inputId">{{ $t('editor.chooseFer') }}</label>
       <input
@@ -40,7 +56,7 @@
       />
     </div>
 
-    <button type="button" class="toggle-mode" :disabled="disabled" @click="toggleMode">
+    <button v-if="allowFreeText !== false" type="button" class="toggle-mode" :disabled="disabled" @click="toggleMode">
       {{ mode === 'catalogue' ? $t('editor.useFreeText') : $t('editor.useCatalogue') }}
     </button>
   </div>
@@ -57,23 +73,51 @@ import type { FerOut } from '@/types/api'
  * search box filtering `options` client-side, and a "Use my own wording"
  * toggle writing `ferFreeText` instead. `ferId` xor `ferFreeText`, matching
  * the backend validator — `change` always emits exactly one of the two set.
+ *
+ * spec 08 §1.5: optionally, a quick-pick `<fieldset>` of `suggested` FERs
+ * above the search box (only while `showSuggested`), each a checkbox
+ * emitting `toggleSuggested`; `checkedFerIds` tells this component which
+ * suggestions already have a declaration elsewhere in the answer (the spec
+ * names `suggested`/`allowFreeText`/`showSuggested` as the new props but
+ * does not spell out how the checkbox state itself is sourced — the
+ * question's whole answer lives in the store, not in one picker instance —
+ * so this is the smallest addition that makes "checked reflects reality"
+ * true: `QuestionCard.vue` derives it from `store.fip.answers[...].declarations`).
+ * `allowFreeText: false` hides the "Use my own wording" toggle and pins `mode`
+ * to `'catalogue'`.
  */
-const props = defineProps<{
-  options: FerOut[]
-  ferId: string | null
-  ferFreeText: string | null
-  disabled?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    options: FerOut[]
+    ferId: string | null
+    ferFreeText: string | null
+    disabled?: boolean
+    suggested?: FerOut[]
+    allowFreeText?: boolean
+    showSuggested?: boolean
+    checkedFerIds?: string[]
+  }>(),
+  { suggested: () => [], allowFreeText: true, showSuggested: false, checkedFerIds: () => [] }
+)
 
-const emit = defineEmits<{ change: [{ ferId: string | null; ferFreeText: string | null }] }>()
+const emit = defineEmits<{
+  change: [{ ferId: string | null; ferFreeText: string | null }]
+  toggleSuggested: [ferId: string, checked: boolean]
+}>()
 
 const { locale } = useI18n()
 
 let uid = 0
 const inputId = `fer-picker-${++uid}`
 
-const mode = ref<'catalogue' | 'freeText'>(props.ferFreeText ? 'freeText' : 'catalogue')
+const mode = ref<'catalogue' | 'freeText'>(
+  props.allowFreeText === false ? 'catalogue' : props.ferFreeText ? 'freeText' : 'catalogue'
+)
 const showList = ref(false)
+
+function onToggleSuggested(opt: FerOut, checked: boolean) {
+  emit('toggleSuggested', opt.id, checked)
+}
 
 function labelOf(opt: FerOut): string {
   return resolveLang(opt.label, locale.value) ?? opt.id
@@ -141,6 +185,55 @@ function onFreeTextInput() {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+}
+
+.suggested-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-hover);
+}
+
+.suggested-fieldset legend {
+  padding: 0 0.3rem;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.suggested-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.suggested-option input[type='checkbox'] {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+.suggested-option-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.suggested-option-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+.suggested-option-homepage {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
 }
 
 .catalogue-mode,

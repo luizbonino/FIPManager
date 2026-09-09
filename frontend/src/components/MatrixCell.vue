@@ -1,6 +1,17 @@
 <template>
   <div class="matrix-cell" :class="{ compact }">
-    <p v-if="cell.unanswered" class="chip status-unanswered" :aria-label="$t('matrix.unanswered')">–</p>
+    <p v-if="cell.absent" class="chip status-absent" :title="$t('matrix.absent')" :aria-label="$t('matrix.absent')">
+      &#9645;
+    </p>
+    <p
+      v-else-if="cell.notApplicable"
+      class="chip status-not-applicable"
+      :title="$t('matrix.notApplicableFull')"
+      :aria-label="$t('matrix.notApplicableFull')"
+    >
+      {{ $t('matrix.notApplicableShort') }}
+    </p>
+    <p v-else-if="cell.unanswered" class="chip status-unanswered" :aria-label="$t('matrix.unanswered')">–</p>
     <template v-else>
       <span v-for="chip in cell.chips" :key="chip.key" class="chip-wrap">
         <button
@@ -148,6 +159,33 @@ function chipTitle(chip: MatrixChip): string {
   background-color: #f3f4f6;
   color: #6b7280;
   margin: 0;
+}
+
+.chip.status-not-applicable {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background-color: var(--color-status-not-applicable);
+  color: #ffffff;
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+/* spec 08 §3.3: hatched, distinct from both unanswered and N/A — the
+   column's model simply does not have this row's question. */
+.chip.status-absent {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  margin: 0;
+  color: #9ca3af;
+  background-image: repeating-linear-gradient(
+    45deg,
+    #e5e7eb,
+    #e5e7eb 4px,
+    #f3f4f6 4px,
+    #f3f4f6 8px
+  );
 }
 
 .chip-note {

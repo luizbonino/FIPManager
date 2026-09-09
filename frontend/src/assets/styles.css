@@ -28,6 +28,8 @@
   --color-status-planned-development: #6f42c1;
   --color-status-planned-replacement: #b3261e;
   --color-status-none: #6b7280;
+  /** spec 08 §2.2: a per-answer "not applicable" chip — distinct from every declaration status and from "unanswered". */
+  --color-status-not-applicable: #0369a1;
 
   /* Canonical bg/fg pairs for StatusBadge.vue and any other chip that
      shows a declaration status (e.g. a matrix view) — explicit foreground
