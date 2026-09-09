@@ -8,6 +8,7 @@
     "login": "Entrar",
     "register": "Cadastrar",
     "workspace": "Área de Trabalho",
+    "admin": "Administração",
     "logout": "Sair"
   },
   "auth": {
@@ -165,14 +166,16 @@
     "freeTextPlaceholder": "Informe o recurso que sua comunidade utiliza",
     "useCatalogue": "Escolher do catálogo",
     "noFerMatch": "Nenhuma correspondência — use suas próprias palavras.",
-    "replacementHint": "Adicione também um segundo recurso com o status 'Planejado' para a substituição.",
     "progress": "{answered} de {total} perguntas respondidas",
     "readOnly": "Somente leitura neste dispositivo.",
+    "editRightsLost": "Direitos de edição perdidos neste dispositivo.",
     "claim": "Salvar este FIP na minha área de trabalho",
     "claimed": "Salvo na sua área de trabalho.",
     "preview": "Pré-visualizar / imprimir",
     "notAnswered": "Sem resposta",
-    "editRightsLost": "Direitos de edição perdidos neste dispositivo."
+    "successor": "Substituído por",
+    "successorHint": "Informe o recurso que vai substituí-lo.",
+    "facilitatorBanner": "Você está editando como facilitador."
   },
   "save": {
     "saved": "Salvo {time}",
@@ -194,7 +197,30 @@
     "title": "Compartilhar",
     "copyLink": "Copiar link",
     "copied": "Copiado",
-    "qrHint": "Escaneie para abrir este FIP"
+    "qrHint": "Escaneie para abrir este FIP",
+    "embed": "Incorporar",
+    "copyEmbed": "Copiar código de incorporação"
+  },
+  "dmp": {
+    "heading": "Planos de gestão de dados (DMP) relacionados",
+    "add": "Adicionar um link de DMP",
+    "url": "URL do plano",
+    "version": "Versão",
+    "system": "Sistema",
+    "fiodmp": "FioDMP",
+    "other": "Outro",
+    "remove": "Remover",
+    "maxReached": "No máximo 10 planos por FIP.",
+    "urlInvalid": "Use uma URL completa https:// do plano.",
+    "duplicate": "Esse plano já está vinculado.",
+    "none": "Nenhum plano vinculado.",
+    "evidence": "Evidência no DMP",
+    "evidencePlan": "Plano",
+    "evidenceSection": "Seção",
+    "evidenceQuestion": "Pergunta ou campo",
+    "evidenceHint": "Onde no plano esta resposta está registrada?",
+    "sectionOther": "Outra",
+    "prefill": "Pré-preencher a partir deste plano"
   },
   "visibility": {
     "label": "Quem pode ver este FIP",
@@ -228,7 +254,8 @@
     "matrix": "Matriz de comparação",
     "matrixSoon": "A matriz de comparação chega na semana 3.",
     "hideChrome": "Modo de projeção",
-    "reconnecting": "Reconectando…"
+    "reconnecting": "Reconectando…",
+    "open": "Aberta"
   },
   "fipRead": {
     "notShared": "Este FIP não existe ou não está compartilhado.",
@@ -262,7 +289,8 @@
     "compact": "Compacto",
     "print": "Imprimir (A3 horizontal)",
     "showNote": "Mostrar motivo",
-    "otherGroup": "Outro"
+    "otherGroup": "Outro",
+    "successor": "→ substituído por {label}"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -338,5 +366,74 @@
     "idTaken": "Esse identificador já está em uso.",
     "importFailed": "Este arquivo não é um modelo de conhecimento válido.",
     "noModels": "Ainda não há modelos."
+  },
+  "admin": {
+    "title": "Administração",
+    "users": "Usuários",
+    "search": "Buscar usuários",
+    "role": "Função",
+    "created": "Criado",
+    "fips": "FIPs",
+    "sessions": "Sessões",
+    "models": "Modelos",
+    "resetPassword": "Redefinir senha",
+    "resetConfirm": "Redefinir a senha deste usuário? A senha atual e todos os acessos dele param de funcionar.",
+    "tempPassword": "Senha temporária",
+    "tempPasswordOnce": "Copie-a agora — ela é mostrada apenas uma vez. O usuário deve alterá-la no próximo login.",
+    "pendingFers": "Recursos aguardando promoção",
+    "noPendingFers": "Nenhum recurso contribuído por usuários.",
+    "usage": "Usado em {count} declarações",
+    "promote": "Promover para o catálogo",
+    "promoteConfirm": "Adicionar este recurso ao catálogo global?",
+    "owner": "Contribuído por",
+    "merge": "Mesclar em…",
+    "mergeConfirm": "Mesclar em {label}? As declarações são redirecionadas e este recurso é excluído. Esta ação não pode ser desfeita.",
+    "mergeDone": "{declarations} declarações em {fips} FIPs foram redirecionadas."
+  },
+  "password": {
+    "mustChangeTitle": "Escolha uma nova senha",
+    "mustChangeHint": "Um administrador definiu uma senha temporária para sua conta. Escolha a sua própria para continuar.",
+    "current": "Senha atual",
+    "new": "Nova senha",
+    "submit": "Alterar senha",
+    "changed": "Senha alterada."
+  },
+  "privacy": {
+    "title": "Aviso de privacidade",
+    "version": "Versão {version}, {date}",
+    "link": "Aviso de privacidade",
+    "accept": "Li o aviso de privacidade.",
+    "required": "Leia e aceite o aviso de privacidade.",
+    "joinNotice": "Suas respostas são armazenadas por esta ferramenta e compartilhadas com o facilitador do workshop. Consulte o {link}."
+  },
+  "print": {
+    "questionnaire": "Imprimir questionário",
+    "handoutTitle": "Questionário FIP — alternativa em papel",
+    "group": "Grupo / mesa",
+    "date": "Data",
+    "resource": "Recurso",
+    "declarationsPerQuestion": "Recursos por pergunta",
+    "ferType": "Tipo de recurso",
+    "footerTool": "As folhas preenchidas são digitadas no Gerenciador de FIP após a sessão.",
+    "instructions": "Marque um status por recurso. Deixe um bloco em branco se sua comunidade não tiver nenhum."
+  },
+  "feedback": {
+    "title": "Dois minutos de feedback?",
+    "intro": "Anônimo. Ajuda a melhorar a ferramenta e o workshop.",
+    "q1": "O questionário foi fácil de entender.",
+    "q2": "A ferramenta foi fácil de usar no meu dispositivo.",
+    "q3": "Agora entendo melhor o que é um FAIR Implementation Profile (Perfil de Implementação FAIR).",
+    "comment": "O que devemos mudar? (opcional)",
+    "scaleLow": "Discordo totalmente",
+    "scaleHigh": "Concordo totalmente",
+    "submit": "Enviar feedback",
+    "thanks": "Obrigado.",
+    "error": "Não foi possível enviar o feedback.",
+    "summaryTitle": "Feedback",
+    "responses": "{count} respostas",
+    "mean": "Média {mean}",
+    "noResponses": "Ainda sem feedback.",
+    "comments": "Comentários",
+    "exportCsv": "Exportar feedback (CSV)"
   }
 }

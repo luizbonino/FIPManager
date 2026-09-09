@@ -8,6 +8,7 @@
     "login": "Iniciar Sessão",
     "register": "Registar",
     "workspace": "Área de Trabalho",
+    "admin": "Administração",
     "logout": "Terminar Sessão"
   },
   "auth": {
@@ -165,14 +166,16 @@
     "freeTextPlaceholder": "Indique o recurso que a sua comunidade utiliza",
     "useCatalogue": "Escolher do catálogo",
     "noFerMatch": "Sem correspondência — utilize as suas próprias palavras.",
-    "replacementHint": "Adicione também um segundo recurso com o estado 'Planeado' para a substituição.",
     "progress": "{answered} de {total} perguntas respondidas",
     "readOnly": "Apenas leitura neste dispositivo.",
+    "editRightsLost": "Direitos de edição perdidos neste dispositivo.",
     "claim": "Guardar este FIP na minha área de trabalho",
     "claimed": "Guardado na sua área de trabalho.",
     "preview": "Pré-visualizar / imprimir",
     "notAnswered": "Sem resposta",
-    "editRightsLost": "Direitos de edição perdidos neste dispositivo."
+    "successor": "Substituído por",
+    "successorHint": "Indique o recurso que o irá substituir.",
+    "facilitatorBanner": "Está a editar como facilitador."
   },
   "save": {
     "saved": "Guardado {time}",
@@ -194,7 +197,30 @@
     "title": "Partilhar",
     "copyLink": "Copiar link",
     "copied": "Copiado",
-    "qrHint": "Digitalize para abrir este FIP"
+    "qrHint": "Digitalize para abrir este FIP",
+    "embed": "Incorporar",
+    "copyEmbed": "Copiar código de incorporação"
+  },
+  "dmp": {
+    "heading": "Planos de gestão de dados (DMP) relacionados",
+    "add": "Adicionar um link de DMP",
+    "url": "URL do plano",
+    "version": "Versão",
+    "system": "Sistema",
+    "fiodmp": "FioDMP",
+    "other": "Outro",
+    "remove": "Remover",
+    "maxReached": "No máximo 10 planos por FIP.",
+    "urlInvalid": "Utilize um URL completo https:// do plano.",
+    "duplicate": "Esse plano já está associado.",
+    "none": "Nenhum plano associado.",
+    "evidence": "Evidência no DMP",
+    "evidencePlan": "Plano",
+    "evidenceSection": "Secção",
+    "evidenceQuestion": "Pergunta ou campo",
+    "evidenceHint": "Onde no plano está esta resposta registada?",
+    "sectionOther": "Outra",
+    "prefill": "Pré-preencher a partir deste plano"
   },
   "visibility": {
     "label": "Quem pode ver este FIP",
@@ -228,7 +254,8 @@
     "matrix": "Matriz de comparação",
     "matrixSoon": "A matriz de comparação chega na semana 3.",
     "hideChrome": "Modo de projeção",
-    "reconnecting": "A reconectar…"
+    "reconnecting": "A reconectar…",
+    "open": "Aberta"
   },
   "fipRead": {
     "notShared": "Este FIP não existe ou não está partilhado.",
@@ -262,7 +289,8 @@
     "compact": "Compacto",
     "print": "Imprimir (A3 horizontal)",
     "showNote": "Mostrar motivo",
-    "otherGroup": "Outro"
+    "otherGroup": "Outro",
+    "successor": "→ substituído por {label}"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -338,5 +366,74 @@
     "idTaken": "Esse identificador já está em uso.",
     "importFailed": "Este ficheiro não é um modelo de conhecimento válido.",
     "noModels": "Ainda não há modelos."
+  },
+  "admin": {
+    "title": "Administração",
+    "users": "Utilizadores",
+    "search": "Pesquisar utilizadores",
+    "role": "Função",
+    "created": "Criado",
+    "fips": "FIPs",
+    "sessions": "Sessões",
+    "models": "Modelos",
+    "resetPassword": "Repor palavra-passe",
+    "resetConfirm": "Repor a palavra-passe deste utilizador? A palavra-passe atual e todas as sessões iniciadas deixam de funcionar.",
+    "tempPassword": "Palavra-passe temporária",
+    "tempPasswordOnce": "Copie-a agora — só é mostrada uma vez. O utilizador tem de a alterar no próximo início de sessão.",
+    "pendingFers": "Recursos a aguardar promoção",
+    "noPendingFers": "Sem recursos contribuídos por utilizadores.",
+    "usage": "Utilizado em {count} declarações",
+    "promote": "Promover para o catálogo",
+    "promoteConfirm": "Adicionar este recurso ao catálogo global?",
+    "owner": "Contribuído por",
+    "merge": "Fundir em…",
+    "mergeConfirm": "Fundir em {label}? As declarações são reencaminhadas e este recurso é eliminado. Esta ação não pode ser anulada.",
+    "mergeDone": "{declarations} declarações em {fips} FIPs foram reencaminhadas."
+  },
+  "password": {
+    "mustChangeTitle": "Escolha uma nova palavra-passe",
+    "mustChangeHint": "Um administrador definiu uma palavra-passe temporária para a sua conta. Escolha a sua própria para continuar.",
+    "current": "Palavra-passe atual",
+    "new": "Nova palavra-passe",
+    "submit": "Alterar palavra-passe",
+    "changed": "Palavra-passe alterada."
+  },
+  "privacy": {
+    "title": "Aviso de privacidade",
+    "version": "Versão {version}, {date}",
+    "link": "Aviso de privacidade",
+    "accept": "Li o aviso de privacidade.",
+    "required": "Leia e aceite o aviso de privacidade.",
+    "joinNotice": "As suas respostas são armazenadas por esta ferramenta e partilhadas com o facilitador do workshop. Consulte o {link}."
+  },
+  "print": {
+    "questionnaire": "Imprimir questionário",
+    "handoutTitle": "Questionário FIP — alternativa em papel",
+    "group": "Grupo / mesa",
+    "date": "Data",
+    "resource": "Recurso",
+    "declarationsPerQuestion": "Recursos por pergunta",
+    "ferType": "Tipo de recurso",
+    "footerTool": "As folhas preenchidas são introduzidas no Gestor de FIP após a sessão.",
+    "instructions": "Assinale um estado por recurso. Deixe um bloco em branco se a sua comunidade não tiver nenhum."
+  },
+  "feedback": {
+    "title": "Dois minutos de feedback?",
+    "intro": "Anónimo. Ajuda-nos a melhorar a ferramenta e o workshop.",
+    "q1": "O questionário foi fácil de compreender.",
+    "q2": "A ferramenta foi fácil de usar no meu dispositivo.",
+    "q3": "Agora compreendo melhor o que é um FAIR Implementation Profile (Perfil de Implementação FAIR).",
+    "comment": "O que devemos mudar? (opcional)",
+    "scaleLow": "Discordo totalmente",
+    "scaleHigh": "Concordo totalmente",
+    "submit": "Enviar feedback",
+    "thanks": "Obrigado.",
+    "error": "Não foi possível enviar o feedback.",
+    "summaryTitle": "Feedback",
+    "responses": "{count} respostas",
+    "mean": "Média {mean}",
+    "noResponses": "Ainda sem feedback.",
+    "comments": "Comentários",
+    "exportCsv": "Exportar feedback (CSV)"
   }
 }
