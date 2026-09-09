@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from fastapi import HTTPException, Request, Response
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
@@ -266,7 +266,13 @@ def resolve_email_token(db: Session, token: str, purpose: str) -> tuple[EmailTok
     stored `email` no longer matches the user's current address -- spec §2)
     raised as HTTPException; 410 `token_expired` when only expiry fails, so
     the UI can distinguish "dead" from "offer a new link". Returns the row
-    and its user on success; the caller marks it used."""
+    and its user on success, with the row already claimed (`used_at` set
+    and committed) -- audit finding 9: two concurrent requests for the same
+    token used to both pass the `row.used_at is not None` read here before
+    either request's caller committed its own `row.used_at = now`, letting
+    both proceed. The claim itself is a single atomic `UPDATE ... WHERE
+    used_at IS NULL`; only the request whose UPDATE actually flips a row
+    (`rowcount == 1`) gets past this point, so double-use is impossible."""
     row = db.get(EmailToken, hash_token(token))
     if row is None or row.purpose != purpose or row.used_at is not None:
         raise HTTPException(status_code=400, detail="invalid_token")
@@ -278,6 +284,18 @@ def resolve_email_token(db: Session, token: str, purpose: str) -> tuple[EmailTok
         expires_at = expires_at.replace(tzinfo=UTC)
     if expires_at < datetime.now(UTC):
         raise HTTPException(status_code=410, detail="token_expired")
+
+    now = datetime.now(UTC)
+    result = db.execute(
+        update(EmailToken)
+        .where(EmailToken.id == row.id, EmailToken.used_at.is_(None))
+        .values(used_at=now)
+    )
+    if result.rowcount != 1:
+        db.rollback()
+        raise HTTPException(status_code=400, detail="invalid_token")
+    db.commit()
+    row.used_at = now
     return row, user
 
 
@@ -350,6 +368,23 @@ def revoke_session(db: Session, token: str) -> None:
 
 def revoke_all_sessions(db: Session, user_id: str) -> None:
     db.execute(delete(AuthSession).where(AuthSession.user_id == user_id))
+    db.commit()
+
+
+def invalidate_password_reset_tokens(db: Session, user_id: str) -> None:
+    """Audit finding 7: a password change made a different way than
+    consuming the token -- the authenticated `/auth/password` endpoint, or
+    a `password_reset` confirm that only deletes *its own* row via
+    `issue_email_token`'s "new token replaces old" rule -- must not leave
+    an already-issued, still-unused `password_reset` link usable afterwards.
+    Called from both `change_password` and `confirm_password_reset`."""
+    db.execute(
+        delete(EmailToken).where(
+            EmailToken.user_id == user_id,
+            EmailToken.purpose == "password_reset",
+            EmailToken.used_at.is_(None),
+        )
+    )
     db.commit()
 
 

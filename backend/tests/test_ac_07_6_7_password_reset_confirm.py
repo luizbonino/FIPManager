@@ -117,6 +117,109 @@ def test_confirm_expired_token_is_410(client, db_session, caplog):
     assert r.json()["detail"] == "token_expired"
 
 
+def test_confirm_clears_must_change_password_set_by_admin_reset(client_factory, db_session, caplog):
+    """Audit finding 8: completing a self-service reset is just another way
+    of setting a fresh password, same as `/auth/password` -- it must clear
+    `must_change_password` the same way, or the user keeps getting 403
+    `password_change_required` on their very next write after "resetting"
+    their password."""
+    caplog.set_level("INFO", logger="fipm.mail")
+    admin = client_factory()
+    admin.post(
+        "/api/auth/register",
+        json={
+            "email": "ac07-confirm-mcp-admin@example.com",
+            "password": OLD_PASSWORD,
+            "displayName": "Admin",
+            "privacyAcceptedVersion": PRIVACY_VERSION,
+        },
+    )
+    from fipm.models import User
+
+    admin_user = (
+        db_session.query(User).filter(User.email == "ac07-confirm-mcp-admin@example.com").one()
+    )
+    admin_user.role = "admin"
+    db_session.commit()
+    admin.post(
+        "/api/auth/login",
+        json={"email": "ac07-confirm-mcp-admin@example.com", "password": OLD_PASSWORD},
+    )
+
+    email = "ac07-confirm-mcp-target@example.com"
+    _register(client_factory(), email)
+    target_user = db_session.query(User).filter(User.email == email).one()
+    reset_r = admin.post(f"/api/admin/users/{target_user.id}/reset-password")
+    assert reset_r.status_code == 200, reset_r.text
+
+    db_session.refresh(target_user)
+    assert target_user.must_change_password is True
+
+    token = _issue_reset_token(client_factory(), email, caplog)
+    confirm = client_factory().post(
+        "/api/auth/password-reset/confirm", json={"token": token, "newPassword": NEW_PASSWORD}
+    )
+    assert confirm.status_code == 204
+
+    db_session.refresh(target_user)
+    assert target_user.must_change_password is False
+
+    fresh = client_factory()
+    login = fresh.post("/api/auth/login", json={"email": email, "password": NEW_PASSWORD})
+    assert login.status_code == 200
+    assert login.json()["mustChangePassword"] is False
+    me = fresh.get("/api/auth/me")
+    assert me.status_code == 200
+
+
+def test_confirm_invalidates_other_outstanding_reset_tokens(client, db_session, caplog):
+    """Audit finding 7: a `password_reset` token consumed by confirm must
+    take every other outstanding `password_reset` token for that user with
+    it -- otherwise a second, still-unused reset link (e.g. requested
+    again before the first was used) keeps working after a reset already
+    happened."""
+    caplog.set_level("INFO", logger="fipm.mail")
+    email = "ac07-confirm-e@example.com"
+    _register(client, email)
+
+    token_a = _issue_reset_token(client, email, caplog)
+    # `issue_email_token` already deletes the earlier *unused* row when a
+    # new one of the same purpose is issued, so insert a second row by hand
+    # to model two concurrently outstanding tokens (e.g. issued from two
+    # different requests that both landed before either was consumed).
+    from datetime import UTC, datetime, timedelta
+
+    from fipm.ids import hash_token, new_token
+    from fipm.models import EmailToken, User
+
+    user = db_session.query(User).filter(User.email == email).one()
+    token_b = new_token()
+    db_session.add(
+        EmailToken(
+            id=hash_token(token_b),
+            user_id=user.id,
+            purpose="password_reset",
+            email=user.email,
+            created_at=datetime.now(UTC),
+            expires_at=datetime.now(UTC) + timedelta(hours=1),
+            used_at=None,
+        )
+    )
+    db_session.commit()
+
+    confirm = client.post(
+        "/api/auth/password-reset/confirm", json={"token": token_a, "newPassword": NEW_PASSWORD}
+    )
+    assert confirm.status_code == 204
+
+    replay_b = client.post(
+        "/api/auth/password-reset/confirm",
+        json={"token": token_b, "newPassword": "yetanotherpassword12"},
+    )
+    assert replay_b.status_code == 400
+    assert replay_b.json()["detail"] == "invalid_token"
+
+
 def test_second_reset_token_deletes_first_unused_one(client, db_session, caplog):
     caplog.set_level("INFO", logger="fipm.mail")
     email = "ac07-confirm-d@example.com"

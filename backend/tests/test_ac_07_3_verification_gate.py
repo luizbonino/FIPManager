@@ -114,6 +114,24 @@ def test_after_verification_public_write_succeeds(client, require_verification, 
     assert r_public.status_code == 201, r_public.text
 
 
+def test_import_fip_rejects_public_when_unverified(client, require_verification):
+    """Audit finding 3: POST /fips/import used to skip
+    `check_email_verification_gate` entirely, so an unverified user could
+    import straight into `visibility="public"` -- the one write path every
+    other FIP-creating endpoint (POST /fips, PATCH /fips/{id}) already
+    gates."""
+    _register(client, "ac07-gate-import@example.com")
+    doc = {
+        "exportVersion": 1,
+        "fip": {"visibility": "public"},
+        "questionnaireRef": {"id": "test-km", "version": "1.0.0"},
+        "answers": [],
+    }
+    r = client.post("/api/fips/import", json=doc)
+    assert r.status_code == 403
+    assert r.json()["detail"] == "email_verification_required"
+
+
 def test_flag_false_blocks_nothing(client):
     """The suite's default elsewhere (flag off) -- spec 01-06 test changes
     would be a regression, so this is the control case."""

@@ -47,7 +47,9 @@ from fipm.schemas import (
     FipImportDoc,
     FipPatchRequest,
     Language,
+    MigratedFromImport,
     MigrateRequest,
+    OrphanedAnswerImport,
     PrefillFromDmpRequest,
     Visibility,
     fip_out_dict,
@@ -285,6 +287,10 @@ def import_fip(
     visibility = fip_data.get("visibility") or "private"
     if visibility not in get_args(Visibility):
         raise HTTPException(status_code=400, detail="invalid_visibility")
+    # Audit finding 3: importing straight into visibility="public" must
+    # respect the same email-verification gate every other write to
+    # visibility does.
+    check_email_verification_gate(user, visibility)
 
     related_dmps = normalise_related_dmps(fip_data.get("relatedDMPs") or [], settings)
 
@@ -304,12 +310,34 @@ def import_fip(
     # default) and preserved verbatim -- declarations reconstructed the same
     # way as `answers` -- on a v2 one. Not re-validated against `km`'s
     # question ids: an orphaned answer's questionId is, by definition, one
-    # the *current* questionnaire version may no longer have.
-    orphaned_answers = reconstruct_orphaned_answers_from_export(
-        body.orphaned_answers, language, related_dmps
-    )
+    # the *current* questionnaire version may no longer have. The entry
+    # *shape* is still validated (audit findings 4/11): a malformed
+    # `orphanedAnswers` entry is 400 `invalid_orphaned_answers`, not an
+    # unvalidated blob that can 500 later (e.g. RDF export).
+    try:
+        reconstructed_orphaned = reconstruct_orphaned_answers_from_export(
+            body.orphaned_answers, language, related_dmps
+        )
+        orphaned_answers = [
+            OrphanedAnswerImport.model_validate(o).model_dump(mode="json", by_alias=True)
+            for o in reconstructed_orphaned
+        ]
+    except (KeyError, ValidationError) as exc:
+        raise HTTPException(status_code=400, detail="invalid_orphaned_answers") from exc
     apply_dmp_evidence(orphaned_answers, related_dmps)
-    migrated_from = fip_data.get("migratedFrom")
+
+    # Audit finding 4: `migratedFrom` was taken verbatim from the request
+    # body with no shape check -- validate it against the shape the
+    # backend's own migrate endpoint writes.
+    migrated_from_raw = fip_data.get("migratedFrom")
+    migrated_from: dict[str, Any] | None = None
+    if migrated_from_raw is not None:
+        try:
+            migrated_from = MigratedFromImport.model_validate(migrated_from_raw).model_dump(
+                mode="json", by_alias=True
+            )
+        except ValidationError as exc:
+            raise HTTPException(status_code=400, detail="invalid_migrated_from") from exc
 
     fip = _insert_fip(
         db,

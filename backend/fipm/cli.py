@@ -10,6 +10,7 @@ from fipm.config import get_settings
 from fipm.db import SessionLocal, init_db
 from fipm.ids import new_user_id
 from fipm.importer import run_import
+from fipm.logging_setup import configure_logging
 from fipm.models import User
 
 
@@ -52,6 +53,11 @@ def _cmd_serve(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Audit finding 12: every subcommand (not just `serve`, which pulls it
+    # in indirectly by importing fipm.main) needs logging configured before
+    # it runs anything that logs -- `import-data` and `create-admin` in
+    # particular don't otherwise touch fipm.main at all.
+    configure_logging()
     parser = argparse.ArgumentParser(prog="python -m fipm")
     subparsers = parser.add_subparsers(dest="command", required=True)
 

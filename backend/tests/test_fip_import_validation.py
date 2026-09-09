@@ -107,6 +107,87 @@ def test_import_rejects_invalid_language(client):
     assert r.json()["detail"] == "invalid_language"
 
 
+def test_import_rejects_malformed_orphaned_answers(client):
+    """Audit findings 4/11: a malformed `orphanedAnswers` entry (here, a
+    declaration missing the ferId/ferFreeText xor) must be 400
+    `invalid_orphaned_answers`, not an unvalidated blob that reaches RDF
+    export later and 500s there."""
+    _register(client, "import-bad-orphaned@example.com")
+    doc = _base_doc(
+        exportVersion=2,
+        orphanedAnswers=[
+            {
+                "questionId": "A2",
+                "declarations": [{"status": "current"}],  # neither fer nor ferFreeText
+                "comment": None,
+                "fromVersion": "1.0.0",
+                "at": "2024-01-01T00:00:00Z",
+            }
+        ],
+    )
+    r = client.post("/api/fips/import", json=doc)
+    assert r.status_code == 400
+    assert r.json()["detail"] == "invalid_orphaned_answers"
+
+
+def test_import_rejects_orphaned_answer_missing_question_id(client):
+    _register(client, "import-orphaned-no-qid@example.com")
+    doc = _base_doc(
+        exportVersion=2,
+        orphanedAnswers=[{"declarations": [], "comment": "no questionId key at all"}],
+    )
+    r = client.post("/api/fips/import", json=doc)
+    assert r.status_code == 400
+    assert r.json()["detail"] == "invalid_orphaned_answers"
+
+
+def test_import_accepts_well_formed_orphaned_answers(client):
+    _register(client, "import-good-orphaned@example.com")
+    doc = _base_doc(
+        exportVersion=2,
+        orphanedAnswers=[
+            {
+                "questionId": "A2",
+                "questionText": {"en": "An old question"},
+                "declarations": [{"ferFreeText": "In-house", "status": "current"}],
+                "comment": None,
+                "fromVersion": "1.0.0",
+                "at": "2024-01-01T00:00:00Z",
+            }
+        ],
+    )
+    r = client.post("/api/fips/import", json=doc)
+    assert r.status_code == 201, r.text
+    # `orphanedAnswers` isn't on FipOut -- confirm it landed via export.json
+    # (build_export_json's "orphanedAnswers" array, spec §6).
+    export = client.get(f"/api/fips/{r.json()['id']}/export.json")
+    assert export.status_code == 200, export.text
+    assert export.json()["orphanedAnswers"][0]["questionId"] == "A2"
+
+
+def test_import_rejects_malformed_migrated_from(client):
+    """Audit finding 4: `fip.migratedFrom` used to be taken verbatim, with
+    no shape check, straight from the request body."""
+    _register(client, "import-bad-migrated-from@example.com")
+    doc = _base_doc(fip={"visibility": "private", "migratedFrom": {"id": "only-id"}})
+    r = client.post("/api/fips/import", json=doc)
+    assert r.status_code == 400
+    assert r.json()["detail"] == "invalid_migrated_from"
+
+
+def test_import_accepts_well_formed_migrated_from(client):
+    _register(client, "import-good-migrated-from@example.com")
+    doc = _base_doc(
+        fip={
+            "visibility": "private",
+            "migratedFrom": {"id": "test-km", "version": "0.9.0", "at": "2024-01-01T00:00:00Z"},
+        }
+    )
+    r = client.post("/api/fips/import", json=doc)
+    assert r.status_code == 201, r.text
+    assert r.json()["migratedFrom"]["id"] == "test-km"
+
+
 def test_import_accepts_well_formed_document(client):
     _register(client, "import-happy@example.com")
     doc = _base_doc(

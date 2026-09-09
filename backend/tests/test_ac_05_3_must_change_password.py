@@ -65,6 +65,38 @@ def test_flagged_user_blocked_on_write_but_not_on_get_or_password_change(client)
     assert user["id"]  # sanity: registration succeeded
 
 
+def test_change_password_invalidates_outstanding_reset_token(client, caplog):
+    """Audit finding 7: `POST /api/auth/password` must invalidate any
+    outstanding `password_reset` token for the same user -- otherwise a
+    reset link requested earlier (the user's own, or one an attacker
+    triggered) still works after the user has already changed their
+    password this way."""
+    import re
+
+    caplog.set_level("INFO", logger="fipm.mail")
+    email = "ac05-3-reset-then-change@example.com"
+    _register(client, email)
+
+    caplog.clear()
+    reset_r = client.post("/api/auth/password-reset/request", json={"email": email})
+    assert reset_r.status_code == 202
+    message = next(rec for rec in caplog.records if rec.name == "fipm.mail").getMessage()
+    reset_token = re.search(r"/reset-password\?token=(\S+)", message).group(1)
+
+    changed = client.post(
+        "/api/auth/password",
+        json={"currentPassword": "correcthorsebattery", "newPassword": "brandnewpassword1"},
+    )
+    assert changed.status_code == 204
+
+    confirm = client.post(
+        "/api/auth/password-reset/confirm",
+        json={"token": reset_token, "newPassword": "someotherpassword1"},
+    )
+    assert confirm.status_code == 400
+    assert confirm.json()["detail"] == "invalid_token"
+
+
 def test_flagged_user_can_still_logout(client):
     _register(client, "ac05-3-logout@example.com")
     _force_must_change_password("ac05-3-logout@example.com")

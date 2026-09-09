@@ -43,6 +43,29 @@ def test_known_address_202_with_one_mail(client, caplog):
     assert "/reset-password?token=" in message
 
 
+def test_known_address_creates_exactly_one_token_row(client, db_session):
+    """Audit finding 10: the token DELETE+INSERT now happens inside the
+    background task (`_issue_password_reset_and_mail`) rather than the
+    synchronous request handler, so the request/response cycle can't be
+    used to time whether an address exists. Behaviourally the outcome is
+    unchanged -- still exactly one `password_reset` row for a known
+    address once the (TestClient-synchronous) background task has run."""
+    _register(client, "ac07-reset-known-row@example.com")
+
+    r = client.post(
+        "/api/auth/password-reset/request", json={"email": "ac07-reset-known-row@example.com"}
+    )
+    assert r.status_code == 202
+
+    rows = db_session.execute(
+        select(EmailToken).where(
+            EmailToken.email == "ac07-reset-known-row@example.com",
+            EmailToken.purpose == "password_reset",
+        )
+    ).all()
+    assert len(rows) == 1
+
+
 def test_unknown_address_202_no_mail_no_row(client, db_session, caplog):
     caplog.set_level("INFO", logger="fipm.mail")
     r = client.post("/api/auth/password-reset/request", json={"email": "nobody-at-all@example.com"})

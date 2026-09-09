@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     allowed_origins: str = ""
     registration_open: bool = True
     env: str = "development"
+    # Audit finding 12: nothing called `logging.basicConfig`/added a
+    # handler, so every `logger.info` -- including the console mail
+    # backend's only record of a verify/reset link -- was silently dropped
+    # by the root logger's default WARNING level. `fipm.logging_setup.
+    # configure_logging` reads this at startup; INFO by default so that
+    # record is visible without any deployment-side configuration.
+    log_level: str = "INFO"
     # Review finding 3: hard cap on the request body of any POST/PUT/PATCH
     # under /api/, enforced by fipm.main.BodySizeLimitMiddleware before the
     # body is read (a Content-Length over the cap is rejected outright; a
@@ -98,13 +105,22 @@ class Settings(BaseSettings):
 
     def check_mail_safety(self) -> None:
         """Refuse to start with an unusable mail configuration (spec 07 §1):
-        an unknown FIPM_MAIL_BACKEND, or `smtp` with no FIPM_SMTP_HOST."""
+        an unknown FIPM_MAIL_BACKEND, `smtp` with no FIPM_SMTP_HOST, or an
+        unrecognised FIPM_SMTP_TLS. The last one matters beyond a typo:
+        `fipm.mail._send_smtp` treats anything other than the literal
+        `"starttls"`/`"ssl"` as "send over a bare, unencrypted socket" --
+        so a mistyped value (e.g. `"ststarttls"`) would silently drop TLS
+        rather than fail loudly."""
         if self.mail_backend not in ("console", "smtp"):
             raise RuntimeError(
                 f"FIPM_MAIL_BACKEND must be 'console' or 'smtp', got {self.mail_backend!r}"
             )
         if self.mail_backend == "smtp" and not self.smtp_host:
             raise RuntimeError("FIPM_SMTP_HOST is required when FIPM_MAIL_BACKEND=smtp")
+        if self.smtp_tls not in ("starttls", "ssl", "none"):
+            raise RuntimeError(
+                f"FIPM_SMTP_TLS must be one of 'starttls', 'ssl', 'none', got {self.smtp_tls!r}"
+            )
 
     @property
     def allowed_origins_list(self) -> list[str]:

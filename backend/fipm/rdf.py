@@ -618,6 +618,24 @@ def session_graph(
     return g
 
 
+_COMMENT_UNSAFE_RE = re.compile(r"[\r\n]+")
+_COMMENT_CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+
+
+def _sanitize_comment_field(value: Any) -> str:
+    """Audit finding 1: `orphaned_answers` entries are user-controlled JSON
+    (round-tripped through `POST /fips/import`, or copied verbatim from a
+    prior migration) and get interpolated into a Turtle `#` comment line
+    with no serialiser escaping in between. A raw `\\n`/`\\r` would close
+    the comment and let the rest of the value be parsed as Turtle -- collapse
+    any run of them to a single space, then drop other control characters,
+    so the value can never introduce a line break or otherwise-invisible
+    control byte into the header block."""
+    text = str(value) if value is not None else ""
+    text = _COMMENT_UNSAFE_RE.sub(" ", text)
+    return _COMMENT_CONTROL_RE.sub("", text)
+
+
 def orphaned_answer_comment_lines(fip: Fip) -> list[str]:
     """spec 07-mail-and-migration.md §6: orphaned answers become Turtle
     comment lines in the prepended header block, not triples -- so they
@@ -627,14 +645,14 @@ def orphaned_answer_comment_lines(fip: Fip) -> list[str]:
     naming the question."""
     lines: list[str] = []
     for entry in fip.orphaned_answers or []:
-        qid = entry.get("questionId")
+        qid = _sanitize_comment_field(entry.get("questionId"))
         declarations = entry.get("declarations") or []
         if not declarations:
             lines.append(f"# orphaned answer {qid}")
             continue
         for decl in declarations:
-            resource = decl.get("ferId") or decl.get("ferFreeText") or "?"
-            status = decl.get("status") or "?"
+            resource = _sanitize_comment_field(decl.get("ferId") or decl.get("ferFreeText") or "?")
+            status = _sanitize_comment_field(decl.get("status") or "?")
             lines.append(f"# orphaned answer {qid}: {resource} ({status})")
     return lines
 

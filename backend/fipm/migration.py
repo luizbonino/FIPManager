@@ -215,22 +215,34 @@ def compute_diff(
                 }
             )
 
-    # Pass 2: source leftovers -- ids gone from the target.
-    for oq in old_qs:
-        if oq["id"] in new_by_id:
-            continue
-        answered = oq["id"] in answered_by_id
-        split_into = split_targets_by_old_id.get(oq["id"])
+    # Pass 2: source leftovers -- ids gone from the target -- plus (audit
+    # finding 2) any answered question id that's absent from *both* models.
+    # Driving this off `old_qs` alone loses those: an answer can reference
+    # an id the source content no longer carries either (e.g. a prior
+    # migration's `from_content` didn't include it, or `from_content` is
+    # missing/empty entirely), and `apply_migration` only keeps or orphans
+    # answers whose id has a diff item -- so an id skipped here doesn't
+    # merely miss review, it silently vanishes on apply. Iterate the ids
+    # `old_qs` supplies (in that order, unchanged) for source/ferType/text,
+    # then any leftover answered id `old_qs` doesn't cover.
+    old_leftover_ids = [oq["id"] for oq in old_qs if oq["id"] not in new_by_id]
+    extra_answered_ids = [
+        qid for qid in answered_by_id if qid not in new_by_id and qid not in old_by_id
+    ]
+    for old_id in old_leftover_ids + extra_answered_ids:
+        oq = old_by_id.get(old_id)
+        answered = old_id in answered_by_id
+        split_into = split_targets_by_old_id.get(old_id)
         if split_into is not None:
             items.append(
                 {
                     "status": "split",
-                    "oldQuestionId": oq["id"],
+                    "oldQuestionId": old_id,
                     "newQuestionId": None,
-                    "oldText": _en_text(oq),
+                    "oldText": _en_text(oq) if oq is not None else "",
                     "flags": [],
                     "answered": answered,
-                    "declarationCount": decl_count(oq["id"]),
+                    "declarationCount": decl_count(old_id),
                     "splitInto": list(split_into),
                     "decision": (
                         {
@@ -246,7 +258,7 @@ def compute_diff(
             continue
         if not answered:
             continue  # an unanswered, non-split leftover raises no item to review.
-        removed_fer_type = oq["ferType"]
+        removed_fer_type = oq["ferType"] if oq is not None else None
         unanswered_non_hidden = [
             q for q in new_qs if not q["hidden"] and q["id"] not in answered_by_id
         ]
@@ -259,12 +271,12 @@ def compute_diff(
         items.append(
             {
                 "status": "removed",
-                "oldQuestionId": oq["id"],
+                "oldQuestionId": old_id,
                 "newQuestionId": None,
-                "oldText": _en_text(oq),
+                "oldText": _en_text(oq) if oq is not None else "",
                 "flags": [],
                 "answered": True,
-                "declarationCount": decl_count(oq["id"]),
+                "declarationCount": decl_count(old_id),
                 "decision": {"kind": "orphanReassign", "options": options, "default": None},
             }
         )
@@ -369,12 +381,27 @@ def apply_migration(
     new_answers: list[dict[str, Any]] = []
     orphaned: list[dict[str, Any]] = []
 
+    # Audit finding 5: `unchanged`/`hidden` targets are each some single
+    # `nq["id"]` from pass 1 and so can't collide with one another, but a
+    # `splitCopies`/`orphanReassign` target is caller-chosen and nothing
+    # upstream stops two decisions (or a decision and a duplicate entry in
+    # one `splitCopies` list) from naming the same target id -- which would
+    # otherwise put two answers on one question. Track every id a decision
+    # claims and reject a second claim as `invalid_decision`.
+    claimed_target_ids: set[str] = set()
+
+    def _claim(target_id: str) -> None:
+        if target_id in claimed_target_ids:
+            raise MigrationError("invalid_decision")
+        claimed_target_ids.add(target_id)
+
     for item in diff["items"]:
         status = item["status"]
         if status in ("unchanged", "hidden"):
             old_id = item["oldQuestionId"]
             original = answers_by_id.get(old_id)
             if original is not None:
+                _claim(item["newQuestionId"])
                 a = dict(original)
                 a["questionId"] = item["newQuestionId"]
                 new_answers.append(a)
@@ -390,8 +417,11 @@ def apply_migration(
             for target in chosen:
                 if target not in item["splitInto"]:
                     raise MigrationError("invalid_decision")
-            if chosen:
-                for target in chosen:
+            # dedupe the caller-supplied list itself before claiming.
+            deduped_chosen = list(dict.fromkeys(chosen))
+            if deduped_chosen:
+                for target in deduped_chosen:
+                    _claim(target)
                     a = dict(original)
                     a["questionId"] = target
                     new_answers.append(a)
@@ -409,6 +439,7 @@ def apply_migration(
             if target is not None:
                 if target not in decision["options"]:
                     raise MigrationError("invalid_decision")
+                _claim(target)
                 a = dict(original)
                 a["questionId"] = target
                 new_answers.append(a)

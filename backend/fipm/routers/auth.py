@@ -16,6 +16,7 @@ from fipm.auth import (
     create_auth_session,
     dummy_verify,
     hash_password,
+    invalidate_password_reset_tokens,
     issue_email_token,
     needs_rehash,
     password_reset_over_limit,
@@ -29,9 +30,9 @@ from fipm.auth import (
 )
 from fipm.authz import require_user
 from fipm.config import get_settings
-from fipm.db import get_db
+from fipm.db import SessionLocal, get_db
 from fipm.ids import hash_token, new_user_id
-from fipm.mail import queue_mail, render_mail
+from fipm.mail import queue_mail, render_mail, send_mail
 from fipm.models import AuthSession, Fer, Fip, KnowledgeModel, User, WorkshopSession
 from fipm.privacy import current_privacy_version
 from fipm.schemas import (
@@ -195,10 +196,10 @@ def verify_email(body: VerifyEmailRequest, db: Session = Depends(get_db)) -> Use
     """spec 07 §2: no auth -- the token is the credential. Success sets
     `email_verified_at`/`used_at`; a replay of the same token is 400
     `invalid_token` by design (already used)."""
-    row, user = resolve_email_token(db, body.token, "verify_email")
-    now = datetime.now(UTC)
-    user.email_verified_at = now
-    row.used_at = now
+    _row, user = resolve_email_token(db, body.token, "verify_email")
+    # `resolve_email_token` already claimed and committed `row.used_at`
+    # (audit finding 9); only `user.email_verified_at` remains to set here.
+    user.email_verified_at = datetime.now(UTC)
     db.commit()
     db.refresh(user)
     return UserOut.model_validate(user)
@@ -222,44 +223,72 @@ def resend_verification(
     return None
 
 
+def _issue_password_reset_and_mail(email: str) -> None:
+    """Runs inside a `BackgroundTasks` callback, after the 202 has already
+    gone out (audit finding 10). Previously `request_password_reset` did
+    the user lookup *and*, only on a match, the `issue_email_token`
+    DELETE+INSERT and `render_mail` template work synchronously before
+    responding -- so a known email took measurably longer to answer than
+    an unknown one, exactly the timing oracle spec §3's "byte-identical
+    either way" is meant to close. Doing every bit of match-dependent work
+    here instead (with its own DB session, since the request's `db` session
+    closes once the response is sent) makes the synchronous path -- rate
+    limit check, then schedule this task -- identical regardless of
+    whether the address exists. A failure here (unknown email: nothing to
+    do; DB or mail error: logged) never surfaces to the client, which
+    already got its 202."""
+    try:
+        settings = get_settings()
+        with SessionLocal() as db:
+            user = db.query(User).filter(User.email == email).one_or_none()
+            if user is None:
+                return
+            recipient = user.email
+            token = issue_email_token(
+                db, user, "password_reset", user.email, settings.reset_token_ttl_hours
+            )
+            link = _mail_link(settings, "/reset-password", token)
+            subject, text = render_mail(
+                "password-reset",
+                user.language,
+                {
+                    "appName": APP_NAME,
+                    "displayName": user.display_name,
+                    "link": link,
+                    "baseUrl": settings.base_url,
+                    "expiresHours": str(settings.reset_token_ttl_hours),
+                },
+            )
+        # `db` (and with it, `user`) is closed at this point -- `recipient`
+        # was captured beforehand so sending doesn't touch the ORM object.
+        send_mail(recipient, subject, text)
+    except Exception:
+        # spec §1: mail (and, here, the token issuance behind it) must never
+        # turn the already-sent 202 into a client-visible failure.
+        logger.exception("password-reset background task failed for %s", email)
+
+
 @router.post("/password-reset/request", status_code=202)
 def request_password_reset(
     body: PasswordResetRequestRequest,
     request: Request,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
 ) -> None:
     """spec 07 §3: always 202, empty body, whether the address exists, is
-    malformed or is already mid-reset -- byte-identical either way. Only on
-    a match: issue a password_reset token and queue the mail. Rate limit
-    3/hour per lowercased email, 10/hour per ip; over-limit also returns
-    202 (a 429 keyed on an email is itself an enumeration oracle) and the
-    mail is dropped and logged."""
-    settings = get_settings()
+    malformed or is already mid-reset -- byte-identical either way. Rate
+    limit 3/hour per lowercased email, 10/hour per ip; over-limit also
+    returns 202 (a 429 keyed on an email is itself an enumeration oracle)
+    and the mail is dropped and logged. The user lookup and, only on a
+    match, the password_reset token issuance and mail are deferred to a
+    background task (`_issue_password_reset_and_mail`, audit finding 10) so
+    the synchronous response path can't leak whether the address exists."""
     email = body.email.strip().lower()
     over_limit = password_reset_over_limit(request, email)
     record_password_reset_attempt(request, email)
     if over_limit:
         logger.info("password-reset request for %s over rate limit; mail dropped", email)
         return None
-    user = db.query(User).filter(User.email == email).one_or_none()
-    if user is not None:
-        token = issue_email_token(
-            db, user, "password_reset", user.email, settings.reset_token_ttl_hours
-        )
-        link = _mail_link(settings, "/reset-password", token)
-        subject, text = render_mail(
-            "password-reset",
-            user.language,
-            {
-                "appName": APP_NAME,
-                "displayName": user.display_name,
-                "link": link,
-                "baseUrl": settings.base_url,
-                "expiresHours": str(settings.reset_token_ttl_hours),
-            },
-        )
-        queue_mail(background_tasks, user.email, subject, text)
+    background_tasks.add_task(_issue_password_reset_and_mail, email)
     return None
 
 
@@ -269,19 +298,26 @@ def confirm_password_reset(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> None:
-    """spec 07 §3, one transaction: argon2id rehash, `used_at` set, every
+    """spec 07 §3, one transaction: argon2id rehash, `used_at` set (already
+    done atomically by `resolve_email_token`, audit finding 9), every
     `auth_sessions` row of that user deleted (the caller's too), and
     `email_verified_at` set if it was null (completing a reset proves
-    control of the mailbox). A password-changed notice is queued
-    afterwards (spec §1)."""
-    row, user = resolve_email_token(db, body.token, "password_reset")
+    control of the mailbox). Also (audit findings 7/8): every other
+    outstanding `password_reset` token for this user is invalidated -- a
+    second still-unused reset link must not keep working once one has been
+    consumed -- and `must_change_password` is cleared, the same as a
+    self-service `/auth/password` change does, since a completed reset is
+    just another way of setting a fresh password. A password-changed
+    notice is queued afterwards (spec §1)."""
+    _row, user = resolve_email_token(db, body.token, "password_reset")
     now = datetime.now(UTC)
     user.password_hash = hash_password(body.new_password)
-    row.used_at = now
+    user.must_change_password = False
     if user.email_verified_at is None:
         user.email_verified_at = now
     db.commit()
     revoke_all_sessions(db, user.id)
+    invalidate_password_reset_tokens(db, user.id)
 
     settings = get_settings()
     _queue_password_changed_mail(background_tasks, settings, user)
@@ -312,6 +348,12 @@ def change_password(
         stmt = stmt.where(AuthSession.id != current_hash)
     db.execute(stmt)
     db.commit()
+
+    # Audit finding 7: an outstanding, still-unused password_reset link
+    # must not survive a password change made this way -- otherwise a
+    # stale reset email (the user's own, or one an attacker triggered)
+    # would still work after the user thinks they've locked things down.
+    invalidate_password_reset_tokens(db, user.id)
 
 
 @router.delete("/me", status_code=204)

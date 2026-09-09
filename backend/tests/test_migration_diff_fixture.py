@@ -181,6 +181,124 @@ def test_apply_migration_invalid_decision():
         assert exc.code == "invalid_decision"
 
 
+def test_compute_diff_surfaces_answer_to_id_absent_from_both_models():
+    """Audit finding 2: `compute_diff`'s pass 2 used to iterate only the
+    source model's questions, so an answer whose questionId is in neither
+    the source nor the target model (e.g. left over from an earlier bug,
+    or hand-edited data) raised no diff item at all -- `apply_migration`
+    then silently dropped it instead of keeping or orphaning it."""
+    old = _load("old-model.json")
+    new = _load("new-model.json")
+    answers = [
+        *_load("answers.json"),
+        {"questionId": "ghost-question", "declarations": [], "comment": "still here"},
+    ]
+
+    diff = compute_diff(
+        {"id": old["id"], "version": old["version"]},
+        {"id": new["id"], "version": new["version"], "changelog": new["changelog"]},
+        old,
+        new,
+        answers,
+    )
+    ghost_items = [i for i in diff["items"] if i["oldQuestionId"] == "ghost-question"]
+    assert len(ghost_items) == 1
+    item = ghost_items[0]
+    assert item["status"] == "removed"
+    assert item["answered"] is True
+    assert item["oldText"] == ""
+
+    new_answers, orphaned = apply_migration(diff, answers, None, "1.0.0")
+    assert "ghost-question" not in {a["questionId"] for a in new_answers}
+    assert "ghost-question" in {o["questionId"] for o in orphaned}
+
+
+def test_compute_diff_missing_source_content_still_surfaces_leftover_answers():
+    """Audit finding 2: when `from_content` itself is missing/empty (e.g.
+    the source knowledge-model version's content couldn't be loaded), pass
+    2 used to iterate zero source questions, so every answer whose id is
+    also absent from the target vanished with no diff item -- and
+    `apply_migration` would then wipe those answers entirely instead of
+    orphaning them. (F2 and A2 -- unlike F1-metadata/F3 -- aren't in the
+    target model either, so they exercise pass 2, not the unrelated pass-1
+    "added" path for ids the empty source can't resolve.)"""
+    new = _load("new-model.json")
+    answers = _load("answers.json")
+    empty_old = {"id": "gone", "version": "0.0.0", "sections": []}
+
+    diff = compute_diff(
+        {"id": empty_old["id"], "version": empty_old["version"]},
+        {"id": new["id"], "version": new["version"], "changelog": new["changelog"]},
+        empty_old,
+        new,
+        answers,
+    )
+    removed_ids = {i["oldQuestionId"] for i in diff["items"] if i["status"] == "removed"}
+    assert {"F2", "A2"} <= removed_ids
+
+    new_answers, orphaned = apply_migration(diff, answers, None, "0.0.0")
+    orphaned_ids = {o["questionId"] for o in orphaned}
+    assert {"F2", "A2"} <= orphaned_ids
+
+
+def test_apply_migration_rejects_duplicate_target_across_removed_items():
+    """Audit finding 5: two different removed old ids reassigned (via
+    `orphanReassign`) to the same target id used to produce two answers on
+    that one question id. The second claim on an already-claimed target is
+    now `invalid_decision`."""
+    diff = {
+        "items": [
+            {
+                "status": "removed",
+                "oldQuestionId": "old-a",
+                "newQuestionId": None,
+                "decision": {"kind": "orphanReassign", "options": ["target-x"], "default": None},
+            },
+            {
+                "status": "removed",
+                "oldQuestionId": "old-b",
+                "newQuestionId": None,
+                "decision": {"kind": "orphanReassign", "options": ["target-x"], "default": None},
+            },
+        ]
+    }
+    answers = [
+        {"questionId": "old-a", "declarations": [{"ferFreeText": "x", "status": "current"}]},
+        {"questionId": "old-b", "declarations": [{"ferFreeText": "y", "status": "current"}]},
+    ]
+    decisions = {"orphanReassign": {"old-a": "target-x", "old-b": "target-x"}}
+    try:
+        apply_migration(diff, answers, decisions, "1.0.0")
+        raise AssertionError("expected MigrationError")
+    except MigrationError as exc:
+        assert exc.code == "invalid_decision"
+
+
+def test_apply_migration_dedupes_split_copies_list():
+    """Audit finding 5: a caller-supplied `splitCopies` list naming the
+    same target twice must produce one answer on that id, not two."""
+    diff = {
+        "items": [
+            {
+                "status": "split",
+                "oldQuestionId": "old-a",
+                "newQuestionId": None,
+                "splitInto": ["target-1", "target-2"],
+                "decision": {
+                    "kind": "splitCopies",
+                    "options": ["target-1", "target-2"],
+                    "default": ["target-1", "target-2"],
+                },
+            }
+        ]
+    }
+    answers = [{"questionId": "old-a", "declarations": [{"ferFreeText": "x", "status": "current"}]}]
+    decisions = {"splitCopies": {"old-a": ["target-1", "target-1"]}}
+    new_answers, orphaned = apply_migration(diff, answers, decisions, "1.0.0")
+    assert [a["questionId"] for a in new_answers] == ["target-1"]
+    assert orphaned == []
+
+
 def test_semver_helpers():
     assert parse_semver("1.2.3") == (1, 2, 3)
     assert semver_gt("1.1.0", "1.0.0")

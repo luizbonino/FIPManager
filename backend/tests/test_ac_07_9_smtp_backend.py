@@ -34,6 +34,22 @@ def test_check_mail_safety_accepts_smtp_with_host():
     Settings(mail_backend="smtp", smtp_host="localhost").check_mail_safety()  # must not raise
 
 
+def test_check_mail_safety_rejects_unknown_smtp_tls():
+    """Audit finding 6: `_send_smtp` treats any non-`"ssl"` value as a plain
+    (non-TLS) connection, and only calls `starttls()` for the literal value
+    `"starttls"` -- so a typo like `"ststarttls"` would silently send mail
+    unencrypted instead of failing loudly."""
+    settings = Settings(mail_backend="smtp", smtp_host="localhost", smtp_tls="ststarttls")
+    with pytest.raises(RuntimeError, match="FIPM_SMTP_TLS"):
+        settings.check_mail_safety()
+
+
+def test_check_mail_safety_accepts_smtp_tls_none():
+    Settings(
+        mail_backend="smtp", smtp_host="localhost", smtp_tls="none"
+    ).check_mail_safety()  # must not raise
+
+
 class _StubSMTP:
     """Records the `send_message` call instead of opening a socket -- stands
     in for `smtplib.SMTP` (used as a context manager, same interface)."""

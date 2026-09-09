@@ -94,8 +94,17 @@ def _build_message(
 
 
 def _send_console(settings: Settings, to: str, subject: str, text: str) -> None:
+    """Audit finding 12: the app never configured logging, so this INFO
+    record -- carrying the only copy of a verify-email/password-reset link
+    a `console`-backend deployment (the default) has -- was silently
+    dropped by the root logger's default WARNING level and lack of a
+    handler; nothing showed up in `docker logs`. `[MAIL]` is a stable,
+    greppable prefix, and the message is also printed straight to stdout
+    as a second, logging-config-independent path to the same output."""
     indented = "\n".join(f"    {line}" for line in text.splitlines())
-    logger.info("MAIL to=%s subject=%s\n%s", to, subject, indented)
+    message = f"[MAIL] to={to} subject={subject}\n{indented}"
+    logger.info(message)
+    print(message, flush=True)
 
 
 def _send_smtp(settings: Settings, msg: EmailMessage) -> None:

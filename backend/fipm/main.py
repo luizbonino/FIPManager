@@ -17,6 +17,7 @@ from starlette.types import ASGIApp, Receive, Scope, Send
 from fipm.auth import csrf_middleware, password_change_middleware
 from fipm.config import get_settings
 from fipm.importer import run_import
+from fipm.logging_setup import configure_logging
 from fipm.mail import warn_if_console_in_production
 from fipm.routers import (
     admin,
@@ -33,6 +34,7 @@ from fipm.routers import (
     sessions,
 )
 
+configure_logging()
 logger = logging.getLogger(__name__)
 
 _BODY_LIMITED_METHODS = {"POST", "PUT", "PATCH"}

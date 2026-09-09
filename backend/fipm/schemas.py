@@ -330,6 +330,37 @@ class Answer(CamelModel):
     comment: str | None = None
 
 
+class MigratedFromImport(CamelModel):
+    """Audit finding 4: `POST /fips/import`'s `fip.migratedFrom` (spec 07
+    §4.4) used to be taken verbatim from the request body with no shape
+    check at all. The backend's own migrate endpoint only ever writes
+    `{"id": ..., "version": ..., "at": ...}` (routers/fips.py's `migrate`),
+    so that's the shape enforced here; a mismatch is 400
+    `invalid_migrated_from` rather than an unvalidated blob reaching RDF
+    export or a later migration."""
+
+    id: str
+    version: str
+    at: str
+
+
+class OrphanedAnswerImport(CamelModel):
+    """Audit findings 4/11: one `fip.orphanedAnswers` entry on an imported
+    export document (spec 07 §4.4/§6) -- an `Answer`-shaped
+    `questionId`/`declarations`/`comment` plus the migration-provenance
+    fields `questionText`/`fromVersion`/`at`. Before this, a malformed
+    entry (e.g. a bad `declarations` shape) reached
+    `rdf.orphaned_answer_comment_lines` / RDF export unvalidated and could
+    500 instead of failing the import with 400 `invalid_orphaned_answers`."""
+
+    question_id: str
+    question_text: dict[str, str] = Field(default_factory=dict)
+    declarations: list[Declaration] = Field(default_factory=list)
+    comment: str | None = None
+    from_version: str | None = None
+    at: str | None = None
+
+
 class DataSteward(CamelModel):
     orcid: str | None = None
     name: str | None = None
