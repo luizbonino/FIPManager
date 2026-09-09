@@ -32,7 +32,7 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] Deliverable: dry run of the whole workshop exercise (30 min) with the three facilitators. Script drafted: docs/workshop/facilitator-script.md and participant-handout.md.
 
 ## Week 4 · 29 Sep–3 Oct · Hardening and deployment
-- [ ] Deploy to the chosen domain with HTTPS; base URL from env so a later move to Fiocruz keeps FIP IDs. Backup script done 8 Sep (`scripts/backup-db.sh`).
+- [ ] Deploy to the chosen domain with HTTPS; base URL from env so a later move to Fiocruz keeps FIP IDs. Backup script done 8 Sep (`scripts/backup-db.sh`). Local test deployment on port 8080 via `docker-compose.local.yml` (gitignored) since 9 Sep.
 - [x] Admin pages: list users, reset password (temporary, must change at next login), promote/merge user FERs (done 9 Sep, docs/specs/05-v1-completion.md).
 - [x] Privacy notice (/privacy, four languages, consent at registration, retention stated) and rate limiting on login/feedback (done 9 Sep). Contact address and hosting organisation come from FIPM_CONTACT_EMAIL / FIPM_HOSTING_ORG — set them at deployment.
 - [ ] Register the `fipm` w3id (https://w3id.org/fipm/ns#) used by the RDF export's extension vocabulary; publish a terms page.
@@ -48,6 +48,9 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] `scripts/import-workshop-docx.py`: Word document → area forks with suggested options; five CONFOA 2026 drafts imported (omics, biodiversity, agriculture, public health, nursing); 131 options resolved to the catalogue, 76 generic phrases skipped, 0 drafts. FER catalogue at 138 entries.
 - [ ] Remaining six area profiles once the co-facilitator delivers them (re-run the importer with `--bump`).
 - [ ] Facilitators review and publish the five area drafts in the editor before creating the workshop session.
+- [x] Knowledge-model catalogue reachable from the top bar; admins see a "drafts to review" notice in the workspace (done 9 Sep).
+- [x] Standalone FIPs: anyone can fill a FIP outside a session and without an account, from the home page or a model's page; edit token kept in the browser, edit link to move between devices, "FIPs on this device" list on the home page; `FIPM_ANONYMOUS_FIPS` switch, 30 creations/hour/IP; admin stats and `python -m fipm purge-standalone-fips` for the 12-month retention promise (done 9 Sep, docs/specs/09-standalone-fips.md).
+- [ ] Operator runs the purge command monthly after deployment (no scheduler shipped); decide whether to keep standalone FIPs on for the workshop deployment.
 
 ## 6 Oct · Workshop
 - Collect FIPs, export session, gather feedback (short form in the tool or paper).

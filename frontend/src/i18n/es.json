@@ -108,7 +108,9 @@
     "invalidCredentials": "Correo electrónico o contraseña no válidos.",
     "emailExists": "Este correo electrónico ya está registrado.",
     "registrationClosed": "El registro está cerrado actualmente.",
-    "emailVerificationRequired": "Confirme su dirección de correo electrónico antes de hacer esto público."
+    "emailVerificationRequired": "Confirme su dirección de correo electrónico antes de hacer esto público.",
+    "anonymousFipsDisabled": "Rellenar un FIP sin cuenta está deshabilitado en este servidor. Inicia sesión.",
+    "privateRequiresAccount": "Un FIP privado necesita una cuenta."
   },
   "languages": {
     "en": "Inglés",
@@ -146,12 +148,17 @@
     "tagline": "FIP Manager ayuda a una comunidad de investigación a responder juntos el GO FAIR FIP mini-questionnaire, en un taller o de forma individual.",
     "joinLabel": "¿Tiene un código de acceso de un taller?",
     "joinPlaceholder": "Código de 6 caracteres",
-    "joinButton": "Unirse"
+    "joinButton": "Unirse",
+    "standaloneHeading": "O rellena un FIP por tu cuenta",
+    "standaloneText": "No hace falta una sesión. Elige un cuestionario y empieza; podrás compartir o reclamar el perfil más tarde.",
+    "startFip": "Empezar un FIP",
+    "yourFipsOnDevice": "FIPs en este dispositivo"
   },
   "fipNew": {
     "title": "Nuevo FIP",
     "chooseQuestionnaire": "Elegir un cuestionario",
-    "submit": "Crear FIP"
+    "submit": "Crear FIP",
+    "anonymousHint": "No has iniciado sesión. Tu navegador guarda el token de edición de este FIP. Usa el enlace de edición del editor para abrirlo en otro dispositivo, o crea una cuenta más tarde y reclama el FIP."
   },
   "join": {
     "sessionTitle": "Sesión de taller",
@@ -226,6 +233,8 @@
   "share": {
     "title": "Compartir",
     "copyLink": "Copiar enlace",
+    "editLink": "Enlace de edición",
+    "editLinkWarning": "Cualquier persona con este enlace puede editar el FIP. Compártelo solo con tu grupo.",
     "copied": "Copiado",
     "qrHint": "Escanee para abrir este FIP",
     "embed": "Insertar",
@@ -419,7 +428,8 @@
     "compactDeclarations": "Declaraciones compactas (ocultar el estado tras «Más»)",
     "unusedInlineFers": "Recursos sin usar (no sugeridos por ninguna pregunta)",
     "unownedDrafts": "Borradores por revisar",
-    "unownedDraftHint": "Borradores importados sin propietario todavía. Editar uno lo reclama como suyo."
+    "unownedDraftHint": "Borradores importados sin propietario todavía. Editar uno lo reclama como suyo.",
+    "startFip": "Empezar un FIP con este modelo"
   },
   "admin": {
     "title": "Administración",

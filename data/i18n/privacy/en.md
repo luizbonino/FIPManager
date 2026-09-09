@@ -7,7 +7,7 @@ Version 1.0 — 12 September 2026. FIP Manager is a research tool operated for t
 
 **If you create an account**, we store your email address, display name, an argon2id hash of your password (never the password itself), and the version of this notice you accepted — only to sign you in and to show you your own FIPs, sessions and knowledge models. No marketing, no analytics.
 
-**If you take part in a workshop without an account**, no name or email is required. Your group's answers are stored with the workshop session, together with your community name and an optional data steward name or ORCID iD, and are visible to the facilitator and to anyone with the FIP's link. Your browser keeps an edit token so your device can keep editing that FIP.
+**If you take part in a workshop without an account**, no name or email is required. Your group's answers are stored with the workshop session, together with your community name and an optional data steward name or ORCID iD, and are visible to the facilitator and to anyone with the FIP's link. Your browser keeps an edit token so your device can keep editing that FIP. You can also create a FIP on your own, outside a workshop session and without an account. A standalone FIP stores the same data — your answers, community name and optional data steward name or ORCID iD — is not attached to any session, and is visible to anyone holding its link. It can only be edited from the browser that keeps its edit token, or by anyone you share that edit link with.
 
 ## Legal basis
 
@@ -15,7 +15,7 @@ For accounts, we process your data on the basis of your **consent**, given when 
 
 ## How long we keep it
 
-Session data is kept until the facilitator deletes the session, and in any case no longer than 12 months after the workshop. Account data is kept until you delete your account; deleting it anonymises the FIPs it leaves behind so workshop results and FIP links stay usable.
+Session data is kept until the facilitator deletes the session, and in any case no longer than 12 months after the workshop. A standalone FIP is kept until you delete it, claim it into an account, or an administrator removes it, and in any case no longer than 12 months after its last edit. Account data is kept until you delete your account; deleting it anonymises the FIPs it leaves behind so workshop results and FIP links stay usable.
 
 ## Sharing and cookies
 

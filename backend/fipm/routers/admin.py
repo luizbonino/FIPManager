@@ -26,6 +26,7 @@ from fipm.schemas import (
     AdminFerMergeOut,
     AdminFerMergeRequest,
     AdminFerOut,
+    AdminFipStatsOut,
     AdminResetPasswordOut,
     AdminUserOut,
     FerOut,
@@ -92,6 +93,27 @@ def list_users(
         for u in rows
     ]
     return ListOut(items=items, total=total)
+
+
+@router.get("/stats", response_model=AdminFipStatsOut)
+def fip_stats(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin_404),
+) -> AdminFipStatsOut:
+    """spec 09-standalone-fips.md retention runbook: FIP counts by kind
+    (spec 09 §2's authorization table) -- `ownedFips` (owner_id set,
+    regardless of session_id), `standaloneFips` (owner_id and session_id
+    both NULL -- the rows `purge-standalone-fips` targets) and
+    `sessionFips` (owner_id NULL, session_id set -- anonymous FIPs still
+    reachable through their session, never purged)."""
+    owned_fips = db.query(Fip).filter(Fip.owner_id.isnot(None)).count()
+    standalone_fips = db.query(Fip).filter(Fip.owner_id.is_(None), Fip.session_id.is_(None)).count()
+    session_fips = db.query(Fip).filter(Fip.owner_id.is_(None), Fip.session_id.isnot(None)).count()
+    return AdminFipStatsOut(
+        owned_fips=owned_fips,
+        standalone_fips=standalone_fips,
+        session_fips=session_fips,
+    )
 
 
 @router.post("/users/{user_id}/reset-password", response_model=AdminResetPasswordOut)

@@ -44,6 +44,14 @@
           >
             {{ $t('km.edit') }}
           </router-link>
+          <!-- Spec 09: anyone, signed in or not, can start a standalone FIP straight from a published model. -->
+          <router-link
+            v-if="model.status === 'published'"
+            :to="`/fips/new?km=${model.id}@${model.version}`"
+            class="btn btn-primary"
+          >
+            {{ $t('km.startFip') }}
+          </router-link>
         </div>
       </header>
 

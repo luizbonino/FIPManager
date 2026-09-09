@@ -26,6 +26,8 @@
     </section>
 
     <form v-else class="community-form" @submit.prevent="onSubmit">
+      <p v-if="!authStore.isAuthenticated" class="anonymous-hint">{{ $t('fipNew.anonymousHint') }}</p>
+
       <h2>{{ $t('community.heading') }}</h2>
 
       <label class="field">
@@ -66,17 +68,22 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { listKnowledgeModels } from '@/api/knowledgeModels'
 import { createFip } from '@/api/fips'
+import { setToken } from '@/lib/editTokens'
+import { createFipErrorMessage } from '@/lib/fipErrors'
 import { resolveLang } from '@/lib/lang'
 import { useAuthStore } from '@/stores/auth'
 import type { KnowledgeModelSummary } from '@/types/api'
 
-// Spec 02 §3 / spec 04 §4: GET /api/knowledge-models?status=published ->
-// radio list grouped System/Mine/Public via `isSystem`/`ownerId`, then the
-// §2.1 community form.
+// Spec 02 §3 / spec 04 §4, extended by spec 09 (standalone FIPs): GET
+// /api/knowledge-models?status=published -> radio list grouped
+// System/Mine/Public via `isSystem`/`ownerId`, then the §2.1 community
+// form. Reachable signed out since spec 09 — `POST /api/fips` itself
+// grants edit rights to an anonymous caller via a returned edit token.
+const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
 const authStore = useAuthStore()
@@ -135,9 +142,14 @@ async function onSubmit() {
         dataSteward: orcid.value.trim() ? { orcid: orcid.value.trim() } : null,
       },
     })
+    // Spec 09: an anonymous caller gets an edit token back exactly once —
+    // store it before navigating, same as the session-joining flow.
+    if (created.editToken) {
+      setToken(created.id, created.editToken)
+    }
     await router.push(`/fips/${created.id}/edit`)
-  } catch {
-    submitError.value = t('errors.serverError')
+  } catch (err) {
+    submitError.value = createFipErrorMessage(t, err, 'standalone')
   } finally {
     submitting.value = false
   }
@@ -148,6 +160,16 @@ onMounted(async () => {
   try {
     const result = await listKnowledgeModels({ status: 'published' })
     knowledgeModels.value = result.items
+
+    // Spec 09: `?km=<id>@<version>` preselects a listed published model,
+    // skipping the choice step — used by KnowledgeModelRead.vue's
+    // "Start a FIP with this model" link. Silently ignored if it doesn't
+    // match anything published and listed.
+    const preselect = route.query.km
+    if (typeof preselect === 'string') {
+      const match = knowledgeModels.value.find((km) => `${km.id}@${km.version}` === preselect)
+      if (match) selectedKmKey.value = preselect
+    }
   } finally {
     loadingKms.value = false
   }
@@ -226,6 +248,15 @@ onMounted(async () => {
 .field-error,
 .form-error {
   color: var(--color-error);
+  font-size: var(--font-size-sm);
+}
+
+.anonymous-hint {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-hover);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 

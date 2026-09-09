@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     cookie_secure: bool = True
     allowed_origins: str = ""
     registration_open: bool = True
+    # spec 09-standalone-fips.md: whether an anonymous caller with no
+    # workshop session may create a FIP at all (POST /fips with neither
+    # sessionId nor a signed-in cookie). True by default -- session
+    # participants (who already carry a joinCode) are unaffected either way.
+    anonymous_fips: bool = True
     env: str = "development"
     # Audit finding 12: nothing called `logging.basicConfig`/added a
     # handler, so every `logger.info` -- including the console mail

@@ -84,7 +84,12 @@
         </details>
       </div>
 
-      <ShareBox v-if="store.fip.visibility !== 'private'" :url="shareUrl" :fip-id="store.fip.id" />
+      <ShareBox
+        v-if="store.fip.visibility !== 'private'"
+        :url="shareUrl"
+        :fip-id="store.fip.id"
+        :edit-token="getToken(store.fip.id) ?? undefined"
+      />
       <ExportButtons
         :json-url="fipExportJsonUrl(store.fip.id)"
         :csv-url="fipExportCsvUrl(store.fip.id)"
@@ -110,7 +115,7 @@ import { useFipEditorStore } from '@/stores/fipEditor'
 import { useAuthStore } from '@/stores/auth'
 import { answeredCount as computeAnsweredCount, visibleQuestionCount } from '@/lib/progress'
 import { resolveLang } from '@/lib/lang'
-import { getToken } from '@/lib/editTokens'
+import { adoptTokenFromQuery, getToken } from '@/lib/editTokens'
 import { getFerTypes } from '@/api/ferTypes'
 import { ApiResponseError } from '@/api/client'
 import { fipExportCsvUrl, fipExportJsonldUrl, fipExportJsonUrl, fipExportTtlUrl } from '@/api/fips'
@@ -222,6 +227,14 @@ async function onDelete() {
 
 async function init() {
   const id = String(route.params.id)
+  // Edit link (spec 09 follow-up): `?token=...` hands this device edit
+  // rights before the FIP is even loaded, then the token is stripped from
+  // the address bar/history so it doesn't linger there or in a share.
+  if (adoptTokenFromQuery(id, route.query)) {
+    const query = { ...route.query }
+    delete query.token
+    await router.replace({ path: route.path, query })
+  }
   try {
     const [, ferTypesResult] = await Promise.all([
       store.load(id),

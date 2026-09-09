@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from fipm.auth import check_anonymous_fip_rate_limit
 from fipm.authz import (
     can_read,
     can_write_owned,
@@ -219,6 +220,7 @@ def _validate_question_ids(answers: list[Answer], km: KnowledgeModel) -> None:
 @router.post("", status_code=201)
 def create_fip(
     body: FipCreateRequest,
+    request: Request,
     db: Session = Depends(get_db),
     user: User | None = Depends(optional_user),
 ) -> dict[str, Any]:
@@ -299,7 +301,30 @@ def create_fip(
         )
         return _out_for_km(fip, km, db)
 
-    raise HTTPException(status_code=400, detail="session_id_or_login_required")
+    # spec 09-standalone-fips.md: an anonymous caller with no session --
+    # "anyone can fill a FIP independently, without a workshop session or
+    # an account". No user to gate on, so check_email_verification_gate
+    # doesn't apply here (it's a no-op for user=None anyway, but the point
+    # stands: there is nothing to verify).
+    if not settings.anonymous_fips:
+        raise HTTPException(status_code=403, detail="anonymous_fips_disabled")
+    visibility = body.visibility or "link"
+    if visibility == "private":
+        # Nobody could ever read it back: no owner, no session, and
+        # "private" means owner/admin-only.
+        raise HTTPException(status_code=400, detail="private_requires_account")
+    check_anonymous_fip_rate_limit(request)
+    edit_token = new_token()
+    fip = _insert_fip(
+        db,
+        settings,
+        owner_id=None,
+        session_id=None,
+        edit_token_hash=hash_token(edit_token),
+        visibility=visibility,
+        **common,
+    )
+    return _out_for_km(fip, km, db, edit_token=edit_token)
 
 
 @router.post("/import", status_code=201)
@@ -434,6 +459,13 @@ def patch_fip(
 
     if body.visibility is not None:
         check_email_verification_gate(user, body.visibility)
+        # spec 09-standalone-fips.md: same rule as POST -- an ownerless FIP
+        # (standalone or session) with visibility="private" would become
+        # unreadable by anyone else (read checks the edit token only after
+        # can_read) and unrecoverable dead data if the token is ever lost,
+        # so this is rejected outright rather than silently downgraded.
+        if body.visibility == "private" and fip.owner_id is None:
+            raise HTTPException(status_code=400, detail="private_requires_account")
 
     if body.community is not None:
         community = body.community.model_dump(mode="json", by_alias=True)

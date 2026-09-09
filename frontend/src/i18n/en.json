@@ -108,7 +108,9 @@
     "invalidCredentials": "Invalid email or password.",
     "emailExists": "This email is already registered.",
     "registrationClosed": "Registration is currently closed.",
-    "emailVerificationRequired": "Confirm your email address before making this public."
+    "emailVerificationRequired": "Confirm your email address before making this public.",
+    "anonymousFipsDisabled": "Filling in a FIP without an account is disabled on this server. Please sign in.",
+    "privateRequiresAccount": "A private FIP needs an account."
   },
   "languages": {
     "en": "English",
@@ -146,12 +148,17 @@
     "tagline": "FIP Manager helps a research community answer the GO FAIR FIP mini-questionnaire together, in a workshop or on their own.",
     "joinLabel": "Have a join code from a workshop?",
     "joinPlaceholder": "6-character code",
-    "joinButton": "Join"
+    "joinButton": "Join",
+    "standaloneHeading": "Or fill in a FIP on your own",
+    "standaloneText": "No session needed. Pick a questionnaire and start; you can share or claim the profile later.",
+    "startFip": "Start a FIP",
+    "yourFipsOnDevice": "FIPs on this device"
   },
   "fipNew": {
     "title": "New FIP",
     "chooseQuestionnaire": "Choose a questionnaire",
-    "submit": "Create FIP"
+    "submit": "Create FIP",
+    "anonymousHint": "You are not signed in. Your browser keeps the edit token for this FIP. Use the editor's edit link to open it on another device, or create an account later and claim the FIP."
   },
   "join": {
     "sessionTitle": "Workshop session",
@@ -226,6 +233,8 @@
   "share": {
     "title": "Share",
     "copyLink": "Copy link",
+    "editLink": "Edit link",
+    "editLinkWarning": "Anyone with this link can edit the FIP. Share it only with your group.",
     "copied": "Copied",
     "qrHint": "Scan to open this FIP",
     "embed": "Embed",
@@ -419,7 +428,8 @@
     "allowFreeText": "Allow participants to use their own wording",
     "defaultDeclarationStatus": "Default status for quick-pick resources",
     "compactDeclarations": "Compact declarations (hide status behind \"More\")",
-    "unusedInlineFers": "Unused resources (not suggested by any question)"
+    "unusedInlineFers": "Unused resources (not suggested by any question)",
+    "startFip": "Start a FIP with this model"
   },
   "admin": {
     "title": "Administration",

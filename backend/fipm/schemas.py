@@ -843,6 +843,16 @@ class AdminResetPasswordOut(CamelModel):
     temporary_password: str
 
 
+class AdminFipStatsOut(CamelModel):
+    """spec 09-standalone-fips.md retention runbook: aggregate FIP counts by
+    kind (spec 09 §2's authorization table), so an admin can see how many
+    ownerless FIPs exist before running `purge-standalone-fips`."""
+
+    owned_fips: int
+    standalone_fips: int
+    session_fips: int
+
+
 class AdminFerOut(CamelModel):
     id: str
     label: dict[str, str]

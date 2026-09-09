@@ -7,7 +7,7 @@ Versão 1.0 — 12 de setembro de 2026. O FIP Manager é uma ferramenta de inves
 
 **Ao criar uma conta**, armazenamos o seu endereço de email, nome apresentado, um hash argon2id da sua palavra-passe (nunca a palavra-passe em si) e a versão deste aviso que aceitou — apenas para iniciar sessão e para mostrar os seus FIPs, sessões e modelos de conhecimento. Sem marketing, sem análises.
 
-**Ao participar num workshop sem conta**, não é necessário qualquer nome ou email. As respostas do grupo são armazenadas com a sessão do workshop, juntamente com o nome da comunidade e, opcionalmente, o nome ou ORCID iD do responsável pelos dados, e ficam visíveis ao facilitador e a quem tiver a ligação do FIP. O seu navegador guarda um token de edição para que o dispositivo possa continuar a editar esse FIP.
+**Ao participar num workshop sem conta**, não é necessário qualquer nome ou email. As respostas do grupo são armazenadas com a sessão do workshop, juntamente com o nome da comunidade e, opcionalmente, o nome ou ORCID iD do responsável pelos dados, e ficam visíveis ao facilitador e a quem tiver a ligação do FIP. O seu navegador guarda um token de edição para que o dispositivo possa continuar a editar esse FIP. Também pode criar um FIP por sua conta, fora de uma sessão de workshop e sem conta. Um FIP autónomo armazena os mesmos dados — as suas respostas, o nome da comunidade e, opcionalmente, o nome ou ORCID iD do responsável pelos dados —, não está associado a nenhuma sessão e fica visível a quem tiver a sua ligação. Só pode ser editado a partir do navegador que guarda o respetivo token de edição, ou por quem partilhar essa ligação de edição.
 
 ## Fundamento jurídico
 
@@ -15,7 +15,7 @@ Para contas, tratamos os seus dados com base no seu **consentimento**, dado no r
 
 ## Durante quanto tempo os conservamos
 
-Os dados da sessão são conservados até o facilitador eliminar a sessão e, em todo o caso, no máximo 12 meses após o workshop. Os dados da conta são conservados até eliminar a conta; ao eliminá-la, os FIPs que deixa para trás são anonimizados, para que os resultados do workshop e as ligações dos FIPs continuem utilizáveis.
+Os dados da sessão são conservados até o facilitador eliminar a sessão e, em todo o caso, no máximo 12 meses após o workshop. Um FIP autónomo é conservado até o eliminar, o reivindicar para uma conta ou um administrador o remover e, em todo o caso, no máximo 12 meses após a sua última edição. Os dados da conta são conservados até eliminar a conta; ao eliminá-la, os FIPs que deixa para trás são anonimizados, para que os resultados do workshop e as ligações dos FIPs continuem utilizáveis.
 
 ## Partilha e cookies
 

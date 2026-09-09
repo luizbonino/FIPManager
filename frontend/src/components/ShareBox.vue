@@ -8,6 +8,16 @@
           {{ copied ? $t('share.copied') : $t('share.copyLink') }}
         </button>
       </div>
+      <div v-if="editToken" class="share-edit-link">
+        <p class="edit-link-label">{{ $t('share.editLink') }}</p>
+        <div class="share-link-row">
+          <input :value="editLinkUrl" type="text" readonly class="share-link-input edit-link-input" @click="selectEditLink" />
+          <button type="button" class="copy-btn" @click="copyEditLink">
+            {{ editLinkCopied ? $t('share.copied') : $t('share.copyLink') }}
+          </button>
+        </div>
+        <p class="edit-link-warning">{{ $t('share.editLinkWarning') }}</p>
+      </div>
       <div class="share-qr">
         <QrCode :text="url" :size="160" />
         <p class="qr-hint">{{ $t('share.qrHint') }}</p>
@@ -39,15 +49,25 @@ import QrCode from './QrCode.vue'
  * `<details>` labelled "Share" (spec 02 §2.4): the absolute FIP URL, copy
  * button, QR, and (spec 06 §3) an "Embed" item with the `<iframe>` snippet
  * for `GET /fips/{id}/embed`.
+ *
+ * `editToken` (spec 09 follow-up) is optional and set only by
+ * FipEditor.vue, which alone knows this device's edit token — when
+ * present, an extra "Edit link" row lets a participant carry edit rights
+ * to another device or hand them to a colleague (today the token only
+ * ever lived in this browser's localStorage).
  */
-const props = defineProps<{ url: string; fipId: string }>()
+const props = defineProps<{ url: string; fipId: string; editToken?: string }>()
 
 const copied = ref(false)
 const embedCopied = ref(false)
+const editLinkCopied = ref(false)
 
 const embedUrl = computed(() => `${location.origin}/fips/${props.fipId}/embed`)
 const embedSnippet = computed(
   () => `<iframe src="${embedUrl.value}" width="100%" height="600" loading="lazy" title="FIP"></iframe>`
+)
+const editLinkUrl = computed(
+  () => `${location.origin}/fips/${props.fipId}/edit?token=${encodeURIComponent(props.editToken ?? '')}`
 )
 
 function selectAll(event: Event) {
@@ -56,6 +76,10 @@ function selectAll(event: Event) {
 
 function selectEmbed(event: Event) {
   ;(event.target as HTMLTextAreaElement).select()
+}
+
+function selectEditLink(event: Event) {
+  ;(event.target as HTMLInputElement).select()
 }
 
 async function copy() {
@@ -69,6 +93,19 @@ async function copy() {
   copied.value = true
   setTimeout(() => {
     copied.value = false
+  }, 2000)
+}
+
+async function copyEditLink() {
+  try {
+    await navigator.clipboard.writeText(editLinkUrl.value)
+  } catch {
+    const input = document.querySelector<HTMLInputElement>('.edit-link-input')
+    input?.select()
+  }
+  editLinkCopied.value = true
+  setTimeout(() => {
+    editLinkCopied.value = false
   }, 2000)
 }
 
@@ -134,6 +171,24 @@ async function copyEmbed() {
   border-radius: var(--border-radius-sm);
   background-color: var(--color-primary);
   color: var(--color-primary-text);
+}
+
+.share-edit-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.edit-link-label {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.edit-link-warning {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 .share-qr {

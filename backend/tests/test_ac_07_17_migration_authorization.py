@@ -75,11 +75,13 @@ def test_owner_and_admin_may_migrate(client, client_factory, db_session):
 
 
 def test_edit_token_holder_is_authorized_same_as_owner_admin(client, client_factory):
-    """The only way to create an anonymous, edit-token-writable FIP in this
-    codebase is via a workshop session (`POST /api/fips` with no login and
-    no `sessionId` is 400 `session_id_or_login_required` --
-    `routers/fips.py::create_fip` never issues an `edit_token_hash` outside
-    the session branch). A session FIP is pinned to its session's version
+    """A workshop session is *a* way to create an anonymous, edit-token-writable
+    FIP, but no longer the only one: spec 09-standalone-fips.md's standalone
+    path (`POST /api/fips` with no login and no `sessionId`) also issues an
+    `edit_token_hash` now (`routers/fips.py::create_fip`'s anonymous-standalone
+    branch) -- see `test_standalone_fips.py`. This test uses the session path
+    specifically because it also wants AC16's version pin. A session FIP is
+    pinned to its session's version
     (AC16), so it cannot *complete* a migrate to a newer version; what this
     asserts instead is that the token holder clears authorization (same as
     an owner or admin -- not 403/404) and reaches the version-specific

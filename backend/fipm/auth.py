@@ -152,6 +152,30 @@ def check_register_rate_limit(request: Request) -> None:
     _rate_limiter.record(f"register-ip:{ip}", REGISTER_WINDOW_SECONDS)
 
 
+# spec 09-standalone-fips.md: POST /fips with neither sessionId nor a
+# signed-in cookie (a fully anonymous, standalone FIP). Session participants
+# (who present a joinCode) and signed-in users are never subject to this.
+ANONYMOUS_FIP_LIMIT_PER_IP = 30
+ANONYMOUS_FIP_WINDOW_SECONDS = 60 * 60
+
+
+def check_anonymous_fip_rate_limit(request: Request) -> None:
+    """30 anonymous standalone-FIP creations per hour per client IP -> 429
+    `rate_limited` with Retry-After. Checks and records in one call (like
+    `check_register_rate_limit`): unlike feedback's split check/record, a
+    rejected-for-an-unrelated-reason creation is rare enough here (the
+    session/questionnaire checks already happened before this branch is
+    reached) that a slightly conservative cap is an acceptable trade for
+    the simpler call site."""
+    ip = client_ip(request)
+    limited, retry = _rate_limiter.is_limited(
+        f"anon-fip-ip:{ip}", ANONYMOUS_FIP_LIMIT_PER_IP, ANONYMOUS_FIP_WINDOW_SECONDS
+    )
+    if limited:
+        _raise_rate_limited(retry)
+    _rate_limiter.record(f"anon-fip-ip:{ip}", ANONYMOUS_FIP_WINDOW_SECONDS)
+
+
 def check_feedback_rate_limit(request: Request) -> None:
     """20 per hour per client IP (spec 05-v1-completion.md §4, review
     finding 6). Only *checks* the cap -- call `record_feedback_attempt`

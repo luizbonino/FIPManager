@@ -126,10 +126,12 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    // spec 09: anyone can start a standalone FIP without an account;
+    // `POST /api/fips` itself grants edit rights via an edit token in that case.
     path: '/fips/new',
     name: 'FipNew',
     component: FipNew,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: false },
   },
   {
     path: '/sessions/new',

@@ -108,7 +108,9 @@
     "invalidCredentials": "Email ou palavra-passe inválidos.",
     "emailExists": "Este email já está registado.",
     "registrationClosed": "O registo está atualmente fechado.",
-    "emailVerificationRequired": "Confirme o seu endereço de email antes de tornar isto público."
+    "emailVerificationRequired": "Confirme o seu endereço de email antes de tornar isto público.",
+    "anonymousFipsDisabled": "Preencher um FIP sem conta está desativado neste servidor. Inicie sessão.",
+    "privateRequiresAccount": "Um FIP privado requer uma conta."
   },
   "languages": {
     "en": "Inglês",
@@ -146,12 +148,17 @@
     "tagline": "O Gestor de FIP ajuda uma comunidade de investigação a responder, em conjunto, ao GO FAIR FIP mini-questionnaire, num workshop ou de forma autónoma.",
     "joinLabel": "Tem um código de acesso de um workshop?",
     "joinPlaceholder": "Código de 6 caracteres",
-    "joinButton": "Participar"
+    "joinButton": "Participar",
+    "standaloneHeading": "Ou preencha um FIP por sua conta",
+    "standaloneText": "Não é necessária uma sessão. Escolha um questionário e comece; pode partilhar ou reivindicar o perfil mais tarde.",
+    "startFip": "Começar um FIP",
+    "yourFipsOnDevice": "FIPs neste dispositivo"
   },
   "fipNew": {
     "title": "Novo FIP",
     "chooseQuestionnaire": "Escolher um questionário",
-    "submit": "Criar FIP"
+    "submit": "Criar FIP",
+    "anonymousHint": "Não tem sessão iniciada. O seu navegador guarda o token de edição deste FIP. Utilize a ligação de edição do editor para o abrir noutro dispositivo, ou crie uma conta mais tarde e reivindique o FIP."
   },
   "join": {
     "sessionTitle": "Sessão de workshop",
@@ -226,6 +233,8 @@
   "share": {
     "title": "Partilhar",
     "copyLink": "Copiar link",
+    "editLink": "Ligação de edição",
+    "editLinkWarning": "Qualquer pessoa com esta ligação pode editar o FIP. Partilhe-a apenas com o seu grupo.",
     "copied": "Copiado",
     "qrHint": "Digitalize para abrir este FIP",
     "embed": "Incorporar",
@@ -419,7 +428,8 @@
     "compactDeclarations": "Declarações compactas (ocultar o estado atrás de \"Mais\")",
     "unusedInlineFers": "Recursos não utilizados (não sugeridos por nenhuma pergunta)",
     "unownedDrafts": "Rascunhos a rever",
-    "unownedDraftHint": "Rascunhos importados que ainda não têm proprietário. Editar um deles torna-o seu."
+    "unownedDraftHint": "Rascunhos importados que ainda não têm proprietário. Editar um deles torna-o seu.",
+    "startFip": "Começar um FIP com este modelo"
   },
   "admin": {
     "title": "Administração",

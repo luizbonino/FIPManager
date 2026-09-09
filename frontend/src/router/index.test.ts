@@ -102,4 +102,15 @@ describe('router — /admin and mustChangePassword guards', () => {
 
     expect(router.currentRoute.value.name).toBe('Privacy')
   })
+
+  // Spec 09: standalone FIPs — /fips/new no longer requires an account.
+  it('lets an anonymous visitor reach /fips/new without redirecting to /login', async () => {
+    getMock.mockRejectedValue(new Error('not signed in'))
+    const { default: router } = await import('./index')
+
+    await router.push('/fips/new')
+    await router.isReady()
+
+    expect(router.currentRoute.value.name).toBe('FipNew')
+  })
 })
