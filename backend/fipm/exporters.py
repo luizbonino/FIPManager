@@ -229,6 +229,9 @@ def build_export_json(db: Session, fip: Fip, settings: Settings) -> dict[str, An
             "community": fip.community,
             "relatedDMPs": fip.related_dmps or [],
             "migratedFrom": fip.migrated_from,
+            # spec 11-nanopub-network.md §4: null for every FIP not created
+            # via POST /fips/from-network.
+            "networkOrigin": fip.network_origin,
         },
         "questionnaireRef": {
             "id": fip.questionnaire_id,

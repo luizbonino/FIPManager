@@ -69,7 +69,12 @@ logger = logging.getLogger(__name__)
 # 1..12 entries). NULL on a pre-v6 row means "derive the single-entry list
 # from questionnaire_id/questionnaire_version" (fipm.routers.sessions), so
 # no data migration/backfill is needed here.
-SCHEMA_VERSION = 6
+# v7 (spec 11-nanopub-network.md §4): one nullable, additive column --
+# `fips.network_origin` (JSON, `{"communityIri","fipNanopubIri","indexIri",
+# "fetchedAt"}`). NULL on a pre-v7 row (or any FIP not created via
+# POST /fips/from-network) means "not from the network" -- no data
+# migration/backfill needed here either.
+SCHEMA_VERSION = 7
 
 _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("users", "must_change_password", "BOOLEAN NOT NULL DEFAULT 0"),
@@ -81,6 +86,7 @@ _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("fips", "migrated_from", "JSON"),
     ("fips", "orphaned_answers", "JSON"),
     ("workshop_sessions", "questionnaire_refs", "JSON"),
+    ("fips", "network_origin", "JSON"),
 )
 
 settings = get_settings()

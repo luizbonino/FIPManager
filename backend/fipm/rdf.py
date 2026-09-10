@@ -105,6 +105,36 @@ KNOWN_QUESTION_INDIVIDUALS: frozenset[str] = frozenset(
     }
 )
 
+# Same 21 local names as KNOWN_QUESTION_INDIVIDUALS, in gofair-fip-mini's own
+# section/question order (verified against data/knowledge-models/
+# gofair-fip-mini-1.0.0.json) -- spec 11-nanopub-network.md §3.3:
+# "questions is all 21, in gofair-fip-mini order". A frozenset's iteration
+# order isn't guaranteed, so `GET /api/network/fips/{communityIri}` orders
+# by this tuple instead.
+KNOWN_QUESTION_INDIVIDUALS_ORDER: tuple[str, ...] = (
+    "F1-MD",
+    "F1-D",
+    "F2",
+    "F3",
+    "F4-MD",
+    "F4-D",
+    "A1.1-MD",
+    "A1.1-D",
+    "A1.2-MD",
+    "A1.2-D",
+    "A2",
+    "I1-MD",
+    "I1-D",
+    "I2-MD",
+    "I2-D",
+    "I3-MD",
+    "I3-D",
+    "R1.1-MD",
+    "R1.1-D",
+    "R1.2-MD",
+    "R1.2-D",
+)
+
 # audit finding 12: whitelist of `fair:<id>` principle IRIs that may be
 # minted -- exactly the 15 individuals spec 00 (§4) actually uses. Anything
 # else (e.g. a stray "R2") is skipped rather than guessed into an IRI.
@@ -202,6 +232,27 @@ def _question_individual_local(question_id: str) -> str | None:
     else:
         candidate = question_id
     return candidate if candidate in KNOWN_QUESTION_INDIVIDUALS else None
+
+
+def question_id_from_individual(iri: str) -> str | None:
+    """spec 11-nanopub-network.md §3.3: the inverse of
+    `_question_individual_local` -- strip the `fip:FIP-Question-` prefix,
+    then `-MD` -> `-metadata`, `-D` -> `-data`, unsuffixed unchanged; `None`
+    for anything that isn't one of the 21 verified individuals (an
+    `FIP-S-Question-*`/FSR question, or any other IRI). The two functions
+    are mutually inverse over all 21 ids (asserted by
+    test_ac_11_02_network_fip_detail.py)."""
+    prefix = str(FIP["FIP-Question-"])
+    if not iri.startswith(prefix):
+        return None
+    local = iri[len(prefix) :]
+    if local not in KNOWN_QUESTION_INDIVIDUALS:
+        return None
+    if local.endswith("-MD"):
+        return local[: -len("-MD")] + "-metadata"
+    if local.endswith("-D"):
+        return local[: -len("-D")] + "-data"
+    return local
 
 
 def _frag(part: str) -> str:
@@ -378,6 +429,13 @@ def fip_graph(db: Session, fip: Fip, settings: Settings, g: Graph | None = None)
             f"{settings.base_url}/knowledge-models/{migrated_from['id']}/{migrated_from['version']}"
         )
         g.add((fip_iri, fipmx["migrated-from"], migrated_from_iri))
+
+    # spec 11-nanopub-network.md §4: a FIP created via POST /fips/from-network
+    # carries a true provenance statement to the network FIP nanopub it was
+    # prefilled from.
+    network_origin = fip.network_origin
+    if network_origin and network_origin.get("fipNanopubIri"):
+        g.add((fip_iri, PROV.wasDerivedFrom, URIRef(network_origin["fipNanopubIri"])))
 
     community_iri = URIRef(f"{fip_iri}#community")
     # audit finding 3: `fip:declared-by` has domain fip:FAIR-Declaration, not

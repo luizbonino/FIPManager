@@ -1,0 +1,1273 @@
+{
+  "head" : {
+    "vars" : [
+      "community",
+      "community_label",
+      "fip_count"
+    ]
+  },
+  "results" : {
+    "bindings" : [
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "8"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAReiL3Iytsie9Yuxe9a-tyiFQyMsQOFdPtPCg9uUtMA8#FTF"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "FAIR Technical Framework Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "5"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RANS1FDYGKYE6IzIP6QuofHtLpvPfGQsCw1gyBmR_n9Ls#ACTRIS-ASC"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS ASC community | ACTRIS Atmospheric simulation chamber data centre unit"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA39E3Dj61wCQkWCkK707UWBEBvRj2-hUDH5V5BicUgrg#ACTRIS-ARES"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS ARES community | ACTRIS Data Center unit for Aerosol REmote Sensing"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA39E3Dj61wCQkWCkK707UWBEBvRj2-hUDH5V5BicUgrg#ACTRIS-ARES"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS Data Center unit for Aerosol REmote Sensing"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA39vQmcuWBPujHO6TsvTZYPvj3KImUVGVc2HQ2xWQML8#LWERIC_Ecosystem"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Ecosystem LifeWatch community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA3ztnxJk-Ct8T9T8HIxuMbEv4KvkQLUL1J-SQm-vg-po#ICOS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ICOS community | Integrated Carbon Observation System"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA60A2KfcavwnEmeDWoSfAw9N5KiWHrDrQBh0fDKdbs7c#EISCAT"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "EISCAT Scientific Association"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA9GLc5qwnKHfaLwDtIwdzmTE7jFBoIWquFZ49tuFeUAM#eLTER-RI"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "eLTER RI community | European Long-Term Ecosystem, critical zone and socio-ecological Research Infrastructure"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAELio4hGFkTvxBs6jeup2QxoMz_I5-Co5dzpkq68bMjs#SeaDataNet-Sextant"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "SDN Sextant community | SeaDataNet aggregated datasets community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAG16j7HyNPJeyKbUDm_GYBP6JqX8hL1R25b74qPJs3jg#DiSSCo"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "DISSCO community | The Distributed System of Scientific Collections"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAJLvTcP6iYyzyS5vo9CnWLR2TA3uRM2qPTg_9rpoYhUk#ACTRIS_InSitu"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS InSitu"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAPZb-dDFFanJIcHazHJjWKZ472Egf8ekpb17LifQeSKk#Anaee"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "AnaEE community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAVCCWaHwMAe8CuM8TPZmbV-Bcjh2Ddn85MP-gDCBDRQg#iagos"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "IAGOS community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAge5lgbVKMXb0zu5CUpFaCiwg7lUXa_5QGhRw68zaq2g#SeaDataNet-CDI"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "SDN community | SeaDataNet Common Data Index repository community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAhtZUfiw2puxceEOXsLhh1eIlFWYvB_j0APDSxt_1Ypk#ACTRIS_CLU"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS CLU community | ACTRIS Cloud remote sensing data centre unit"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAhtZUfiw2puxceEOXsLhh1eIlFWYvB_j0APDSxt_1Ypk#ACTRIS_CLU"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS Cloud remote sensing data centre unit (CLU)"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAigW2GWJ5T5odcCltjA6iWxKT-xIdvKE_aThDdgbcZzA#EMSO"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "EMSO ERIC community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAoZsfUhNx4sYz-IXfsp1xPBH1-YgTGtHpp3BbMQtWHJg#PARCToxicology"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "PARCToxicology | PARC Chemicals Toxicology Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "4"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAvRsoe_qjAtywswoh3PyrL7Q5_7ayjsyhsUdecmm1JMs#lw-marine"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "LifeWatch Marine"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA2DSK-lZtvgsa-U8nifRqbg1eMjXShspatIff11LvCo8#DANUBIUS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "DANUBIUS community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAFwKMWo-TYDJTfluPaKERvMa5tYNxDgni6mWSXZEt_PA#EPOS-ERIC"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "EPOS community | European Plate Observing System - European Research Infrastructure Consortium"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAFwKMWo-TYDJTfluPaKERvMa5tYNxDgni6mWSXZEt_PA#EPOS-ERIC"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "European Plate Observing System - European Research Infrastructure Consortium"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAHVl0EK5hvDcncvS86BtCuWixugUk66QMB_mHlOvpMHI#AnaEE_CREA"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "AnaEE CREA community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAgUAZ0ZK8XPR4g9ZSlrjOfsZ0W3SkR7mcNd8yt0u0WMs#ACTRIS_GRES"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS GRES community | ACTRIS trace gases remote sensing data centre unit"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAgUAZ0ZK8XPR4g9ZSlrjOfsZ0W3SkR7mcNd8yt0u0WMs#ACTRIS_GRES"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS trace gases remote sensing data centre unit (GRES)"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAjmALSYfmSr04t6hTEkrJwzL0NwLGxdPrWfel_7RzRV0#Galaxy-Imaging"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "FAIR Image Data Workflows in Galaxy"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "3"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAp_hYKUyGM-d2a1XYpnGZS--gyg7ovP6SJy5_i7Nq9_Y#PINK_Community"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "PINK Horizon Europe project"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA0jJGOvWjnXBMYZPZC_BUbPc0z5nnopRQXoA5GOLd2o8#ACTRIS_DVAS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS DVAS community | ACTRIS Data Discovery, Virtual Access and Services unit"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA0jJGOvWjnXBMYZPZC_BUbPc0z5nnopRQXoA5GOLd2o8#ACTRIS_DVAS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS Data Discovery, Virtual Access and Services unit (DVAS)"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAJQgJPARxw22R9sFLB8zJZCArPAYJhArut0cRC-uGQqQ#ADVANCE"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ADVANCE | Advanced metadata standards for biodiversity survey and monitoring data: Supporting of research and conservation"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAWg5p8IqzdX0PIYNBpze1iUpyhHXD7JgDQKWxsFNhSZk#NanoCommons"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "European Nanotechnology Data, Knowledge and Informatics Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAnG1KQTq8iUqlFL_WWdXJmdQx_OdJ8Vpcvqja5n-FGcI#NDS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "NDS | NORMAN Database System Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RArTgFtY0Xe6WqEiQClFUvHT8Hv98-sQuz2I1I2BUcIfk#SSSR"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "GESIS Social Science Survey Research"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAuUzmorfO0tJGzmqaQpaas5BkACS3loFju52-R9_ga-w#CMIP6-data"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "WRCP Climate Model Intercomparison Project phase 6 data"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "2"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAvbqfh4FOsT89jbN0jgF4Zwg-EOJtljcuvBQiIMTgJGA#EU-HFR"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "EU-HFR | European High Frequency Radar Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA-Jj80AkhlsblERx3ADJ1v1891SUGNyOG5A8Zr0lUu10#indigeo"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "indigeo - Environmental data and geospatial information infrastructure UMR LETG • OSU IUEM • ZABrI"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA5c-SUjsRy2ixQ4lJ-LEHgzmA7JN5-FE6JjjQaA-pN6U#MP"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Materials Project"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAA2uh8j0RqYl1gMgpq9OEw29CWOT_zzsFTZVJZt8PukM#HBM4EU"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Human BioMonitoring 4 EU Project"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAFPXuMROn9YjtqJdD3Cz6wZOCtBbkI1wsDn-9o5PQZ_Y#PARC-HBM"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "PARC Human Biomonitoring Data"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAGxfl8Z5Egex6Q_j1W1fMbedKSC6FobiFbu0HMPk-AZQ#IPCHEM"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "IPCHEM - Information Platform for Chemical Monitoring"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAHhF4pBGrcGHesBRYYdL6K5sIxUcDqO9h_iXowWq9v-0#GalaxyClimate"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "The Galaxy Climate Science Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAHl740od2qEm8Zzp2qObyTCIRRAIxoiDpnCxJTrUMh1c#MLCommons"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Machine Learning Commons"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAIzxpfFphUQFmZ4WE7MHy5s0lVUBtZdfO2mqJT-Q4gWw#GloPID-R"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "GloPID-R | Global Research Collaboration for Infectious Disease Preparedness"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAJ2Cvb1itBE-1KGQUJFor2fw167N8z1NW-SxALq55-Sg#SSHOC-NL-SEH"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "SSHOC-NL Socio Economic History Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAJGj6TQ-ksYHKd7txoniUc_SakJ-oEPwlNogM1hascp0#WFC"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "WorldFAIR Chemistry "
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAMrZ9OM8QJpE8W5d1OwHoNuUAOkD5jiwKAwd_m5eDqeo#MCAL-NL"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "MCAL scholars - Media Content Analysis Lab scholars in the Netherlands"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAOGUK-HzDHdTUPVG9tJXEjnG_p1mkqOylWUi10xf11_8#LGBTQVoc"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "LGBTQ+ Linked Open Vocabulary Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAQufjbWqPyxaNoGCLug_9nTbCXSTo2ADgEmN3BVPBNe0#sios"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "SIOS community | Svalbard Integrating arctic Observing System"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAWYlDarwOREB3W-z2k_6l-Dp79ZBzqkcyU9hM28J6vhQ#iupac-assets"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "IUPAC WorldFAIR Activity"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAZnvp2SHhPYWlZVf1gse7mSFZRElzTIgdYIkGKyrfdbI#EPND-CS1-ATN"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "European platform for neurodegenerative diseases, case study 1 on amyloid, tau and neurodegeneration "
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAgiguZ7odRIgqS5PB6DTN8Mn-74Apgfcfd-ZUmbplk74#EnvDS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "The Environmental Data Science"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAgsbUg4xWCe6Jgjm6aDAiHiRqb4U6PYbrRvqO3PrDxTk#FAIR-AOPs"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "FAIR Adverse Outcome Pathways"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAmGrWU8VeFW4C832nbioVSWfsBsP1b6FDneaG4hdbyi8#wf-wp09-biodiversity"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "WorldFAIR WP09 Biodiversity"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAmih19Rf5xYvAgDOrocfgcYfDh7PO1BB3Fg5tvOouGS4#NP_Com"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "NP_Com | Nanopublication Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAmxgeABOyjhFrz09FpEjcVfFhxeFroaLx3moyIVqGOF4#INSPIRE_WorldFAIR"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "INSPIRE WorldFAIR community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAsVPJo9f1v4PXsIG2heBlgfQX2tTNgPN_w70jtmnW-QM#AUSSI-ESS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "AUSSI-ESS | Australian Social Survey International – European Social Survey"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAsr4zT2dFBT4BDW8_SxQd8bIpoGcBIBvLwAPOarirhMQ#ArgoGdac"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Argo GDAC | Argo GDAC FAIR implementation community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RA3vLa9A5pNlpdTiPe2kVSn-kYX1SdDtf6rK_HATIXl8M/Climate_Adaptation_Hub_PT"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Climate Adaptation Hub Portugal"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RA3yyhMs9owHskPcpdUcooJVkvdi7Bdh3GJPtQzMCbYb8#ARI-FIC"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Arctic Radio-Isotopes FAIR Implementation Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RA8Iu7nffdIb3IZ7iwtAQBzLR_nv5UWXZfe4rMDtZG4lk/OHTCommunity"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "OECD Harmonised Template "
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RA8JE3oMAY8EId35lpxdo2fQ_6Tx8yCScs6n_3FlhghNM#DL"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "DeSci Labs"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAAND-rTLJrBhHSjrqu57Di3-cy2f6VtgGLPrwc58iGHM#DYNCAT"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "The DYNCAT project, coordinated by SINTEF."
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RADmLak8t8R6eSW3nXxF4BnPSUJDPJeU7wnIJHbYQA1-A#WF-Oceanography"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "WF-Oceanography | WorldFAIR WP11 Oceanography Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAEMHnxF2pAhxUeUrbdLxgb4RhBEt58TjLCCaBOOBwGuw#JERICO-Italy"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "JERICO-Italy | Joint European Research Infrastructure of Coastal Observatories - Italian Node"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAJ5ogFYmr0R1gUWsZ-faHYHdGMGaBgeKIU4j_Phf-9m0#CLARIN"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "CLARIN "
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAJNY8UnLOj2FO0x55BYlp_AilxrYyLJpAzmmK6zb_WhM/agroecologypartnership"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "AGROECOLOGY Partnership"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAM_kWZRB25Lh9JXPSKo8KBd_womXIb2rW1sJ2jjyb8As#ODISSEI-Portal-Community"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ODISSEI Portal Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAQR6VTk0kWplEQgXwPzhmp6A3gFvBAfGxhyDHBWuGcWU#FLUXNET"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "FLUXNET | Community of FLUXNET"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RARrLKDFO0bvN1wIHGkT3zKkvUjKSwtFIFHvWFLImU6e0#GFTS"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Global Fish Tracking System (GFTS) Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RATy0Gq8CFJqlBWDhAXYDLnO90qnq761rRseGpzg40BYs#DiSSCo-IT"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "The Distributed System of Scientific Collections of Italy"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAV00u38cxSQd1Wa6SrRQp97Qo4gmXyEg07voXi9dKA0E#HHRiskCom"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "HHRiskCom | Hamburg Risk Map Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAVcggettaztxlN5hW4mFHBA7tUgx_whDPBaRRInHQ0NU/pathogens-portal-nl"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "Pathogens Portal Netherlands"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAX4qW1ifhSR23JF49tYEVvRJniYQvdoPezmKuVwNGq8Q#GLOBALISE"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "The GLOBALISE Project Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RA_ygjRzfHirhNpEUfCFNoO-UxV58bSMD6L-CH7czb75k#OneGeochemistry"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "OneGeochemistry WorldFAIR activity"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAdq5D4GmIZrZDIKCJJVrA_ysXoS8gsKosrkfFL_lNnfY#WeAdapt"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "WeAdapt Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAgSNbki1k3dc8Yogr2q3srk3f19gYwLmo8fWV6BS369Q/ATTO-Community"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "The Amazonian Tall Tower Observatory - ATTO Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAk029FqmGOJnYIukGkk5pLSaviE0lvWDo3maMcqmFYRg/ACTRIS-DC"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "ACTRIS Data Centre"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAklQB1ClUqkrsOYezw6TdxA-rL424wbHvafYOUKC8-8w/FMind"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "FAIR Mind"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAngPW7HAxcC2kwN18Y_lI8dhxjkPvxTjnSnvt9YWrFHg#GGP"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "GGP | Generations-Gender-Programme"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAqMi-fcftXx37oHs76AQs3fgh7O-hWm_EWawSSPv4CpE#FAIR2Adapt"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "FAIR2Adapt | FAIR to Adapt to Climate Change"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAqn6GtXAM1k7oujOq5_0iTkbXIaPmOu7XPA-TkHoLIcg#BiscayanRiOMarCom"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "French coastal areas in the Bay of Biscay Community"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAuXATygKM2i2Gg4aXfe-ZNnCFGBw-6RTfVtJfL07-_dw#gofairus-eval-project-2024"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "GO FAIR US Evaluation Project 2024"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAxfFVHfqI4joOiGq3YdS-dglphbVkA6VUtOG1HG0UkpQ#RSpace"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "RSpace | Research Space"
+        }
+      },
+      {
+        "fip_count" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#integer",
+          "type" : "literal",
+          "value" : "1"
+        },
+        "community" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAyWAzEGZ3vnakWsHj0s5A4Zc9fcHWe_XCR_hlOOspDEU#LISS-Data-Archive"
+        },
+        "community_label" : {
+          "type" : "literal",
+          "value" : "LISS Data Archive"
+        }
+      }
+    ]
+  }
+}

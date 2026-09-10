@@ -7,6 +7,7 @@
           <nav class="app-nav">
             <router-link to="/" class="nav-link">{{ $t('nav.home') }}</router-link>
             <router-link to="/knowledge-models" class="nav-link">{{ $t('nav.knowledgeModels') }}</router-link>
+            <router-link v-if="networkEnabled" to="/network" class="nav-link">{{ $t('network.navLabel') }}</router-link>
             <router-link v-if="!isAuthenticated" to="/login" class="nav-link">{{ $t('nav.login') }}</router-link>
             <router-link v-if="!isAuthenticated" to="/register" class="nav-link">{{ $t('nav.register') }}</router-link>
             <router-link v-if="isAuthenticated" to="/workspace" class="nav-link">{{ $t('nav.workspace') }}</router-link>
@@ -27,8 +28,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { get } from '@/api/client'
 import { useAuthStore } from '@/stores/auth'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import SiteFooter from '@/components/SiteFooter.vue'
@@ -37,6 +39,13 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+
+// spec 11 §3.4/§3.5: the Network FIPs nav entry is hidden when
+// `GET /api/health`'s `networkEnabled` is false. Optimistically shown
+// (like FeedbackForm.vue's `feedbackEnabled` check) until the health
+// check says otherwise — a failed/slow health check should not flicker
+// or permanently hide navigation the deployment actually offers.
+const networkEnabled = ref(true)
 // spec 05 §1: the "Admin" nav link — and only that link — reflects role;
 // the /admin route itself still renders `common.notFound` for anyone else.
 const isAdmin = computed(() => authStore.user?.role === 'admin')
@@ -49,6 +58,19 @@ const handleLogout = async () => {
     console.error('Logout failed:', error)
   }
 }
+
+onMounted(async () => {
+  try {
+    const health = await get<Record<string, unknown>>('/health')
+    if (health.networkEnabled === false) {
+      networkEnabled.value = false
+    }
+  } catch {
+    // Best-effort only, like FeedbackForm.vue's own health check — leave
+    // the nav entry shown; the Network FIPs pages themselves render
+    // `network_disabled` if the deployment really has it off.
+  }
+})
 </script>
 
 <style scoped>

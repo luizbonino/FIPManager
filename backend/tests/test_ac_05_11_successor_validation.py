@@ -142,6 +142,38 @@ def test_fer_id_must_be_an_iri_422(client):
         assert r.status_code == 422, f"{bad_fer_id!r} should be rejected, got {r.status_code}"
 
 
+def test_fer_id_rejects_iriref_unsafe_characters_422(client):
+    """spec 11-nanopub-network.md review finding 2: a ferId is later
+    embedded verbatim into a hand-rolled TriG IRIREF
+    (fipm.nanopub_export._format_term), which never escapes -- so none of
+    the characters RFC 3987 forbids inside an IRIREF (`<>"{}|^\\``) may be
+    storable in the first place, on top of the pre-existing whitespace/
+    control-character ban."""
+    fip_id = _create_fip(client, "ac05-11-h@example.com")
+    for bad_fer_id in (
+        "https://example.org/x>evil",
+        'https://example.org/x"evil',
+        "https://example.org/x{evil}",
+        "https://example.org/x|evil",
+        "https://example.org/x^evil",
+        "https://example.org/x\\evil",
+        "https://example.org/x`evil",
+        "https://example.org/x<evil",
+    ):
+        r = client.patch(
+            f"/api/fips/{fip_id}",
+            json={
+                "answers": [
+                    {
+                        "questionId": "F1-metadata",
+                        "declarations": [{"ferId": bad_fer_id, "status": "current"}],
+                    }
+                ]
+            },
+        )
+        assert r.status_code == 422, f"{bad_fer_id!r} should be rejected, got {r.status_code}"
+
+
 def test_fer_id_accepts_http_https_and_urn_iris(client):
     fip_id = _create_fip(client, "ac05-11-f@example.com")
     for good_fer_id in (

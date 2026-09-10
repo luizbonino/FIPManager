@@ -1,0 +1,102 @@
+{
+  "head" : {
+    "vars" : [
+      "fip_np",
+      "label",
+      "index",
+      "created",
+      "startDate",
+      "endDate"
+    ]
+  },
+  "results" : {
+    "bindings" : [
+      {
+        "created" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-09-07T12:48:22.000Z"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "PARC Toxicology "
+        },
+        "fip_np" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAKa7vUwc8qVbktDqDSpuq7lRrrKcjPKvkB4Tn7WHvr7E"
+        },
+        "index" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RATReWJWVaVcOU7UrhKTkMPuNW4P_hmuD07FyOm4UtN3U"
+        }
+      },
+      {
+        "created" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-03-02T16:26:48.000Z"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "PARC Toxicology rFIP"
+        },
+        "fip_np" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAN-uMHMo1-an-nG1hTOCtfJETwfwrwEujhndKfDVzd2E"
+        },
+        "index" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAFa5tuuVrWzHh7OIT2VW29WK0Xlv7c1i3SQ7zhvzJcao"
+        }
+      },
+      {
+        "created" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-03-02T16:25:31.000Z"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "PARC Toxicology rFIP"
+        },
+        "fip_np" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RA84BfWjTB5WjZOQTbHgRNI0v7AxT8UVz5558kKcIyPZQ"
+        },
+        "index" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAGk44UfzPDxpbuGaLG2g53a8X5WRKeurDo08gD974neQ"
+        }
+      },
+      {
+        "created" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-22T20:09:10.000Z"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "PARC TOXRIC FIP"
+        },
+        "fip_np" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAllERFvC1zFXu7uTmQ1Dibvrh-VIr4l1XKM54oQKeZog"
+        },
+        "index" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RA7UpAcMN5tmQR8cfFd1CzzUm1H2XVWPtChzEJRVQSkXE"
+        },
+        "startDate" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#date",
+          "type" : "literal",
+          "value" : "2023-04-14"
+        },
+        "endDate" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#date",
+          "type" : "literal",
+          "value" : "2026-04-30"
+        }
+      }
+    ]
+  }
+}

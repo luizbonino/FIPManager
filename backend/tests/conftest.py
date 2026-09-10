@@ -96,6 +96,38 @@ def _reset_rate_limits():
     yield
 
 
+@pytest.fixture(autouse=True)
+def _reset_network_cache():
+    """Each test starts with a clean fipm.network cache (spec
+    11-nanopub-network.md §3.4) -- otherwise a cache entry recorded by one
+    test's fixture would be served to a later test that never called
+    _post_sparql/_get_grlc at all."""
+    from fipm.network import reset_network_cache
+
+    reset_network_cache()
+    yield
+
+
+@pytest.fixture(autouse=True)
+def _guard_network_calls(monkeypatch):
+    """spec 11-nanopub-network.md §6: "no test performs a live network
+    request" -- fipm.network._post_sparql/_get_grlc default to raising a
+    clear error unless a test explicitly monkeypatches them with a
+    fixture-serving replacement, so a test that forgets to patch one fails
+    loudly with this message rather than attempting (and, on a machine with
+    no network, hanging on) a real HTTP request."""
+
+    def _unpatched(*args, **kwargs):
+        raise AssertionError(
+            "no fixture registered for this fipm.network call -- monkeypatch "
+            "fipm.network._post_sparql / _get_grlc before making this request"
+        )
+
+    monkeypatch.setattr("fipm.network._post_sparql", _unpatched)
+    monkeypatch.setattr("fipm.network._get_grlc", _unpatched)
+    yield
+
+
 @pytest.fixture()
 def db_session():
     from fipm.db import SessionLocal

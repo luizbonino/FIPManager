@@ -28,6 +28,7 @@
         </div>
         <p v-if="store.readOnly" class="readonly-banner">{{ readOnlyMessage }}</p>
         <p v-if="store.facilitatorWrite" class="facilitator-banner">{{ $t('editor.facilitatorBanner') }}</p>
+        <p v-if="networkPrefillBanner" class="network-prefill-banner no-print">{{ networkPrefillBanner }}</p>
         <MigrationBanner
           v-if="store.canEdit"
           class="no-print"
@@ -95,6 +96,7 @@
         :csv-url="fipExportCsvUrl(store.fip.id)"
         :ttl-url="fipExportTtlUrl(store.fip.id)"
         :jsonld-url="fipExportJsonldUrl(store.fip.id)"
+        :nanopub-zip-url="nanopubZipUrl(store.fip.id)"
       />
 
       <FeedbackForm
@@ -119,6 +121,7 @@ import { adoptTokenFromQuery, getToken } from '@/lib/editTokens'
 import { getFerTypes } from '@/api/ferTypes'
 import { ApiResponseError } from '@/api/client'
 import { fipExportCsvUrl, fipExportJsonldUrl, fipExportJsonUrl, fipExportTtlUrl } from '@/api/fips'
+import { nanopubZipUrl } from '@/api/network'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import SaveIndicator from '@/components/SaveIndicator.vue'
@@ -163,6 +166,33 @@ const readOnlyMessage = computed(() => {
   if (store.lastError === 'session_closed') return t('join.closed')
   return t('editor.readOnly')
 })
+
+/**
+ * spec 11 §3.6: the one-time "prefilled from the network" banner. The
+ * persisted `store.fip.networkOrigin` (spec 11 §4) carries only
+ * `communityIri`/`fetchedAt`, not a human community label or the
+ * imported/skipped counts from the creation response — those arrive once,
+ * via `?networkCommunity=&networkImported=&networkSkipped=` on the very
+ * navigation from `NetworkFipDetail.vue`'s "Use as starting point", read
+ * and stripped from the URL in `init()` below (same idiom as
+ * `adoptTokenFromQuery`'s `?token=`). Non-null, hence the banner visible,
+ * only on that one navigation.
+ */
+const networkPrefillInfo = ref<{ community: string; imported: string; skipped: string } | null>(null)
+
+const networkPrefillBanner = computed(() => {
+  if (!networkPrefillInfo.value || !store.fip?.networkOrigin) return null
+  return t('network.prefillBanner', {
+    community: networkPrefillInfo.value.community,
+    date: formatDate(store.fip.networkOrigin.fetchedAt),
+    imported: networkPrefillInfo.value.imported,
+    skipped: networkPrefillInfo.value.skipped,
+  })
+})
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString()
+}
 
 const visibilityError = ref<string | null>(null)
 
@@ -227,12 +257,35 @@ async function onDelete() {
 
 async function init() {
   const id = String(route.params.id)
+  // Bug fix: editor->editor navigation (the `watch` below, same route
+  // record different `:id`) reuses this component instance, so a stale
+  // `networkPrefillInfo` from the *previous* FIP would otherwise survive
+  // into the new one and, if that FIP also happens to carry a
+  // `networkOrigin`, show the wrong community's banner. Reset unconditionally,
+  // before the query-adopting block below decides whether to set it again
+  // for *this* navigation.
+  networkPrefillInfo.value = null
   // Edit link (spec 09 follow-up): `?token=...` hands this device edit
   // rights before the FIP is even loaded, then the token is stripped from
   // the address bar/history so it doesn't linger there or in a share.
   if (adoptTokenFromQuery(id, route.query)) {
     const query = { ...route.query }
     delete query.token
+    await router.replace({ path: route.path, query })
+  }
+  // spec 11 §3.6: the one-time network-prefill banner's community label and
+  // imported/skipped counts, same URL-carried/one-time-strip idiom as the
+  // edit-token adoption above.
+  if (typeof route.query.networkCommunity === 'string') {
+    networkPrefillInfo.value = {
+      community: route.query.networkCommunity,
+      imported: typeof route.query.networkImported === 'string' ? route.query.networkImported : '0',
+      skipped: typeof route.query.networkSkipped === 'string' ? route.query.networkSkipped : '0',
+    }
+    const query = { ...route.query }
+    delete query.networkCommunity
+    delete query.networkImported
+    delete query.networkSkipped
     await router.replace({ path: route.path, query })
   }
   try {
@@ -319,6 +372,15 @@ onBeforeUnmount(() => {
 }
 
 .facilitator-banner {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-user-info);
+  color: var(--color-user-info-text);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.network-prefill-banner {
   margin: 0;
   padding: 0.5rem 0.75rem;
   background-color: var(--color-user-info);

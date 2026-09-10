@@ -1,0 +1,88 @@
+{
+  "head" : {
+    "vars" : [
+      "np",
+      "label",
+      "s"
+    ]
+  },
+  "results" : {
+    "bindings" : [
+      {
+        "np" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAncf2hj1w4rywAclhA_R0vx54K-OJNGdUjyeycfWF6i0"
+        },
+        "s" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#float",
+          "type" : "literal",
+          "value" : "1.0567944"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "FAIR-enabling resource: ORCID-AAI | Open Researcher and Contributor ID AAI service"
+        }
+      },
+      {
+        "np" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAtIFnvA0nuTJjr4QEBw8j_CNW-8D7xLAC42qLxSZqDMo"
+        },
+        "s" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#float",
+          "type" : "literal",
+          "value" : "1.0489565"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ORCID | Open Researcher and Contributor ID"
+        }
+      },
+      {
+        "np" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAch6DyoYVD3iuaALPR32ZPAZTvbw_ulid9E7Dnc67GtA"
+        },
+        "s" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#float",
+          "type" : "literal",
+          "value" : "0.83287066"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : " Open Researcher and Contributor ID"
+        }
+      },
+      {
+        "np" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAuUguKopfbJ1ZRJaxqlNR-2P3t4ecBmwo9zxa5TY_ypU"
+        },
+        "s" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#float",
+          "type" : "literal",
+          "value" : "0.7833481"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Argo SPARQL endpoint"
+        }
+      },
+      {
+        "np" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAgHF-ditF-Wcg-aUWu4_yFFsSRAvZ580e5BtYxJQ9iKY"
+        },
+        "s" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#float",
+          "type" : "literal",
+          "value" : "0.7548531"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "HumanID - Authentification and Registration Service"
+        }
+      }
+    ]
+  }
+}

@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from fipm import network
 from fipm.auth import check_anonymous_fip_rate_limit
 from fipm.authz import (
     can_read,
@@ -40,16 +41,20 @@ from fipm.migration import (
     semver_gt,
     semver_key,
 )
-from fipm.models import Fip, KnowledgeModel, User, WorkshopSession
-from fipm.rdf import fip_graph, orphaned_answer_comment_lines, to_jsonld, to_turtle
+from fipm.models import Fer, Fip, KnowledgeModel, User, WorkshopSession
+from fipm.nanopub_export import NanopubBundle, NanopubBundleError, build_bundle
+from fipm.rdf import _is_http_iri, fip_graph, orphaned_answer_comment_lines, to_jsonld, to_turtle
 from fipm.schemas import (
+    FER_LABEL_MAX_LEN,
     Answer,
     FipCreateRequest,
+    FipFromNetworkRequest,
     FipImportDoc,
     FipPatchRequest,
     Language,
     MigratedFromImport,
     MigrateRequest,
+    NetworkOriginImport,
     OrphanedAnswerImport,
     PrefillFromDmpRequest,
     Visibility,
@@ -217,6 +222,146 @@ def _validate_question_ids(answers: list[Answer], km: KnowledgeModel) -> None:
             raise HTTPException(status_code=422, detail="free_text_not_allowed")
 
 
+def _resolve_session_for_create(
+    db: Session, session_id: str | None, join_code: str | None, questionnaire_ref: Any
+) -> tuple[WorkshopSession | None, str, str]:
+    """The session half of the create-a-FIP authorization ladder (spec
+    09-standalone-fips.md, spec 08-workshop-picklists.md §3.2): resolves and
+    validates `session_id`/`join_code`, and picks the questionnaire_id/
+    version -- the session's if a `questionnaire_ref` was matched against
+    its ref list, otherwise `questionnaire_ref` verbatim (the no-session
+    case). Shared by `create_fip` and `create_fip_from_network`."""
+    if not session_id:
+        return None, questionnaire_ref.id, questionnaire_ref.version
+
+    session_row = db.get(WorkshopSession, session_id)
+    if session_row is None:
+        raise HTTPException(status_code=404, detail="session_not_found")
+    if not join_code or not secrets.compare_digest(join_code, session_row.join_code):
+        raise HTTPException(status_code=403, detail="invalid_join_code")
+    if session_row.status != "open":
+        raise HTTPException(status_code=409, detail="session_closed")
+    # spec 08-workshop-picklists.md §3.2: a multi-ref session offers several
+    # questionnaires (one per area); the ref must match *one of* the
+    # session's refs -- the chosen ref becomes the FIP's questionnaire_id/
+    # version, no new FIP column.
+    allowed_refs = {(ref["id"], ref["version"]) for ref in session_questionnaire_refs(session_row)}
+    if (questionnaire_ref.id, questionnaire_ref.version) not in allowed_refs:
+        raise HTTPException(status_code=400, detail="questionnaire_ref_mismatch")
+    return session_row, questionnaire_ref.id, questionnaire_ref.version
+
+
+def _resolve_create_fip_authorization(
+    settings: Settings,
+    request: Request,
+    user: User | None,
+    session_row: WorkshopSession | None,
+    requested_visibility: str | None,
+) -> str:
+    """The *checks* half of spec 09-standalone-fips.md's three-way
+    authorization ladder -- session participant / signed-in user / anonymous
+    standalone -- split out of what used to be `_create_fip_with_auth_ladder`
+    (review finding 10) so a caller with something expensive to do *after*
+    authorization (`create_fip_from_network`'s upstream network fetch and FER
+    inserts) can run every check first and touch neither the network nor the
+    database when a check fails. No DB write and no network call happens
+    here -- only `HTTPException`s and a resolved `visibility` string."""
+    if session_row is not None:
+        return requested_visibility or "link"
+
+    if user is not None:
+        visibility = requested_visibility or "private"
+        check_email_verification_gate(user, visibility)
+        return visibility
+
+    # spec 09-standalone-fips.md: an anonymous caller with no session --
+    # "anyone can fill a FIP independently, without a workshop session or
+    # an account". No user to gate on, so check_email_verification_gate
+    # doesn't apply here (it's a no-op for user=None anyway, but the point
+    # stands: there is nothing to verify).
+    if not settings.anonymous_fips:
+        raise HTTPException(status_code=403, detail="anonymous_fips_disabled")
+    visibility = requested_visibility or "link"
+    if visibility == "private":
+        # Nobody could ever read it back: no owner, no session, and
+        # "private" means owner/admin-only.
+        raise HTTPException(status_code=400, detail="private_requires_account")
+    check_anonymous_fip_rate_limit(request)
+    return visibility
+
+
+def _insert_fip_with_visibility(
+    db: Session,
+    settings: Settings,
+    user: User | None,
+    session_row: WorkshopSession | None,
+    visibility: str,
+    common: dict[str, Any],
+) -> tuple[Fip, str | None]:
+    """The *insertion* half of the old `_create_fip_with_auth_ladder`: given
+    an already-authorized `visibility` (from `_resolve_create_fip_
+    authorization`), actually creates the row. Returns `(fip, edit_token)`;
+    `edit_token` is `None` when the caller is a signed-in owner (no token is
+    issued)."""
+    if session_row is not None:
+        edit_token = new_token()
+        fip = _insert_fip(
+            db,
+            settings,
+            owner_id=None,
+            session_id=session_row.id,
+            edit_token_hash=hash_token(edit_token),
+            visibility=visibility,
+            **common,
+        )
+        return fip, edit_token
+
+    if user is not None:
+        fip = _insert_fip(
+            db,
+            settings,
+            owner_id=user.id,
+            session_id=None,
+            edit_token_hash=None,
+            visibility=visibility,
+            **common,
+        )
+        return fip, None
+
+    edit_token = new_token()
+    fip = _insert_fip(
+        db,
+        settings,
+        owner_id=None,
+        session_id=None,
+        edit_token_hash=hash_token(edit_token),
+        visibility=visibility,
+        **common,
+    )
+    return fip, edit_token
+
+
+def _create_fip_with_auth_ladder(
+    db: Session,
+    settings: Settings,
+    request: Request,
+    user: User | None,
+    session_row: WorkshopSession | None,
+    requested_visibility: str | None,
+    common: dict[str, Any],
+) -> tuple[Fip, str | None]:
+    """spec 09-standalone-fips.md's three-way authorization ladder for
+    creating a FIP -- session participant / signed-in user / anonymous
+    standalone -- shared verbatim by `POST /fips` and (via its own split
+    call, review finding 10) `POST /fips/from-network`. Returns
+    `(fip, edit_token)`; `edit_token` is `None` when the caller is a
+    signed-in owner (no token is issued)."""
+    visibility = _resolve_create_fip_authorization(
+        settings, request, user, session_row, requested_visibility
+    )
+    return _insert_fip_with_visibility(db, settings, user, session_row, visibility, common)
+
+
 @router.post("", status_code=201)
 def create_fip(
     body: FipCreateRequest,
@@ -226,30 +371,9 @@ def create_fip(
 ) -> dict[str, Any]:
     settings = get_settings()
 
-    session_row: WorkshopSession | None = None
-    if body.session_id:
-        session_row = db.get(WorkshopSession, body.session_id)
-        if session_row is None:
-            raise HTTPException(status_code=404, detail="session_not_found")
-        if not body.join_code or not secrets.compare_digest(body.join_code, session_row.join_code):
-            raise HTTPException(status_code=403, detail="invalid_join_code")
-        if session_row.status != "open":
-            raise HTTPException(status_code=409, detail="session_closed")
-        # spec 08-workshop-picklists.md §3.2: a multi-ref session offers
-        # several questionnaires (one per area); the body ref must match
-        # *one of* the session's refs (was: must equal the session's single
-        # ref) -- the chosen ref becomes the FIP's questionnaire_id/version,
-        # no new FIP column.
-        allowed_refs = {
-            (ref["id"], ref["version"]) for ref in session_questionnaire_refs(session_row)
-        }
-        if (body.questionnaire_ref.id, body.questionnaire_ref.version) not in allowed_refs:
-            raise HTTPException(status_code=400, detail="questionnaire_ref_mismatch")
-        questionnaire_id = body.questionnaire_ref.id
-        questionnaire_version = body.questionnaire_ref.version
-    else:
-        questionnaire_id = body.questionnaire_ref.id
-        questionnaire_version = body.questionnaire_ref.version
+    session_row, questionnaire_id, questionnaire_version = _resolve_session_for_create(
+        db, body.session_id, body.join_code, body.questionnaire_ref
+    )
 
     km = get_readable_published_km(db, questionnaire_id, questionnaire_version, user)
     _validate_question_ids(body.answers, km)
@@ -274,57 +398,292 @@ def create_fip(
         "license": license_,
     }
 
-    if session_row is not None:
-        edit_token = new_token()
-        fip = _insert_fip(
-            db,
-            settings,
-            owner_id=None,
-            session_id=session_row.id,
-            edit_token_hash=hash_token(edit_token),
-            visibility=body.visibility or "link",
-            **common,
-        )
-        return _out_for_km(fip, km, db, edit_token=edit_token)
-
-    if user is not None:
-        visibility = body.visibility or "private"
-        check_email_verification_gate(user, visibility)
-        fip = _insert_fip(
-            db,
-            settings,
-            owner_id=user.id,
-            session_id=None,
-            edit_token_hash=None,
-            visibility=visibility,
-            **common,
-        )
-        return _out_for_km(fip, km, db)
-
-    # spec 09-standalone-fips.md: an anonymous caller with no session --
-    # "anyone can fill a FIP independently, without a workshop session or
-    # an account". No user to gate on, so check_email_verification_gate
-    # doesn't apply here (it's a no-op for user=None anyway, but the point
-    # stands: there is nothing to verify).
-    if not settings.anonymous_fips:
-        raise HTTPException(status_code=403, detail="anonymous_fips_disabled")
-    visibility = body.visibility or "link"
-    if visibility == "private":
-        # Nobody could ever read it back: no owner, no session, and
-        # "private" means owner/admin-only.
-        raise HTTPException(status_code=400, detail="private_requires_account")
-    check_anonymous_fip_rate_limit(request)
-    edit_token = new_token()
-    fip = _insert_fip(
-        db,
-        settings,
-        owner_id=None,
-        session_id=None,
-        edit_token_hash=hash_token(edit_token),
-        visibility=visibility,
-        **common,
+    fip, edit_token = _create_fip_with_auth_ladder(
+        db, settings, request, user, session_row, body.visibility, common
     )
     return _out_for_km(fip, km, db, edit_token=edit_token)
+
+
+# ---------------------------------------------------------------------------
+# POST /fips/from-network (spec 11-nanopub-network.md §3.6): "use as
+# starting point" -- prefill a new, fully editable FIP from a network
+# community's newest FIP.
+# ---------------------------------------------------------------------------
+
+# The canonical 21-question model a network FIP's declarations are mapped
+# onto outside a session (spec §3.3: the mapping is the inverse of
+# rdf._question_individual_local, which is defined in terms of this exact
+# model's own question ids). A session-scoped import instead uses the
+# session's own ref (spec 08's multi-ref rule), which may be a fork -- any
+# of its questions the network mapping doesn't recognise are reported in
+# `skipped`, same as an unrelated forked model would be.
+GOFAIR_MINI_KM_ID = "gofair-fip-mini"
+
+
+def _latest_published_km(db: Session, km_id: str, user: User | None) -> KnowledgeModel:
+    rows = (
+        db.query(KnowledgeModel)
+        .filter(KnowledgeModel.id == km_id, KnowledgeModel.status == "published")
+        .all()
+    )
+    candidates = [row for row in rows if can_read(row.owner_id, row.visibility, user)]
+    if not candidates:
+        raise HTTPException(status_code=404, detail="questionnaire_not_found")
+    candidates.sort(key=lambda row: semver_key(row.version))
+    return candidates[-1]
+
+
+def _km_for_from_network(
+    db: Session,
+    session_row: WorkshopSession | None,
+    questionnaire_ref: Any,
+    user: User | None,
+) -> KnowledgeModel:
+    """Review finding 8: which knowledge model a `POST /fips/from-network`
+    call maps declarations onto. Inside a session, `body.questionnaireRef`
+    must be one of the session's *own* refs (same rule `_resolve_session_
+    for_create` applies to `POST /fips`) -- 400 `questionnaire_ref_mismatch`
+    otherwise -- and falls back to the session's first ref when omitted,
+    matching the pre-existing behaviour. Outside a session, an explicit ref
+    is honoured verbatim (any published, readable model); omitted falls
+    back to the canonical GO FAIR mini model, also matching the pre-existing
+    behaviour."""
+    if session_row is not None:
+        refs = session_questionnaire_refs(session_row)
+        if questionnaire_ref is not None:
+            allowed_refs = {(ref["id"], ref["version"]) for ref in refs}
+            if (questionnaire_ref.id, questionnaire_ref.version) not in allowed_refs:
+                raise HTTPException(status_code=400, detail="questionnaire_ref_mismatch")
+            return get_readable_published_km(
+                db, questionnaire_ref.id, questionnaire_ref.version, user
+            )
+        return get_readable_published_km(db, refs[0]["id"], refs[0]["version"], user)
+
+    if questionnaire_ref is not None:
+        return get_readable_published_km(db, questionnaire_ref.id, questionnaire_ref.version, user)
+    return _latest_published_km(db, GOFAIR_MINI_KM_ID, user)
+
+
+def _build_answers_from_network(
+    db: Session,
+    payload: dict[str, Any],
+    km: KnowledgeModel,
+    language: str,
+    user: User | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int, int]:
+    """spec 11-nanopub-network.md §3.6, steps 1-5. Returns
+    `(answers, skipped, fers_created, fers_matched)`. `payload` is mutated
+    in place (`_resolve_in_catalogue` fills in each resource's
+    `inCatalogue`).
+
+    Review findings 3/8: everything the network hands back is validated
+    exactly as if it had arrived through `POST /fips` itself before it is
+    allowed to create a `fers` row or land in `answers` --
+    - a question the target knowledge model doesn't have (a session's own
+      forked model may lack some of the 21 GO FAIR ids) is skipped with
+      reason `question_not_in_model`, never silently answered against a
+      question the model can't render;
+    - a resource IRI that isn't a safe http(s) IRI is skipped with reason
+      `invalid_resource_iri`, before it ever reaches the `fers` table;
+    - every declaration is built through `Answer.model_validate` +
+      `answer_dump`, exactly like `create_fip`'s own `body.answers` --
+      anything that fails validation (e.g. a resource IRI that is http(s)
+      but still carries a character `schemas._validate_fer_iri` rejects) is
+      skipped with reason `invalid_declaration`/`invalid_resource_iri`
+      instead of ever being written."""
+    from fipm.routers.network import _resolve_in_catalogue
+
+    _resolve_in_catalogue(db, payload)
+    questions_by_id = _questions_by_id(km)
+
+    answers: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    fers_created = 0
+    fers_matched = 0
+
+    def _skip(reason: str, decl_index: int) -> None:
+        skipped.append(
+            {"questionId": question_id, "declarationIndex": decl_index, "reason": reason}
+        )
+
+    def _validated_declaration(decl_dict: dict[str, Any]) -> dict[str, Any] | None:
+        try:
+            validated = Answer.model_validate(
+                {"questionId": question_id, "declarations": [decl_dict]}
+            )
+        except ValidationError:
+            return None
+        return answer_dump(validated)["declarations"][0]
+
+    for question in payload["questions"]:
+        question_id = question["questionId"]
+        if question_id not in questions_by_id:
+            for decl_index in range(len(question["declarations"])):
+                _skip("question_not_in_model", decl_index)
+            continue
+        question_meta = questions_by_id[question_id]
+        declarations_out: list[dict[str, Any]] = []
+        for decl_index, decl in enumerate(question["declarations"]):
+            status = decl.get("status")
+            considerations = decl.get("considerations")
+            resource = decl.get("resource")
+
+            if status == "none":
+                if not considerations:
+                    continue
+                validated_decl = _validated_declaration(
+                    {"status": "none", "ferFreeText": considerations[:500]}
+                )
+                if validated_decl is None:
+                    _skip("invalid_declaration", decl_index)
+                    continue
+                declarations_out.append(validated_decl)
+                continue
+
+            if resource is None:
+                # No FER reference and not a "none" declaration -- nothing
+                # importable (a real-world data anomaly, not an expected
+                # case per spec §0.1).
+                continue
+
+            resource_iri = resource.get("iri")
+            if not resource_iri or not _is_http_iri(resource_iri):
+                _skip("invalid_resource_iri", decl_index)
+                continue
+
+            in_catalogue = resource.get("inCatalogue")
+            fer_id = in_catalogue["ferId"] if in_catalogue else resource_iri
+
+            declaration_dict: dict[str, Any] = {"ferId": fer_id, "status": status}
+            if considerations:
+                declaration_dict["note"] = {language: considerations}
+            validated_decl = _validated_declaration(declaration_dict)
+            if validated_decl is None:
+                # The only field this declaration's shape leaves un-checked
+                # above is the fer_id's own character safety
+                # (schemas._validate_fer_iri, run by Answer.model_validate's
+                # Declaration field validator) -- so a failure here is still
+                # about the resource IRI.
+                _skip("invalid_resource_iri", decl_index)
+                continue
+            declarations_out.append(validated_decl)
+
+            if in_catalogue:
+                fers_matched += 1
+            elif db.get(Fer, fer_id) is None:
+                label_text = (resource.get("label") or fer_id).strip()[:FER_LABEL_MAX_LEN]
+                fer_type = resource.get("ferTypeKey") or question_meta.get("ferType") or ""
+                db.add(
+                    Fer(
+                        id=fer_id,
+                        label={language: label_text},
+                        label_search=label_text.casefold(),
+                        type=fer_type,
+                        homepage=resource.get("homepage"),
+                        owner_id=user.id if user is not None else None,
+                        source="network",
+                    )
+                )
+                db.flush()
+                fers_created += 1
+            else:
+                fers_matched += 1
+
+        if declarations_out:
+            answers.append({"questionId": question_id, "declarations": declarations_out})
+
+    skipped.extend(
+        {"questionIri": entry["questionIri"], "reason": "no_question_individual"}
+        for entry in payload["unmapped"]
+        for _decl in entry["declarations"]
+    )
+
+    return answers, skipped, fers_created, fers_matched
+
+
+@router.post("/from-network", status_code=201)
+def create_fip_from_network(
+    body: FipFromNetworkRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> dict[str, Any]:
+    settings = get_settings()
+    if not settings.network_enabled:
+        raise HTTPException(status_code=503, detail="network_disabled")
+
+    session_row: WorkshopSession | None = None
+    if body.session_id:
+        session_row = db.get(WorkshopSession, body.session_id)
+        if session_row is None:
+            raise HTTPException(status_code=404, detail="session_not_found")
+        if not body.join_code or not secrets.compare_digest(body.join_code, session_row.join_code):
+            raise HTTPException(status_code=403, detail="invalid_join_code")
+        if session_row.status != "open":
+            raise HTTPException(status_code=409, detail="session_closed")
+
+    # Review finding 10: the full create-a-FIP authorization ladder
+    # (anonymous_fips flag, private_requires_account, the anonymous rate
+    # limit) runs before anything below that touches the network or writes
+    # a FER row -- an unauthorized caller must never trigger upstream
+    # traffic or a database write.
+    visibility = _resolve_create_fip_authorization(
+        settings, request, user, session_row, body.visibility
+    )
+
+    km = _km_for_from_network(db, session_row, body.questionnaire_ref, user)
+
+    try:
+        payload, _cached_at, _stale = network.get_community_fip(settings, body.community_iri)
+    except network.NetworkError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.code) from exc
+
+    language = body.language or settings.default_language
+    answers, skipped, fers_created, fers_matched = _build_answers_from_network(
+        db, payload, km, language, user
+    )
+
+    community_name = body.title or payload["fip"].get("label") or payload["community"].get("label")
+    community = {"name": community_name or "FIP imported from the nanopublication network"}
+
+    common: dict[str, Any] = {
+        "questionnaire_id": km.id,
+        "questionnaire_version": km.version,
+        "title": community.get("name"),
+        "community": community,
+        "related_dmps": [],
+        "answers": answers,
+        "language": language,
+        "license": "CC0-1.0",
+    }
+
+    fip, edit_token = _insert_fip_with_visibility(
+        db, settings, user, session_row, visibility, common
+    )
+
+    fip.network_origin = {
+        "communityIri": body.community_iri,
+        "fipNanopubIri": payload["fip"]["nanopubIri"],
+        "indexIri": payload["fip"].get("indexIri"),
+        "fetchedAt": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+    }
+    db.commit()
+    db.refresh(fip)
+
+    out = _out_for_km(fip, km, db, edit_token=edit_token)
+    imported_declarations = sum(len(a["declarations"]) for a in answers)
+    result: dict[str, Any] = {
+        "fip": out,
+        "imported": {
+            "declarations": imported_declarations,
+            "fersCreated": fers_created,
+            "fersMatched": fers_matched,
+        },
+        "skipped": skipped,
+    }
+    if edit_token:
+        result["editToken"] = edit_token
+    return result
 
 
 @router.post("/import", status_code=201)
@@ -410,6 +769,20 @@ def import_fip(
         except ValidationError as exc:
             raise HTTPException(status_code=400, detail="invalid_migrated_from") from exc
 
+    # spec 11-nanopub-network.md §4/§3.3: `fip.networkOrigin` round-trips
+    # through export/import the same way `migratedFrom` does -- validated
+    # against the fixed shape POST /fips/from-network itself writes, not an
+    # unvalidated blob.
+    network_origin_raw = fip_data.get("networkOrigin")
+    network_origin: dict[str, Any] | None = None
+    if network_origin_raw is not None:
+        try:
+            network_origin = NetworkOriginImport.model_validate(network_origin_raw).model_dump(
+                mode="json", by_alias=True
+            )
+        except ValidationError as exc:
+            raise HTTPException(status_code=400, detail="invalid_network_origin") from exc
+
     fip = _insert_fip(
         db,
         settings,
@@ -425,6 +798,7 @@ def import_fip(
         answers=answer_dicts,
         orphaned_answers=orphaned_answers,
         migrated_from=migrated_from,
+        network_origin=network_origin,
         language=language,
         license=fip_data.get("license") or "CC0-1.0",
     )
@@ -843,3 +1217,78 @@ def export_fip_jsonld(
         media_type="application/ld+json",
         headers={"Content-Disposition": f'attachment; filename="{fip.id}.jsonld"'},
     )
+
+
+# ---------------------------------------------------------------------------
+# Unsigned nanopublication bundle export (spec 11-nanopub-network.md §2.7).
+# Authorization is identical to the four export.* endpoints above --
+# _get_readable_fip, deliberately not stricter (the bundle contains
+# strictly less than export.ttl already does).
+# ---------------------------------------------------------------------------
+
+
+def _now_for_bundle() -> datetime:
+    """Review findings 5/16: second precision (also enforced inside
+    `build_bundle` itself, so this is belt-and-braces). Each of the three
+    endpoints below builds its own bundle -- the UI's "zip + index.json +
+    preview" dialog therefore does not see byte-identical `dct:created`/
+    `generatedAt` values across the three requests (that would need a
+    shared build cached across requests, which is out of scope here) --
+    but truncating to the second keeps the common case, all three requests
+    landing in the same second, consistent. Documented, not "fixed"."""
+    return datetime.now(UTC).replace(microsecond=0)
+
+
+def _build_bundle_or_413(db: Session, fip: Fip, settings: Settings) -> NanopubBundle:
+    try:
+        return build_bundle(db, fip, settings, _now_for_bundle())
+    except NanopubBundleError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.code) from exc
+
+
+@router.get("/{fip_id}/export/nanopubs.zip")
+def export_fip_nanopubs_zip(
+    fip_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> Response:
+    fip = _get_readable_fip(fip_id, request, db, user)
+    settings = get_settings()
+    bundle = _build_bundle_or_413(db, fip, settings)
+    return Response(
+        content=bundle.zip_bytes(),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{fip.id}-nanopubs.zip"'},
+    )
+
+
+@router.get("/{fip_id}/export/nanopubs/index.json")
+def export_fip_nanopubs_index(
+    fip_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> Response:
+    fip = _get_readable_fip(fip_id, request, db, user)
+    settings = get_settings()
+    bundle = _build_bundle_or_413(db, fip, settings)
+    return Response(content=json.dumps(bundle.index, indent=2), media_type="application/json")
+
+
+@router.get("/{fip_id}/export/nanopubs/preview.trig")
+def export_fip_nanopubs_preview(
+    fip_id: str,
+    request: Request,
+    n: int | None = Query(default=None),
+    db: Session = Depends(get_db),
+    user: User | None = Depends(optional_user),
+) -> Response:
+    fip = _get_readable_fip(fip_id, request, db, user)
+    settings = get_settings()
+    bundle = _build_bundle_or_413(db, fip, settings)
+    target_n = n if n is not None else bundle.index["nanopubs"][-1]["n"]
+    for path, text in bundle.files:
+        if path.startswith(f"np/{target_n:04d}-"):
+            return Response(content=text, media_type="application/trig; charset=utf-8")
+    raise HTTPException(status_code=404, detail="nanopub_not_found")

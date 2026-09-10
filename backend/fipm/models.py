@@ -136,6 +136,11 @@ class Fip(Base):
     # v5 (spec 07 §4.4): append-only list of answers orphaned by a migration
     # (§4.4 shape); never re-injected into `answers`.
     orphaned_answers: Mapped[list | None] = mapped_column(JSON, nullable=True, default=list)
+    # v7 (spec 11-nanopub-network.md §4): set only for a FIP created via
+    # POST /api/fips/from-network -- {"communityIri", "fipNanopubIri",
+    # "indexIri", "fetchedAt"}. NULL for every FIP not created from the
+    # network (the pre-v7 value, meaning exactly that).
+    network_origin: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     __table_args__ = (
         ForeignKeyConstraint(

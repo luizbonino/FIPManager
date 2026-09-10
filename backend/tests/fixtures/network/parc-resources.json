@@ -1,0 +1,3786 @@
+{
+  "head" : {
+    "vars" : [
+      "resource",
+      "label",
+      "comment",
+      "match",
+      "type",
+      "date"
+    ]
+  },
+  "results" : {
+    "bindings" : [
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA1MzU1MPio-mtLzm1P7zfTBSMnTNc2I8HLNARhPjpif8#ORCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ORCID | Open Researcher and Contributor ID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-17T02:45:09.054Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ORCID is an open, non-profit, community-driven effort to create and maintain a registry of unique researcher identifiers and a transparent method of linking research activities and outputs to these identifiers. The ORCID Registry is a repository of unique researcher identifiers which allows researchers to manage a record of their research activities. In addition, there are APIs that support system-to-system communication and authentication. ORCID makes its code available under an open source license, and will post an annual public data file under a CC0 waiver for free download."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA1MzU1MPio-mtLzm1P7zfTBSMnTNc2I8HLNARhPjpif8#ORCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ORCID | Open Researcher and Contributor ID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-17T02:45:09.054Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ORCID is an open, non-profit, community-driven effort to create and maintain a registry of unique researcher identifiers and a transparent method of linking research activities and outputs to these identifiers. The ORCID Registry is a repository of unique researcher identifiers which allows researchers to manage a record of their research activities. In addition, there are APIs that support system-to-system communication and authentication. ORCID makes its code available under an open source license, and will post an annual public data file under a CC0 waiver for free download."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA1MzU1MPio-mtLzm1P7zfTBSMnTNc2I8HLNARhPjpif8#ORCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ORCID | Open Researcher and Contributor ID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-17T02:45:09.054Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ORCID is an open, non-profit, community-driven effort to create and maintain a registry of unique researcher identifiers and a transparent method of linking research activities and outputs to these identifiers. The ORCID Registry is a repository of unique researcher identifiers which allows researchers to manage a record of their research activities. In addition, there are APIs that support system-to-system communication and authentication. ORCID makes its code available under an open source license, and will post an annual public data file under a CC0 waiver for free download."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA1MzU1MPio-mtLzm1P7zfTBSMnTNc2I8HLNARhPjpif8#ORCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ORCID | Open Researcher and Contributor ID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-17T02:45:09.054Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ORCID is an open, non-profit, community-driven effort to create and maintain a registry of unique researcher identifiers and a transparent method of linking research activities and outputs to these identifiers. The ORCID Registry is a repository of unique researcher identifiers which allows researchers to manage a record of their research activities. In addition, there are APIs that support system-to-system communication and authentication. ORCID makes its code available under an open source license, and will post an annual public data file under a CC0 waiver for free download."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA1MzU1MPio-mtLzm1P7zfTBSMnTNc2I8HLNARhPjpif8#ORCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ORCID | Open Researcher and Contributor ID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-17T02:45:09.054Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ORCID is an open, non-profit, community-driven effort to create and maintain a registry of unique researcher identifiers and a transparent method of linking research activities and outputs to these identifiers. The ORCID Registry is a repository of unique researcher identifiers which allows researchers to manage a record of their research activities. In addition, there are APIs that support system-to-system communication and authentication. ORCID makes its code available under an open source license, and will post an annual public data file under a CC0 waiver for free download."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Communication-protocol"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA24ysQcpWDzK6wHANkG_3F1HiTbgOO4ULjYxjaXDi8C4#MIT"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MIT License"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-01-07T18:46:26.549Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to some conditions."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://spdx.org/licenses/MIT.html"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA24ysQcpWDzK6wHANkG_3F1HiTbgOO4ULjYxjaXDi8C4#MIT"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MIT License"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-01-07T18:46:26.549Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to some conditions."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://spdx.org/licenses/MIT.html"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA24ysQcpWDzK6wHANkG_3F1HiTbgOO4ULjYxjaXDi8C4#MIT"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MIT License"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-01-07T18:46:26.549Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to some conditions."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://spdx.org/licenses/MIT.html"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Data-usage-license"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA4b-LIptEtHjOVWfK1uvEwd0s9NAWtKKEHTsXklIC6fU#CERIF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CERIF | Common European Research Information Format"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:52:01.058Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "This standard allows for a metadata representation of research entities, their activities and interconnections, along with their output. This is captured in highly flexible formal (semantic) relationships, and enables quality maintenance, archiving, access and interchange of research information, so supporting knowledge transfer to decision makers, for research evaluation, research managers, strategists, researchers, editors and the general public."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA4b-LIptEtHjOVWfK1uvEwd0s9NAWtKKEHTsXklIC6fU#CERIF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CERIF | Common European Research Information Format"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:52:01.058Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "This standard allows for a metadata representation of research entities, their activities and interconnections, along with their output. This is captured in highly flexible formal (semantic) relationships, and enables quality maintenance, archiving, access and interchange of research information, so supporting knowledge transfer to decision makers, for research evaluation, research managers, strategists, researchers, editors and the general public."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA4b-LIptEtHjOVWfK1uvEwd0s9NAWtKKEHTsXklIC6fU#CERIF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CERIF | Common European Research Information Format"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:52:01.058Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "This standard allows for a metadata representation of research entities, their activities and interconnections, along with their output. This is captured in highly flexible formal (semantic) relationships, and enables quality maintenance, archiving, access and interchange of research information, so supporting knowledge transfer to decision makers, for research evaluation, research managers, strategists, researchers, editors and the general public."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Provenance-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA4b-LIptEtHjOVWfK1uvEwd0s9NAWtKKEHTsXklIC6fU#CERIF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CERIF | Common European Research Information Format"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:52:01.058Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "This standard allows for a metadata representation of research entities, their activities and interconnections, along with their output. This is captured in highly flexible formal (semantic) relationships, and enables quality maintenance, archiving, access and interchange of research information, so supporting knowledge transfer to decision makers, for research evaluation, research managers, strategists, researchers, editors and the general public."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Structured-vocabulary"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA4b-LIptEtHjOVWfK1uvEwd0s9NAWtKKEHTsXklIC6fU#CERIF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CERIF | Common European Research Information Format"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:52:01.058Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "This standard allows for a metadata representation of research entities, their activities and interconnections, along with their output. This is captured in highly flexible formal (semantic) relationships, and enables quality maintenance, archiving, access and interchange of research information, so supporting knowledge transfer to decision makers, for research evaluation, research managers, strategists, researchers, editors and the general public."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Semantic-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RA4b-LIptEtHjOVWfK1uvEwd0s9NAWtKKEHTsXklIC6fU#CERIF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CERIF | Common European Research Information Format"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:52:01.058Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "This standard allows for a metadata representation of research entities, their activities and interconnections, along with their output. This is captured in highly flexible formal (semantic) relationships, and enables quality maintenance, archiving, access and interchange of research information, so supporting knowledge transfer to decision makers, for research evaluation, research managers, strategists, researchers, editors and the general public."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RACnVJ6N84471y43_jMo2rkJi-gHG1TB4KFu8uqX9SqMk#ODbL"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Open Data Commons Open Database License "
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-07-11T07:54:43.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Open Database License (ODbL) is a license agreement intended to allow users to freely share, modify, and use a Database while maintaining this same freedom for others. It is developed by Open Data Commons, the home of a set of legal tools and licenses to help publish, provide and use open data."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RACnVJ6N84471y43_jMo2rkJi-gHG1TB4KFu8uqX9SqMk#ODbL"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Open Data Commons Open Database License "
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-07-11T07:54:43.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Open Database License (ODbL) is a license agreement intended to allow users to freely share, modify, and use a Database while maintaining this same freedom for others. It is developed by Open Data Commons, the home of a set of legal tools and licenses to help publish, provide and use open data."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RACnVJ6N84471y43_jMo2rkJi-gHG1TB4KFu8uqX9SqMk#ODbL"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Open Data Commons Open Database License "
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-07-11T07:54:43.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Open Database License (ODbL) is a license agreement intended to allow users to freely share, modify, and use a Database while maintaining this same freedom for others. It is developed by Open Data Commons, the home of a set of legal tools and licenses to help publish, provide and use open data."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Data-usage-license"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAFP-uWPTN5u2kPR8pYeIgdbwyP1_KYZgoogYIv0Wp-fQ#ROR"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ROR | Research Organization Registry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-25T00:35:25.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Research Organization Registry (ROR) includes IDs and metadata for more than 102,000 organizations and counting. Registry data is CC0 and openly available via a search interface, REST API, and data dump. Registry updates are curated through a community process and released on a rolling basis."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAFP-uWPTN5u2kPR8pYeIgdbwyP1_KYZgoogYIv0Wp-fQ#ROR"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ROR | Research Organization Registry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-25T00:35:25.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Research Organization Registry (ROR) includes IDs and metadata for more than 102,000 organizations and counting. Registry data is CC0 and openly available via a search interface, REST API, and data dump. Registry updates are curated through a community process and released on a rolling basis."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAFP-uWPTN5u2kPR8pYeIgdbwyP1_KYZgoogYIv0Wp-fQ#ROR"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ROR | Research Organization Registry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-04-25T00:35:25.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Research Organization Registry (ROR) includes IDs and metadata for more than 102,000 organizations and counting. Registry data is CC0 and openly available via a search interface, REST API, and data dump. Registry updates are curated through a community process and released on a rolling basis."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAIpnldLlIedp5J7Jcy8pt_X9_YpOez4rO-fHxZl0T96Y#OWL"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OWL | Web Ontology Language"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:55:27.299Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Web Ontology Language (OWL) is a family of knowledge representation languages or ontology languages for authoring ontologies or knowledge bases. The languages are characterized by formal semantics and RDF/XML-based serializations for the Semantic Web. OWL is endorsed by the World Wide Web Consortium (W3C) and has attracted academic, medical and commercial interest. The OWL 2 Web Ontology Language, informally OWL 2, is an ontology language for the Semantic Web with formally defined meaning. OWL 2 ontologies provide classes, properties, individuals, and data values and are stored as Semantic Web documents. OWL 2 ontologies can be used along with information written in RDF, and OWL 2 ontologies themselves are primarily exchanged as RDF documents."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAIpnldLlIedp5J7Jcy8pt_X9_YpOez4rO-fHxZl0T96Y#OWL"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OWL | Web Ontology Language"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:55:27.299Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Web Ontology Language (OWL) is a family of knowledge representation languages or ontology languages for authoring ontologies or knowledge bases. The languages are characterized by formal semantics and RDF/XML-based serializations for the Semantic Web. OWL is endorsed by the World Wide Web Consortium (W3C) and has attracted academic, medical and commercial interest. The OWL 2 Web Ontology Language, informally OWL 2, is an ontology language for the Semantic Web with formally defined meaning. OWL 2 ontologies provide classes, properties, individuals, and data values and are stored as Semantic Web documents. OWL 2 ontologies can be used along with information written in RDF, and OWL 2 ontologies themselves are primarily exchanged as RDF documents."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAIpnldLlIedp5J7Jcy8pt_X9_YpOez4rO-fHxZl0T96Y#OWL"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OWL | Web Ontology Language"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:55:27.299Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Web Ontology Language (OWL) is a family of knowledge representation languages or ontology languages for authoring ontologies or knowledge bases. The languages are characterized by formal semantics and RDF/XML-based serializations for the Semantic Web. OWL is endorsed by the World Wide Web Consortium (W3C) and has attracted academic, medical and commercial interest. The OWL 2 Web Ontology Language, informally OWL 2, is an ontology language for the Semantic Web with formally defined meaning. OWL 2 ontologies provide classes, properties, individuals, and data values and are stored as Semantic Web documents. OWL 2 ontologies can be used along with information written in RDF, and OWL 2 ontologies themselves are primarily exchanged as RDF documents."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Knowledge-representation-language"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAQKjgd7Ug9xSo4J0REW_AHGOJyaF9-ydj60nunqQ0qVg#JSON-LD"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "JSON-LD | JavaScript Object Notation for Linking Data"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:39:14.795Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "JSON-LD is a JSON-based format to serialize Linked Data. The syntax is designed to easily integrate into deployed systems that already use JSON, and provides a smooth upgrade path from JSON to JSON-LD. It is primarily intended to be a way to use Linked Data in Web-based programming environments, to build interoperable Web services, and to store Linked Data in JSON-based storage engines. JSON-LD is a concrete RDF syntax. A JSON-LD document is both an RDF document and a JSON document and correspondingly represents an instance of an RDF data model. However, JSON-LD also extends the RDF data model to optionally allow JSON-LD to serialize generalized RDF Datasets."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAQKjgd7Ug9xSo4J0REW_AHGOJyaF9-ydj60nunqQ0qVg#JSON-LD"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "JSON-LD | JavaScript Object Notation for Linking Data"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:39:14.795Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "JSON-LD is a JSON-based format to serialize Linked Data. The syntax is designed to easily integrate into deployed systems that already use JSON, and provides a smooth upgrade path from JSON to JSON-LD. It is primarily intended to be a way to use Linked Data in Web-based programming environments, to build interoperable Web services, and to store Linked Data in JSON-based storage engines. JSON-LD is a concrete RDF syntax. A JSON-LD document is both an RDF document and a JSON document and correspondingly represents an instance of an RDF data model. However, JSON-LD also extends the RDF data model to optionally allow JSON-LD to serialize generalized RDF Datasets."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAQKjgd7Ug9xSo4J0REW_AHGOJyaF9-ydj60nunqQ0qVg#JSON-LD"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "JSON-LD | JavaScript Object Notation for Linking Data"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:39:14.795Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "JSON-LD is a JSON-based format to serialize Linked Data. The syntax is designed to easily integrate into deployed systems that already use JSON, and provides a smooth upgrade path from JSON to JSON-LD. It is primarily intended to be a way to use Linked Data in Web-based programming environments, to build interoperable Web services, and to store Linked Data in JSON-based storage engines. JSON-LD is a concrete RDF syntax. A JSON-LD document is both an RDF document and a JSON document and correspondingly represents an instance of an RDF data model. However, JSON-LD also extends the RDF data model to optionally allow JSON-LD to serialize generalized RDF Datasets."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Knowledge-representation-language"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAQ__sGdY_Qc7l1O_zmn4nr-pMBOxKU04Ur9s998rS6Fc#CC-BY-4.0"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CC BY 4.0 | Attribution 4.0 International"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-18T17:52:25.213Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Using this licence you are free to share and adapt the resource but you must give appropriate credit."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAQ__sGdY_Qc7l1O_zmn4nr-pMBOxKU04Ur9s998rS6Fc#CC-BY-4.0"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CC BY 4.0 | Attribution 4.0 International"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-18T17:52:25.213Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Using this licence you are free to share and adapt the resource but you must give appropriate credit."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAQ__sGdY_Qc7l1O_zmn4nr-pMBOxKU04Ur9s998rS6Fc#CC-BY-4.0"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "CC BY 4.0 | Attribution 4.0 International"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-18T17:52:25.213Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Using this licence you are free to share and adapt the resource but you must give appropriate credit."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Data-usage-license"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RARv4EFw3iwjRn01xnpto4yzc15buTVcm2_q-8a3jLoZw#FTP"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "FTP | File Transfer Protocol"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-21T09:16:47.553Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The FTP is a standard communication protocol used for the transfer of computer files from a server to a client on a computer network."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RARv4EFw3iwjRn01xnpto4yzc15buTVcm2_q-8a3jLoZw#FTP"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "FTP | File Transfer Protocol"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-21T09:16:47.553Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The FTP is a standard communication protocol used for the transfer of computer files from a server to a client on a computer network."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RARv4EFw3iwjRn01xnpto4yzc15buTVcm2_q-8a3jLoZw#FTP"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "FTP | File Transfer Protocol"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-21T09:16:47.553Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The FTP is a standard communication protocol used for the transfer of computer files from a server to a client on a computer network."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Communication-protocol"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAbhCIJzwMFVkgwvrhsdjnpxtH58oLKoyxgj60DzkS-q4#OAuth"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OAuth | Open Authorization"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-23T14:12:39.024Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity while providing specific authorization flows for web applications, desktop applications, mobile phones, and living room devices."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAbhCIJzwMFVkgwvrhsdjnpxtH58oLKoyxgj60DzkS-q4#OAuth"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OAuth | Open Authorization"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-23T14:12:39.024Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity while providing specific authorization flows for web applications, desktop applications, mobile phones, and living room devices."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAbhCIJzwMFVkgwvrhsdjnpxtH58oLKoyxgj60DzkS-q4#OAuth"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OAuth | Open Authorization"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-23T14:12:39.024Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity while providing specific authorization flows for web applications, desktop applications, mobile phones, and living room devices."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Authentication-and-authorization-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAko0U2Q8boW-drM8t11DcbX6Ixu2mcSQf-2BrM07geIQ#datacite_metadata_scheme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DataCite Metadata Scheme"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:42:42.757Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The DataCite Metadata Schema is a list of core metadata properties chosen for accurate and consistent identification of a resource for citation and retrieval purposes, with recommended use instructions in the documentation. The resource that is being identified can be of any kind, but it is typically a dataset. We use the term ‘dataset’ in its broadest sense. We mean it to include not only numerical data, but any other research objects in keeping with DataCite’s mission (https://datacite.org/value.html). The metadata schema properties are presented and described in detail in the section DataCite Metadata Properties in this document."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://schema.datacite.org/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAko0U2Q8boW-drM8t11DcbX6Ixu2mcSQf-2BrM07geIQ#datacite_metadata_scheme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DataCite Metadata Scheme"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:42:42.757Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The DataCite Metadata Schema is a list of core metadata properties chosen for accurate and consistent identification of a resource for citation and retrieval purposes, with recommended use instructions in the documentation. The resource that is being identified can be of any kind, but it is typically a dataset. We use the term ‘dataset’ in its broadest sense. We mean it to include not only numerical data, but any other research objects in keeping with DataCite’s mission (https://datacite.org/value.html). The metadata schema properties are presented and described in detail in the section DataCite Metadata Properties in this document."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://schema.datacite.org/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAko0U2Q8boW-drM8t11DcbX6Ixu2mcSQf-2BrM07geIQ#datacite_metadata_scheme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DataCite Metadata Scheme"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:42:42.757Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The DataCite Metadata Schema is a list of core metadata properties chosen for accurate and consistent identification of a resource for citation and retrieval purposes, with recommended use instructions in the documentation. The resource that is being identified can be of any kind, but it is typically a dataset. We use the term ‘dataset’ in its broadest sense. We mean it to include not only numerical data, but any other research objects in keeping with DataCite’s mission (https://datacite.org/value.html). The metadata schema properties are presented and described in detail in the section DataCite Metadata Properties in this document."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://schema.datacite.org/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Provenance-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAko0U2Q8boW-drM8t11DcbX6Ixu2mcSQf-2BrM07geIQ#datacite_metadata_scheme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DataCite Metadata Scheme"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:42:42.757Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The DataCite Metadata Schema is a list of core metadata properties chosen for accurate and consistent identification of a resource for citation and retrieval purposes, with recommended use instructions in the documentation. The resource that is being identified can be of any kind, but it is typically a dataset. We use the term ‘dataset’ in its broadest sense. We mean it to include not only numerical data, but any other research objects in keeping with DataCite’s mission (https://datacite.org/value.html). The metadata schema properties are presented and described in detail in the section DataCite Metadata Properties in this document."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://schema.datacite.org/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Semantic-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAko0U2Q8boW-drM8t11DcbX6Ixu2mcSQf-2BrM07geIQ#datacite_metadata_scheme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DataCite Metadata Scheme"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-08T16:42:42.757Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The DataCite Metadata Schema is a list of core metadata properties chosen for accurate and consistent identification of a resource for citation and retrieval purposes, with recommended use instructions in the documentation. The resource that is being identified can be of any kind, but it is typically a dataset. We use the term ‘dataset’ in its broadest sense. We mean it to include not only numerical data, but any other research objects in keeping with DataCite’s mission (https://datacite.org/value.html). The metadata schema properties are presented and described in detail in the section DataCite Metadata Properties in this document."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://schema.datacite.org/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAm6jl2f_ysCwqHyEEJjb7vdEnZXMwtNyIXSjsbNU3In8#HTTP"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "HTTP | Hypertext Transfer Protocol"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-19T12:50:58.508Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "he Hypertext Transfer Protocol (HTTP) is an application layer protocol in the Internet protocol suite model for distributed, collaborative, hypermedia information systems."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAm6jl2f_ysCwqHyEEJjb7vdEnZXMwtNyIXSjsbNU3In8#HTTP"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "HTTP | Hypertext Transfer Protocol"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-19T12:50:58.508Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "he Hypertext Transfer Protocol (HTTP) is an application layer protocol in the Internet protocol suite model for distributed, collaborative, hypermedia information systems."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAm6jl2f_ysCwqHyEEJjb7vdEnZXMwtNyIXSjsbNU3In8#HTTP"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "HTTP | Hypertext Transfer Protocol"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-07-19T12:50:58.508Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "he Hypertext Transfer Protocol (HTTP) is an application layer protocol in the Internet protocol suite model for distributed, collaborative, hypermedia information systems."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Communication-protocol"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAnAWGdeI_1GGmDAqv-vZjby5XqbL2ZujNz1vgwK_6cRI#DOI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DOI | Digital Object Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-07T18:45:11.243Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The digital object identifier (DOI) system originated in a joint initiative of three trade associations in the publishing industry (International Publishers Association; International Association of Scientific, Technical and Medical Publishers; Association of American Publishers). The system was announced at the Frankfurt Book Fair 1997. The International DOI Foundation (IDF) was created to develop and manage the DOI system, also in 1997. The DOI system was adopted as International Standard ISO 26324 in 2012. The DOI system implements the Handle System and adds a number of new features. The DOI system provides an infrastructure for persistent unique identification of objects of any type. The DOI system is designed to work over the Internet. A DOI name is permanently assigned to an object to provide a resolvable persistent network link to current information about that object, including where the object, or information about it, can be found on the Internet. While information about an object can change over time, its DOI name will not change. A DOI name can be resolved within the DOI system to values of one or more types of data relating to the object identified by that DOI name, such as a URL, an e-mail address, other identifiers and descriptive metadata. The DOI system enables the construction of automated services and transactions. Applications of the DOI system include but are not limited to managing information and documentation location and access; managing metadata; facilitating electronic transactions; persistent unique identification of any form of any data; and commercial and non-commercial transactions. The content of an object associated with a DOI name is described unambiguously by DOI metadata, based on a structured extensible data model that enables the object to be associated with metadata of any desired degree of precision and granularity to support description and services. The data model supports interoperability between DOI applications. The scope of the DOI system is not defined by reference to the type of content (format, etc.) of the referent, but by reference to the functionalities it provides and the context of use. The DOI system provides, within networks of DOI applications, for unique identification, persistence, resolution, metadata and semantic interoperability."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAnAWGdeI_1GGmDAqv-vZjby5XqbL2ZujNz1vgwK_6cRI#DOI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DOI | Digital Object Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-07T18:45:11.243Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The digital object identifier (DOI) system originated in a joint initiative of three trade associations in the publishing industry (International Publishers Association; International Association of Scientific, Technical and Medical Publishers; Association of American Publishers). The system was announced at the Frankfurt Book Fair 1997. The International DOI Foundation (IDF) was created to develop and manage the DOI system, also in 1997. The DOI system was adopted as International Standard ISO 26324 in 2012. The DOI system implements the Handle System and adds a number of new features. The DOI system provides an infrastructure for persistent unique identification of objects of any type. The DOI system is designed to work over the Internet. A DOI name is permanently assigned to an object to provide a resolvable persistent network link to current information about that object, including where the object, or information about it, can be found on the Internet. While information about an object can change over time, its DOI name will not change. A DOI name can be resolved within the DOI system to values of one or more types of data relating to the object identified by that DOI name, such as a URL, an e-mail address, other identifiers and descriptive metadata. The DOI system enables the construction of automated services and transactions. Applications of the DOI system include but are not limited to managing information and documentation location and access; managing metadata; facilitating electronic transactions; persistent unique identification of any form of any data; and commercial and non-commercial transactions. The content of an object associated with a DOI name is described unambiguously by DOI metadata, based on a structured extensible data model that enables the object to be associated with metadata of any desired degree of precision and granularity to support description and services. The data model supports interoperability between DOI applications. The scope of the DOI system is not defined by reference to the type of content (format, etc.) of the referent, but by reference to the functionalities it provides and the context of use. The DOI system provides, within networks of DOI applications, for unique identification, persistence, resolution, metadata and semantic interoperability."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAnAWGdeI_1GGmDAqv-vZjby5XqbL2ZujNz1vgwK_6cRI#DOI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DOI | Digital Object Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-07T18:45:11.243Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The digital object identifier (DOI) system originated in a joint initiative of three trade associations in the publishing industry (International Publishers Association; International Association of Scientific, Technical and Medical Publishers; Association of American Publishers). The system was announced at the Frankfurt Book Fair 1997. The International DOI Foundation (IDF) was created to develop and manage the DOI system, also in 1997. The DOI system was adopted as International Standard ISO 26324 in 2012. The DOI system implements the Handle System and adds a number of new features. The DOI system provides an infrastructure for persistent unique identification of objects of any type. The DOI system is designed to work over the Internet. A DOI name is permanently assigned to an object to provide a resolvable persistent network link to current information about that object, including where the object, or information about it, can be found on the Internet. While information about an object can change over time, its DOI name will not change. A DOI name can be resolved within the DOI system to values of one or more types of data relating to the object identified by that DOI name, such as a URL, an e-mail address, other identifiers and descriptive metadata. The DOI system enables the construction of automated services and transactions. Applications of the DOI system include but are not limited to managing information and documentation location and access; managing metadata; facilitating electronic transactions; persistent unique identification of any form of any data; and commercial and non-commercial transactions. The content of an object associated with a DOI name is described unambiguously by DOI metadata, based on a structured extensible data model that enables the object to be associated with metadata of any desired degree of precision and granularity to support description and services. The data model supports interoperability between DOI applications. The scope of the DOI system is not defined by reference to the type of content (format, etc.) of the referent, but by reference to the functionalities it provides and the context of use. The DOI system provides, within networks of DOI applications, for unique identification, persistence, resolution, metadata and semantic interoperability."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAnAWGdeI_1GGmDAqv-vZjby5XqbL2ZujNz1vgwK_6cRI#DOI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "DOI | Digital Object Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-01-07T18:45:11.243Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The digital object identifier (DOI) system originated in a joint initiative of three trade associations in the publishing industry (International Publishers Association; International Association of Scientific, Technical and Medical Publishers; Association of American Publishers). The system was announced at the Frankfurt Book Fair 1997. The International DOI Foundation (IDF) was created to develop and manage the DOI system, also in 1997. The DOI system was adopted as International Standard ISO 26324 in 2012. The DOI system implements the Handle System and adds a number of new features. The DOI system provides an infrastructure for persistent unique identification of objects of any type. The DOI system is designed to work over the Internet. A DOI name is permanently assigned to an object to provide a resolvable persistent network link to current information about that object, including where the object, or information about it, can be found on the Internet. While information about an object can change over time, its DOI name will not change. A DOI name can be resolved within the DOI system to values of one or more types of data relating to the object identified by that DOI name, such as a URL, an e-mail address, other identifiers and descriptive metadata. The DOI system enables the construction of automated services and transactions. Applications of the DOI system include but are not limited to managing information and documentation location and access; managing metadata; facilitating electronic transactions; persistent unique identification of any form of any data; and commercial and non-commercial transactions. The content of an object associated with a DOI name is described unambiguously by DOI metadata, based on a structured extensible data model that enables the object to be associated with metadata of any desired degree of precision and granularity to support description and services. The data model supports interoperability between DOI applications. The scope of the DOI system is not defined by reference to the type of content (format, etc.) of the referent, but by reference to the functionalities it provides and the context of use. The DOI system provides, within networks of DOI applications, for unique identification, persistence, resolution, metadata and semantic interoperability."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-data-linking-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAp2h5QufBE4kWgqbhwyajGHzvTN-foKe14pQYypDQKWk#InChI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IUPAC International Chemical Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-16T16:47:16.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The InChI algorithm turns chemical structures into machine-readable strings of information. InChIs are unique to the compound they describe and can encode absolute stereochemistry making chemicals and chemistry machine-readable and discoverable. A simple analogy is that InChI is the bar-code for chemistry and chemical structures. Additionally, InChIKey is defined as a fixed-length string of upper-case characters designed as simple identifier to be used in internet and database search engines. It is generated by subjecting the InChI string to a compression algorithm. Besides the standard InChI for chemicals, extensions to mixtures, nanomaterials, organometalics and polymers are also available usable as unique identifiers and as metadata schema for composition and structural information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAp2h5QufBE4kWgqbhwyajGHzvTN-foKe14pQYypDQKWk#InChI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IUPAC International Chemical Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-16T16:47:16.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The InChI algorithm turns chemical structures into machine-readable strings of information. InChIs are unique to the compound they describe and can encode absolute stereochemistry making chemicals and chemistry machine-readable and discoverable. A simple analogy is that InChI is the bar-code for chemistry and chemical structures. Additionally, InChIKey is defined as a fixed-length string of upper-case characters designed as simple identifier to be used in internet and database search engines. It is generated by subjecting the InChI string to a compression algorithm. Besides the standard InChI for chemicals, extensions to mixtures, nanomaterials, organometalics and polymers are also available usable as unique identifiers and as metadata schema for composition and structural information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAp2h5QufBE4kWgqbhwyajGHzvTN-foKe14pQYypDQKWk#InChI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IUPAC International Chemical Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-16T16:47:16.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The InChI algorithm turns chemical structures into machine-readable strings of information. InChIs are unique to the compound they describe and can encode absolute stereochemistry making chemicals and chemistry machine-readable and discoverable. A simple analogy is that InChI is the bar-code for chemistry and chemical structures. Additionally, InChIKey is defined as a fixed-length string of upper-case characters designed as simple identifier to be used in internet and database search engines. It is generated by subjecting the InChI string to a compression algorithm. Besides the standard InChI for chemicals, extensions to mixtures, nanomaterials, organometalics and polymers are also available usable as unique identifiers and as metadata schema for composition and structural information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAp2h5QufBE4kWgqbhwyajGHzvTN-foKe14pQYypDQKWk#InChI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IUPAC International Chemical Identifier"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-16T16:47:16.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The InChI algorithm turns chemical structures into machine-readable strings of information. InChIs are unique to the compound they describe and can encode absolute stereochemistry making chemicals and chemistry machine-readable and discoverable. A simple analogy is that InChI is the bar-code for chemistry and chemical structures. Additionally, InChIKey is defined as a fixed-length string of upper-case characters designed as simple identifier to be used in internet and database search engines. It is generated by subjecting the InChI string to a compression algorithm. Besides the standard InChI for chemicals, extensions to mixtures, nanomaterials, organometalics and polymers are also available usable as unique identifiers and as metadata schema for composition and structural information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAt0hUGI9DUyQvTyIorbdbHDHKItMHif6GjSoIYUYvNxM#MeSH"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MeSH|Medical Subject Headings"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-01-16T22:08:29.566Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MeSH is the National Library of Medicine's controlled vocabulary thesaurus. It consists of sets of terms naming descriptors in a hierarchical structure that permits searching at various levels of specificity. MeSH descriptors are arranged in both an alphabetic and a hierarchical structure. At the most general level of the hierarchical structure are very broad headings such as \"Anatomy\" or \"Mental Disorders.\" More specific headings are found at more narrow levels of the thirteen-level hierarchy, such as \"Ankle\" and \"Conduct Disorder.\" There are 27,883 descriptors in 2016 MeSH with over 87,000 entry terms that assist in finding the most appropriate MeSH Heading, for example, \"Vitamin C\" is an entry term to \"Ascorbic Acid.\" In addition to these headings, there are more than 232,000 Supplementary Concept Records (SCRs) within a separate file. Generally SCR records contain specific examples of chemicals, diseases, and drug protocols. They are updated more frequently than descriptors. Each SCR is assigned to a related descriptor via the Heading Map (HM) field. The HM is used to rapidly identify the most specific descriptor class and include it in the citation. If you work on the project responsible for \"Medical Subject Headings\" then please consider helping us by claiming this record and updating it appropriately."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/bsg-s000294/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAt0hUGI9DUyQvTyIorbdbHDHKItMHif6GjSoIYUYvNxM#MeSH"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MeSH|Medical Subject Headings"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-01-16T22:08:29.566Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MeSH is the National Library of Medicine's controlled vocabulary thesaurus. It consists of sets of terms naming descriptors in a hierarchical structure that permits searching at various levels of specificity. MeSH descriptors are arranged in both an alphabetic and a hierarchical structure. At the most general level of the hierarchical structure are very broad headings such as \"Anatomy\" or \"Mental Disorders.\" More specific headings are found at more narrow levels of the thirteen-level hierarchy, such as \"Ankle\" and \"Conduct Disorder.\" There are 27,883 descriptors in 2016 MeSH with over 87,000 entry terms that assist in finding the most appropriate MeSH Heading, for example, \"Vitamin C\" is an entry term to \"Ascorbic Acid.\" In addition to these headings, there are more than 232,000 Supplementary Concept Records (SCRs) within a separate file. Generally SCR records contain specific examples of chemicals, diseases, and drug protocols. They are updated more frequently than descriptors. Each SCR is assigned to a related descriptor via the Heading Map (HM) field. The HM is used to rapidly identify the most specific descriptor class and include it in the citation. If you work on the project responsible for \"Medical Subject Headings\" then please consider helping us by claiming this record and updating it appropriately."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/bsg-s000294/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAt0hUGI9DUyQvTyIorbdbHDHKItMHif6GjSoIYUYvNxM#MeSH"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MeSH|Medical Subject Headings"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-01-16T22:08:29.566Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MeSH is the National Library of Medicine's controlled vocabulary thesaurus. It consists of sets of terms naming descriptors in a hierarchical structure that permits searching at various levels of specificity. MeSH descriptors are arranged in both an alphabetic and a hierarchical structure. At the most general level of the hierarchical structure are very broad headings such as \"Anatomy\" or \"Mental Disorders.\" More specific headings are found at more narrow levels of the thirteen-level hierarchy, such as \"Ankle\" and \"Conduct Disorder.\" There are 27,883 descriptors in 2016 MeSH with over 87,000 entry terms that assist in finding the most appropriate MeSH Heading, for example, \"Vitamin C\" is an entry term to \"Ascorbic Acid.\" In addition to these headings, there are more than 232,000 Supplementary Concept Records (SCRs) within a separate file. Generally SCR records contain specific examples of chemicals, diseases, and drug protocols. They are updated more frequently than descriptors. Each SCR is assigned to a related descriptor via the Heading Map (HM) field. The HM is used to rapidly identify the most specific descriptor class and include it in the citation. If you work on the project responsible for \"Medical Subject Headings\" then please consider helping us by claiming this record and updating it appropriately."
+        },
+        "match" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/bsg-s000294/"
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Structured-vocabulary"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAutRQwoS4d5eLq7eBV1xsnWZ2spDYH4xfhhRzOxSZdhs#RDF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "RDF | Resource Description Framework"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-09-15T11:48:17.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Resource Description Framework (RDF) is a framework for representing information in the Web."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAutRQwoS4d5eLq7eBV1xsnWZ2spDYH4xfhhRzOxSZdhs#RDF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "RDF | Resource Description Framework"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-09-15T11:48:17.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Resource Description Framework (RDF) is a framework for representing information in the Web."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "http://purl.org/np/RAutRQwoS4d5eLq7eBV1xsnWZ2spDYH4xfhhRzOxSZdhs#RDF"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "RDF | Resource Description Framework"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2022-09-15T11:48:17.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Resource Description Framework (RDF) is a framework for representing information in the Web."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Knowledge-representation-language"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.41af40"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OECD Omics Reporting Framework | OORF"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-14T16:13:32.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The OECD Omics Reporting Framework (OORF) was developed to increase transparency in the reporting of Omics data used in regulatory toxicology, and aid regulatory uptake while remaining sufficiently flexible to allow technologies to evolve. It is a harmonized combination of the Transcriptomics Reporting Framework (TRF) and a Metabolomics Reporting Framework (MRF), with four types of reporting modules:\n  (i) The Study Summary Reporting Module (SSRM) provides a high-level overview of the regulatory toxicology and Omics experiment,\n  (ii) The Toxicology Experiment Reporting Module (TERM) reports the key descriptors of the in vivo or in vitro toxicology study,\n  (iii) Data Acquisition and Processing Reporting Modules (DAPRM) report descriptions of the Omics assays, data acquisition and associated data,\n  (iv) Data Analysis Reporting Modules (DARM) describe the statistical analysis that has been undertaken in the Omics study. \n\n  Guidance documents describe each of the reporting modules in detail alongside associated templates are available via the website. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.41af40"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OECD Omics Reporting Framework | OORF"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-14T16:13:32.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The OECD Omics Reporting Framework (OORF) was developed to increase transparency in the reporting of Omics data used in regulatory toxicology, and aid regulatory uptake while remaining sufficiently flexible to allow technologies to evolve. It is a harmonized combination of the Transcriptomics Reporting Framework (TRF) and a Metabolomics Reporting Framework (MRF), with four types of reporting modules:\n  (i) The Study Summary Reporting Module (SSRM) provides a high-level overview of the regulatory toxicology and Omics experiment,\n  (ii) The Toxicology Experiment Reporting Module (TERM) reports the key descriptors of the in vivo or in vitro toxicology study,\n  (iii) Data Acquisition and Processing Reporting Modules (DAPRM) report descriptions of the Omics assays, data acquisition and associated data,\n  (iv) Data Analysis Reporting Modules (DARM) describe the statistical analysis that has been undertaken in the Omics study. \n\n  Guidance documents describe each of the reporting modules in detail alongside associated templates are available via the website. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.41af40"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OECD Omics Reporting Framework | OORF"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-14T16:13:32.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The OECD Omics Reporting Framework (OORF) was developed to increase transparency in the reporting of Omics data used in regulatory toxicology, and aid regulatory uptake while remaining sufficiently flexible to allow technologies to evolve. It is a harmonized combination of the Transcriptomics Reporting Framework (TRF) and a Metabolomics Reporting Framework (MRF), with four types of reporting modules:\n  (i) The Study Summary Reporting Module (SSRM) provides a high-level overview of the regulatory toxicology and Omics experiment,\n  (ii) The Toxicology Experiment Reporting Module (TERM) reports the key descriptors of the in vivo or in vitro toxicology study,\n  (iii) Data Acquisition and Processing Reporting Modules (DAPRM) report descriptions of the Omics assays, data acquisition and associated data,\n  (iv) Data Analysis Reporting Modules (DARM) describe the statistical analysis that has been undertaken in the Omics study. \n\n  Guidance documents describe each of the reporting modules in detail alongside associated templates are available via the website. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Provenance-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.41af40"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OECD Omics Reporting Framework | OORF"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-14T16:13:32.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The OECD Omics Reporting Framework (OORF) was developed to increase transparency in the reporting of Omics data used in regulatory toxicology, and aid regulatory uptake while remaining sufficiently flexible to allow technologies to evolve. It is a harmonized combination of the Transcriptomics Reporting Framework (TRF) and a Metabolomics Reporting Framework (MRF), with four types of reporting modules:\n  (i) The Study Summary Reporting Module (SSRM) provides a high-level overview of the regulatory toxicology and Omics experiment,\n  (ii) The Toxicology Experiment Reporting Module (TERM) reports the key descriptors of the in vivo or in vitro toxicology study,\n  (iii) Data Acquisition and Processing Reporting Modules (DAPRM) report descriptions of the Omics assays, data acquisition and associated data,\n  (iv) Data Analysis Reporting Modules (DARM) describe the statistical analysis that has been undertaken in the Omics study. \n\n  Guidance documents describe each of the reporting modules in detail alongside associated templates are available via the website. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.41af40"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OECD Omics Reporting Framework | OORF"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-14T16:13:32.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The OECD Omics Reporting Framework (OORF) was developed to increase transparency in the reporting of Omics data used in regulatory toxicology, and aid regulatory uptake while remaining sufficiently flexible to allow technologies to evolve. It is a harmonized combination of the Transcriptomics Reporting Framework (TRF) and a Metabolomics Reporting Framework (MRF), with four types of reporting modules:\n  (i) The Study Summary Reporting Module (SSRM) provides a high-level overview of the regulatory toxicology and Omics experiment,\n  (ii) The Toxicology Experiment Reporting Module (TERM) reports the key descriptors of the in vivo or in vitro toxicology study,\n  (iii) Data Acquisition and Processing Reporting Modules (DAPRM) report descriptions of the Omics assays, data acquisition and associated data,\n  (iv) Data Analysis Reporting Modules (DARM) describe the statistical analysis that has been undertaken in the Omics study. \n\n  Guidance documents describe each of the reporting modules in detail alongside associated templates are available via the website. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Specification"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.53gp75"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Investigation Study Assay Tabular"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-07-12T10:54:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Investigation Study Assay Tabular (ISA-Tab) describes the ISA Abstract Model reference implementation specified using the ISA-Tab format. ISA-Tab files are tab separated value (tsv) files, with specific labeled column structures. The ISA model consists of three core entities to capture experimental metadata: investigation, study and assay. The extensible, hierarchical structure of this model enables the representation of studies employing one or a combination of technologies, focusing on the description of its experimental metadata (i.e. sample characteristics, technology and measurement types, sample-to-data relationships)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.53gp75"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Investigation Study Assay Tabular"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-07-12T10:54:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Investigation Study Assay Tabular (ISA-Tab) describes the ISA Abstract Model reference implementation specified using the ISA-Tab format. ISA-Tab files are tab separated value (tsv) files, with specific labeled column structures. The ISA model consists of three core entities to capture experimental metadata: investigation, study and assay. The extensible, hierarchical structure of this model enables the representation of studies employing one or a combination of technologies, focusing on the description of its experimental metadata (i.e. sample characteristics, technology and measurement types, sample-to-data relationships)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.53gp75"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Investigation Study Assay Tabular"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-07-12T10:54:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Investigation Study Assay Tabular (ISA-Tab) describes the ISA Abstract Model reference implementation specified using the ISA-Tab format. ISA-Tab files are tab separated value (tsv) files, with specific labeled column structures. The ISA model consists of three core entities to capture experimental metadata: investigation, study and assay. The extensible, hierarchical structure of this model enables the representation of studies employing one or a combination of technologies, focusing on the description of its experimental metadata (i.e. sample characteristics, technology and measurement types, sample-to-data relationships)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.5hc8vt"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Expression Omnibus"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-23T09:31:37.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Expression Omnibus (GEO) is a public repository that archives and freely distributes microarray, next-generation sequencing, and other forms of high-throughput functional genomic data submitted by the scientific community. Accepts next generation sequence data that examine quantitative gene expression, gene regulation, epigenomics or other aspects of functional genomics using methods such as RNA-seq, miRNA-seq, ChIP-seq, RIP-seq, HiC-seq, methyl-seq, etc. GEO will process all components of your study, including the samples, project description, processed data files, and will submit the raw data files to the Sequence Read Archive (SRA) on the researchers behalf. In addition to data storage, a collection of web-based interfaces and applications are available to help users query and download the studies and gene expression patterns stored in GEO."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.5hc8vt"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Expression Omnibus"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-23T09:31:37.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Expression Omnibus (GEO) is a public repository that archives and freely distributes microarray, next-generation sequencing, and other forms of high-throughput functional genomic data submitted by the scientific community. Accepts next generation sequence data that examine quantitative gene expression, gene regulation, epigenomics or other aspects of functional genomics using methods such as RNA-seq, miRNA-seq, ChIP-seq, RIP-seq, HiC-seq, methyl-seq, etc. GEO will process all components of your study, including the samples, project description, processed data files, and will submit the raw data files to the Sequence Read Archive (SRA) on the researchers behalf. In addition to data storage, a collection of web-based interfaces and applications are available to help users query and download the studies and gene expression patterns stored in GEO."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.5hc8vt"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Expression Omnibus"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-23T09:31:37.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Expression Omnibus (GEO) is a public repository that archives and freely distributes microarray, next-generation sequencing, and other forms of high-throughput functional genomic data submitted by the scientific community. Accepts next generation sequence data that examine quantitative gene expression, gene regulation, epigenomics or other aspects of functional genomics using methods such as RNA-seq, miRNA-seq, ChIP-seq, RIP-seq, HiC-seq, methyl-seq, etc. GEO will process all components of your study, including the samples, project description, processed data files, and will submit the raw data files to the Sequence Read Archive (SRA) on the researchers behalf. In addition to data storage, a collection of web-based interfaces and applications are available to help users query and download the studies and gene expression patterns stored in GEO."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.5hc8vt"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Expression Omnibus"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-23T09:31:37.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Expression Omnibus (GEO) is a public repository that archives and freely distributes microarray, next-generation sequencing, and other forms of high-throughput functional genomic data submitted by the scientific community. Accepts next generation sequence data that examine quantitative gene expression, gene regulation, epigenomics or other aspects of functional genomics using methods such as RNA-seq, miRNA-seq, ChIP-seq, RIP-seq, HiC-seq, methyl-seq, etc. GEO will process all components of your study, including the samples, project description, processed data files, and will submit the raw data files to the Sequence Read Archive (SRA) on the researchers behalf. In addition to data storage, a collection of web-based interfaces and applications are available to help users query and download the studies and gene expression patterns stored in GEO."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6k0kwd"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ArrayExpress"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:52:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ArrayExpress is a database of functional genomics experiments that can be queried and the data downloaded. ArrayExpress has moved to the BioStudies repository but maintains its distinct data model and submission portal - experiments are submitted directly to ArrayExpress via its own dedicated submission tool Annotare.\n  It includes gene expression data from microarray and high throughput sequencing studies, including single-cell sequencing experiments. Data is collected to MIAME, MINSEQE and minSCe standards and guidelines. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6k0kwd"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ArrayExpress"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:52:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ArrayExpress is a database of functional genomics experiments that can be queried and the data downloaded. ArrayExpress has moved to the BioStudies repository but maintains its distinct data model and submission portal - experiments are submitted directly to ArrayExpress via its own dedicated submission tool Annotare.\n  It includes gene expression data from microarray and high throughput sequencing studies, including single-cell sequencing experiments. Data is collected to MIAME, MINSEQE and minSCe standards and guidelines. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6k0kwd"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ArrayExpress"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:52:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ArrayExpress is a database of functional genomics experiments that can be queried and the data downloaded. ArrayExpress has moved to the BioStudies repository but maintains its distinct data model and submission portal - experiments are submitted directly to ArrayExpress via its own dedicated submission tool Annotare.\n  It includes gene expression data from microarray and high throughput sequencing studies, including single-cell sequencing experiments. Data is collected to MIAME, MINSEQE and minSCe standards and guidelines. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6k0kwd"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ArrayExpress"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:52:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "ArrayExpress is a database of functional genomics experiments that can be queried and the data downloaded. ArrayExpress has moved to the BioStudies repository but maintains its distinct data model and submission portal - experiments are submitted directly to ArrayExpress via its own dedicated submission tool Annotare.\n  It includes gene expression data from microarray and high throughput sequencing studies, including single-cell sequencing experiments. Data is collected to MIAME, MINSEQE and minSCe standards and guidelines. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6s749p"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Wikidata"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T14:36:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Free knowledge database project hosted by Wikimedia and edited by volunteers."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6s749p"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Wikidata"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T14:36:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Free knowledge database project hosted by Wikimedia and edited by volunteers."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6s749p"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Wikidata"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T14:36:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Free knowledge database project hosted by Wikimedia and edited by volunteers."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6s749p"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Wikidata"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T14:36:55.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Free knowledge database project hosted by Wikimedia and edited by volunteers."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Generalist-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6xq0ee"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Ontology | GO"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-29T16:44:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Ontology (GO) is a structured vocabulary for use by the research community for the annotation of genes, gene products and sequences. The GO defines concepts/classes used to describe gene function and relationships between these concepts."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6xq0ee"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Ontology | GO"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-29T16:44:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Ontology (GO) is a structured vocabulary for use by the research community for the annotation of genes, gene products and sequences. The GO defines concepts/classes used to describe gene function and relationships between these concepts."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6xq0ee"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Ontology | GO"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-29T16:44:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Ontology (GO) is a structured vocabulary for use by the research community for the annotation of genes, gene products and sequences. The GO defines concepts/classes used to describe gene function and relationships between these concepts."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Structured-vocabulary"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6xq0ee"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Ontology | GO"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-29T16:44:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Ontology (GO) is a structured vocabulary for use by the research community for the annotation of genes, gene products and sequences. The GO defines concepts/classes used to describe gene function and relationships between these concepts."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Semantic-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.6xq0ee"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Gene Ontology | GO"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-29T16:44:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The Gene Ontology (GO) is a structured vocabulary for use by the research community for the annotation of genes, gene products and sequences. The GO defines concepts/classes used to describe gene function and relationships between these concepts."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Specification"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.91yrz6"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Extracellular Matrix Interaction Database | MatrixDB"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T15:15:46.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MatrixDB stores experimental data established by full-length proteins, matricryptins, glycosaminoglycans, lipids and cations. MatrixDB reports interactions with individual polypeptide chains or with multimers (e.g. collagens, laminins, thrombospondins) when appropriate. Multimers are treated as permanent complexes, referencing EBI identifiers when possible. Human interactions were inferred from non-human homologous interactions when available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.91yrz6"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Extracellular Matrix Interaction Database | MatrixDB"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T15:15:46.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MatrixDB stores experimental data established by full-length proteins, matricryptins, glycosaminoglycans, lipids and cations. MatrixDB reports interactions with individual polypeptide chains or with multimers (e.g. collagens, laminins, thrombospondins) when appropriate. Multimers are treated as permanent complexes, referencing EBI identifiers when possible. Human interactions were inferred from non-human homologous interactions when available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.91yrz6"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Extracellular Matrix Interaction Database | MatrixDB"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T15:15:46.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MatrixDB stores experimental data established by full-length proteins, matricryptins, glycosaminoglycans, lipids and cations. MatrixDB reports interactions with individual polypeptide chains or with multimers (e.g. collagens, laminins, thrombospondins) when appropriate. Multimers are treated as permanent complexes, referencing EBI identifiers when possible. Human interactions were inferred from non-human homologous interactions when available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.91yrz6"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Extracellular Matrix Interaction Database | MatrixDB"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T15:15:46.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MatrixDB stores experimental data established by full-length proteins, matricryptins, glycosaminoglycans, lipids and cations. MatrixDB reports interactions with individual polypeptide chains or with multimers (e.g. collagens, laminins, thrombospondins) when appropriate. Multimers are treated as permanent complexes, referencing EBI identifiers when possible. Human interactions were inferred from non-human homologous interactions when available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.PB6595"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Wikidata Identifier | QID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T14:27:41.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Wikidata is a document-oriented database, focused on items, which represent any kind of topic, concept, or object. Each item is allocated a unique, persistent identifier (a QID), which is a positive integer prefixed with the upper-case letter Q."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.PB6595"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Wikidata Identifier | QID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T14:27:41.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Wikidata is a document-oriented database, focused on items, which represent any kind of topic, concept, or object. Each item is allocated a unique, persistent identifier (a QID), which is a positive integer prefixed with the upper-case letter Q."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.PB6595"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Wikidata Identifier | QID"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T14:27:41.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Wikidata is a document-oriented database, focused on items, which represent any kind of topic, concept, or object. Each item is allocated a unique, persistent identifier (a QID), which is a positive integer prefixed with the upper-case letter Q."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.a55z32"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Minimal Information about a high throughput SEQuencing Experiment | MINSEQE"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T17:08:58.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MINSEQE describes the Minimum Information about a high-throughput nucleotide SEQuencing Experiment that is needed to enable the unambiguous interpretation and facilitate reproduction of the results of the experiment. By analogy to the MIAME guidelines for microarray experiments, adherence to the MINSEQE guidelines will improve integration of multiple experiments across different modalities, thereby maximising the value of high-throughput research. Metadata collection template includes critical information such as: 1) The description of the biological system, samples, and the experimental variables being studied, 2) The sequence read data for each assay, 3) The ‘final’ processed (or summary) data for the set of assays in the study, 4) General information about the experiment and sample-data relationships, and 5) Essential experimental and data processing protocols.\n\n  NOTE: The provided resource documentation at Zenodo contains version 1.0 of the MINSEQE guidelines, which originated from discussions at the March 2008 Functional Genomics Data (FGED) Society-hosted workshop held in Berkeley, CA, USA. The FGED Society was operational from 1999-2021."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.a55z32"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Minimal Information about a high throughput SEQuencing Experiment | MINSEQE"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T17:08:58.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MINSEQE describes the Minimum Information about a high-throughput nucleotide SEQuencing Experiment that is needed to enable the unambiguous interpretation and facilitate reproduction of the results of the experiment. By analogy to the MIAME guidelines for microarray experiments, adherence to the MINSEQE guidelines will improve integration of multiple experiments across different modalities, thereby maximising the value of high-throughput research. Metadata collection template includes critical information such as: 1) The description of the biological system, samples, and the experimental variables being studied, 2) The sequence read data for each assay, 3) The ‘final’ processed (or summary) data for the set of assays in the study, 4) General information about the experiment and sample-data relationships, and 5) Essential experimental and data processing protocols.\n\n  NOTE: The provided resource documentation at Zenodo contains version 1.0 of the MINSEQE guidelines, which originated from discussions at the March 2008 Functional Genomics Data (FGED) Society-hosted workshop held in Berkeley, CA, USA. The FGED Society was operational from 1999-2021."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.a55z32"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Minimal Information about a high throughput SEQuencing Experiment | MINSEQE"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T17:08:58.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MINSEQE describes the Minimum Information about a high-throughput nucleotide SEQuencing Experiment that is needed to enable the unambiguous interpretation and facilitate reproduction of the results of the experiment. By analogy to the MIAME guidelines for microarray experiments, adherence to the MINSEQE guidelines will improve integration of multiple experiments across different modalities, thereby maximising the value of high-throughput research. Metadata collection template includes critical information such as: 1) The description of the biological system, samples, and the experimental variables being studied, 2) The sequence read data for each assay, 3) The ‘final’ processed (or summary) data for the set of assays in the study, 4) General information about the experiment and sample-data relationships, and 5) Essential experimental and data processing protocols.\n\n  NOTE: The provided resource documentation at Zenodo contains version 1.0 of the MINSEQE guidelines, which originated from discussions at the March 2008 Functional Genomics Data (FGED) Society-hosted workshop held in Berkeley, CA, USA. The FGED Society was operational from 1999-2021."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.a55z32"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Minimal Information about a high throughput SEQuencing Experiment | MINSEQE"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T17:08:58.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MINSEQE describes the Minimum Information about a high-throughput nucleotide SEQuencing Experiment that is needed to enable the unambiguous interpretation and facilitate reproduction of the results of the experiment. By analogy to the MIAME guidelines for microarray experiments, adherence to the MINSEQE guidelines will improve integration of multiple experiments across different modalities, thereby maximising the value of high-throughput research. Metadata collection template includes critical information such as: 1) The description of the biological system, samples, and the experimental variables being studied, 2) The sequence read data for each assay, 3) The ‘final’ processed (or summary) data for the set of assays in the study, 4) General information about the experiment and sample-data relationships, and 5) Essential experimental and data processing protocols.\n\n  NOTE: The provided resource documentation at Zenodo contains version 1.0 of the MINSEQE guidelines, which originated from discussions at the March 2008 Functional Genomics Data (FGED) Society-hosted workshop held in Berkeley, CA, USA. The FGED Society was operational from 1999-2021."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Specification"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.d05nwx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IntAct molecular interaction database | IntAct"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T13:32:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "IntAct provides a freely available, open source database system and analysis tools for protein interaction data. All interactions are derived from literature curation or direct user submissions and are freely available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.d05nwx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IntAct molecular interaction database | IntAct"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T13:32:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "IntAct provides a freely available, open source database system and analysis tools for protein interaction data. All interactions are derived from literature curation or direct user submissions and are freely available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.d05nwx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IntAct molecular interaction database | IntAct"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T13:32:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "IntAct provides a freely available, open source database system and analysis tools for protein interaction data. All interactions are derived from literature curation or direct user submissions and are freely available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.d05nwx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "IntAct molecular interaction database | IntAct"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T13:32:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "IntAct provides a freely available, open source database system and analysis tools for protein interaction data. All interactions are derived from literature curation or direct user submissions and are freely available."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dff3ef"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Electron Microscopy Public Image Archive | EMPIAR"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:49:01.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "EMPIAR, the Electron Microscopy Public Image Archive, is a public resource for raw images underpinning 3D cryo-EM maps and tomograms (themselves archived in EMDB). EMPIAR also accommodates 3D datasets obtained with volume EM techniques and soft and hard X-ray tomography."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dff3ef"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Electron Microscopy Public Image Archive | EMPIAR"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:49:01.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "EMPIAR, the Electron Microscopy Public Image Archive, is a public resource for raw images underpinning 3D cryo-EM maps and tomograms (themselves archived in EMDB). EMPIAR also accommodates 3D datasets obtained with volume EM techniques and soft and hard X-ray tomography."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dff3ef"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Electron Microscopy Public Image Archive | EMPIAR"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:49:01.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "EMPIAR, the Electron Microscopy Public Image Archive, is a public resource for raw images underpinning 3D cryo-EM maps and tomograms (themselves archived in EMDB). EMPIAR also accommodates 3D datasets obtained with volume EM techniques and soft and hard X-ray tomography."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dff3ef"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Electron Microscopy Public Image Archive | EMPIAR"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:49:01.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "EMPIAR, the Electron Microscopy Public Image Archive, is a public resource for raw images underpinning 3D cryo-EM maps and tomograms (themselves archived in EMDB). EMPIAR also accommodates 3D datasets obtained with volume EM techniques and soft and hard X-ray tomography."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dff3ef"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Electron Microscopy Public Image Archive | EMPIAR"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:49:01.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "EMPIAR, the Electron Microscopy Public Image Archive, is a public resource for raw images underpinning 3D cryo-EM maps and tomograms (themselves archived in EMDB). EMPIAR also accommodates 3D datasets obtained with volume EM techniques and soft and hard X-ray tomography."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-data-linking-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dff3ef"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Electron Microscopy Public Image Archive | EMPIAR"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:49:01.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "EMPIAR, the Electron Microscopy Public Image Archive, is a public resource for raw images underpinning 3D cryo-EM maps and tomograms (themselves archived in EMDB). EMPIAR also accommodates 3D datasets obtained with volume EM techniques and soft and hard X-ray tomography."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Specification"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dff3ef"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Electron Microscopy Public Image Archive | EMPIAR"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:49:01.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "EMPIAR, the Electron Microscopy Public Image Archive, is a public resource for raw images underpinning 3D cryo-EM maps and tomograms (themselves archived in EMDB). EMPIAR also accommodates 3D datasets obtained with volume EM techniques and soft and hard X-ray tomography."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dj8nt8"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "European Nucleotide Archive | ENA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-04-14T14:29:12.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Nucleotide Archive (ENA) is a globally comprehensive data resource for nucleotide sequence, spanning raw data, alignments and assemblies, functional and taxonomic annotation and rich contextual data relating to sequenced samples and experimental design. Serving both as the database of record for the output of the world's sequencing activity and as a platform for the management, sharing and publication of sequence data, the ENA provides a portfolio of services for submission, data management, search and retrieval across web and programmatic interfaces. The ENA is part of the International Nucleotide Sequence Database Collaboration (INSDC), which comprises the DNA DataBank of Japan (DDBJ), the European Molecular Biology Laboratory (EMBL), and GenBank at the NCBI. These three organizations exchange data on a daily basis."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dj8nt8"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "European Nucleotide Archive | ENA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-04-14T14:29:12.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Nucleotide Archive (ENA) is a globally comprehensive data resource for nucleotide sequence, spanning raw data, alignments and assemblies, functional and taxonomic annotation and rich contextual data relating to sequenced samples and experimental design. Serving both as the database of record for the output of the world's sequencing activity and as a platform for the management, sharing and publication of sequence data, the ENA provides a portfolio of services for submission, data management, search and retrieval across web and programmatic interfaces. The ENA is part of the International Nucleotide Sequence Database Collaboration (INSDC), which comprises the DNA DataBank of Japan (DDBJ), the European Molecular Biology Laboratory (EMBL), and GenBank at the NCBI. These three organizations exchange data on a daily basis."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dj8nt8"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "European Nucleotide Archive | ENA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-04-14T14:29:12.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Nucleotide Archive (ENA) is a globally comprehensive data resource for nucleotide sequence, spanning raw data, alignments and assemblies, functional and taxonomic annotation and rich contextual data relating to sequenced samples and experimental design. Serving both as the database of record for the output of the world's sequencing activity and as a platform for the management, sharing and publication of sequence data, the ENA provides a portfolio of services for submission, data management, search and retrieval across web and programmatic interfaces. The ENA is part of the International Nucleotide Sequence Database Collaboration (INSDC), which comprises the DNA DataBank of Japan (DDBJ), the European Molecular Biology Laboratory (EMBL), and GenBank at the NCBI. These three organizations exchange data on a daily basis."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.dj8nt8"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "European Nucleotide Archive | ENA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-04-14T14:29:12.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Nucleotide Archive (ENA) is a globally comprehensive data resource for nucleotide sequence, spanning raw data, alignments and assemblies, functional and taxonomic annotation and rich contextual data relating to sequenced samples and experimental design. Serving both as the database of record for the output of the world's sequencing activity and as a platform for the management, sharing and publication of sequence data, the ENA provides a portfolio of services for submission, data management, search and retrieval across web and programmatic interfaces. The ENA is part of the International Nucleotide Sequence Database Collaboration (INSDC), which comprises the DNA DataBank of Japan (DDBJ), the European Molecular Biology Laboratory (EMBL), and GenBank at the NCBI. These three organizations exchange data on a daily basis."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.e5c86e"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Chemical Abstracts Service Common Chemistry | CAS Common Chemistry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-08-20T08:47:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CAS (Chemical Abstracts Service) Common Chemistry is an open community resource for accessing chemical information. Nearly 500,000 chemical substances from the CAS REGISTRY cover areas of community interest, including common and frequently regulated chemicals, and those relevant to high school and undergraduate chemistry classes. This chemical information is manually curated and provided in alignment with their role as a division of the American Chemical Society."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.e5c86e"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Chemical Abstracts Service Common Chemistry | CAS Common Chemistry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-08-20T08:47:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CAS (Chemical Abstracts Service) Common Chemistry is an open community resource for accessing chemical information. Nearly 500,000 chemical substances from the CAS REGISTRY cover areas of community interest, including common and frequently regulated chemicals, and those relevant to high school and undergraduate chemistry classes. This chemical information is manually curated and provided in alignment with their role as a division of the American Chemical Society."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.e5c86e"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Chemical Abstracts Service Common Chemistry | CAS Common Chemistry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-08-20T08:47:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CAS (Chemical Abstracts Service) Common Chemistry is an open community resource for accessing chemical information. Nearly 500,000 chemical substances from the CAS REGISTRY cover areas of community interest, including common and frequently regulated chemicals, and those relevant to high school and undergraduate chemistry classes. This chemical information is manually curated and provided in alignment with their role as a division of the American Chemical Society."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.e5c86e"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Chemical Abstracts Service Common Chemistry | CAS Common Chemistry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-08-20T08:47:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CAS (Chemical Abstracts Service) Common Chemistry is an open community resource for accessing chemical information. Nearly 500,000 chemical substances from the CAS REGISTRY cover areas of community interest, including common and frequently regulated chemicals, and those relevant to high school and undergraduate chemistry classes. This chemical information is manually curated and provided in alignment with their role as a division of the American Chemical Society."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.e5c86e"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Chemical Abstracts Service Common Chemistry | CAS Common Chemistry"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-08-20T08:47:18.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CAS (Chemical Abstracts Service) Common Chemistry is an open community resource for accessing chemical information. Nearly 500,000 chemical substances from the CAS REGISTRY cover areas of community interest, including common and frequently regulated chemicals, and those relevant to high school and undergraduate chemistry classes. This chemical information is manually curated and provided in alignment with their role as a division of the American Chemical Society."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.fx0mw7"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Ensembl"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:22:31.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Ensembl creates, integrates and distributes reference datasets and analysis tools that enable genomics. Ensembl is a genome browser that supports research in comparative genomics, evolution, sequence variation and transcriptional regulation. Ensembl annotate genes, computes multiple alignments, predicts regulatory function and collects disease data."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.fx0mw7"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Ensembl"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:22:31.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Ensembl creates, integrates and distributes reference datasets and analysis tools that enable genomics. Ensembl is a genome browser that supports research in comparative genomics, evolution, sequence variation and transcriptional regulation. Ensembl annotate genes, computes multiple alignments, predicts regulatory function and collects disease data."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.fx0mw7"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Ensembl"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:22:31.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Ensembl creates, integrates and distributes reference datasets and analysis tools that enable genomics. Ensembl is a genome browser that supports research in comparative genomics, evolution, sequence variation and transcriptional regulation. Ensembl annotate genes, computes multiple alignments, predicts regulatory function and collects disease data."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.fx0mw7"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Ensembl"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:22:31.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Ensembl creates, integrates and distributes reference datasets and analysis tools that enable genomics. Ensembl is a genome browser that supports research in comparative genomics, evolution, sequence variation and transcriptional regulation. Ensembl annotate genes, computes multiple alignments, predicts regulatory function and collects disease data."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.g593w1"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "EDAM Bioimaging Ontology | EDAM-BIOIMAGING"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T16:27:22.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioimaging operations, data types, formats, identifiers and topics. EDAM-Bioimaging is an extension to the EDAM ontology (edamontology.org) for bioimaging, developed in collaboration with partners from NEUBIAS (neubias.org)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.g593w1"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "EDAM Bioimaging Ontology | EDAM-BIOIMAGING"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T16:27:22.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioimaging operations, data types, formats, identifiers and topics. EDAM-Bioimaging is an extension to the EDAM ontology (edamontology.org) for bioimaging, developed in collaboration with partners from NEUBIAS (neubias.org)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.g593w1"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "EDAM Bioimaging Ontology | EDAM-BIOIMAGING"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T16:27:22.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioimaging operations, data types, formats, identifiers and topics. EDAM-Bioimaging is an extension to the EDAM ontology (edamontology.org) for bioimaging, developed in collaboration with partners from NEUBIAS (neubias.org)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Structured-vocabulary"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.g593w1"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "EDAM Bioimaging Ontology | EDAM-BIOIMAGING"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T16:27:22.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioimaging operations, data types, formats, identifiers and topics. EDAM-Bioimaging is an extension to the EDAM ontology (edamontology.org) for bioimaging, developed in collaboration with partners from NEUBIAS (neubias.org)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Semantic-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.g593w1"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "EDAM Bioimaging Ontology | EDAM-BIOIMAGING"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-30T16:27:22.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioimaging operations, data types, formats, identifiers and topics. EDAM-Bioimaging is an extension to the EDAM ontology (edamontology.org) for bioimaging, developed in collaboration with partners from NEUBIAS (neubias.org)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Specification"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.kkdpxe"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MetaboLights"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-28T12:23:09.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MetaboLights is a database for metabolomics studies, their raw experimental data and associated metadata. The database is cross-species and cross-technique and it covers metabolite structures and their reference spectra as well as their biological roles and locations. MetaboLights is the recommended metabolomics repository for a number of leading journals and ELIXIR, the European infrastructure for life science information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.kkdpxe"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MetaboLights"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-28T12:23:09.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MetaboLights is a database for metabolomics studies, their raw experimental data and associated metadata. The database is cross-species and cross-technique and it covers metabolite structures and their reference spectra as well as their biological roles and locations. MetaboLights is the recommended metabolomics repository for a number of leading journals and ELIXIR, the European infrastructure for life science information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.kkdpxe"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "MetaboLights"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-28T12:23:09.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "MetaboLights is a database for metabolomics studies, their raw experimental data and associated metadata. The database is cross-species and cross-technique and it covers metabolite structures and their reference spectra as well as their biological roles and locations. MetaboLights is the recommended metabolomics repository for a number of leading journals and ELIXIR, the European infrastructure for life science information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mtjvme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "BioStudies"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-12-11T15:33:24.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The BioStudies database holds descriptions of biological studies, links to data from these studies in other databases at EMBL-EBI or outside, as well as data that do not fit in the structured archives at EMBL-EBI. The database can accept a wide range of types of studies described via a simple format. It also enables manuscript authors to submit supplementary information and link to it from the publication."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mtjvme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "BioStudies"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-12-11T15:33:24.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The BioStudies database holds descriptions of biological studies, links to data from these studies in other databases at EMBL-EBI or outside, as well as data that do not fit in the structured archives at EMBL-EBI. The database can accept a wide range of types of studies described via a simple format. It also enables manuscript authors to submit supplementary information and link to it from the publication."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mtjvme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "BioStudies"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-12-11T15:33:24.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The BioStudies database holds descriptions of biological studies, links to data from these studies in other databases at EMBL-EBI or outside, as well as data that do not fit in the structured archives at EMBL-EBI. The database can accept a wide range of types of studies described via a simple format. It also enables manuscript authors to submit supplementary information and link to it from the publication."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mtjvme"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "BioStudies"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2023-12-11T15:33:24.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The BioStudies database holds descriptions of biological studies, links to data from these studies in other databases at EMBL-EBI or outside, as well as data that do not fit in the structured archives at EMBL-EBI. The database can accept a wide range of types of studies described via a simple format. It also enables manuscript authors to submit supplementary information and link to it from the publication."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mya1ff"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive | EGA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:16:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing of personally identifiable genetic, phenotypic, and clinical data generated for the purposes of biomedical research projects or in the context of research-focused healthcare systems. Access to data must be approved by the specified Data Access Committee (DAC)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mya1ff"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive | EGA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:16:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing of personally identifiable genetic, phenotypic, and clinical data generated for the purposes of biomedical research projects or in the context of research-focused healthcare systems. Access to data must be approved by the specified Data Access Committee (DAC)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mya1ff"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive | EGA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:16:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing of personally identifiable genetic, phenotypic, and clinical data generated for the purposes of biomedical research projects or in the context of research-focused healthcare systems. Access to data must be approved by the specified Data Access Committee (DAC)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mya1ff"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive | EGA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:16:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing of personally identifiable genetic, phenotypic, and clinical data generated for the purposes of biomedical research projects or in the context of research-focused healthcare systems. Access to data must be approved by the specified Data Access Committee (DAC)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.mya1ff"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive | EGA"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-09-04T12:16:45.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The European Genome-phenome Archive (EGA) is a service for permanent archiving and sharing of personally identifiable genetic, phenotypic, and clinical data generated for the purposes of biomedical research projects or in the context of research-focused healthcare systems. Access to data must be approved by the specified Data Access Committee (DAC)."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.t2e1ss"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:38:35.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository is a research data repository running on the open source Dataverse software. The repository is fully open to the public, allows upload and browsing of data from all fields of research, and is free for all researchers worldwide.\n\n  Harvard Dataverse Repository receives support from Harvard University, public and private grants, and an emergent consortium model."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.t2e1ss"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:38:35.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository is a research data repository running on the open source Dataverse software. The repository is fully open to the public, allows upload and browsing of data from all fields of research, and is free for all researchers worldwide.\n\n  Harvard Dataverse Repository receives support from Harvard University, public and private grants, and an emergent consortium model."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.t2e1ss"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:38:35.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository is a research data repository running on the open source Dataverse software. The repository is fully open to the public, allows upload and browsing of data from all fields of research, and is free for all researchers worldwide.\n\n  Harvard Dataverse Repository receives support from Harvard University, public and private grants, and an emergent consortium model."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.t2e1ss"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-03T08:38:35.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Harvard Dataverse Repository is a research data repository running on the open source Dataverse software. The repository is fully open to the public, allows upload and browsing of data from all fields of research, and is free for all researchers worldwide.\n\n  Harvard Dataverse Repository receives support from Harvard University, public and private grants, and an emergent consortium model."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Generalist-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.wkggtx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Dryad Digital Repository | Dryad"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-05-28T09:58:13.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Dryad is an open-source, community-led data curation, publishing, and preservation platform for CC0 publicly available research data. Dryad has a long-term data preservation strategy, and is a Core Trust Seal Certified Merritt repository with storage in US and EU at the San Diego Supercomputing Center, DANS, and Zenodo. While data is undergoing peer review, it is embargoed if the related journal requires / allows this. Dryad is an independent non-profit that works directly with: researchers to publish datasets utilising best practices for discovery and reuse; publishers to support the integration of data availability statements and data citations into their workflows; and institutions to enable scalable campus support for research data management best practices at low cost. Costs are covered by institutional, publisher, and funder members, otherwise a one-time fee of $120 for authors to cover cost of curation and preservation. Dryad also receives direct funder support through grants."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.wkggtx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Dryad Digital Repository | Dryad"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-05-28T09:58:13.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Dryad is an open-source, community-led data curation, publishing, and preservation platform for CC0 publicly available research data. Dryad has a long-term data preservation strategy, and is a Core Trust Seal Certified Merritt repository with storage in US and EU at the San Diego Supercomputing Center, DANS, and Zenodo. While data is undergoing peer review, it is embargoed if the related journal requires / allows this. Dryad is an independent non-profit that works directly with: researchers to publish datasets utilising best practices for discovery and reuse; publishers to support the integration of data availability statements and data citations into their workflows; and institutions to enable scalable campus support for research data management best practices at low cost. Costs are covered by institutional, publisher, and funder members, otherwise a one-time fee of $120 for authors to cover cost of curation and preservation. Dryad also receives direct funder support through grants."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.wkggtx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Dryad Digital Repository | Dryad"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-05-28T09:58:13.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Dryad is an open-source, community-led data curation, publishing, and preservation platform for CC0 publicly available research data. Dryad has a long-term data preservation strategy, and is a Core Trust Seal Certified Merritt repository with storage in US and EU at the San Diego Supercomputing Center, DANS, and Zenodo. While data is undergoing peer review, it is embargoed if the related journal requires / allows this. Dryad is an independent non-profit that works directly with: researchers to publish datasets utilising best practices for discovery and reuse; publishers to support the integration of data availability statements and data citations into their workflows; and institutions to enable scalable campus support for research data management best practices at low cost. Costs are covered by institutional, publisher, and funder members, otherwise a one-time fee of $120 for authors to cover cost of curation and preservation. Dryad also receives direct funder support through grants."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://doi.org/10.25504/FAIRsharing.wkggtx"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Dryad Digital Repository | Dryad"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-05-28T09:58:13.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Dryad is an open-source, community-led data curation, publishing, and preservation platform for CC0 publicly available research data. Dryad has a long-term data preservation strategy, and is a Core Trust Seal Certified Merritt repository with storage in US and EU at the San Diego Supercomputing Center, DANS, and Zenodo. While data is undergoing peer review, it is embargoed if the related journal requires / allows this. Dryad is an independent non-profit that works directly with: researchers to publish datasets utilising best practices for discovery and reuse; publishers to support the integration of data availability statements and data citations into their workflows; and institutions to enable scalable campus support for research data management best practices at low cost. Costs are covered by institutional, publisher, and funder members, otherwise a one-time fee of $120 for authors to cover cost of curation and preservation. Dryad also receives direct funder support through grants."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Generalist-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/10.25504/FAIRsharing.ewjdq6"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "BioSD | BioSamples"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-02-29T12:21:20.168Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "BioSamples, previously the BioSample Database (BioSD),  stores and supplies descriptions and metadata about biological samples used in research and development by academia and industry. Samples are either 'reference' samples (e.g., from 1000 Genomes, HipSci, FAANG) or have been used in an assay database such as the European Nucleotide Archive (ENA) or ArrayExpress. It provides links to assays and specific samples, and accepts direct submissions of sample information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/10.25504/FAIRsharing.ewjdq6"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "BioSD | BioSamples"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-02-29T12:21:20.168Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "BioSamples, previously the BioSample Database (BioSD),  stores and supplies descriptions and metadata about biological samples used in research and development by academia and industry. Samples are either 'reference' samples (e.g., from 1000 Genomes, HipSci, FAANG) or have been used in an assay database such as the European Nucleotide Archive (ENA) or ArrayExpress. It provides links to assays and specific samples, and accepts direct submissions of sample information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/10.25504/FAIRsharing.ewjdq6"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "BioSD | BioSamples"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-02-29T12:21:20.168Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "BioSamples, previously the BioSample Database (BioSD),  stores and supplies descriptions and metadata about biological samples used in research and development by academia and industry. Samples are either 'reference' samples (e.g., from 1000 Genomes, HipSci, FAANG) or have been used in an assay database such as the European Nucleotide Archive (ENA) or ArrayExpress. It provides links to assays and specific samples, and accepts direct submissions of sample information."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/fairsharing_records/3517"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Bioschemas Deploys"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T12:13:33.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioschemas aims to improve data interoperability in the life sciences. It does this by encouraging the use of Schema.org markup within web pages, so that their websites and services contain machine-processable metadata that is consistently structured. This structured information makes it easier to discover, collate and analyse distributed data. As well as extending Schema.org with life sciences specific types, the Bioschemas community has developed a group of specifications that provide guidelines to facilitate a more consistent adoption of Schema.org markup within the life sciences. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/fairsharing_records/3517"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Bioschemas Deploys"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T12:13:33.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioschemas aims to improve data interoperability in the life sciences. It does this by encouraging the use of Schema.org markup within web pages, so that their websites and services contain machine-processable metadata that is consistently structured. This structured information makes it easier to discover, collate and analyse distributed data. As well as extending Schema.org with life sciences specific types, the Bioschemas community has developed a group of specifications that provide guidelines to facilitate a more consistent adoption of Schema.org markup within the life sciences. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/fairsharing_records/3517"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Bioschemas Deploys"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T12:13:33.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioschemas aims to improve data interoperability in the life sciences. It does this by encouraging the use of Schema.org markup within web pages, so that their websites and services contain machine-processable metadata that is consistently structured. This structured information makes it easier to discover, collate and analyse distributed data. As well as extending Schema.org with life sciences specific types, the Bioschemas community has developed a group of specifications that provide guidelines to facilitate a more consistent adoption of Schema.org markup within the life sciences. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Provenance-model"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/fairsharing_records/3517"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Bioschemas Deploys"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T12:13:33.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioschemas aims to improve data interoperability in the life sciences. It does this by encouraging the use of Schema.org markup within web pages, so that their websites and services contain machine-processable metadata that is consistently structured. This structured information makes it easier to discover, collate and analyse distributed data. As well as extending Schema.org with life sciences specific types, the Bioschemas community has developed a group of specifications that provide guidelines to facilitate a more consistent adoption of Schema.org markup within the life sciences. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Structured-vocabulary"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://fairsharing.org/fairsharing_records/3517"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "Bioschemas Deploys"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-04-03T12:13:33.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Bioschemas aims to improve data interoperability in the life sciences. It does this by encouraging the use of Schema.org markup within web pages, so that their websites and services contain machine-processable metadata that is consistently structured. This structured information makes it easier to discover, collate and analyse distributed data. As well as extending Schema.org with life sciences specific types, the Bioschemas community has developed a group of specifications that provide guidelines to facilitate a more consistent adoption of Schema.org markup within the life sciences. "
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Metadata-schema"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RALGzv6X0tjUaQ--X_7HYv5L7w1P5AUQh_-hLDnrpBGSM#PubChemCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "PubChem CID | PubChem Compound Identification"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-05-04T21:53:59.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CID -- PubChem Compound Identification, a non-zero integer PubChem accession identifier for a unique chemical structure. For example, the CID of aspirin is 2244."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RALGzv6X0tjUaQ--X_7HYv5L7w1P5AUQh_-hLDnrpBGSM#PubChemCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "PubChem CID | PubChem Compound Identification"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-05-04T21:53:59.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CID -- PubChem Compound Identification, a non-zero integer PubChem accession identifier for a unique chemical structure. For example, the CID of aspirin is 2244."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Identifier-service"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RALGzv6X0tjUaQ--X_7HYv5L7w1P5AUQh_-hLDnrpBGSM#PubChemCID"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "PubChem CID | PubChem Compound Identification"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2026-05-04T21:53:59.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "CID -- PubChem Compound Identification, a non-zero integer PubChem accession identifier for a unique chemical structure. For example, the CID of aspirin is 2244."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Supporting-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RANN2kj6N2WTWR-LCZmfa9PwfM4FdXpC6bDc0-Bbt2CeY#OSDR"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OSDR | NASA Open Science Data Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T14:46:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The NASA Open Science Data Repository (OSDR) enables access to space-related data from experiments and missions that investigate biological and health responses of terrestrial life to spaceflight. OSDR comprises GeneLab, Ames Life Sciences Data Archive (ALSDA), and NASA Biological Institutional Scientific Collection (NBISC) projects. The goal of OSDR is to enable multi-modal and multi-hierarchical fundamental space life science data, including ‘omics, phenotypic, physiological, behavioral, hardware, and environmental data, to be reused toward basic science, applied science, and operational outcomes for space exploration and knowledge discovery."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RANN2kj6N2WTWR-LCZmfa9PwfM4FdXpC6bDc0-Bbt2CeY#OSDR"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OSDR | NASA Open Science Data Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T14:46:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The NASA Open Science Data Repository (OSDR) enables access to space-related data from experiments and missions that investigate biological and health responses of terrestrial life to spaceflight. OSDR comprises GeneLab, Ames Life Sciences Data Archive (ALSDA), and NASA Biological Institutional Scientific Collection (NBISC) projects. The goal of OSDR is to enable multi-modal and multi-hierarchical fundamental space life science data, including ‘omics, phenotypic, physiological, behavioral, hardware, and environmental data, to be reused toward basic science, applied science, and operational outcomes for space exploration and knowledge discovery."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RANN2kj6N2WTWR-LCZmfa9PwfM4FdXpC6bDc0-Bbt2CeY#OSDR"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OSDR | NASA Open Science Data Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T14:46:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The NASA Open Science Data Repository (OSDR) enables access to space-related data from experiments and missions that investigate biological and health responses of terrestrial life to spaceflight. OSDR comprises GeneLab, Ames Life Sciences Data Archive (ALSDA), and NASA Biological Institutional Scientific Collection (NBISC) projects. The goal of OSDR is to enable multi-modal and multi-hierarchical fundamental space life science data, including ‘omics, phenotypic, physiological, behavioral, hardware, and environmental data, to be reused toward basic science, applied science, and operational outcomes for space exploration and knowledge discovery."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Domain-Specific-Registry"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RANN2kj6N2WTWR-LCZmfa9PwfM4FdXpC6bDc0-Bbt2CeY#OSDR"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "OSDR | NASA Open Science Data Repository"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2025-07-02T14:46:11.000Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "The NASA Open Science Data Repository (OSDR) enables access to space-related data from experiments and missions that investigate biological and health responses of terrestrial life to spaceflight. OSDR comprises GeneLab, Ames Life Sciences Data Archive (ALSDA), and NASA Biological Institutional Scientific Collection (NBISC) projects. The goal of OSDR is to enable multi-modal and multi-hierarchical fundamental space life science data, including ‘omics, phenotypic, physiological, behavioral, hardware, and environmental data, to be reused toward basic science, applied science, and operational outcomes for space exploration and knowledge discovery."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Supporting-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAiHZjVo32RyXg_i777br8u1oT-TW6ul20Xv5HAWszcis#ChEBI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ChEBI | Chemical Entities of Biological Interest"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-09T09:39:06.278Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Chemical Entities of Biological Interest (ChEBI) is a freely available dictionary of molecular entities focused on ‘small’ chemical compounds."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Supporting-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAiHZjVo32RyXg_i777br8u1oT-TW6ul20Xv5HAWszcis#ChEBI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ChEBI | Chemical Entities of Biological Interest"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-09T09:39:06.278Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Chemical Entities of Biological Interest (ChEBI) is a freely available dictionary of molecular entities focused on ‘small’ chemical compounds."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAiHZjVo32RyXg_i777br8u1oT-TW6ul20Xv5HAWszcis#ChEBI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ChEBI | Chemical Entities of Biological Interest"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-09T09:39:06.278Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Chemical Entities of Biological Interest (ChEBI) is a freely available dictionary of molecular entities focused on ‘small’ chemical compounds."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Available-FAIR-Enabling-Resource"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAiHZjVo32RyXg_i777br8u1oT-TW6ul20Xv5HAWszcis#ChEBI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ChEBI | Chemical Entities of Biological Interest"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-09T09:39:06.278Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Chemical Entities of Biological Interest (ChEBI) is a freely available dictionary of molecular entities focused on ‘small’ chemical compounds."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Structured-vocabulary"
+        }
+      },
+      {
+        "resource" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/np/RAiHZjVo32RyXg_i777br8u1oT-TW6ul20Xv5HAWszcis#ChEBI"
+        },
+        "label" : {
+          "type" : "literal",
+          "value" : "ChEBI | Chemical Entities of Biological Interest"
+        },
+        "date" : {
+          "datatype" : "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type" : "literal",
+          "value" : "2024-01-09T09:39:06.278Z"
+        },
+        "comment" : {
+          "type" : "literal",
+          "value" : "Chemical Entities of Biological Interest (ChEBI) is a freely available dictionary of molecular entities focused on ‘small’ chemical compounds."
+        },
+        "type" : {
+          "type" : "uri",
+          "value" : "https://w3id.org/fair/fip/terms/Semantic-model"
+        }
+      }
+    ]
+  }
+}

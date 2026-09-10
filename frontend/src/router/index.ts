@@ -22,6 +22,8 @@ import ForgotPassword from '@/views/ForgotPassword.vue'
 import ResetPassword from '@/views/ResetPassword.vue'
 import VerifyEmail from '@/views/VerifyEmail.vue'
 import FipMigrate from '@/views/FipMigrate.vue'
+import NetworkFipList from '@/views/NetworkFipList.vue'
+import NetworkFipDetail from '@/views/NetworkFipDetail.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useFipEditorStore } from '@/stores/fipEditor'
 import { useKmEditorStore } from '@/stores/kmEditor'
@@ -132,6 +134,22 @@ const routes: RouteRecordRaw[] = [
     name: 'FipNew',
     component: FipNew,
     meta: { requiresAuth: false },
+  },
+  {
+    // spec 11 §3.5: unauthenticated, read-only — hidden from the nav when
+    // `GET /api/health`'s `networkEnabled` is false (App.vue).
+    path: '/network',
+    name: 'NetworkFipList',
+    component: NetworkFipList,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    path: '/network/:communityIri',
+    name: 'NetworkFipDetail',
+    component: NetworkFipDetail,
+    meta: { requiresAuth: false },
+    props: true,
   },
   {
     path: '/sessions/new',

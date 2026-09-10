@@ -14,6 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from fipm.db import SCHEMA_VERSION
 from fipm.exporters import CSV_HEADER
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -239,7 +240,10 @@ def test_v5_db_upgrades_to_v6_losslessly_and_idempotently(tmp_path):
     assert "questionnaire_refs" in session_cols
 
     version = conn.execute("SELECT version FROM schema_version WHERE id = 1").fetchone()[0]
-    assert version == 6
+    # spec 11-nanopub-network.md §4: SCHEMA_VERSION moved 6 -> 7; this test
+    # is about the v5->v6 questionnaire_refs retrofit specifically, so it
+    # asserts against the current constant rather than a hardcoded number.
+    assert version == SCHEMA_VERSION
 
     row = conn.execute(
         "SELECT title, questionnaire_id, questionnaire_refs "

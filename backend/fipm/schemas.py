@@ -43,6 +43,9 @@ class HealthOut(CamelModel):
     feedback_enabled: bool = True
     privacy_version: str | None = None
     languages: list[str] = Field(default_factory=list)
+    # spec 11-nanopub-network.md §3.4: lets the frontend hide the Network
+    # FIPs nav entry when FIPM_NETWORK_ENABLED=false.
+    network_enabled: bool = True
 
 
 # ---------------------------------------------------------------------------
@@ -252,6 +255,18 @@ class KnowledgeModelNewVersionRequest(CamelModel):
 # ---------------------------------------------------------------------------
 
 
+# spec 11-nanopub-network.md §3.6, review finding 3: the cap a network-
+# imported FER label is trimmed to before being stored -- there is no
+# explicit per-language length limit on `FerCreateRequest.label` today, so
+# this is the nearest "Fer schema label limit" to reuse; matches the order
+# of magnitude of every other free-text cap in this module (RegisterRequest
+# etc. aside, `FeedbackCreate.comment` is 2000, `KnowledgeModelPublishRequest.
+# notes` is 2000 -- a resource label is a title, not a paragraph, so 500 is
+# generous while still bounding what a hostile/broken upstream nanopub could
+# stuff into a stored row).
+FER_LABEL_MAX_LEN = 500
+
+
 class FerCreateRequest(CamelModel):
     id: str
     label: dict[str, str]
@@ -294,7 +309,16 @@ class DmpEvidence(CamelModel):
 # (that's what ferFreeText/successorFreeText are for). No control characters
 # or whitespace anywhere in the value; \S already excludes whitespace, so
 # only C0/DEL control characters need a separate check.
-_FER_IRI_RE = re.compile(r"^(?:https?://|urn:)\S+$")
+#
+# nanopub-network review finding 2: a ferId stored here is later embedded
+# verbatim into a hand-rolled Turtle/TriG IRIREF by
+# fipm.nanopub_export._format_term (`f"<{term}>"`, no escaping at all), so
+# any of the characters RFC 3987 forbids inside an IRIREF -- `<>"{}|^\`` --
+# must never be storable in the first place, on top of the existing
+# whitespace/control-character ban. This is the primary gate; nanopub_export
+# also gates defensively at emission time in case older/legacy data still
+# carries an unsafe value.
+_FER_IRI_RE = re.compile(r"^(?:https?://|urn:)[^\s<>\"{}|^`\\]+$")
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
 
 
@@ -302,7 +326,7 @@ def _validate_fer_iri(value: str) -> str:
     if _CONTROL_CHAR_RE.search(value) or not _FER_IRI_RE.match(value):
         raise ValueError(
             "must be an http(s):// or urn: IRI with no whitespace/control characters "
-            "(invalid_fer_iri)"
+            'and none of <>"{}|^\\` (invalid_fer_iri)'
         )
     return value
 
@@ -403,6 +427,20 @@ class MigratedFromImport(CamelModel):
     at: str
 
 
+class NetworkOriginImport(CamelModel):
+    """spec 11-nanopub-network.md §4: the fixed shape of `fips.network_origin`
+    -- set only by `POST /fips/from-network` and round-tripped by
+    `POST /fips/import` (§3.3's `networkOrigin` in the export JSON). Like
+    `MigratedFromImport`, validated as a fixed-key object rather than an
+    unvalidated blob: `indexIri` is the only optional field (a network FIP
+    may have no declaration index)."""
+
+    community_iri: str
+    fip_nanopub_iri: str
+    index_iri: str | None = None
+    fetched_at: str
+
+
 class OrphanedAnswerImport(CamelModel):
     """Audit findings 4/11: one `fip.orphanedAnswers` entry on an imported
     export document (spec 07 §4.4/§6) -- an `Answer`-shaped
@@ -465,6 +503,27 @@ class FipCreateRequest(CamelModel):
     license: str | None = None
 
 
+class FipFromNetworkRequest(CamelModel):
+    """Body of POST /api/fips/from-network (spec 11-nanopub-network.md §3.6).
+    `sessionId`/`joinCode` let the prefill land in a workshop session exactly
+    like `FipCreateRequest.session_id`/`.join_code` do -- `joinCode` isn't
+    named in the spec's own body-shape sketch, but "reuses create_fip's
+    authorization ladder verbatim" requires it for the session-participant
+    branch of that ladder, which validates it. `questionnaireRef` (review
+    finding 8) lets a session participant pick one of the session's *own*
+    refs (a multi-ref session offers several areas); when omitted, a
+    session import falls back to the session's first ref, matching
+    `_resolve_session_for_create`'s no-ref-given behaviour."""
+
+    community_iri: str
+    title: str | None = None
+    language: Language | None = None
+    visibility: Visibility | None = None
+    session_id: str | None = None
+    join_code: str | None = None
+    questionnaire_ref: QuestionnaireRef | None = None
+
+
 class FipPatchRequest(CamelModel):
     community: Community | None = None
     answers: list[Answer] | None = None
@@ -515,6 +574,9 @@ class FipOut(CamelModel):
     # read/export time (never copied onto the FIP row) -- non-null only for
     # a FIP in a multi-ref session.
     area_label: dict[str, str] | None = None
+    # spec 11-nanopub-network.md §4: set only for a FIP created via
+    # POST /fips/from-network; null otherwise.
+    network_origin: dict[str, Any] | None = None
 
 
 class PrefillFromDmpRequest(CamelModel):
@@ -736,6 +798,7 @@ def fip_to_out(
         summary=_fip_summary(answers, total_questions, known_question_ids),
         migrated_from=fip.migrated_from,
         area_label=area_label,
+        network_origin=fip.network_origin,
     )
 
 

@@ -42,18 +42,24 @@ def test_import_data_idempotent(tmp_path):
 
     r1 = _run_import(env)
     assert r1.returncode == 0, r1.stdout + r1.stderr
-    assert "knowledge_models: created=1 updated=0 skipped=0" in r1.stdout
+    # spec 11-nanopub-network.md §8.1: tests/fixtures/knowledge-models/ gained
+    # two files -- gofair-fip-mini-1.0.0.json (the real canonical 21-question
+    # model, needed so POST /fips/from-network is testable without depending
+    # on the repo's data/ directory) and nanopub-test-km-1.0.0.json (a fixture
+    # with one forked, non-ontology question id, for the nanopub export's
+    # "skipped" case) -- so both counts move 1 -> 3.
+    assert "knowledge_models: created=3 updated=0 skipped=0" in r1.stdout
     assert "fers: created=2 updated=0 skipped=0" in r1.stdout
 
     conn = sqlite3.connect(db_path)
     km_before = conn.execute("SELECT id, version, updated_at FROM knowledge_models").fetchall()
     fer_before = conn.execute("SELECT id, created_at FROM fers ORDER BY id").fetchall()
-    assert len(km_before) == 1
+    assert len(km_before) == 3
     assert len(fer_before) == 2
 
     r2 = _run_import(env)
     assert r2.returncode == 0, r2.stdout + r2.stderr
-    assert "knowledge_models: created=0 updated=0 skipped=1" in r2.stdout
+    assert "knowledge_models: created=0 updated=0 skipped=3" in r2.stdout
     assert "fers: created=0 updated=0 skipped=2" in r2.stdout
 
     km_after = conn.execute("SELECT id, version, updated_at FROM knowledge_models").fetchall()

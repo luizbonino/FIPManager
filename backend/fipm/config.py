@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import urlparse
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -89,6 +90,43 @@ class Settings(BaseSettings):
     # False by default, since trusting it blindly lets a client spoof its
     # own rate-limit bucket.
     trust_proxy: bool = False
+
+    # spec 11-nanopub-network.md §3.4: the read-only nanopublication-network
+    # proxy. `network_enabled=false` -> 503 network_disabled on all three
+    # /api/network/* endpoints and GET /api/health reports it, so the
+    # frontend can hide the nav entry.
+    network_enabled: bool = True
+    # Scheme + host only, no trailing slash (checked by check_network_safety
+    # below); every upstream URL is built as f"{this}/repo/..." or
+    # f"{this}/api/...". The verified mirror https://query.petapico.org is a
+    # drop-in alternative.
+    nanopub_query_url: str = "https://query.knowledgepixels.com"
+    network_timeout_seconds: float = 10.0
+    network_cache_ttl_seconds: int = 900
+    network_max_response_bytes: int = 8 * 1024 * 1024
+
+    def check_network_safety(self) -> None:
+        """Refuse to start with an `FIPM_NANOPUB_QUERY_URL` that could be
+        turned into an SSRF vector (spec 11 §5): must be `https`, must have a
+        hostname, must carry no userinfo and no path (every upstream URL is
+        built by appending a *literal* path to this fixed base, so a base
+        that already has a path or embedded credentials would silently
+        change what gets requested, or leak credentials, on every call)."""
+        parsed = urlparse(self.nanopub_query_url)
+        if parsed.scheme != "https":
+            raise RuntimeError(
+                f"FIPM_NANOPUB_QUERY_URL must use https://, got {self.nanopub_query_url!r}"
+            )
+        if not parsed.hostname:
+            raise RuntimeError(
+                f"FIPM_NANOPUB_QUERY_URL must have a hostname, got {self.nanopub_query_url!r}"
+            )
+        if parsed.username or parsed.password:
+            raise RuntimeError("FIPM_NANOPUB_QUERY_URL must not carry userinfo")
+        if parsed.path:
+            raise RuntimeError(
+                f"FIPM_NANOPUB_QUERY_URL must have no path, got {self.nanopub_query_url!r}"
+            )
 
     # spec 07-mail-and-migration.md §1: mail backend. `console` (default)
     # logs one INFO record on `fipm.mail`; `smtp` dispatches via

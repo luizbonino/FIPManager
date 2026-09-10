@@ -142,6 +142,20 @@ export interface FipOut {
   migratedFrom?: MigratedFrom | null
   /** spec 08 §3.2: the session ref's area label, non-null only for a FIP in a multi-ref session. */
   areaLabel?: LangMap | null
+  /**
+   * spec 11 §3.6/§4: set once, at creation, for a FIP prefilled via "Use as
+   * starting point" from a network community — null for every other FIP.
+   * Read by `FipEditor.vue`'s one-time "prefilled from the network" banner.
+   */
+  networkOrigin?: NetworkOrigin | null
+}
+
+/** spec 11 §4: `fips.network_origin`. */
+export interface NetworkOrigin {
+  communityIri: string
+  fipNanopubIri: string
+  indexIri: string | null
+  fetchedAt: string
 }
 
 // ---------------------------------------------------------------------------

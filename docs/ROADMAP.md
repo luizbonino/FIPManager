@@ -65,7 +65,9 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] `GET /api/fips/{id}` (with summary and embedUrl) and `/fips/{id}/embed` HTML view with configurable frame-ancestors (done 9 Sep).
 - [ ] Prefill from FioDMP JSON once available (endpoint stub returns 501 with the contract pointer).
 - [x] Spanish (es) translation (draft done 9 Sep: 288 UI keys, 21 questions, FER types; pending native review).
-- [ ] FER lookup via Nanopub Query; publish FIPs as nanopublications.
+- [x] Nanopublication network, read side: browse and search FIP communities, view any network FIP mapped onto our 21 questions (FIP-Wizard-only questions listed as unmapped), "Use as starting point" prefills a new FIP and imports unknown resources as catalogue FERs with source `network`; server-side proxy to Nanopub Query with cache, timeout, size cap and `FIPM_NETWORK_ENABLED` (done 10 Sep, docs/specs/11-nanopub-network.md).
+- [x] Nanopublication network, prepare for export: every FIP downloads as a zip of unsigned nanopublications (community, one per declaration, index, FIP) in the FIP Wizard's shape, with index.json (signing order, IRI rewrites) and a manifest of what publishing still needs: ORCID, RSA key, key declaration, nanopub-py or nanopub-java (done 10 Sep). Not published, no keys held.
+- [ ] Publish to the network: decide agent IRI, per-community ORCID, community identity across FIPs (spec 11 §7 Q1, Q2, Q7), then sign and publish with nanopub-py; store the published IRI and emit `npx:supersedes` on republish. FER lookup in the picker after CONFOA (spec 11 Q8).
 - [x] FIP migration between knowledge-model versions (DSW-style) — done 9 Sep, docs/specs/07-mail-and-migration.md: diff view, split/orphan decisions, migratedFrom in exports; verified in browser.
 - [ ] ORCID and Login Único Fiocruz sign-in (needs client registrations). Email verification and password reset done 9 Sep behind FIPM_MAIL_BACKEND (console by default; set smtp + FIPM_SMTP_* at deployment) and FIPM_REQUIRE_EMAIL_VERIFICATION (default off).
 - [ ] Team workspaces (share sessions, FIPs, models with collaborators); public FIP gallery.

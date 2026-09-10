@@ -32,6 +32,7 @@ from fipm.routers import (
     health,
     knowledge_models,
     me,
+    network,
     privacy,
     sessions,
 )
@@ -107,6 +108,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     settings.check_production_safety()
     settings.check_mail_safety()
+    # Review finding 14: an FIPM_NANOPUB_QUERY_URL that would fail the SSRF
+    # check is harmless when the network integration is disabled outright
+    # (FIPM_NETWORK_ENABLED=false) -- no code path ever builds a URL from
+    # it -- so it must not block startup in that case.
+    if settings.network_enabled:
+        settings.check_network_safety()
     warn_if_console_in_production(settings)
     try:
         summary = run_import()
@@ -161,6 +168,7 @@ app.include_router(knowledge_models.router, prefix="/api")
 app.include_router(fers.router, prefix="/api")
 app.include_router(fer_types.router, prefix="/api")
 app.include_router(fips.router, prefix="/api")
+app.include_router(network.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(privacy.router, prefix="/api")

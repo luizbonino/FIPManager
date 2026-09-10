@@ -1,0 +1,76 @@
+{
+  "id": "nanopub-test-km",
+  "version": "1.0.0",
+  "status": "published",
+  "license": "CC0-1.0",
+  "source": "Test fixture questionnaire for spec 11 nanopub export tests",
+  "title": {
+    "en": "Nanopub export test knowledge model"
+  },
+  "description": {
+    "en": "A fixture questionnaire with both GO FAIR mini ids (mappable to fip:FIP-Question-*) and one forked, non-ontology id (confoa-omics-1), used by backend/tests/test_ac_11_03_nanopub_export.py."
+  },
+  "changelog": [
+    {"version": "1.0.0", "date": "2026-09-10", "notes": "initial fixture"}
+  ],
+  "sections": [
+    {
+      "id": "findable",
+      "title": {"en": "Findable"},
+      "questions": [
+        {
+          "id": "F1-metadata",
+          "principle": "F1",
+          "scope": "metadata",
+          "text": {"en": "What identifiers do you use?"},
+          "help": null,
+          "ferType": "identifier-service",
+          "required": true,
+          "allowMultiple": true
+        },
+        {
+          "id": "F2",
+          "principle": "F2",
+          "scope": null,
+          "text": {"en": "Which metadata schema do you use?"},
+          "help": null,
+          "ferType": "metadata-schema",
+          "required": true,
+          "allowMultiple": false
+        }
+      ]
+    },
+    {
+      "id": "accessible",
+      "title": {"en": "Accessible"},
+      "questions": [
+        {
+          "id": "A2",
+          "principle": "A2",
+          "scope": null,
+          "text": {"en": "What is your metadata preservation policy?"},
+          "help": null,
+          "ferType": "metadata-preservation-policy",
+          "required": false,
+          "allowMultiple": true
+        }
+      ]
+    },
+    {
+      "id": "confoa-area",
+      "title": {"en": "CONFOA omics area (forked, not in the FIP ontology)"},
+      "questions": [
+        {
+          "id": "confoa-omics-1",
+          "principle": null,
+          "scope": null,
+          "text": {"en": "A CONFOA-specific omics question with no fip:FIP-Question-* counterpart"},
+          "help": null,
+          "ferType": null,
+          "required": false,
+          "allowMultiple": true
+        }
+      ]
+    }
+  ]
+}

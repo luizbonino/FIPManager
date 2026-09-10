@@ -30,14 +30,17 @@ def list_fers(
     # 08-workshop-picklists.md §1.3/§5.3: source="model" (an inlineFers
     # promotion) joins that globally-visible set too, anonymous callers
     # included -- a workshop participant has no account and must still see
-    # the options their model suggests.
+    # the options their model suggests. spec 11-nanopub-network.md §3.6: a
+    # FER row created by "use as starting point" (source="network") is the
+    # same kind of globally-visible catalogue content.
     query = db.query(Fer)
     if user is not None:
         query = query.filter(
-            (Fer.source.in_(("seed", "user-promoted", "model"))) | (Fer.owner_id == user.id)
+            (Fer.source.in_(("seed", "user-promoted", "model", "network")))
+            | (Fer.owner_id == user.id)
         )
     else:
-        query = query.filter(Fer.source.in_(("seed", "user-promoted", "model")))
+        query = query.filter(Fer.source.in_(("seed", "user-promoted", "model", "network")))
     if type:
         query = query.filter(Fer.type == type)
     if source:

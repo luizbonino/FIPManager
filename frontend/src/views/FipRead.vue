@@ -136,9 +136,19 @@
           :csv-url="fipExportCsvUrl(doc.fip.id)"
           :ttl-url="fipExportTtlUrl(doc.fip.id)"
           :jsonld-url="fipExportJsonldUrl(doc.fip.id)"
+          :nanopub-zip-url="nanopubZipUrl(doc.fip.id)"
         />
         <button type="button" class="btn btn-secondary" @click="printPage">{{ $t('fipRead.print') }}</button>
+        <button type="button" class="btn btn-secondary" @click="nanopubDialogOpen = true">
+          {{ $t('nanopubExport.buttonLabel') }}
+        </button>
       </div>
+
+      <NanopubExportDialog
+        :open="nanopubDialogOpen"
+        :fip-id="doc.fip.id"
+        @close="nanopubDialogOpen = false"
+      />
 
       <AttributionFooter :questionnaire-license="questionnaireLicense" :fip-license="doc.fip.license" />
     </template>
@@ -150,12 +160,14 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ApiResponseError } from '@/api/client'
 import { fipExportCsvUrl, fipExportJsonldUrl, fipExportJsonUrl, fipExportTtlUrl, getFipExport } from '@/api/fips'
+import { nanopubZipUrl } from '@/api/network'
 import { getKnowledgeModel } from '@/api/knowledgeModels'
 import { getToken } from '@/lib/editTokens'
 import StatusBadge from '@/components/StatusBadge.vue'
 import ExportButtons from '@/components/ExportButtons.vue'
 import AttributionFooter from '@/components/AttributionFooter.vue'
 import MigrationBanner from '@/components/MigrationBanner.vue'
+import NanopubExportDialog from '@/components/NanopubExportDialog.vue'
 import '@/assets/print.css'
 import type { FipExportDmpEvidence, FipExportDoc, RelatedDmp } from '@/types/api'
 
@@ -168,6 +180,7 @@ const loading = ref(true)
 const notFound = ref(false)
 const doc = ref<FipExportDoc | null>(null)
 const questionnaireLicense = ref<string | null>(null)
+const nanopubDialogOpen = ref(false)
 
 // spec 07 §5: an edit token in this browser's storage, if any — passed to
 // MigrationBanner so a token-holding non-owner still sees it.
