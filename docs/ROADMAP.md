@@ -6,6 +6,7 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] Questionnaire: GO FAIR mini-questionnaire as-is, editable knowledge model (decided 8 Sep).
 - [x] Licence: MIT for the tool, CC0 default for exported FIPs (decided 8 Sep).
 - [ ] Shortlist hosting (FAIR domain vs Fiocruz) — see PLAN.md §9.
+- [ ] Scope-freeze decision (12 Sep): include the pre-CONFOA slice of spec 12 — entailments per question, type-conformance prompt, evidence links with a declared/evidenced badge — or defer it all to v2 (docs/specs/12-understanding-assurance-dashboard.md §D).
 - [x] Repo scaffold: FastAPI + Vue 3 + Docker Compose, CI workflow for tests and build (done 8 Sep; CI runs once a GitHub remote exists).
 - [x] Data model implemented (User, Questionnaire, FIP, FER, Session) with ownership and visibility fields, JSON import/export (done 8 Sep, docs/specs/01-foundations.md).
 - [x] Accounts: register, sign in/out, argon2id hashing, cookie sessions, CSRF, roles user/admin, first admin from env (done 8 Sep; review fixes in progress).
@@ -70,6 +71,8 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] Publish to the network: decide agent IRI, per-community ORCID, community identity across FIPs (spec 11 §7 Q1, Q2, Q7), then sign and publish with nanopub-py; store the published IRI and emit `npx:supersedes` on republish. FER lookup in the picker after CONFOA (spec 11 Q8).
 - [x] FIP migration between knowledge-model versions (DSW-style) — done 9 Sep, docs/specs/07-mail-and-migration.md: diff view, split/orphan decisions, migratedFrom in exports; verified in browser.
 - [ ] ORCID and Login Único Fiocruz sign-in (needs client registrations). Email verification and password reset done 9 Sep behind FIPM_MAIL_BACKEND (console by default; set smtp + FIPM_SMTP_* at deployment) and FIPM_REQUIRE_EMAIL_VERIFICATION (default off).
+- [ ] Understanding and assurance layer: coherence rules, positive/negative examples, section reflection, criteria per FER type, assessments read from the nanopublication network, automated probes (spec 12 §A–B, proposal 10 Sep).
+- [ ] FIP dashboard over a session, this instance's public FIPs and network FIPs: principle coverage, resource adoption, similarity and convergence, gaps, evolution (spec 12 §C).
 - [ ] Team workspaces (share sessions, FIPs, models with collaborators); public FIP gallery.
 - [ ] Paper or report on the workshop results and the FIP–DMP linkage.
 
