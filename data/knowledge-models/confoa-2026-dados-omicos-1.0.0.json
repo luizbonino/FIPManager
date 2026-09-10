@@ -27,7 +27,7 @@
   "changelog": [
     {
       "version": "1.0.0",
-      "date": "2026-09-09",
+      "date": "2026-09-10",
       "notes": "Imported from PERFIS DE IMPLEMENTAÇÃO FAIR 2.docx (9bf9d1d728cb of the .docx)"
     }
   ],
@@ -73,6 +73,13 @@
             "https://ega-archive.org/",
             "https://www.ncbi.nlm.nih.gov/gap/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Identificador institucional persistente"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -105,6 +112,7 @@
             "https://ega-archive.org/",
             "https://www.ncbi.nlm.nih.gov/gap/"
           ],
+          "suggestedPhrases": [],
           "allowFreeText": true
         },
         {
@@ -135,6 +143,18 @@
             "https://bioschemas.org/",
             "https://schema.datacite.org/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Esquema do repositório ômico utilizado"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Perfil próprio documentado"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -161,6 +181,18 @@
             "https://schema.datacite.org/meta/kernel-4.6/",
             "https://isa-tools.org/format/specification.html",
             "https://www.researchobject.org/ro-crate/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Referências cruzadas entre repositórios"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "A vinculação ocorre apenas por links manuais"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -195,6 +227,7 @@
             "https://commons.datacite.org/",
             "https://datasetsearch.research.google.com/"
           ],
+          "suggestedPhrases": [],
           "allowFreeText": true
         },
         {
@@ -228,6 +261,7 @@
             "https://www.ncbi.nlm.nih.gov/gap/",
             "https://www.omicsdi.org/"
           ],
+          "suggestedPhrases": [],
           "allowFreeText": true
         }
       ]
@@ -266,6 +300,18 @@
             "https://www.openarchives.org/pmh/",
             "https://www.w3.org/TR/sparql11-protocol/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "API REST"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Acesso apenas mediante solicitação formal"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -290,6 +336,28 @@
           "suggestedFerIds": [
             "https://www.rfc-editor.org/rfc/rfc9110",
             "https://github.com/ncbi/sra-tools"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "API REST"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Armazenamento em nuvem ou objetos"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Ambiente seguro / acesso remoto sem download"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Acesso apenas mediante solicitação formal"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -316,6 +384,28 @@
             "https://openid.net/specs/openid-connect-core-1_0.html",
             "https://www.rfc-editor.org/rfc/rfc6749"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Acesso público sem autenticação"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Conta do repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Conta institucional ou autenticação federada"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Chave de API"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -338,6 +428,38 @@
           "required": true,
           "allowMultiple": true,
           "suggestedFerIds": [],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Acesso público sem autenticação"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Conta do repositório / institucional"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Autenticação federada e/ou multifator"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Aprovação por Comitê de Acesso a Dados (DAC)"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Termo de Uso / DUA / consentimento compatível"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Ambiente seguro de análise"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -360,6 +482,43 @@
           "required": true,
           "allowMultiple": true,
           "suggestedFerIds": [],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Política do repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Plano de Gestão de Dados ou política institucional"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Backups, checksums e controle de versões"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Migração de formatos"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Plano de recuperação de desastres"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Responsáveis definidos pela preservação"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Existem apenas rotinas de backup"
+              }
+            }
+          ],
           "allowFreeText": true
         }
       ]
@@ -400,6 +559,13 @@
             "https://www.w3.org/TR/rdf11-concepts/",
             "https://www.rfc-editor.org/rfc/rfc4180"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Apenas texto não estruturado"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -429,6 +595,18 @@
             "https://anndata.readthedocs.io/",
             "https://www.psidev.info/mzml",
             "https://www.rfc-editor.org/rfc/rfc4180"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Formato proprietário acompanhado de formato aberto"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas formato proprietário"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -462,6 +640,13 @@
             "https://mondo.monarchinitiative.org/",
             "https://github.com/EBISPOT/DUO"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Apenas palavras-chave livres"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -493,6 +678,13 @@
             "https://www.ebi.ac.uk/chebi/",
             "https://hpo.jax.org/",
             "https://mondo.monarchinitiative.org/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Apenas palavras-chave livres"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -527,8 +719,12 @@
             "https://en.wikipedia.org/wiki/FASTQ_format",
             "https://www.ncbi.nlm.nih.gov/genbank/fastaformat/",
             "https://samtools.github.io/hts-specs/CRAMv3.pdf",
-            "https://samtools.github.io/hts-specs/SAMv1.pdf"
+            "https://samtools.github.io/hts-specs/SAMv1.pdf",
+            "https://samtools.github.io/hts-specs/VCFv4.3.pdf",
+            "https://anndata.readthedocs.io/",
+            "https://www.psidev.info/mzml"
           ],
+          "suggestedPhrases": [],
           "allowFreeText": true
         },
         {
@@ -551,6 +747,7 @@
           "required": true,
           "allowMultiple": true,
           "suggestedFerIds": [],
+          "suggestedPhrases": [],
           "allowFreeText": true
         }
       ]
@@ -587,6 +784,23 @@
             "https://creativecommons.org/publicdomain/zero/1.0/",
             "https://creativecommons.org/licenses/by/4.0/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Licença ou termos adotados pelo repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Licença institucional"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Metadados públicos sem licença explicitamente declarada"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -611,6 +825,38 @@
           "suggestedFerIds": [
             "https://creativecommons.org/publicdomain/zero/1.0/",
             "https://creativecommons.org/licenses/by/4.0/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Termos do repositório temático"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Acesso controlado por DAC / DUA / Termo de Uso"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Uso compatível com consentimento e aprovação ética"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Uso apenas em ambiente seguro"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "A licença ou condição de uso ainda não foi definida"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Reutilização não permitida"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -640,6 +886,18 @@
             "https://ror.org/",
             "https://git-scm.com/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Histórico de versões e datas de atualização"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas autoria e data são registradas"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -666,6 +924,33 @@
             "https://www.w3.org/TR/prov-o/",
             "https://isa-tools.org/format/specification.html",
             "https://git-scm.com/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Workflow, scripts ou notebooks"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Versões de software, genoma de referência e parâmetros"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Protocolo experimental e métricas de qualidade"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas os principais métodos são documentados"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "O registro detalhado ainda está em desenvolvimento"
+              }
+            }
           ],
           "allowFreeText": true
         }

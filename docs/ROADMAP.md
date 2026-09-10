@@ -45,12 +45,14 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] Suggested options per question, inline FERs, compact declarations with default status (docs/specs/08-workshop-picklists.md).
 - [x] "Não se aplica" (not applicable) answers through editor, exports, RDF, matrix and migration.
 - [x] Sessions offering several area questionnaires; area choice at join; matrix grouped by area; session CSV `area` column.
-- [x] `scripts/import-workshop-docx.py`: Word document → area forks with suggested options; five CONFOA 2026 drafts imported (omics, biodiversity, agriculture, public health, nursing); 131 options resolved to the catalogue, 76 generic phrases skipped, 0 drafts. FER catalogue at 138 entries.
+- [x] `scripts/import-workshop-docx.py`: Word document → area forks with suggested options; five CONFOA 2026 drafts imported (omics, biodiversity, agriculture, public health, nursing). Re-run 10 Sep with `--overwrite-draft`: every option from the document is now shown — 131 resolved to catalogue FERs, 74 descriptive phrases as free-text options (293 placements), sentinels "Outros" / "Não se aplica" / "Ainda não definido" handled by the UI. FER catalogue at 138 entries.
 - [ ] Remaining six area profiles once the co-facilitator delivers them (re-run the importer with `--bump`).
 - [ ] Facilitators review and publish the five area drafts in the editor before creating the workshop session.
 - [x] Knowledge-model catalogue reachable from the top bar; admins see a "drafts to review" notice in the workspace (done 9 Sep).
 - [x] Standalone FIPs: anyone can fill a FIP outside a session and without an account, from the home page or a model's page; edit token kept in the browser, edit link to move between devices, "FIPs on this device" list on the home page; `FIPM_ANONYMOUS_FIPS` switch, 30 creations/hour/IP; admin stats and `python -m fipm purge-standalone-fips` for the 12-month retention promise (done 9 Sep, docs/specs/09-standalone-fips.md).
 - [ ] Operator runs the purge command monthly after deployment (no scheduler shipped); decide whether to keep standalone FIPs on for the workshop deployment.
+- [x] Co-facilitator feedback 10 Sep ("todas as opções… e, em Outros, abrir uma caixa"): suggested phrases per question (free-text options, editable in the model editor, shown in read and print views) and a built-in "Outro (especificar)" box on every question with options (done 10 Sep, docs/specs/10-suggested-phrases-and-other.md). Suggested-FER cap raised to 16.
+- [ ] Show the co-facilitator the omics draft on a phone and collect a second round of wording feedback before publishing the five areas.
 
 ## 6 Oct · Workshop
 - Collect FIPs, export session, gather feedback (short form in the tool or paper).

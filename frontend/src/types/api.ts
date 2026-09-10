@@ -257,6 +257,18 @@ export interface KnowledgeModelQuestion {
   suggestedFerIds?: string[]
   /** spec 08 §1.1: default `true`; `false` hides free text and rejects `ferFreeText` server-side. */
   allowFreeText?: boolean
+  /**
+   * spec 08 §1.5 extension: free-text quick-pick options, a sibling of
+   * `suggestedFerIds` for generic phrases that are not catalogue FERs
+   * ("Outros" wording from the co-facilitator's document). 0..12 entries,
+   * each 1..200 chars per language, no duplicate normalised text.
+   */
+  suggestedPhrases?: SuggestedPhrase[]
+}
+
+/** spec 08 §1.5 extension: one free-text quick-pick option on a question. */
+export interface SuggestedPhrase {
+  text: LangMap
 }
 
 /** spec 08 §1.1: an area-specific FER a fork carries before it exists in the global catalogue. */

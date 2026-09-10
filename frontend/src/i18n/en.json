@@ -86,7 +86,9 @@
     "ontologyMappings": "Ontology Mappings",
     "source": "Source",
     "target": "Target",
-    "type": "Type"
+    "type": "Type",
+    "otherOption": "Other (specify)",
+    "otherPlaceholder": "Describe the resource or practice"
   },
   "session": {
     "joinTitle": "Join Session",
@@ -141,7 +143,8 @@
     "close": "Close",
     "retry": "Retry",
     "notFound": "Not found",
-    "view": "View"
+    "view": "View",
+    "add": "Add"
   },
   "home": {
     "heading": "Build your Findable, Accessible, Interoperable, Reusable data plan",
@@ -429,6 +432,10 @@
     "defaultDeclarationStatus": "Default status for quick-pick resources",
     "compactDeclarations": "Compact declarations (hide status behind \"More\")",
     "unusedInlineFers": "Unused resources (not suggested by any question)",
+    "suggestedPhrases": "Suggested phrases (free-text options)",
+    "addPhrase": "Add phrase",
+    "newPhrase": "New phrase",
+    "phrasesMax": "At most 12 phrases per question",
     "startFip": "Start a FIP with this model"
   },
   "admin": {

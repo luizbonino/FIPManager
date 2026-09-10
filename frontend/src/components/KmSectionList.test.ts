@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import en from '@/i18n/en.json'
 import { useKmEditorStore } from '@/stores/kmEditor'
+import { validateContent } from '@/lib/kmContent'
 import KmSectionList from './KmSectionList.vue'
 import type { KnowledgeModelContent } from '@/types/api'
 
@@ -21,7 +22,22 @@ function makeContent(): KnowledgeModelContent {
     description: { en: '' },
     changelog: [],
     sections: [
-      { id: 'A', title: { en: 'Section A' }, questions: [] },
+      {
+        id: 'A',
+        title: { en: 'Section A' },
+        questions: [
+          {
+            id: 'Q1',
+            principle: null,
+            scope: null,
+            text: { en: 'Question 1' },
+            help: null,
+            ferType: null,
+            required: false,
+            allowMultiple: true,
+          },
+        ],
+      },
       { id: 'B', title: { en: 'Section B' }, questions: [] },
     ],
   }
@@ -71,5 +87,33 @@ describe('KmSectionList.vue', () => {
 
     expect(confirmSpy).toHaveBeenCalledWith(en.km.deleteSectionConfirm)
     expect(store.content?.sections.map((s) => s.id)).toEqual(['B'])
+  })
+})
+
+// Bug fix: "Add phrase" used to call `addSuggestedPhrase(c, question.id, {})`
+// -- an empty LangMap the backend rejects with 400 `missing_key`, so the
+// autosave that followed always landed in `saveError`. A freshly added
+// phrase must be immediately valid: seeded with the editor's current
+// language (`km.newPhrase`), never an empty object.
+describe('KmSectionList.vue — "Add phrase" (spec 10 §1/§2)', () => {
+  it('seeds a new phrase with { [locale]: t("km.newPhrase") }, never an empty LangMap', async () => {
+    const { wrapper, store } = mountList(makeContent())
+
+    const addPhraseButton = wrapper.findAll('button').find((b) => b.text() === en.km.addPhrase)
+    expect(addPhraseButton).toBeTruthy()
+    await addPhraseButton!.trigger('click')
+
+    const question = store.content?.sections[0].questions[0]
+    expect(question?.suggestedPhrases).toEqual([{ text: { en: en.km.newPhrase } }])
+  })
+
+  it('a freshly added phrase validates cleanly (no missing_key / empty_string on suggestedPhrases)', async () => {
+    const { wrapper, store } = mountList(makeContent())
+
+    const addPhraseButton = wrapper.findAll('button').find((b) => b.text() === en.km.addPhrase)
+    await addPhraseButton!.trigger('click')
+
+    const errors = validateContent(store.content!, [])
+    expect(errors.filter((e) => e.path.includes('suggestedPhrases'))).toEqual([])
   })
 })

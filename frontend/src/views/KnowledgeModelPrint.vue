@@ -58,6 +58,15 @@
               {{ resolveLang(question.help, locale) }}
             </p>
 
+            <div v-if="hasSuggestions(question)" class="suggested-checklist">
+              <div v-for="ferId in question.suggestedFerIds ?? []" :key="ferId" class="suggested-line">
+                &#9744; {{ resolveFerLabel(ferId) }}
+              </div>
+              <div v-for="(phrase, i) in question.suggestedPhrases ?? []" :key="`phrase-${i}`" class="suggested-line">
+                &#9744; {{ resolveLang(phrase.text, locale) }}
+              </div>
+            </div>
+
             <div v-for="n in declarationsPerQuestion" :key="n" class="decl-block">
               <div class="fill-line"><span class="fill-label">{{ $t('print.resource') }} {{ n }}</span></div>
               <div class="tick-row">
@@ -90,10 +99,12 @@ import { useRoute } from 'vue-router'
 import { ApiResponseError } from '@/api/client'
 import { getKnowledgeModel } from '@/api/knowledgeModels'
 import { getFerTypes } from '@/api/ferTypes'
+import { listFers } from '@/api/fers'
 import { resolveLang } from '@/lib/lang'
+import { resolveSuggestedFer } from '@/lib/kmContent'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import '@/assets/print-questionnaire.css'
-import type { DeclarationStatus, FerType, KnowledgeModelOut, KnowledgeModelSection } from '@/types/api'
+import type { DeclarationStatus, FerOut, FerType, KnowledgeModelOut, KnowledgeModelQuestion, KnowledgeModelSection } from '@/types/api'
 
 // spec 05 §3: the paper-fallback questionnaire, public and print-only in
 // intent (a `window.print()` button drives it) but rendered fully on
@@ -105,6 +116,7 @@ const loading = ref(true)
 const notFound = ref(false)
 const model = ref<KnowledgeModelOut | null>(null)
 const ferTypes = ref<Record<string, FerType>>({})
+const fers = ref<Record<string, FerOut>>({})
 
 const STATUSES: DeclarationStatus[] = ['current', 'planned', 'planned-development', 'planned-replacement', 'none']
 const STATUS_KEYS: Record<DeclarationStatus, string> = {
@@ -131,6 +143,17 @@ function ferTypeLabel(key: string): string {
   return entry ? (resolveLang(entry.label, locale.value) ?? key) : key
 }
 
+/** spec 08 §1.5: resolves a suggested id against `content.inlineFers` then the catalogue (spec §1.3). */
+function resolveFerLabel(ferId: string): string {
+  if (!model.value) return ferId
+  const resolved = resolveSuggestedFer(ferId, model.value.content, fers.value)
+  return (resolved && resolveLang(resolved.label, locale.value)) || ferId
+}
+
+function hasSuggestions(question: KnowledgeModelQuestion): boolean {
+  return (question.suggestedFerIds?.length ?? 0) > 0 || (question.suggestedPhrases?.length ?? 0) > 0
+}
+
 function onPrint() {
   window.print()
 }
@@ -141,12 +164,14 @@ async function load() {
   const id = String(route.params.id)
   const version = String(route.params.version)
   try {
-    const [loaded, ferTypesResult] = await Promise.all([
+    const [loaded, ferTypesResult, fersResult] = await Promise.all([
       getKnowledgeModel(id, version),
       getFerTypes().catch(() => ({ items: [], total: 0 })),
+      listFers({ limit: 500 }).catch(() => ({ items: [], total: 0 })),
     ])
     model.value = loaded
     ferTypes.value = Object.fromEntries(ferTypesResult.items.map((f) => [f.key, f]))
+    fers.value = Object.fromEntries(fersResult.items.map((f) => [f.id, f]))
   } catch (err) {
     if (err instanceof ApiResponseError && err.status === 404) {
       notFound.value = true
@@ -332,6 +357,17 @@ watch(() => [route.params.id, route.params.version], load)
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+.suggested-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.3rem 0;
+}
+
+.suggested-line {
+  font-size: var(--font-size-sm);
 }
 
 .decl-block {

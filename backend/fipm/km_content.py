@@ -63,9 +63,21 @@ MAX_QUESTIONS = 300
 MAX_TEXT_LEN = 4000
 MAX_ERRORS = 50
 
-# spec 08-workshop-picklists.md §1.1/§1.2.
-MAX_SUGGESTED_FER_IDS = 12
+# spec 08-workshop-picklists.md §1.1/§1.2. Bumped 12 -> 16 by spec
+# 10-suggested-phrases-and-other.md: the 2026-09-10 CONFOA re-import (with
+# generic options now diverted to `suggestedPhrases` instead of being
+# dropped) still resolves 15 real catalogue FERs on
+# confoa-2026-dados-omicos/I3-metadata, one over the old cap. The frontend
+# `MAX_SUGGESTED_FER_IDS` mirror in `lib/kmContent.ts` must be bumped to the
+# same 16 (not done here -- frontend/ is out of scope for this change).
+MAX_SUGGESTED_FER_IDS = 16
 MAX_INLINE_FERS = 300
+# spec 10-suggested-phrases-and-other.md: `question.suggestedPhrases`, the
+# free-text options the co-facilitator asked to keep visible instead of
+# silently dropping every generic/placeholder option (previously the
+# importer's "skip" sentinel in data/workshop/option-map.json).
+MAX_SUGGESTED_PHRASES = 12
+MAX_PHRASE_TEXT_LEN = 200
 
 _CROCKFORD_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -261,6 +273,70 @@ def _validate_suggested_fer_ids(
             _err(errors, item_path, "unknown_suggested_fer", f"unresolved suggested FER {fer_id}")
 
 
+def _validate_suggested_phrases(
+    question: dict[str, Any],
+    q_path: str,
+    errors: list[ContentError],
+) -> None:
+    """spec 10-suggested-phrases-and-other.md: `question.suggestedPhrases`,
+    a list of `{"text": LangMap}` entries -- generic/placeholder options
+    (previously the importer's "skip" sentinel) that the FIP editor shows as
+    tickable free-text options instead of dropping. `text` reuses the same
+    LangMap shape as `question.text` (rule 3 / `_check_langmap`), except `en`
+    is not required (the source document is pt-BR only, same relaxation as
+    an `inlineFers` label -- spec 08 §7 A7) and each string is capped at
+    `MAX_PHRASE_TEXT_LEN` (200, not `MAX_TEXT_LEN`) and must be trimmed (no
+    leading/trailing whitespace). Phrases never touch `suggestedFerIds` or
+    the FER catalogue -- they are pure authoring metadata; the frontend
+    turns a ticked phrase into an ordinary declaration with `ferFreeText`
+    set to the phrase text in the FIP's language, so no export/RDF changes
+    are needed."""
+    phrases = question.get("suggestedPhrases")
+    if phrases is None:
+        return
+    path = f"{q_path}.suggestedPhrases"
+    if not isinstance(phrases, list):
+        _err(errors, path, "invalid_value", "suggestedPhrases must be a list")
+        return
+    if len(phrases) > MAX_SUGGESTED_PHRASES:
+        _err(errors, path, "too_many", f"more than {MAX_SUGGESTED_PHRASES} suggestedPhrases")
+
+    seen_norms: set[str] = set()
+    for idx, entry in enumerate(phrases):
+        item_path = f"{path}[{idx}]"
+        if not isinstance(entry, dict):
+            _err(errors, item_path, "missing_key", "suggestedPhrases entry must be an object")
+            continue
+
+        text_path = f"{item_path}.text"
+        text_value = entry.get("text")
+        _check_langmap(
+            text_value,
+            text_path,
+            errors,
+            require_en=False,
+            max_len=MAX_PHRASE_TEXT_LEN,
+        )
+        if not isinstance(text_value, dict):
+            continue
+
+        entry_norms: set[str] = set()
+        for lang, s in text_value.items():
+            if not isinstance(s, str) or lang not in LANGUAGES:
+                continue
+            if s != s.strip():
+                _err(
+                    errors,
+                    f"{text_path}.{lang}",
+                    "not_trimmed",
+                    f"{text_path}.{lang} must not have leading/trailing whitespace",
+                )
+            entry_norms.add(" ".join(s.split()).casefold())
+        if entry_norms & seen_norms:
+            _err(errors, item_path, "duplicate_phrase", "duplicate suggestedPhrases text")
+        seen_norms |= entry_norms
+
+
 def validate_content(
     doc: dict[str, Any],
     *,
@@ -430,6 +506,7 @@ def validate_content(
                     )
 
             _validate_suggested_fer_ids(question, q_path, errors, known_ids=known_suggested_ids)
+            _validate_suggested_phrases(question, q_path, errors)
 
             # Review finding 11: a hidden question is never shown to a
             # respondent, so it needs no answer path of its own to publish.

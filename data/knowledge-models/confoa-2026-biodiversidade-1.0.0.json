@@ -27,7 +27,7 @@
   "changelog": [
     {
       "version": "1.0.0",
-      "date": "2026-09-09",
+      "date": "2026-09-10",
       "notes": "Imported from PERFIS DE IMPLEMENTAÇÃO FAIR 2.docx (9bf9d1d728cb of the .docx)"
     }
   ],
@@ -68,6 +68,18 @@
             "https://arks.org/",
             "https://www.handle.net/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Identificador persistente do repositório ou infraestrutura temática"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Identificador institucional persistente"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -93,6 +105,18 @@
             "https://www.doi.org/",
             "https://arks.org/",
             "https://www.handle.net/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Identificador/accession do repositório temático"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Identificador institucional persistente"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -122,6 +146,13 @@
             "https://www.biocase.org/",
             "https://schema.datacite.org/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Perfil próprio documentado"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -146,6 +177,18 @@
           "suggestedFerIds": [
             "https://schema.datacite.org/meta/kernel-4.6/",
             "https://www.researchobject.org/ro-crate/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Referências cruzadas do repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Manifesto, tabela de relacionamento ou dicionário de dados"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -173,6 +216,18 @@
             "https://datasetsearch.research.google.com/",
             "https://www.fairdatapoint.org/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Catálogo ou índice da área"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Catálogo institucional"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -199,6 +254,18 @@
             "https://zenodo.org/",
             "https://commons.datacite.org/",
             "https://datasetsearch.research.google.com/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Repositório temático da área"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Repositório institucional"
+              }
+            }
           ],
           "allowFreeText": true
         }
@@ -237,6 +304,28 @@
             "https://www.openarchives.org/pmh/",
             "https://www.w3.org/TR/sparql11-protocol/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "API REST"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Interface web sem API"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Acesso apenas mediante solicitação formal"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Os dados ainda não estão acessíveis externamente"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -261,6 +350,33 @@
           "suggestedFerIds": [
             "https://www.rfc-editor.org/rfc/rfc9110",
             "https://www.rfc-editor.org/rfc/rfc959"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "API REST"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Armazenamento em nuvem ou objetos"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Ambiente seguro ou acesso remoto controlado"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Acesso apenas mediante solicitação formal"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Os dados ainda não estão acessíveis externamente"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -287,6 +403,28 @@
             "https://openid.net/specs/openid-connect-core-1_0.html",
             "https://www.rfc-editor.org/rfc/rfc6749"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Acesso público sem autenticação"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Conta do repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Conta institucional ou autenticação federada"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Chave de API"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -309,6 +447,38 @@
           "required": true,
           "allowMultiple": true,
           "suggestedFerIds": [],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Acesso público sem autenticação"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Conta do repositório ou institucional"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Autenticação federada e/ou multifator"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Aprovação por comitê ou instância responsável"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Termo de uso / Data Use Agreement"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Ambiente seguro de análise"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -331,6 +501,43 @@
           "required": true,
           "allowMultiple": true,
           "suggestedFerIds": [],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Política do repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Plano de Gestão de Dados ou política institucional"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Backups, checksums e controle de versões"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Migração de formatos"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Plano de recuperação de desastres"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Responsáveis definidos pela preservação"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Existem apenas rotinas de backup"
+              }
+            }
+          ],
           "allowFreeText": true
         }
       ]
@@ -370,6 +577,18 @@
             "https://www.w3.org/TR/rdf11-concepts/",
             "https://www.rfc-editor.org/rfc/rfc4180"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Representação específica da área"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas texto não estruturado"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -398,6 +617,18 @@
             "https://www.w3.org/TR/json-ld11/",
             "https://www.w3.org/TR/rdf11-concepts/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Formato proprietário acompanhado de exportação aberta"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas formato proprietário"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -424,6 +655,18 @@
             "https://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c",
             "https://obofoundry.org/ontology/envo",
             "https://www.catalogueoflife.org/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Vocabulário próprio documentado"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas palavras-chave livres"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -453,6 +696,23 @@
             "https://obofoundry.org/ontology/envo",
             "https://www.marinespecies.org/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Vocabulário próprio documentado"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas palavras-chave livres"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Ainda não são utilizados vocabulários controlados"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -479,6 +739,13 @@
             "https://eml.ecoinformatics.org/",
             "https://abcd.tdwg.org/",
             "https://schema.datacite.org/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Perfil próprio documentado"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -508,6 +775,7 @@
             "https://geojson.org/",
             "https://www.w3.org/TR/rdf11-concepts/"
           ],
+          "suggestedPhrases": [],
           "allowFreeText": true
         }
       ]
@@ -544,6 +812,23 @@
             "https://creativecommons.org/publicdomain/zero/1.0/",
             "https://creativecommons.org/licenses/by/4.0/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Licença ou termos adotados pelo repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Licença institucional"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Metadados públicos sem licença explicitamente declarada"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -569,6 +854,33 @@
             "https://creativecommons.org/publicdomain/zero/1.0/",
             "https://creativecommons.org/licenses/by/4.0/",
             "https://creativecommons.org/licenses/by-nc/4.0/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Licença ou termos do repositório"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Acesso controlado mediante termo/acordo"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Uso limitado à finalidade aprovada"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "A licença ou condição de uso ainda não foi definida"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Reutilização não permitida"
+              }
+            }
           ],
           "allowFreeText": true
         },
@@ -598,6 +910,18 @@
             "https://ror.org/",
             "https://git-scm.com/"
           ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Histórico de versões e datas de atualização"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas autoria e data são registradas"
+              }
+            }
+          ],
           "allowFreeText": true
         },
         {
@@ -623,6 +947,38 @@
             "https://www.researchobject.org/ro-crate/",
             "https://www.w3.org/TR/prov-o/",
             "https://git-scm.com/"
+          ],
+          "suggestedPhrases": [
+            {
+              "text": {
+                "pt-BR": "Workflow, scripts ou notebooks"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Versões de software, parâmetros e configurações"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Dicionário de dados, métodos e protocolos"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Checksums e relação entre entradas e saídas"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "Apenas os principais métodos são documentados"
+              }
+            },
+            {
+              "text": {
+                "pt-BR": "O registro detalhado ainda está em desenvolvimento"
+              }
+            }
           ],
           "allowFreeText": true
         }

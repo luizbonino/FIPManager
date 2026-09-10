@@ -1,6 +1,9 @@
 <template>
   <div class="fer-picker">
-    <fieldset v-if="showSuggested && suggested.length > 0" class="suggested-fieldset">
+    <fieldset
+      v-if="showSuggested && (suggested.length > 0 || suggestedPhrases.length > 0)"
+      class="suggested-fieldset"
+    >
       <legend>{{ $t('editor.suggestedOptions') }}</legend>
       <label v-for="opt in suggested" :key="opt.id" class="suggested-option">
         <input
@@ -14,6 +17,41 @@
           <span v-if="opt.homepage" class="suggested-option-homepage">{{ opt.homepage }}</span>
         </span>
       </label>
+
+      <label v-for="(phrase, phraseIndex) in suggestedPhrases" :key="`phrase-${phraseIndex}`" class="suggested-option">
+        <input
+          type="checkbox"
+          :checked="checkedPhraseIndexes.includes(phraseIndex)"
+          :disabled="disabled"
+          @change="onTogglePhrase(phraseIndex, ($event.target as HTMLInputElement).checked)"
+        />
+        <span class="suggested-option-text">
+          <span class="suggested-option-label">{{ phraseLabel(phrase) }}</span>
+        </span>
+      </label>
+
+      <label class="suggested-option other-option">
+        <input v-model="otherChecked" type="checkbox" :disabled="disabled" />
+        <span class="suggested-option-text">
+          <span class="suggested-option-label">{{ $t('fip.otherOption') }}</span>
+        </span>
+      </label>
+      <div v-if="otherChecked" class="other-input-row">
+        <label class="sr-only" :for="otherInputId">{{ $t('fip.otherPlaceholder') }}</label>
+        <input
+          :id="otherInputId"
+          v-model="otherText"
+          type="text"
+          class="fer-input"
+          :placeholder="$t('fip.otherPlaceholder')"
+          :disabled="disabled"
+          @keydown.enter.prevent="onAddOther"
+          @blur="onOtherBlur"
+        />
+        <button type="button" class="other-add-btn" :disabled="disabled || !otherText.trim()" @click="onAddOther">
+          {{ $t('common.add') }}
+        </button>
+      </div>
     </fieldset>
 
     <div v-if="mode === 'catalogue'" class="catalogue-mode">
@@ -62,11 +100,23 @@
   </div>
 </template>
 
+<script lang="ts">
+// Module-scope (not inside `<script setup>`, which re-runs per component
+// instance): a plain `<script>` block's top level executes once, when the
+// module is first imported, so this counter is shared across every
+// `FerPicker` instance ever mounted — unlike a `let uid = 0` declared
+// inside `<script setup>`, which would reset to 0 on every mount and hand
+// out duplicate `#fer-picker-1` / `#fer-picker-other-1` ids whenever two
+// pickers are on screen at once (a question with both a FER type and
+// suggested phrases, spec 10 §2, renders more than one).
+let uid = 0
+</script>
+
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { resolveLang } from '@/lib/lang'
-import type { FerOut } from '@/types/api'
+import type { FerOut, SuggestedPhrase } from '@/types/api'
 
 /**
  * Combobox over the catalogue FERs of one `ferType` (spec 02 §2.2): a
@@ -85,6 +135,14 @@ import type { FerOut } from '@/types/api'
  * true: `QuestionCard.vue` derives it from `store.fip.answers[...].declarations`).
  * `allowFreeText: false` hides the "Use my own wording" toggle and pins `mode`
  * to `'catalogue'`.
+ *
+ * spec 08 §1.5 extension: `suggestedPhrases` renders one checkbox per
+ * generic free-text option after the FER checkboxes (`checkedPhraseIndexes`
+ * tells this component which are already declared, same idea as
+ * `checkedFerIds`), emitting `togglePhrase`; a built-in "Other" checkbox
+ * always sits last, revealing a one-line free-text input + add button that
+ * emits `addOther` and then re-hides itself — a plain UI affordance with no
+ * state of its own to reconcile against the store.
  */
 const props = withDefaults(
   defineProps<{
@@ -93,22 +151,34 @@ const props = withDefaults(
     ferFreeText: string | null
     disabled?: boolean
     suggested?: FerOut[]
+    suggestedPhrases?: SuggestedPhrase[]
+    checkedPhraseIndexes?: number[]
     allowFreeText?: boolean
     showSuggested?: boolean
     checkedFerIds?: string[]
   }>(),
-  { suggested: () => [], allowFreeText: true, showSuggested: false, checkedFerIds: () => [] }
+  {
+    suggested: () => [],
+    suggestedPhrases: () => [],
+    checkedPhraseIndexes: () => [],
+    allowFreeText: true,
+    showSuggested: false,
+    checkedFerIds: () => [],
+  }
 )
 
 const emit = defineEmits<{
   change: [{ ferId: string | null; ferFreeText: string | null }]
   toggleSuggested: [ferId: string, checked: boolean]
+  togglePhrase: [index: number, checked: boolean]
+  addOther: [text: string]
 }>()
 
 const { locale } = useI18n()
 
-let uid = 0
-const inputId = `fer-picker-${++uid}`
+const instanceId = ++uid
+const inputId = `fer-picker-${instanceId}`
+const otherInputId = `fer-picker-other-${instanceId}`
 
 const mode = ref<'catalogue' | 'freeText'>(
   props.allowFreeText === false ? 'catalogue' : props.ferFreeText ? 'freeText' : 'catalogue'
@@ -123,23 +193,70 @@ function labelOf(opt: FerOut): string {
   return resolveLang(opt.label, locale.value) ?? opt.id
 }
 
+function phraseLabel(phrase: SuggestedPhrase): string {
+  return resolveLang(phrase.text, locale.value) ?? ''
+}
+
+function onTogglePhrase(index: number, checked: boolean) {
+  emit('togglePhrase', index, checked)
+}
+
+// The "Outros" checkbox (spec 08 §1.5 extension): purely local UI state —
+// ticking just reveals the input, adding emits `addOther` and re-hides
+// itself, so there is nothing here to reconcile against the store (unlike
+// the FER/phrase checkboxes, whose checked state mirrors an existing
+// declaration).
+const otherChecked = ref(false)
+const otherText = ref('')
+
+function onAddOther() {
+  const trimmed = otherText.value.trim()
+  if (!trimmed) {
+    otherChecked.value = false
+    return
+  }
+  emit('addOther', trimmed)
+  otherText.value = ''
+  otherChecked.value = false
+}
+
+function onOtherBlur() {
+  if (!otherText.value.trim()) {
+    otherChecked.value = false
+  }
+}
+
 const selectedOption = computed(() => props.options.find((o) => o.id === props.ferId) ?? null)
 
 const query = ref(selectedOption.value ? labelOf(selectedOption.value) : '')
 const freeTextValue = ref(props.ferFreeText ?? '')
 
 // Keep the local input in sync when the declaration changes from outside
-// (e.g. store hydration after a save round trip).
+// (e.g. store hydration after a save round trip) -- and, critically, keep
+// `mode` in sync too. Bug: `mode` was only ever set once, from the props
+// this instance happened to mount with; the "Other" built-in box (QuestionCard's
+// virtual placeholder row, spec 08 §1.5) mounts a FerPicker with
+// `ferId: null, ferFreeText: null` (`mode` picks 'catalogue'), and when
+// `addOther` turns that placeholder into a real free-text declaration, Vue
+// reuses this *same* instance (`DeclarationEditor`'s `:key="row.index"`
+// never changes -- the placeholder and the real row are both index 0) --
+// so without this, `mode` stayed 'catalogue' forever and the new
+// `ferFreeText` never rendered until a full reload remounted the tree.
+// Ticking a suggested FER/phrase doesn't hit this: those checkboxes read
+// `checkedFerIds`/`checkedPhraseIndexes` directly, entirely independent of
+// this component's `mode`.
 watch(
   () => props.ferId,
   () => {
     query.value = selectedOption.value ? labelOf(selectedOption.value) : query.value
+    if (props.ferId) mode.value = 'catalogue'
   }
 )
 watch(
   () => props.ferFreeText,
   (v) => {
     freeTextValue.value = v ?? ''
+    if (v) mode.value = 'freeText'
   }
 )
 
@@ -221,6 +338,8 @@ function onFreeTextInput() {
 
 .suggested-option-text {
   display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
   flex-direction: column;
   line-height: 1.3;
 }
@@ -228,12 +347,42 @@ function onFreeTextInput() {
 .suggested-option-label {
   font-size: var(--font-size-sm);
   color: var(--color-text);
+  overflow-wrap: anywhere;
 }
 
 .suggested-option-homepage {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   overflow-wrap: anywhere;
+}
+
+.other-input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: -0.15rem 0 0.2rem;
+}
+
+.other-input-row .fer-input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.other-add-btn {
+  flex: none;
+  min-height: 44px;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius-sm);
+  background: none;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+
+.other-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .catalogue-mode,

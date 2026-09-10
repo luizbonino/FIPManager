@@ -6,11 +6,15 @@
       :fer-free-text="declaration.ferFreeText ?? null"
       :disabled="readOnly"
       :suggested="suggested"
+      :suggested-phrases="suggestedPhrases"
+      :checked-phrase-indexes="checkedPhraseIndexes"
       :allow-free-text="allowFreeText"
       :show-suggested="showSuggested"
       :checked-fer-ids="checkedFerIds"
       @change="onFerChange"
       @toggle-suggested="(ferId, checked) => $emit('toggleSuggested', ferId, checked)"
+      @toggle-phrase="(index, checked) => $emit('togglePhrase', index, checked)"
+      @add-other="(text) => $emit('addOther', text)"
     />
 
     <template v-if="!compact">
@@ -143,7 +147,7 @@ import { resolveLang } from '@/lib/lang'
 import FerPicker from './FerPicker.vue'
 import StatusSelect from './StatusSelect.vue'
 import StatusBadge from './StatusBadge.vue'
-import type { Declaration, DeclarationStatus, FerOut, RelatedDmp } from '@/types/api'
+import type { Declaration, DeclarationStatus, FerOut, RelatedDmp, SuggestedPhrase } from '@/types/api'
 
 /**
  * `FerPicker` + `StatusSelect` + optional note + remove button (spec 02 §2.2).
@@ -157,6 +161,9 @@ import type { Declaration, DeclarationStatus, FerOut, RelatedDmp } from '@/types
  * against the store. `compact` (the model's `compactDeclarations`) hides
  * the status control, note and successor picker behind a "more" `<details>`,
  * closed by default, with the status still visible as a `StatusBadge`.
+ *
+ * spec 08 §1.5 extension: `suggestedPhrases`/`checkedPhraseIndexes` forward
+ * the same way, and `togglePhrase`/`addOther` bubble up unchanged.
  */
 const props = withDefaults(
   defineProps<{
@@ -165,15 +172,30 @@ const props = withDefaults(
     declaration: Declaration
     options: FerOut[]
     suggested?: FerOut[]
+    suggestedPhrases?: SuggestedPhrase[]
+    checkedPhraseIndexes?: number[]
     allowFreeText?: boolean
     showSuggested?: boolean
     checkedFerIds?: string[]
     compact?: boolean
   }>(),
-  { suggested: () => [], allowFreeText: true, showSuggested: false, checkedFerIds: () => [], compact: false }
+  {
+    suggested: () => [],
+    suggestedPhrases: () => [],
+    checkedPhraseIndexes: () => [],
+    allowFreeText: true,
+    showSuggested: false,
+    checkedFerIds: () => [],
+    compact: false,
+  }
 )
 
-defineEmits<{ remove: []; toggleSuggested: [ferId: string, checked: boolean] }>()
+defineEmits<{
+  remove: []
+  toggleSuggested: [ferId: string, checked: boolean]
+  togglePhrase: [index: number, checked: boolean]
+  addOther: [text: string]
+}>()
 
 const store = useFipEditorStore()
 const readOnly = computed(() => store.readOnly)

@@ -86,7 +86,9 @@
     "ontologyMappings": "Mapeamentos de Ontologia",
     "source": "Origem",
     "target": "Destino",
-    "type": "Tipo"
+    "type": "Tipo",
+    "otherOption": "Outro (especificar)",
+    "otherPlaceholder": "Descreva o recurso ou a prática"
   },
   "session": {
     "joinTitle": "Participar na Sessão",
@@ -141,7 +143,8 @@
     "close": "Fechar",
     "retry": "Tentar novamente",
     "notFound": "Não encontrado",
-    "view": "Ver"
+    "view": "Ver",
+    "add": "Adicionar"
   },
   "home": {
     "heading": "Construa o seu plano de dados Localizável, Acessível, Interoperável e Reutilizável",
@@ -427,6 +430,10 @@
     "defaultDeclarationStatus": "Estado predefinido para recursos de seleção rápida",
     "compactDeclarations": "Declarações compactas (ocultar o estado atrás de \"Mais\")",
     "unusedInlineFers": "Recursos não utilizados (não sugeridos por nenhuma pergunta)",
+    "suggestedPhrases": "Frases sugeridas (opções de texto livre)",
+    "addPhrase": "Adicionar frase",
+    "newPhrase": "Nova frase",
+    "phrasesMax": "No máximo 12 frases por pergunta",
     "unownedDrafts": "Rascunhos a rever",
     "unownedDraftHint": "Rascunhos importados que ainda não têm proprietário. Editar um deles torna-o seu.",
     "startFip": "Começar um FIP com este modelo"

@@ -64,6 +64,10 @@
           @move-suggested="(ferId, direction) => applyOp((c) => moveSuggestedFer(c, question.id, ferId, direction))"
           @add-inline-fer="(fer) => applyOp((c) => addInlineFer(c, question.id, fer))"
           @update-allow-free-text="(value) => applyOp((c) => setAllowFreeText(c, question.id, value))"
+          @add-phrase="applyOp((c) => addSuggestedPhrase(c, question.id, { [locale]: t('km.newPhrase') }))"
+          @remove-phrase="(index) => applyOp((c) => removeSuggestedPhrase(c, question.id, index))"
+          @move-phrase="(index, direction) => applyOp((c) => moveSuggestedPhrase(c, question.id, index, direction))"
+          @update-phrase-text="(index, lang, value) => applyOp((c) => updateSuggestedPhraseText(c, question.id, index, lang, value))"
         />
 
         <button type="button" class="btn btn-secondary no-print" :disabled="readOnly" @click="onAddQuestion(section.id)">
@@ -84,18 +88,22 @@ import {
   addQuestion,
   addSection,
   addSuggestedFer,
+  addSuggestedPhrase,
   deleteQuestion,
   deleteSection,
   hideQuestion,
   moveQuestion,
   moveSection,
   moveSuggestedFer,
+  moveSuggestedPhrase,
   removeSuggestedFer,
+  removeSuggestedPhrase,
   setAllowFreeText,
   setFerType,
   setText,
   splitQuestion,
   unhideQuestion,
+  updateSuggestedPhraseText,
   type KmContentOpError,
 } from '@/lib/kmContent'
 import KmQuestionCard from './KmQuestionCard.vue'

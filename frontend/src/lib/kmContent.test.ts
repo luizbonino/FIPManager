@@ -5,6 +5,7 @@ import {
   addQuestion,
   addSection,
   addSuggestedFer,
+  addSuggestedPhrase,
   completeness,
   deleteQuestion,
   deleteSection,
@@ -12,8 +13,12 @@ import {
   moveQuestion,
   moveSection,
   moveSuggestedFer,
+  moveSuggestedPhrase,
+  normalisePhraseText,
+  phraseMatchesFreeText,
   removeInlineFer,
   removeSuggestedFer,
+  removeSuggestedPhrase,
   resolveSuggestedFer,
   setAllowFreeText,
   setFerType,
@@ -22,6 +27,7 @@ import {
   suggestedFersFor,
   unhideQuestion,
   unusedInlineFers,
+  updateSuggestedPhraseText,
   validateContent,
   visibleQuestionCount,
 } from './kmContent'
@@ -343,16 +349,16 @@ describe('kmContent — validateContent', () => {
 // ---------------------------------------------------------------------------
 
 describe('kmContent — suggested FERs and inline FERs (ops)', () => {
-  it('addSuggestedFer appends once, is a no-op on a duplicate id, and caps at 12', () => {
+  it('addSuggestedFer appends once, is a no-op on a duplicate id, and caps at 16 (spec 10 §1.3)', () => {
     let content = fixture()
     content = addSuggestedFer(content, 'F1-metadata', 'https://www.doi.org/')
     content = addSuggestedFer(content, 'F1-metadata', 'https://www.doi.org/')
     expect(content.sections[0].questions[0].suggestedFerIds).toEqual(['https://www.doi.org/'])
 
-    for (let i = 0; i < 12; i += 1) {
+    for (let i = 0; i < 16; i += 1) {
       content = addSuggestedFer(content, 'F1-metadata', `https://example.org/fer/${i}`)
     }
-    expect(content.sections[0].questions[0].suggestedFerIds).toHaveLength(12)
+    expect(content.sections[0].questions[0].suggestedFerIds).toHaveLength(16)
   })
 
   it('removeSuggestedFer removes exactly the given id', () => {
@@ -440,6 +446,104 @@ describe('kmContent — suggested FERs and inline FERs (ops)', () => {
   })
 })
 
+// Suggested phrases (spec 08 §1.5 extension) — free-text quick-pick options,
+// a sibling of suggestedFerIds for generic answer options that are not
+// catalogue FERs.
+describe('kmContent — suggested phrases (ops)', () => {
+  it('addSuggestedPhrase appends and caps at 12', () => {
+    let content = addSuggestedPhrase(fixture(), 'F1-metadata', { en: 'A community wiki' })
+    expect(content.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { en: 'A community wiki' } }])
+
+    for (let i = 0; i < 12; i += 1) {
+      content = addSuggestedPhrase(content, 'F1-metadata', { en: `Phrase ${i}` })
+    }
+    expect(content.sections[0].questions[0].suggestedPhrases).toHaveLength(12)
+  })
+
+  it('removeSuggestedPhrase removes exactly the given index', () => {
+    let content = addSuggestedPhrase(fixture(), 'F1-metadata', { en: 'First' })
+    content = addSuggestedPhrase(content, 'F1-metadata', { en: 'Second' })
+    content = removeSuggestedPhrase(content, 'F1-metadata', 0)
+    expect(content.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { en: 'Second' } }])
+  })
+
+  it('moveSuggestedPhrase reorders within the list and no-ops at the ends', () => {
+    let content = addSuggestedPhrase(fixture(), 'F1-metadata', { en: 'A' })
+    content = addSuggestedPhrase(content, 'F1-metadata', { en: 'B' })
+    const moved = moveSuggestedPhrase(content, 'F1-metadata', 1, 'up')
+    expect(moved.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { en: 'B' } }, { text: { en: 'A' } }])
+    const noop = moveSuggestedPhrase(content, 'F1-metadata', 0, 'up')
+    expect(noop.sections[0].questions[0].suggestedPhrases).toEqual(content.sections[0].questions[0].suggestedPhrases)
+  })
+
+  it('updateSuggestedPhraseText sets a language value, no "en" required', () => {
+    let content = addSuggestedPhrase(fixture(), 'F1-metadata', {})
+    content = updateSuggestedPhraseText(content, 'F1-metadata', 0, 'pt-BR', 'Uma wiki comunitária')
+    expect(content.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { 'pt-BR': 'Uma wiki comunitária' } }])
+  })
+
+  it('updateSuggestedPhraseText refuses to remove the last remaining language, keeping it as an empty string instead', () => {
+    // Bug fix: clearing a phrase's only language used to delete the key
+    // entirely, leaving `{ text: {} }` -- the *shape* of an object that has
+    // never had any content, indistinguishable from a phrase nobody has
+    // touched yet. Keeping the key with '' instead means the validator's
+    // `empty_string` code lands on that exact language (in addition to the
+    // pre-existing whole-field `missing_key`, unchanged from before this
+    // fix), which is what lets KmLangTabs render its inline "missing"
+    // panel/dot on the language the participant actually cleared, the same
+    // way it already does for an emptied question `text`.
+    let content = addSuggestedPhrase(fixture(), 'F1-metadata', { 'pt-BR': 'Uma wiki comunitária' })
+    content = updateSuggestedPhraseText(content, 'F1-metadata', 0, 'pt-BR', '')
+    expect(content.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { 'pt-BR': '' } }])
+
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases[0].text.pt-BR',
+      code: 'empty_string',
+      message: expect.any(String),
+    })
+  })
+
+  it('updateSuggestedPhraseText still deletes a non-last language normally', () => {
+    let content = addSuggestedPhrase(fixture(), 'F1-metadata', { en: 'A', 'pt-BR': 'B' })
+    content = updateSuggestedPhraseText(content, 'F1-metadata', 0, 'pt-BR', '')
+    expect(content.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { en: 'A' } }])
+  })
+
+  it('cloneContent deep-clones suggestedPhrases so mutating a clone never touches the original', () => {
+    const content = addSuggestedPhrase(fixture(), 'F1-metadata', { en: 'A' })
+    const mutated = updateSuggestedPhraseText(content, 'F1-metadata', 0, 'en', 'Changed')
+    expect(content.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { en: 'A' } }])
+    expect(mutated.sections[0].questions[0].suggestedPhrases).toEqual([{ text: { en: 'Changed' } }])
+  })
+
+  it('phraseMatchesFreeText matches any language variant, trimmed and case-insensitive', () => {
+    const phrase = { text: { en: 'Community Wiki', 'pt-BR': 'Wiki da comunidade' } }
+    expect(phraseMatchesFreeText(phrase, '  community wiki  ')).toBe(true)
+    expect(phraseMatchesFreeText(phrase, 'WIKI DA COMUNIDADE')).toBe(true)
+    expect(phraseMatchesFreeText(phrase, 'something else')).toBe(false)
+    expect(phraseMatchesFreeText(phrase, null)).toBe(false)
+  })
+
+  // Bug fix: normalisePhraseText only trimmed and lowercased, so
+  // "Community  Wiki" (double space) and "Community Wiki" (single space)
+  // normalised differently -- the backend's `" ".join(s.split()).casefold()`
+  // (backend/fipm/km_content._validate_suggested_phrases) collapses *all*
+  // internal whitespace, so the two implementations disagreed on both
+  // duplicate detection and free-text matching for exactly this shape.
+  it('normalisePhraseText collapses internal whitespace like the backend does', () => {
+    expect(normalisePhraseText('Community   Wiki')).toBe('community wiki')
+    expect(normalisePhraseText('  Community\tWiki\n')).toBe('community wiki')
+    expect(normalisePhraseText('Community Wiki')).toBe(normalisePhraseText('Community   Wiki'))
+  })
+
+  it('phraseMatchesFreeText matches free text that differs only in internal whitespace', () => {
+    const phrase = { text: { en: 'Community  Wiki' } }
+    expect(phraseMatchesFreeText(phrase, 'Community Wiki')).toBe(true)
+    expect(phraseMatchesFreeText({ text: { en: 'Community Wiki' } }, 'Community   Wiki')).toBe(true)
+  })
+})
+
 // Criterion 15 — `kmContent.ts` mirrors AC 1 and AC 2 exactly (same codes,
 // same paths) for the same shapes: suggestedFerIds, inlineFers, publish-time
 // no_answer_path, and the pt-BR-only inline label exemption.
@@ -452,9 +556,12 @@ describe('kmContent — validateContent (spec 08 §1.2 rules 9-13)', () => {
     return content
   }
 
-  it('rejects 13 suggested ids with too_many', () => {
-    const ids = Array.from({ length: 13 }, (_, i) => `https://example.org/fer/${i}`)
-    const errors = validateContent(withSuggested(ids), FER_TYPES)
+  it('accepts 16 suggested ids and rejects 17 with too_many (spec 10 §1.3: cap 12 -> 16)', () => {
+    const sixteen = Array.from({ length: 16 }, (_, i) => `https://example.org/fer/${i}`)
+    expect(validateContent(withSuggested(sixteen), FER_TYPES).filter((e) => e.code === 'too_many')).toEqual([])
+
+    const seventeen = Array.from({ length: 17 }, (_, i) => `https://example.org/fer/${i}`)
+    const errors = validateContent(withSuggested(seventeen), FER_TYPES)
     expect(errors).toContainEqual({
       path: 'sections[0].questions[0].suggestedFerIds',
       code: 'too_many',
@@ -606,5 +713,108 @@ describe('kmContent — validateContent (spec 08 §1.2 rules 9-13)', () => {
 
   it('accepts the real fixture unchanged with the five new fields all absent', () => {
     expect(validateContent(fixture(), FER_TYPES, { publishing: true })).toEqual([])
+  })
+})
+
+// Suggested phrases validation (spec 08 §1.5 extension): list shape, cap 12,
+// empty text, duplicate normalised text across languages, 200-char cap,
+// untrimmed text (spec 10 §1.2's `_validate_suggested_phrases`).
+describe('kmContent — validateContent (suggestedPhrases, spec 10 §1.2)', () => {
+  it('accepts a valid list of phrases', () => {
+    let content = fixture()
+    content.sections[0].questions[0].suggestedPhrases = [{ text: { en: 'A community wiki' } }, { text: { 'pt-BR': 'Um repositório institucional' } }]
+    expect(validateContent(content, FER_TYPE_KEYS)).toEqual([])
+  })
+
+  it('flags more than 12 phrases with too_many', () => {
+    const content = fixture()
+    content.sections[0].questions[0].suggestedPhrases = Array.from({ length: 13 }, (_, i) => ({ text: { en: `Phrase ${i}` } }))
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases',
+      code: 'too_many',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags a non-object entry with missing_key', () => {
+    const content = fixture()
+    // @ts-expect-error deliberately invalid for the test
+    content.sections[0].questions[0].suggestedPhrases = ['not-an-object']
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases[0]',
+      code: 'missing_key',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags a phrase entry with a missing/non-object text with missing_key, not missing_en (en is never required here)', () => {
+    // Bug fix: validateLangMap's "value isn't an object" branch always
+    // pushed `missing_en`, even when `requireEn` is false (suggestedPhrases,
+    // inlineFers labels) -- a phrase never requires "en" (spec 10 §1.1), so
+    // a `missing_en` code/message was actively misleading. The backend's
+    // `_check_langmap` never emits `missing_en` for a non-object value
+    // regardless of `require_en`; this pins the same neutral `missing_key`.
+    const content = fixture()
+    // @ts-expect-error deliberately invalid for the test: no "text" key at all
+    content.sections[0].questions[0].suggestedPhrases = [{}]
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases[0].text',
+      code: 'missing_key',
+      message: expect.any(String),
+    })
+    expect(errors.some((e) => e.code === 'missing_en')).toBe(false)
+  })
+
+  it('flags a phrase with no non-empty language value with missing_key (shared _check_langmap code)', () => {
+    const content = fixture()
+    content.sections[0].questions[0].suggestedPhrases = [{ text: {} }]
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases[0].text',
+      code: 'missing_key',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags a phrase text over 200 characters with too_long', () => {
+    const content = fixture()
+    content.sections[0].questions[0].suggestedPhrases = [{ text: { en: 'x'.repeat(201) } }]
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases[0].text.en',
+      code: 'too_long',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags leading/trailing whitespace with not_trimmed', () => {
+    const content = fixture()
+    content.sections[0].questions[0].suggestedPhrases = [{ text: { en: '  Community Wiki  ' } }]
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases[0].text.en',
+      code: 'not_trimmed',
+      message: expect.any(String),
+    })
+  })
+
+  it('flags a duplicate normalised phrase, even across two different languages, with duplicate_phrase', () => {
+    const content = fixture()
+    content.sections[0].questions[0].suggestedPhrases = [{ text: { en: 'Community Wiki' } }, { text: { 'pt-BR': 'community wiki' } }]
+    const errors = validateContent(content, FER_TYPE_KEYS)
+    expect(errors).toContainEqual({
+      path: 'sections[0].questions[0].suggestedPhrases[1]',
+      code: 'duplicate_phrase',
+      message: expect.any(String),
+    })
+  })
+
+  it('accepts a pt-BR-only phrase (no en required)', () => {
+    const content = fixture()
+    content.sections[0].questions[0].suggestedPhrases = [{ text: { 'pt-BR': 'Um wiki comunitário' } }]
+    expect(validateContent(content, FER_TYPE_KEYS)).toEqual([])
   })
 })

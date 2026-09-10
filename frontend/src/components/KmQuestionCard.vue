@@ -102,6 +102,15 @@
       @add-inline="(fer) => $emit('addInlineFer', fer)"
       @update-allow-free-text="(value) => $emit('updateAllowFreeText', value)"
     />
+
+    <KmSuggestedPhrases
+      :phrases="question.suggestedPhrases ?? []"
+      :read-only="readOnly"
+      @add="$emit('addPhrase')"
+      @remove="(index) => $emit('removePhrase', index)"
+      @move="(index, direction) => $emit('movePhrase', index, direction)"
+      @update-text="(index, lang, value) => $emit('updatePhraseText', index, lang, value)"
+    />
   </div>
 </template>
 
@@ -114,6 +123,7 @@ import { useKmEditorStore } from '@/stores/kmEditor'
 import MoveButtons from './MoveButtons.vue'
 import KmLangTabs from './KmLangTabs.vue'
 import KmSuggestedFers from './KmSuggestedFers.vue'
+import KmSuggestedPhrases from './KmSuggestedPhrases.vue'
 import type { FerType, InlineFer, KnowledgeModelQuestion } from '@/types/api'
 
 /**
@@ -151,6 +161,10 @@ const emit = defineEmits<{
   moveSuggested: [ferId: string, direction: MoveDirection]
   addInlineFer: [fer: InlineFer]
   updateAllowFreeText: [value: boolean]
+  addPhrase: []
+  removePhrase: [index: number]
+  movePhrase: [index: number, direction: MoveDirection]
+  updatePhraseText: [index: number, lang: string, value: string]
 }>()
 
 const { locale, t } = useI18n()

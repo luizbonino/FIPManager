@@ -9,13 +9,13 @@
 **Four kinds of answer, one line each:**
 
 - **Tick an option** — your community uses it today; that's the whole action, no extra step.
-- **"Outro"** — not on the list? Type it as free text. Just as valid as a listed option, especially for local or informal tools.
+- **"Outro (especificar)"** — a checkbox at the end of the list. Tick it to open a text box, type your own wording, then press Enter (or tap the add button) to add it as a free-text answer — just as valid as a listed option, especially for local or informal tools.
 - **"Ainda não definido"** — the group hasn't decided; leave the question unticked and move on. An honest answer, not a skip.
 - **"Não se aplica"** — the question genuinely doesn't apply to your community; toggle it on the question itself.
 
 Ticking an option records "currently used." If your choice is only **planned**, **to be developed**, **to be replaced**, or needs a note, tap **"more"** on that item to open the full status control.
 
-**How to join and save:** scan the QR code or type the join code from the projector into your phone's browser. Pick your area, then a name for your community, and start answering — saving is automatic, a couple of seconds after you stop typing (watch the "Saved" indicator). Only the device that started the FIP can edit it; any other device gets a read-only view.
+**How to join and save:** scan the QR code or type the join code from the projector into your phone's browser. Pick your area, then a name for your community, and start answering — saving is automatic, a couple of seconds after you stop typing (watch the "Saved" indicator). Editing isn't limited to the device that started the FIP: open **"Edit link"** in the Share panel to continue on any phone or laptop. Anyone with that link can edit, so share it only within your group — the plain FIP link stays read-only. Can't find it again? The home page also lists **"FIPs on this device."**
 
 **Where is your FIP's URL?** Open the "Share" panel in your editor — it shows your FIP's permanent URL and a QR code to scan or send to teammates. Keep that link; it still works after today, and you can create a free account any time to claim the FIP into your own workspace.
 
@@ -34,13 +34,13 @@ Ticking an option records "currently used." If your choice is only **planned**, 
 **Quatro tipos de resposta, uma linha cada:**
 
 - **Marcar uma opção** — a vossa comunidade usa-a hoje; é a única ação necessária.
-- **"Outro"** — não está na lista? Escrevam em texto livre. Tão válido como uma opção listada, especialmente para ferramentas locais ou informais.
+- **"Outro (especificar)"** — uma caixa de verificação no final da lista. Marquem-na para abrir uma caixa de texto, escrevam a vossa própria formulação e depois carreguem em Enter (ou toquem no botão de adicionar) para a acrescentar como resposta em texto livre — tão válida como uma opção listada, especialmente para ferramentas locais ou informais.
 - **"Ainda não definido"** — o grupo ainda não decidiu; deixem a pergunta por marcar e avancem. Uma resposta honesta, não uma pergunta saltada.
 - **"Não se aplica"** — a pergunta realmente não se aplica à vossa comunidade; ativem o interrutor na própria pergunta.
 
 Marcar uma opção regista "atualmente utilizado". Se a escolha for apenas **planeada**, **a desenvolver**, **a substituir**, ou precisar de uma nota, toquem em **"mais"** nesse item para abrir o controlo de estado completo.
 
-**Como aderir e guardar:** digitalizem o código QR ou introduzam o código de acesso do projetor no navegador do telemóvel. Escolham a vossa área, depois um nome para a vossa comunidade, e comecem a responder — a gravação é automática, poucos segundos depois de pararem de escrever (indicador "Guardado"). Só o dispositivo que iniciou o FIP o pode editar; qualquer outro dispositivo vê uma versão apenas de leitura.
+**Como aderir e guardar:** digitalizem o código QR ou introduzam o código de acesso do projetor no navegador do telemóvel. Escolham a vossa área, depois um nome para a vossa comunidade, e comecem a responder — a gravação é automática, poucos segundos depois de pararem de escrever (indicador "Guardado"). A edição já não está limitada ao dispositivo que iniciou o FIP: abram a **"Ligação de edição"** no painel Partilhar para continuar a editar a partir de qualquer telemóvel ou portátil. Quem tiver essa ligação pode editar, por isso partilhem-na só dentro do vosso grupo — a ligação simples do FIP continua a ser apenas de leitura. Não a encontram? A página inicial também lista os **"FIPs neste dispositivo"** para o vosso grupo reencontrar o FIP.
 
 **Onde está o URL do vosso FIP?** Abram o painel "Partilhar" no editor — mostra o URL permanente do FIP e um código QR para digitalizar ou enviar à equipa. Guardem esse link; continua a funcionar depois de hoje, e podem criar uma conta gratuita a qualquer momento para reivindicar o FIP para o vosso espaço.
 

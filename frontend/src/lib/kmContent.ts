@@ -15,6 +15,7 @@ import type {
   KnowledgeModelQuestion,
   KnowledgeModelSection,
   LangMap,
+  SuggestedPhrase,
 } from '@/types/api'
 
 // ---------------------------------------------------------------------------
@@ -59,8 +60,40 @@ export const DECLARATION_STATUSES: readonly DeclarationStatus[] = [
   'none',
 ]
 
-export const MAX_SUGGESTED_FERS = 12
+/**
+ * `fipm.km_content.MAX_SUGGESTED_FER_IDS` (spec 08 §1.1, bumped 12 -> 16 by
+ * spec 10 §1.3: `confoa-2026-dados-omicos`'s `I3-metadata` resolves 15 real
+ * catalogue FERs, one over the old cap).
+ */
+export const MAX_SUGGESTED_FERS = 16
 export const MAX_INLINE_FERS = 300
+/** spec 08 §1.5 extension: same cap as `suggestedFerIds`, siblings on the same question. */
+export const MAX_SUGGESTED_PHRASES = 12
+export const MAX_PHRASE_LENGTH = 200
+
+/**
+ * Case-insensitive, whitespace-collapsed comparison for phrase text (this
+ * module and the participant editor) — mirrors the backend's
+ * `" ".join(s.split()).casefold()` (spec 10 §1.2), so two phrases that
+ * differ only in internal whitespace (e.g. a double space) are still
+ * recognised as the same text, both for duplicate detection and for
+ * matching a ticked phrase back to its declaration.
+ */
+export function normalisePhraseText(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+/**
+ * True when `freeText` (trimmed, case-insensitive) equals any language
+ * variant of `phrase.text` — how the participant editor recognises a
+ * declaration as "this quick-pick phrase, ticked" regardless of which
+ * language the phrase (or the stored `ferFreeText`) happens to be in.
+ */
+export function phraseMatchesFreeText(phrase: SuggestedPhrase, freeText: string | null | undefined): boolean {
+  if (!freeText || !freeText.trim()) return false
+  const normalised = normalisePhraseText(freeText)
+  return Object.values(phrase.text).some((value) => typeof value === 'string' && normalisePhraseText(value) === normalised)
+}
 
 /** An absolute `http(s)` IRI (spec 08 §1.2 rule 9/12): a same-shape check the backend's `httpx`-style parse mirrors. */
 export function isAbsoluteHttpIri(value: unknown): value is string {
@@ -99,12 +132,19 @@ function cloneLangMap(map: LangMap | null | undefined): LangMap {
   return map ? { ...map } : {}
 }
 
+function cloneSuggestedPhrase(phrase: SuggestedPhrase): SuggestedPhrase {
+  return { text: cloneLangMap(phrase.text) }
+}
+
 function cloneQuestion(question: KnowledgeModelQuestion): KnowledgeModelQuestion {
   return {
     ...question,
     text: cloneLangMap(question.text),
     help: question.help ? cloneLangMap(question.help) : null,
     suggestedFerIds: question.suggestedFerIds ? [...question.suggestedFerIds] : question.suggestedFerIds,
+    suggestedPhrases: question.suggestedPhrases
+      ? question.suggestedPhrases.map(cloneSuggestedPhrase)
+      : question.suggestedPhrases,
   }
 }
 
@@ -458,6 +498,94 @@ export function setAllowFreeText(
   return next
 }
 
+// ---------------------------------------------------------------------------
+// Spec 08 §1.5 extension — suggested phrases (free-text quick-pick options).
+// ---------------------------------------------------------------------------
+
+/** Appends a phrase to the question's `suggestedPhrases`, a no-op at the 12 cap (mirrors `addSuggestedFer`). */
+export function addSuggestedPhrase(
+  content: KnowledgeModelContent,
+  questionId: string,
+  text: LangMap
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  const current = question.suggestedPhrases ?? []
+  if (current.length >= MAX_SUGGESTED_PHRASES) return next
+  question.suggestedPhrases = [...current, { text: { ...text } }]
+  return next
+}
+
+/** Removes the phrase at `index` (phrases have no id of their own, unlike a suggested FER). */
+export function removeSuggestedPhrase(
+  content: KnowledgeModelContent,
+  questionId: string,
+  index: number
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  question.suggestedPhrases = (question.suggestedPhrases ?? []).filter((_, i) => i !== index)
+  return next
+}
+
+/** Moves the phrase at `index` one step up/down; a no-op at either end (mirrors `moveSuggestedFer`). */
+export function moveSuggestedPhrase(
+  content: KnowledgeModelContent,
+  questionId: string,
+  index: number,
+  direction: MoveDirection
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  question.suggestedPhrases = moveWithinArray(question.suggestedPhrases ?? [], index, direction)
+  return next
+}
+
+/**
+ * Sets (or, given `''`, deletes) one language key of one phrase's text.
+ * Unlike `setText`'s `applyLangValue`, no language is mandatory here — a
+ * phrase needs only >= 1 non-empty value (spec: an area phrase is pt-BR
+ * only), so `en` may be cleared like any other language. Unlike a
+ * question's `text`, though, a phrase has no distinguished "always keep"
+ * language (`en`) to fall back on: clearing the *last* remaining key would
+ * leave `{ text: {} }`, which the validator flags with `missing_key` (an
+ * unhelpful, save-blocking error with nothing on screen to point at — spec
+ * 10 review finding). Instead, when this would remove the last key, the
+ * key is kept with an empty string: the validator now reports
+ * `empty_string` on that exact language, which `KmLangTabs` already
+ * renders inline (its "missing" panel + tab dot), the same as an emptied
+ * question `text`.
+ */
+export function updateSuggestedPhraseText(
+  content: KnowledgeModelContent,
+  questionId: string,
+  index: number,
+  lang: string,
+  value: string
+): KnowledgeModelContent {
+  const next = cloneContent(content)
+  const { sectionIndex, questionIndex } = findQuestionLocation(next, questionId)
+  const question = next.sections[sectionIndex].questions[questionIndex]
+  const current = question.suggestedPhrases ?? []
+  if (index < 0 || index >= current.length) return next
+  const nextText = { ...current[index].text }
+  if (value === '') {
+    const isLastKey = lang in nextText && Object.keys(nextText).length === 1
+    if (isLastKey) {
+      nextText[lang] = ''
+    } else {
+      delete nextText[lang]
+    }
+  } else {
+    nextText[lang] = value
+  }
+  question.suggestedPhrases = current.map((phrase, i) => (i === index ? { text: nextText } : phrase))
+  return next
+}
+
 /**
  * "Add inline FER" (spec §1.4): appends `fer` to `model.inlineFers` *and* to
  * `questionId`'s `suggestedFerIds` in one op, matching the editor's single
@@ -633,9 +761,20 @@ export function validateContent(
     if (errors.length < MAX_ERRORS) errors.push({ path, code, message })
   }
 
-  function validateLangMap(value: unknown, path: string, requireEn = true) {
+  function validateLangMap(value: unknown, path: string, requireEn = true, maxLength: number = MAX_TEXT_LENGTH) {
     if (!isPlainObject(value)) {
-      push(path, 'missing_en', `${path} must be an object containing "en"`)
+      if (requireEn) {
+        push(path, 'missing_en', `${path} must be an object containing "en"`)
+      } else {
+        // spec 08 §7 A7 / spec 10 §1.1: an area/inline-FER label or a
+        // suggested phrase never requires "en" — naming it in a
+        // `missing_en` message here would be actively wrong, and the
+        // backend's `_check_langmap` never emits `missing_en` for a
+        // non-object value regardless of `require_en` (it's `missing_key`
+        // for a bad shape, `missing_en` only for a valid object that lacks
+        // "en"). Same neutral code and message the backend uses.
+        push(path, 'missing_key', `${path} must be an object`)
+      }
       return
     }
     let hasEn = false
@@ -650,8 +789,8 @@ export function validateContent(
         push(`${path}.${key}`, 'empty_string', `${path}.${key} must be a non-empty string`)
       } else {
         hasAny = true
-        if (langValue.length > MAX_TEXT_LENGTH) {
-          push(`${path}.${key}`, 'too_long', `${path}.${key} exceeds ${MAX_TEXT_LENGTH} characters`)
+        if (langValue.length > maxLength) {
+          push(`${path}.${key}`, 'too_long', `${path}.${key} exceeds ${maxLength} characters`)
         }
       }
     }
@@ -772,6 +911,51 @@ export function validateContent(
             const resolvable = inlineIds.has(id) || knownFerIds === null || knownFerIds.has(id)
             if (!resolvable) {
               push(idPath, 'unknown_suggested_fer', `suggested FER "${id}" does not resolve`)
+            }
+          })
+        }
+      }
+
+      // Spec 10 §1.2 (`_validate_suggested_phrases`): suggestedPhrases — a
+      // list of {text: LangMap}, <= MAX_SUGGESTED_PHRASES, each text a
+      // LangMap by the shared `validateLangMap` rule (`en` not required,
+      // <= 200 chars — spec 10 §1.1), each non-empty value trimmed
+      // (`not_trimmed`), no normalised-text duplicate anywhere in the list,
+      // checked across languages (a phrase is matched to a declaration's
+      // `ferFreeText` regardless of which language it was authored in).
+      const phrases = question.suggestedPhrases
+      if (phrases !== undefined) {
+        if (!Array.isArray(phrases)) {
+          push(`${questionPath}.suggestedPhrases`, 'invalid_value', 'suggestedPhrases must be a list')
+        } else {
+          if (phrases.length > MAX_SUGGESTED_PHRASES) {
+            push(`${questionPath}.suggestedPhrases`, 'too_many', `more than ${MAX_SUGGESTED_PHRASES} suggested phrases`)
+          }
+          const seenNormalised = new Map<string, number>()
+          phrases.forEach((phrase, phraseIndex) => {
+            const phrasePath = `${questionPath}.suggestedPhrases[${phraseIndex}]`
+            if (!isPlainObject(phrase)) {
+              push(phrasePath, 'missing_key', `${phrasePath} must be an object`)
+              return
+            }
+            validateLangMap(phrase.text, `${phrasePath}.text`, false, MAX_PHRASE_LENGTH)
+            if (!isPlainObject(phrase.text)) return
+            let duplicatePushed = false
+            for (const [lang, value] of Object.entries(phrase.text)) {
+              if (typeof value !== 'string' || value === '') continue
+              if (value !== value.trim()) {
+                push(`${phrasePath}.text.${lang}`, 'not_trimmed', `${phrasePath}.text.${lang} must not have leading or trailing whitespace`)
+              }
+              const normalised = normalisePhraseText(value)
+              const seenAt = seenNormalised.get(normalised)
+              if (seenAt !== undefined && seenAt !== phraseIndex) {
+                if (!duplicatePushed) {
+                  push(phrasePath, 'duplicate_phrase', 'duplicate suggested phrase')
+                  duplicatePushed = true
+                }
+              } else if (seenAt === undefined) {
+                seenNormalised.set(normalised, phraseIndex)
+              }
             }
           })
         }

@@ -61,8 +61,8 @@ Projector shows the session's join code and QR (already created — see checklis
 *Say:* "Scan the QR code, or type the join code into your browser. First, pick your area from the list —
 dados ômicos, biodiversidade, agricultura, saúde pública, enfermagem, or 'outra área' if none of those
 fits. Then pick a name for your community — it can be playful, it just needs to be yours for the next
-twenty minutes. Whoever starts the FIP on their phone is the only device that can edit it, so pick one
-phone per table now."
+twenty minutes. Start the FIP on one phone per table; the plain link is read-only on other devices, and the
+"Edit link" in the Share panel is how you hand it to a teammate if you need to."
 
 *pt-PT: "Digitalizem o código QR, ou introduzam o código de acesso no navegador. Primeiro, escolham a
 vossa área na lista — dados ômicos, biodiversidade, agricultura, saúde pública, enfermagem, ou 'outra área'
@@ -92,8 +92,9 @@ I1 e R1.1: uma por cada letra de FAIR. O resto é um bónus."*
 
 **Using the tool, in plain words:**
 - Each question shows a short list of options **for your area**. **Tick** every one your community
-  actually uses today — that's it, no extra step. Not on the list? Tap **"Outro"** and type what your
-  community uses in free text; that's completely normal, especially for local or informal tools.
+  actually uses today — that's it, no extra step. Not on the list? Tick the **"Outro (especificar)"**
+  checkbox at the end of the list to open a text box, type what your community uses, then press Enter or
+  tap the add button; that's completely normal, especially for local or informal tools.
 - Two more choices live on every question: **"Ainda não definido"** if the group hasn't decided (an
   honest answer, not a skip — leave it unticked and move on), and **"Não se aplica"** if the question
   genuinely doesn't apply to this community (a separate toggle on the question, keeps the question
@@ -103,15 +104,18 @@ I1 e R1.1: uma por cada letra de FAIR. O resto é um bónus."*
   status control — everything is still there, just tucked away so the checklist stays fast on a phone.
 - Saving is automatic — there's no save button. A small indicator at the top shows "Saved" a couple of
   seconds after you stop typing.
+- If a group loses its device, they can continue from the **"Edit link"** in the Share panel on any other
+  phone or laptop — but never project that link on screen, since anyone who sees it can edit the FIP.
 
 Circulate. Co-facilitators watch for groups stuck on "more" (reassure them it's optional — ticking alone
-is a complete, valid answer) and for the "second device is read-only" surprise (only the phone that started
-the FIP can edit it; a teammate opening the same link on their own phone will see a read-only view, which
-is by design — one edit token per FIP, no conflict merging).
+is a complete, valid answer) and for the "second device is read-only" surprise (the plain FIP link opens a
+read-only view on any other phone; only the "Edit link" from the Share panel grants editing, which is by
+design — one edit token per FIP, no conflict merging, and two devices editing at once overwrite each other).
 
 **Demo walk-through (on the projector, before groups start):** open the **dados ômicos** FIP live and
-answer F1 in front of the room — tick two options, tap "Outro" once to show free text, tap "more" on one
-tick to show the status control, then toggle "Não se aplica" on a question and off again. That one minute
+answer F1 in front of the room — tick two options, tick **"Outro (especificar)"** once to show the text
+box and add a free-text answer, tap "more" on one tick to show the status control, then toggle "Não se
+aplica" on a question and off again. That one minute
 covers every interaction a group will need.
 
 ### 20–27 min — Comparison matrix on the projector
@@ -164,7 +168,8 @@ each row carrying its area), and the feedback form/paper.
   reappears. If the hotspot also fails, hand out the printed questionnaire and collect it on paper; enter
   answers into the tool later.
 - **A group loses edit rights** (private browsing, cleared storage, wrong device): they'll see a
-  read-only view with no edit controls. The facilitator (session owner) can still write any FIP in an
+  read-only view with no edit controls. If anyone in the group still has the "Edit link", open it on
+  another phone and carry on. Otherwise the facilitator (session owner) can still write any FIP in an
   open session from the facilitator account — ask the group for their community name, find their FIP in
   the session list, and continue editing from there, or open it and read the answers back to the group
   to re-enter on a fresh device.

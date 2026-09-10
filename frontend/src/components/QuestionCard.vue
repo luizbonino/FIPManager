@@ -24,12 +24,16 @@
         :declaration="row.declaration"
         :options="ferOptions"
         :suggested="row.index === 0 ? suggestedFers : []"
+        :suggested-phrases="row.index === 0 ? suggestedPhrases : []"
+        :checked-phrase-indexes="row.index === 0 ? checkedPhraseIndexes : []"
         :allow-free-text="allowFreeText"
-        :show-suggested="row.index === 0 && suggestedFers.length > 0"
+        :show-suggested="row.index === 0 && hasSuggestions"
         :checked-fer-ids="checkedFerIds"
         :compact="compactDeclarations"
         @remove="onRemove(row.index)"
         @toggle-suggested="onToggleSuggested"
+        @toggle-phrase="onTogglePhrase"
+        @add-other="onAddOther"
       />
     </div>
 
@@ -58,10 +62,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useFipEditorStore } from '@/stores/fipEditor'
-import { suggestedFersFor } from '@/lib/kmContent'
+import { phraseMatchesFreeText, suggestedFersFor } from '@/lib/kmContent'
 import { resolveLang } from '@/lib/lang'
 import DeclarationEditor from './DeclarationEditor.vue'
-import type { Declaration, FerOut, KnowledgeModelQuestion } from '@/types/api'
+import type { Declaration, FerOut, KnowledgeModelQuestion, SuggestedPhrase } from '@/types/api'
 
 /**
  * One question of a section panel (spec 02 §2.2, extended by spec 08 §1.5/
@@ -112,7 +116,20 @@ const suggestedFers = computed<FerOut[]>(() => {
   return suggestedFersFor(store.km.content, props.question.id, store.fers)
 })
 
+/** spec 08 §1.5 extension: generic free-text quick-pick options, a sibling of `suggestedFers`. */
+const suggestedPhrases = computed<SuggestedPhrase[]>(() => props.question.suggestedPhrases ?? [])
+
+const hasSuggestions = computed(() => suggestedFers.value.length > 0 || suggestedPhrases.value.length > 0)
+
 const checkedFerIds = computed(() => declarations.value.map((d) => d.ferId).filter((id): id is string => !!id))
+
+/** Indexes of `suggestedPhrases` that already have a matching declaration (spec 08 §1.5 extension). */
+const checkedPhraseIndexes = computed(() =>
+  suggestedPhrases.value.reduce<number[]>((acc, phrase, index) => {
+    if (declarations.value.some((d) => phraseMatchesFreeText(phrase, d.ferFreeText))) acc.push(index)
+    return acc
+  }, [])
+)
 
 /**
  * `DeclarationEditor` rows to render: the real declarations, or — when
@@ -126,7 +143,7 @@ const displayRows = computed<{ declaration: Declaration; index: number }[]>(() =
   if (declarations.value.length > 0) {
     return declarations.value.map((declaration, index) => ({ declaration, index }))
   }
-  if ((props.question.suggestedFerIds?.length ?? 0) > 0) {
+  if (hasSuggestions.value) {
     return [{ declaration: { status: defaultDeclarationStatus.value }, index: 0 }]
   }
   return []
@@ -141,12 +158,26 @@ function onRemove(index: number) {
 }
 
 /**
+ * spec §1.5: a declaration the checkbox alone can't fully represent (a
+ * note, DMP evidence, a successor or a non-default status) needs a confirm
+ * before an untick silently drops that context — shared by the FER
+ * quick-pick and the suggested-phrase quick-pick (spec 10 §2).
+ */
+function isAnnotatedDeclaration(declaration: Declaration): boolean {
+  return (
+    !!(declaration.note && Object.keys(declaration.note).length > 0) ||
+    !!declaration.dmpEvidence ||
+    !!declaration.successorFerId ||
+    !!declaration.successorFreeText ||
+    declaration.status !== defaultDeclarationStatus.value
+  )
+}
+
+/**
  * spec §1.5: a tick appends an ordinary declaration with the model's
  * default status; an untick removes the declaration whose `ferId` matches,
- * confirming first when it carries anything the checkbox alone can't
- * represent (a note, DMP evidence, a successor or a non-default status) —
- * silently dropping that context would lose information the participant
- * can't easily reconstruct.
+ * confirming first when it's annotated — silently dropping that context
+ * would lose information the participant can't easily reconstruct.
  */
 function onToggleSuggested(ferId: string, checked: boolean) {
   if (checked) {
@@ -156,15 +187,65 @@ function onToggleSuggested(ferId: string, checked: boolean) {
   }
   const index = declarations.value.findIndex((d) => d.ferId === ferId)
   if (index === -1) return
-  const declaration = declarations.value[index]
-  const isAnnotated =
-    !!(declaration.note && Object.keys(declaration.note).length > 0) ||
-    !!declaration.dmpEvidence ||
-    !!declaration.successorFerId ||
-    !!declaration.successorFreeText ||
-    declaration.status !== defaultDeclarationStatus.value
-  if (isAnnotated && !confirm(t('editor.dropAnnotatedDeclaration'))) return
+  if (isAnnotatedDeclaration(declarations.value[index]) && !confirm(t('editor.dropAnnotatedDeclaration'))) return
   store.removeDeclaration(props.question.id, index)
+}
+
+/**
+ * spec 10 §2: a tick resolves the phrase's text in the FIP's own language
+ * (the same fallback chain export uses, spec 01 §2 — not the editor's UI
+ * display language, which a participant may have switched mid-session) and
+ * appends a free-text declaration with the model's default status. An
+ * untick removes every declaration whose `ferFreeText` matches *any*
+ * language variant of the phrase — a participant who switched UI language
+ * must still be able to untick what they ticked earlier — confirming first
+ * exactly when any matched declaration is annotated, same rule as the FER
+ * quick-pick; removed highest index first so earlier indices don't shift
+ * under a still-pending removal.
+ */
+function onTogglePhrase(index: number, checked: boolean) {
+  const phrase = suggestedPhrases.value[index]
+  if (!phrase) return
+  if (checked) {
+    const alreadyChecked = declarations.value.some((d) => phraseMatchesFreeText(phrase, d.ferFreeText))
+    if (alreadyChecked) return
+    const fipLanguage = store.fip?.language ?? 'en'
+    const resolvedText = resolveLang(phrase.text, fipLanguage)
+    if (!resolvedText) return
+    store.addDeclaration(props.question.id, {
+      ferId: null,
+      ferFreeText: resolvedText,
+      status: defaultDeclarationStatus.value,
+      note: null,
+    })
+    return
+  }
+  const matching = declarations.value
+    .map((d, i) => (phraseMatchesFreeText(phrase, d.ferFreeText) ? i : -1))
+    .filter((i) => i !== -1)
+  if (matching.length === 0) return
+  const anyAnnotated = matching.some((i) => isAnnotatedDeclaration(declarations.value[i]))
+  if (anyAnnotated && !confirm(t('editor.dropAnnotatedDeclaration'))) return
+  for (const i of [...matching].reverse()) {
+    store.removeDeclaration(props.question.id, i)
+  }
+}
+
+/**
+ * The built-in "Other" checkbox (spec 08 §1.5 extension): adds a plain
+ * free-text declaration with the model's default status. It is not matched
+ * against `suggestedPhrases`, so it renders afterwards like any other
+ * free-text declaration rather than through a quick-pick checkbox.
+ */
+function onAddOther(text: string) {
+  const trimmed = text.trim()
+  if (!trimmed) return
+  store.addDeclaration(props.question.id, {
+    ferId: null,
+    ferFreeText: trimmed,
+    status: defaultDeclarationStatus.value,
+    note: null,
+  })
 }
 
 /**

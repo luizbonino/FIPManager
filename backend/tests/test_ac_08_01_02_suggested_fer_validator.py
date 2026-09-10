@@ -6,7 +6,7 @@ style."""
 
 from __future__ import annotations
 
-from fipm.km_content import validate_content
+from fipm.km_content import MAX_SUGGESTED_FER_IDS, validate_content
 
 
 def _base_doc() -> dict:
@@ -43,8 +43,10 @@ def _find(errors, path, code):
 
 
 def test_too_many_suggested_fer_ids_rejected(settings):
+    # spec 10-suggested-phrases-and-other.md: cap bumped 12 -> 16 (the 2026-
+    # 09-10 CONFOA re-import resolves 15 real FERs on one question).
     doc = _base_doc()
-    ids = [f"https://example.org/fer/{i}" for i in range(13)]
+    ids = [f"https://example.org/fer/{i}" for i in range(MAX_SUGGESTED_FER_IDS + 1)]
     doc["sections"][0]["questions"][0]["suggestedFerIds"] = ids
     errors = validate_content(doc, settings=settings, known_fer_ids=set(ids))
     hit = _find(errors, "sections[0].questions[0].suggestedFerIds", "too_many")

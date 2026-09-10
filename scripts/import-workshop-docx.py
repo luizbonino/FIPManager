@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Import the CONFOA 2026 workshop picklist .docx into 11 area knowledge models.
 
-See docs/specs/08-workshop-picklists.md §4. Stdlib only (zipfile, xml.etree,
-json, re, argparse, pathlib, unicodedata, difflib, hashlib) -- no python-docx,
-no new dependency.
+See docs/specs/08-workshop-picklists.md §4 and docs/specs/10-suggested-
+phrases-and-other.md. Stdlib only (zipfile, xml.etree, json, re, argparse,
+pathlib, unicodedata, difflib, hashlib) -- no python-docx, no new
+dependency.
 
     uv run --project backend python scripts/import-workshop-docx.py \\
         --docx "docs/workshop/PERFIS DE IMPLEMENTAÇÃO FAIR 2.docx" \\
@@ -11,7 +12,7 @@ no new dependency.
         [--seed data/fers/seed.json] \\
         [--map data/workshop/option-map.json] [--out data/knowledge-models] \\
         [--base-url https://fipm.example.org] [--report -] \\
-        [--bump] [--strict] [--dry-run]
+        [--bump] [--overwrite-draft] [--strict] [--dry-run]
 
 Every function below the CLI section is pure (no I/O), so
 backend/tests/test_import_workshop_docx.py can exercise the parsing and
@@ -598,8 +599,12 @@ def is_decided(entry: dict[str, Any]) -> bool:
 def classify_map_entry(entry: dict[str, Any]) -> str:
     """resolved / skipped / ambiguous / unresolved, for the human-readable
     report only (both ambiguous and unresolved become inlineFers drafts;
-    skipped options -- generic/placeholder text curated in
-    data/fers/aliases-workshop.md -- become neither)."""
+    "skipped" -- generic/placeholder text curated in data/fers/aliases-
+    workshop.md or a human override, the map's "skip" sentinel -- becomes
+    neither a suggestion nor an inlineFers draft; spec 10-suggested-phrases-
+    and-other.md instead shows it to participants as a free-text
+    `suggestedPhrases` option, so "skipped" here means "not a FER", not
+    "dropped")."""
     if entry.get("ferId") == "skip":
         return "skipped"
     if entry.get("ferId") is not None or entry.get("ferIds"):
@@ -824,7 +829,40 @@ ATTRIBUTION_TEXT = (
     "Schultes / GO FAIR Foundation, CC BY-SA 4.0."
 )
 
-MAX_SUGGESTED_FER_IDS = 12
+# spec 10-suggested-phrases-and-other.md: bumped 12 -> 16 in lockstep with
+# backend/fipm/km_content.MAX_SUGGESTED_FER_IDS (the 2026-09-10 CONFOA
+# re-import resolves 15 real catalogue FERs on one question -- see
+# data/workshop/import-report-2026-09-10.md).
+MAX_SUGGESTED_FER_IDS = 16
+
+# spec 10-suggested-phrases-and-other.md: cap on `question.suggestedPhrases`,
+# mirroring backend/fipm/km_content.MAX_SUGGESTED_PHRASES.
+MAX_SUGGESTED_PHRASES = 12
+
+# spec 10-suggested-phrases-and-other.md §1.1: each phrase text is capped at
+# 200 chars (not the usual 4000) and must be trimmed -- mirrors
+# backend/fipm/km_content.MAX_PHRASE_TEXT_LEN. Review finding: the real
+# 2026-09-10 import's longest phrase is 67 chars, well under the cap, but
+# nothing stopped a future re-run (a longer document, a differently-worded
+# alias) from writing an over-long, `too_long`-failing phrase, so this is
+# enforced here rather than left to validate_content to catch at publish time.
+MAX_PHRASE_TEXT_LEN = 200
+
+
+def _clean_phrase_text(text: str, limit: int = MAX_PHRASE_TEXT_LEN) -> tuple[str, bool]:
+    """Trims `text` and, if it's still over `limit` chars, truncates at the
+    last word boundary at or before `limit` (falling back to a hard cut only
+    when there's no whitespace to break on within the limit -- one giant
+    token). Returns `(cleaned_text, was_truncated)`; `cleaned_text` is always
+    trimmed, so the result is never `not_trimmed` even after truncation."""
+    trimmed = text.strip()
+    if len(trimmed) <= limit:
+        return trimmed, False
+    cut = trimmed[:limit]
+    last_space = cut.rfind(" ")
+    if last_space > 0:
+        cut = cut[:last_space]
+    return cut.rstrip(), True
 
 
 @dataclass
@@ -837,6 +875,17 @@ class QuestionResult:
     sentinel_counts: dict[str, int]
     skipped_generic: int = 0
     type_mismatches: int = 0
+    # spec 10: options whose option-map.json entry is the "skip" sentinel
+    # (a generic/placeholder option, source data/fers/aliases-workshop.md or
+    # a human override) -- shown as free-text `suggestedPhrases` instead of
+    # being dropped, in document order, original casing preserved.
+    suggested_phrases: list[str] = field(default_factory=list)
+    phrases_truncated_from: int | None = None
+    # spec 10 review finding: how many of `suggested_phrases` had to be
+    # trimmed to MAX_PHRASE_TEXT_LEN chars (word-boundary truncation) --
+    # distinct from `phrases_truncated_from`, which counts how many *entries*
+    # were dropped by the 12-phrase cap.
+    phrase_text_truncations: int = 0
 
 
 @dataclass
@@ -895,8 +944,11 @@ def build_area_import(
 
         ids_ordered: list[str] = []
         seen_ids: set[str] = set()
+        phrases_ordered: list[str] = []
+        seen_phrase_norms: set[str] = set()
         skipped_generic = 0
         type_mismatches = 0
+        phrase_text_truncations = 0
         for opt in fq.options:
             kind = classify_sentinel(opt)
             if kind is not None:
@@ -911,9 +963,24 @@ def build_area_import(
                 continue
             fer_id = entry.get("ferId")
             if fer_id == "skip":
-                # A generic/placeholder option (data/fers/aliases-workshop.md)
-                # -> no suggestion, no inlineFers draft.
+                # spec 10: a generic/placeholder option (data/fers/aliases-
+                # workshop.md, or a human "skip" override in option-map.json)
+                # is not a FAIR Enabling Resource -- no suggestion, no
+                # inlineFers draft -- but it's shown to participants as a
+                # free-text `suggestedPhrases` option instead of being
+                # silently dropped, in document order and original casing.
                 skipped_generic += 1
+                if norm_text not in seen_phrase_norms:
+                    seen_phrase_norms.add(norm_text)
+                    # spec 10 §1.1: each phrase text must be trimmed and
+                    # capped at MAX_PHRASE_TEXT_LEN (200) chars, truncated at
+                    # a word boundary -- `norm_text` (used above for dedup)
+                    # is untouched by this, so truncation never changes
+                    # which options collapse into one phrase.
+                    phrase_text, was_truncated = _clean_phrase_text(opt)
+                    phrases_ordered.append(phrase_text)
+                    if was_truncated:
+                        phrase_text_truncations += 1
                 continue
             if entry.get("typeMismatch"):
                 type_mismatches += 1
@@ -941,6 +1008,11 @@ def build_area_import(
             truncated_from = len(ids_ordered)
             ids_ordered = ids_ordered[:MAX_SUGGESTED_FER_IDS]
 
+        phrases_truncated_from = None
+        if len(phrases_ordered) > MAX_SUGGESTED_PHRASES:
+            phrases_truncated_from = len(phrases_ordered)
+            phrases_ordered = phrases_ordered[:MAX_SUGGESTED_PHRASES]
+
         question_results[qid] = QuestionResult(
             question_id=qid,
             found=True,
@@ -950,6 +1022,9 @@ def build_area_import(
             sentinel_counts=sentinel_counts,
             skipped_generic=skipped_generic,
             type_mismatches=type_mismatches,
+            suggested_phrases=phrases_ordered,
+            phrases_truncated_from=phrases_truncated_from,
+            phrase_text_truncations=phrase_text_truncations,
         )
 
     title_en, title_es, _needs_review = translate_title(area.name, area.slug)
@@ -970,6 +1045,11 @@ def build_area_import(
             result = question_results.get(qid)
             q_out = copy.deepcopy(q)
             q_out["suggestedFerIds"] = result.suggested_ids if result is not None else []
+            q_out["suggestedPhrases"] = (
+                [{"text": {"pt-BR": p}} for p in result.suggested_phrases]
+                if result is not None
+                else []
+            )
             q_out["allowFreeText"] = True
             questions_out.append(q_out)
         sections_out.append(
@@ -1030,12 +1110,26 @@ def _with_version(content: dict[str, Any], version: str) -> dict[str, Any]:
 class WriteDecision:
     version: str
     content: dict[str, Any]
-    action: str  # "write" (new or byte-identical rewrite) or "skip" (changed, no --bump)
+    action: str  # "write" (new, byte-identical rewrite, --bump, or --overwrite-draft
+    # over a draft) or "skip" (changed, no --bump/--overwrite-draft, or latest is published)
 
 
 def decide_output_version(
-    out_dir: Path, model_id: str, candidate_1_0_0: dict[str, Any], bump: bool
+    out_dir: Path,
+    model_id: str,
+    candidate_1_0_0: dict[str, Any],
+    bump: bool,
+    *,
+    overwrite_draft: bool = False,
 ) -> WriteDecision:
+    """`overwrite_draft` (spec 10-suggested-phrases-and-other.md): when the
+    latest existing version's on-disk `status` is `"draft"` (an unclaimed
+    shipped draft, never a facilitator-edited or published one -- the
+    importer never even sees a claimed draft's on-disk file, since
+    `import_knowledge_model_doc` compares content hashes against the DB, not
+    this file), rewrite it in place instead of refusing without `--bump`. A
+    `"published"` latest version is refused exactly as without the flag
+    (falls through to the `not bump` branch below)."""
     pattern = re.compile(rf"^{re.escape(model_id)}-(\d+\.\d+\.\d+)\.json$")
     existing: list[str] = []
     if out_dir.exists():
@@ -1056,6 +1150,13 @@ def decide_output_version(
 
     candidate_at_latest = _with_version(candidate_1_0_0, latest)
     if latest_doc == candidate_at_latest:
+        return WriteDecision(version=latest, content=candidate_at_latest, action="write")
+
+    if (
+        overwrite_draft
+        and isinstance(latest_doc, dict)
+        and latest_doc.get("status") == "draft"
+    ):
         return WriteDecision(version=latest, content=candidate_at_latest, action="write")
 
     if not bump:
@@ -1119,12 +1220,20 @@ def render_report(
     sentinel_totals = {"other": 0, "undefined": 0, "not_applicable": 0}
     skipped_generic_total = 0
     type_mismatch_total = 0
+    phrase_entries_total = 0
+    max_phrases_on_one_question = 0
+    phrase_text_truncations_total = 0
     for a in areas:
         for q in a.questions.values():
             for k, v in q.sentinel_counts.items():
                 sentinel_totals[k] += v
             skipped_generic_total += q.skipped_generic
             type_mismatch_total += q.type_mismatches
+            phrase_entries_total += len(q.suggested_phrases)
+            max_phrases_on_one_question = max(
+                max_phrases_on_one_question, len(q.suggested_phrases)
+            )
+            phrase_text_truncations_total += q.phrase_text_truncations
 
     lines.append("## Totals")
     lines.append(f"- Areas detected: {len(areas)}")
@@ -1133,8 +1242,20 @@ def render_report(
     )
     lines.append(f"- Options resolved to a catalogue FER: {resolved}")
     lines.append(
-        f"- Options skipped as generic/placeholder (data/fers/aliases-workshop.md): {skipped} "
+        f"- Options offered as free-text phrases, not FAIR Enabling Resources "
+        f"(data/fers/aliases-workshop.md or a human \"skip\" override; spec "
+        f"10-suggested-phrases-and-other.md `suggestedPhrases`): {skipped} distinct texts "
         f"({skipped_generic_total} occurrences across areas)"
+    )
+    lines.append(
+        f"- suggestedPhrases entries written to models: {phrase_entries_total} total, "
+        f"max {max_phrases_on_one_question} on one question"
+        + (
+            f", {phrase_text_truncations_total} trimmed to {MAX_PHRASE_TEXT_LEN} chars "
+            "(word-boundary truncation, see per-question notes below)"
+            if phrase_text_truncations_total
+            else f" (none over {MAX_PHRASE_TEXT_LEN} chars)"
+        )
     )
     lines.append(
         f"- Options as inline FER drafts: {inline_total} "
@@ -1168,7 +1289,10 @@ def render_report(
             lines.append(f"- Duplicate question headings seen: {', '.join(a.duplicate_doc_codes)}")
         area_skipped = sum(q.skipped_generic for q in a.questions.values())
         if area_skipped:
-            lines.append(f"- Options skipped as generic/placeholder: {area_skipped}")
+            lines.append(f"- Options offered as free-text phrases (not FERs): {area_skipped}")
+        area_phrase_entries = sum(len(q.suggested_phrases) for q in a.questions.values())
+        if area_phrase_entries:
+            lines.append(f"- suggestedPhrases entries written: {area_phrase_entries}")
         area_mismatches = sum(q.type_mismatches for q in a.questions.values())
         if area_mismatches:
             lines.append(
@@ -1180,6 +1304,15 @@ def render_report(
             note = f"  - {qid}: {len(q.suggested_ids)} suggested option(s)"
             if q.truncated_from:
                 note += f" (truncated from {q.truncated_from}, see report totals)"
+            if q.suggested_phrases:
+                note += f", {len(q.suggested_phrases)} phrase(s)"
+                if q.phrases_truncated_from:
+                    note += f" (truncated from {q.phrases_truncated_from})"
+                if q.phrase_text_truncations:
+                    note += (
+                        f", {q.phrase_text_truncations} text(s) trimmed to "
+                        f"{MAX_PHRASE_TEXT_LEN} chars"
+                    )
             lines.append(note)
         area_sentinels = {"other": 0, "undefined": 0, "not_applicable": 0}
         for q in a.questions.values():
@@ -1288,6 +1421,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help='path, or "-" for stdout (default: data/workshop/import-report-<date>.md)',
     )
     p.add_argument("--bump", action="store_true")
+    p.add_argument(
+        "--overwrite-draft",
+        action="store_true",
+        help=(
+            "when the latest existing version of an area model on disk is still "
+            'status "draft", rewrite that file in place instead of refusing without '
+            "--bump; a published latest version is still refused (spec 10)"
+        ),
+    )
     p.add_argument("--strict", action="store_true")
     p.add_argument("--dry-run", action="store_true")
     return p
@@ -1393,7 +1535,13 @@ def main(argv: list[str] | None = None) -> int:
     validation_errors: dict[str, list[dict]] = {}
 
     for area in area_results:
-        decision = decide_output_version(args.out, area.model_id, area.content_1_0_0, args.bump)
+        decision = decide_output_version(
+            args.out,
+            area.model_id,
+            area.content_1_0_0,
+            args.bump,
+            overwrite_draft=args.overwrite_draft,
+        )
         write_actions[area.model_id] = decision.action
         write_versions[area.model_id] = decision.version
 

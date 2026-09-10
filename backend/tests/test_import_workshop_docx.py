@@ -597,6 +597,9 @@ def test_ac18_full_import(iwd, ac18_env):
         # allowFreeText is set true everywhere; hidden is never introduced.
         assert all(q["allowFreeText"] is True for q in by_id.values())
         assert all("hidden" not in q for q in by_id.values())
+        # suggestedPhrases is always present (spec 10), empty here -- this
+        # fixture has no option-map "skip" entries.
+        assert all(q["suggestedPhrases"] == [] for q in by_id.values())
         # Only options differ from the base: text/help are copied verbatim
         # in every language, never replaced by the document's short heading,
         # even for a question the document *did* find options for.
@@ -687,6 +690,48 @@ def test_ac18_bump_writes_new_version_and_keeps_old(iwd, ac18_env):
         assert (ac18_env["out"] / name).read_bytes() == data  # kept untouched
 
 
+def test_ac18_overwrite_draft_rewrites_in_place(iwd, ac18_env):
+    """spec 10-suggested-phrases-and-other.md: `--overwrite-draft` rewrites
+    the latest *draft* version in place (no new file, unlike --bump) when
+    the document changed on disk."""
+    rc = _run(iwd, ac18_env)
+    assert rc == 0
+    before_files = sorted(f.name for f in ac18_env["out"].glob("confoa-2026-*.json"))
+    assert len(before_files) == 2  # both still 1.0.0
+
+    ac18_env["docx"].write_bytes(_build_fixture_docx(iwd, edited=True))
+    rc2 = _run(iwd, ac18_env, "--overwrite-draft")
+    assert rc2 == 0
+
+    after_files = sorted(f.name for f in ac18_env["out"].glob("confoa-2026-*.json"))
+    assert after_files == before_files  # still 1.0.0, rewritten in place, no 1.0.1
+
+    doc = json.loads((ac18_env["out"] / before_files[0]).read_text(encoding="utf-8"))
+    assert doc["status"] == "draft"
+    by_id = {q["id"]: q for s in doc["sections"] for q in s["questions"]}
+    f1_ids = by_id["F1-metadata"]["suggestedFerIds"]
+    assert any("draft" in fid for fid in f1_ids)  # the edited unknown option re-hashed
+
+
+def test_ac18_overwrite_draft_refuses_published_latest(iwd, ac18_env):
+    """A published latest version is refused exactly as without the flag --
+    --overwrite-draft never touches published content."""
+    rc = _run(iwd, ac18_env)
+    assert rc == 0
+    model_path = sorted(ac18_env["out"].glob("confoa-2026-*-1.0.0.json"))[0]
+    published = json.loads(model_path.read_text(encoding="utf-8"))
+    published["status"] = "published"
+    model_path.write_text(json.dumps(published), encoding="utf-8")
+    published_bytes = model_path.read_bytes()
+
+    ac18_env["docx"].write_bytes(_build_fixture_docx(iwd, edited=True))
+    rc2 = _run(iwd, ac18_env, "--overwrite-draft")
+    assert rc2 == 0  # soft-skip, not a hard failure (matches today's --bump-less behaviour)
+
+    assert model_path.read_bytes() == published_bytes  # untouched
+    assert not any(ac18_env["out"].glob(f"{model_path.stem.rsplit('-', 1)[0]}-1.0.1.json"))
+
+
 def test_ac18_strict_exits_1(iwd, ac18_env):
     rc = _run(iwd, ac18_env, "--strict")
     assert rc == 1
@@ -701,9 +746,10 @@ def test_ac18_dry_run_writes_nothing(iwd, ac18_env):
 
 def test_ac18_aliases_md_skips_generic_and_resolves_multi_iri(iwd, ac18_env):
     """Coordinator follow-up: a generic/placeholder option marked in
-    data/fers/aliases-workshop.md must become neither a suggestion nor an
-    inlineFers draft, and a row with several comma-separated IRIs must add
-    all of them."""
+    data/fers/aliases-workshop.md must become neither a catalogue suggestion
+    nor an inlineFers draft -- spec 10-suggested-phrases-and-other.md: it
+    becomes a `suggestedPhrases` free-text entry instead -- and a row with
+    several comma-separated IRIs must add all of them."""
     aliases_text = "\n".join(
         [
             "| Document option text (pt-BR) | Resolves to |",
@@ -723,11 +769,15 @@ def test_ac18_aliases_md_skips_generic_and_resolves_multi_iri(iwd, ac18_env):
     ]
     for doc in docs:
         by_id = {q["id"]: q for s in doc["sections"] for q in s["questions"]}
-        # UNKNOWN_I21_TEXT is now "skip": only the 2 known options remain.
+        # UNKNOWN_I21_TEXT is now "skip": only the 2 known options remain in
+        # suggestedFerIds, and it appears instead as a suggestedPhrases entry
+        # (original casing preserved, not norm()'d).
         assert by_id["I2-metadata"]["suggestedFerIds"] == [
             "https://schema.org/",
             "https://www.wikidata.org/",
         ]
+        assert by_id["I2-metadata"]["suggestedPhrases"] == [{"text": {"pt-BR": UNKNOWN_I21_TEXT}}]
+        assert by_id["F1-metadata"]["suggestedPhrases"] == []
         # UNKNOWN_F11_TEXT now resolves to 2 real ids instead of a draft.
         assert by_id["F1-metadata"]["suggestedFerIds"] == [
             "https://www.doi.org/",
@@ -751,8 +801,80 @@ def test_ac18_aliases_md_skips_generic_and_resolves_multi_iri(iwd, ac18_env):
     }
 
     report_text = ac18_env["report"].read_text(encoding="utf-8")
-    assert "skipped as generic" in report_text.lower()
+    assert "free-text phrase" in report_text.lower()
+    assert "suggestedphrases entries written" in report_text.lower()
     assert "type mismatches" in report_text.lower()
+
+
+# A document option long enough to exceed MAX_PHRASE_TEXT_LEN (200); no
+# accents, so norm()/parse_aliases_markdown()'s exact-text keying isn't
+# entangled with unicode edge cases the test doesn't care about.
+LONG_OPTION_TEXT = (
+    "Perfil de metadados institucional extremamente detalhado, cobrindo "
+    "vocabularios controlados legados, esquemas proprietarios herdados de "
+    "sistemas anteriores e convencoes de nomenclatura ainda nao "
+    "documentadas formalmente"
+)
+
+
+def test_ac18_skip_phrase_text_is_trimmed_and_truncated_at_word_boundary(iwd, ac18_env):
+    """spec 10 review finding: a `suggestedPhrases` text must be trimmed and
+    capped at MAX_PHRASE_TEXT_LEN (200 chars), truncated at a word boundary
+    -- otherwise a long enough document option would write a phrase
+    validate_content rejects with `too_long` at publish time. The real
+    2026-09-10 import's longest phrase is 67 chars (well under the cap, see
+    docs/specs/10-suggested-phrases-and-other.md §4.4), so this only guards
+    against a *future* document or alias row; hence the synthetic fixture
+    rather than re-running the real import (which is unaffected, per the
+    task: max 67 chars, output unchanged)."""
+    from fipm.km_content import validate_content
+
+    assert len(LONG_OPTION_TEXT) > iwd.MAX_PHRASE_TEXT_LEN
+
+    paras: list[tuple[str, str | None]] = [("1. PERFIL DE IMPLEMENTAÇÃO FAIR – ÁREA UM", "Ttulo1")]
+    for code in iwd.DOC_CODE_TO_QUESTION_ID:
+        if code in OMIT_CODES:
+            continue
+        paras.append((f"{code}. Texto da pergunta {code} no documento", None))
+        if code == "F1.1":
+            paras.append((f"☐ {LONG_OPTION_TEXT}", None))
+    ac18_env["docx"].write_bytes(_docx_bytes(paras))
+
+    # Marked "unmatched: generic" (spec 10 §4.1's "skip" sentinel) so it
+    # becomes a suggestedPhrases entry instead of an inlineFers draft --
+    # only a "skip" option's text goes through the trim/truncate path.
+    ac18_env["aliases"].write_text(
+        "\n".join(
+            [
+                "| Document option text (pt-BR) | Resolves to |",
+                "|---|---|",
+                f"| {LONG_OPTION_TEXT} | unmatched: generic |",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    rc = _run(iwd, ac18_env)
+    assert rc == 0
+
+    model_files = sorted(ac18_env["out"].glob("confoa-2026-*-1.0.0.json"))
+    assert len(model_files) == 1
+    doc = json.loads(model_files[0].read_text(encoding="utf-8"))
+    known_fer_ids = {e["id"] for e in SEED_ENTRIES}
+    assert validate_content(doc, known_fer_ids=known_fer_ids) == []
+
+    by_id = {q["id"]: q for s in doc["sections"] for q in s["questions"]}
+    phrases = by_id["F1-metadata"]["suggestedPhrases"]
+    assert len(phrases) == 1
+    text = phrases[0]["text"]["pt-BR"]
+
+    assert len(text) <= iwd.MAX_PHRASE_TEXT_LEN
+    assert text == text.strip()  # never not_trimmed, even after truncation
+    assert LONG_OPTION_TEXT.startswith(text)  # a genuine prefix, not rewritten
+    assert LONG_OPTION_TEXT[len(text)] == " "  # cut fell on a word boundary
+
+    report_text = ac18_env["report"].read_text(encoding="utf-8")
+    assert f"trimmed to {iwd.MAX_PHRASE_TEXT_LEN} chars" in report_text
 
 
 def test_ac18_missing_aliases_file_is_not_an_error(iwd, ac18_env):

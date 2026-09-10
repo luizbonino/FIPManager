@@ -84,6 +84,16 @@
               </div>
               <p class="question-text">{{ resolveLang(question.text, locale) ?? question.id }}</p>
               <p v-if="resolveLang(question.help, locale)" class="question-help">{{ resolveLang(question.help, locale) }}</p>
+
+              <div v-if="hasSuggestions(question)" class="suggested-options">
+                <span class="suggested-options-label">{{ $t('editor.suggestedOptions') }}</span>
+                <ul>
+                  <li v-for="ferId in question.suggestedFerIds ?? []" :key="ferId">{{ resolveFerLabel(ferId) }}</li>
+                  <li v-for="(phrase, i) in question.suggestedPhrases ?? []" :key="`phrase-${i}`">
+                    {{ resolveLang(phrase.text, locale) }}
+                  </li>
+                </ul>
+              </div>
             </article>
           </div>
         </section>
@@ -113,10 +123,12 @@ import {
   newKnowledgeModelVersion,
 } from '@/api/knowledgeModels'
 import { getFerTypes } from '@/api/ferTypes'
+import { listFers } from '@/api/fers'
 import { resolveLang } from '@/lib/lang'
+import { resolveSuggestedFer } from '@/lib/kmContent'
 import { useAuthStore } from '@/stores/auth'
 import AttributionFooter from '@/components/AttributionFooter.vue'
-import type { FerType, KnowledgeModelOut } from '@/types/api'
+import type { FerOut, FerType, KnowledgeModelOut, KnowledgeModelQuestion } from '@/types/api'
 
 // Spec 04 §5: public, read-only view of one knowledge-model version.
 const route = useRoute()
@@ -128,6 +140,7 @@ const loading = ref(true)
 const notFound = ref(false)
 const model = ref<KnowledgeModelOut | null>(null)
 const ferTypes = ref<Record<string, FerType>>({})
+const fers = ref<Record<string, FerOut>>({})
 
 // `KnowledgeModelOut` carries no `ownerId` (spec §3 #3's body is
 // unchanged), so ownership is resolved with a side query against
@@ -139,6 +152,17 @@ const isOwner = ref(false)
 function ferTypeLabel(key: string): string {
   const entry = ferTypes.value[key]
   return entry ? (resolveLang(entry.label, locale.value) ?? key) : key
+}
+
+/** spec 08 §1.5: resolves a suggested id against `content.inlineFers` then the catalogue (spec §1.3). */
+function resolveFerLabel(ferId: string): string {
+  if (!model.value) return ferId
+  const resolved = resolveSuggestedFer(ferId, model.value.content, fers.value)
+  return (resolved && resolveLang(resolved.label, locale.value)) || ferId
+}
+
+function hasSuggestions(question: KnowledgeModelQuestion): boolean {
+  return (question.suggestedFerIds?.length ?? 0) > 0 || (question.suggestedPhrases?.length ?? 0) > 0
 }
 
 async function onFork() {
@@ -160,12 +184,14 @@ async function load() {
   const id = String(route.params.id)
   const version = String(route.params.version)
   try {
-    const [loaded, ferTypesResult] = await Promise.all([
+    const [loaded, ferTypesResult, fersResult] = await Promise.all([
       getKnowledgeModel(id, version),
       getFerTypes().catch(() => ({ items: [], total: 0 })),
+      listFers({ limit: 500 }).catch(() => ({ items: [], total: 0 })),
     ])
     model.value = loaded
     ferTypes.value = Object.fromEntries(ferTypesResult.items.map((f) => [f.key, f]))
+    fers.value = Object.fromEntries(fersResult.items.map((f) => [f.id, f]))
     if (authStore.isAuthenticated) {
       const mine = await listKnowledgeModels({ mine: true }).catch(() => ({ items: [], total: 0 }))
       isOwner.value = mine.items.some((m) => m.id === id && m.version === version)
@@ -329,6 +355,26 @@ watch(() => [route.params.id, route.params.version], load)
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+.suggested-options {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-hover);
+}
+
+.suggested-options-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.suggested-options ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+  font-size: var(--font-size-sm);
 }
 
 .btn {
