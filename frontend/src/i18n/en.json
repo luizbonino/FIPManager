@@ -157,7 +157,9 @@
     "standaloneHeading": "Or fill in a FIP on your own",
     "standaloneText": "No session needed. Pick a questionnaire and start; you can share or claim the profile later.",
     "startFip": "Start a FIP",
-    "yourFipsOnDevice": "FIPs on this device"
+    "yourFipsOnDevice": "FIPs on this device",
+    "createSession": "Create a session",
+    "recentFips": "Your recent FIPs"
   },
   "fipNew": {
     "title": "New FIP",
@@ -479,6 +481,14 @@
     "accept": "I have read the privacy notice.",
     "required": "Please read and accept the privacy notice.",
     "joinNotice": "Your answers are stored by this tool and shared with the workshop facilitator. See the {link}."
+  },
+  "guide": {
+    "navLabel": "Guide",
+    "participantLabel": "Participant guide",
+    "administratorLabel": "Administrator guide",
+    "participantTitle": "Filling in a FIP — A Guide for Participants",
+    "administratorTitle": "Administering FIP Manager — A Guide",
+    "languageFallback": "This guide is not yet available in your language. Showing it in {language}."
   },
   "print": {
     "questionnaire": "Print questionnaire",

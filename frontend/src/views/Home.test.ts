@@ -8,7 +8,9 @@ import type { FipOut } from '@/types/api'
 
 // Spec 09: standalone FIPs — Home.vue's anonymous block gains a "Start a
 // FIP" entry point and a "FIPs on this device" list built from stored edit
-// tokens, dropping any entry whose GET /fips/{id} fails.
+// tokens, dropping any entry whose GET /fips/{id} fails. The signed-in
+// strip (this task) reuses GET /api/me/fips (Workspace's own data source)
+// and GET /api/health for the dashboard-enabled flag (App.vue's own idiom).
 vi.mock('@/api/fips', () => ({
   getFip: vi.fn(),
 }))
@@ -17,16 +19,43 @@ vi.mock('@/lib/editTokens', () => ({
   clearToken: vi.fn(),
   getToken: vi.fn(),
 }))
+vi.mock('@/api/client', async () => {
+  const actual = await vi.importActual<typeof import('@/api/client')>('@/api/client')
+  return { ...actual, get: vi.fn() }
+})
+vi.mock('@/api/me', () => ({
+  myFips: vi.fn(),
+}))
 
 import { getFip } from '@/api/fips'
-import { ApiResponseError } from '@/api/client'
+import { ApiResponseError, get } from '@/api/client'
+import { myFips } from '@/api/me'
 import { clearToken, getToken, listTokenFipIds } from '@/lib/editTokens'
+import { useAuthStore, type User } from '@/stores/auth'
 import Home from './Home.vue'
 
 const getFipMock = vi.mocked(getFip)
 const listTokenFipIdsMock = vi.mocked(listTokenFipIds)
 const clearTokenMock = vi.mocked(clearToken)
 const getTokenMock = vi.mocked(getToken)
+const healthGetMock = vi.mocked(get)
+const myFipsMock = vi.mocked(myFips)
+
+function makeUser(overrides: Partial<User> = {}): User {
+  return {
+    id: 'u1',
+    email: 'a@example.org',
+    displayName: 'Ada',
+    role: 'user',
+    language: 'en',
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+    mustChangePassword: false,
+    privacyAcceptedVersion: '1.0',
+    emailVerifiedAt: '2026-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
 
 function makeI18n() {
   return createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -52,17 +81,36 @@ function makeFip(overrides: Partial<FipOut> = {}): FipOut {
   } as FipOut
 }
 
-async function mountHome() {
+async function mountHome(options: { authenticated?: boolean; dashboardEnabled?: boolean } = {}) {
+  const { authenticated = false, dashboardEnabled = true } = options
   const pinia = createPinia()
   setActivePinia(pinia)
+
+  healthGetMock.mockImplementation(async (path: string) => {
+    if (path === '/auth/me') {
+      if (!authenticated) throw new ApiResponseError(401, { detail: 'unauthorized' })
+      return { ...makeUser(), verificationRequired: false }
+    }
+    if (path === '/health') {
+      return { dashboardEnabled }
+    }
+    throw new Error(`unexpected path ${path}`)
+  })
+
+  const authStore = useAuthStore()
+  await authStore.restoreSession()
 
   const router: Router = createRouter({
     history: createMemoryHistory(),
     routes: [
       { path: '/', name: 'Home', component: Home },
       { path: '/fips/new', name: 'FipNew', component: { template: '<div/>' } },
+      { path: '/fips/:id', name: 'FipRead', component: { template: '<div/>' } },
       { path: '/fips/:id/edit', name: 'FipEditor', component: { template: '<div/>' } },
       { path: '/join/:joinCode', name: 'JoinSession', component: { template: '<div/>' } },
+      { path: '/workspace', name: 'Workspace', component: { template: '<div/>' } },
+      { path: '/sessions/new', name: 'SessionNew', component: { template: '<div/>' } },
+      { path: '/dashboard', name: 'DashboardHome', component: { template: '<div/>' } },
     ],
   })
   await router.push('/')
@@ -79,8 +127,11 @@ describe('Home.vue (spec 09: standalone FIPs)', () => {
     listTokenFipIdsMock.mockReset()
     clearTokenMock.mockReset()
     getTokenMock.mockReset()
+    healthGetMock.mockReset()
+    myFipsMock.mockReset()
     listTokenFipIdsMock.mockReturnValue([])
     getTokenMock.mockReturnValue(null)
+    myFipsMock.mockResolvedValue({ items: [], total: 0 })
   })
 
   it('shows the "Start a FIP" entry point for an anonymous visitor', async () => {
@@ -157,5 +208,67 @@ describe('Home.vue (spec 09: standalone FIPs)', () => {
     const wrapper = await mountHome()
 
     expect(wrapper.text()).not.toContain(en.home.yourFipsOnDevice)
+  })
+
+  describe('signed-in visitor', () => {
+    it('adds a welcome strip with quick links, without removing the join-code box', async () => {
+      const wrapper = await mountHome({ authenticated: true })
+
+      expect(wrapper.text()).toContain('Ada')
+      expect(wrapper.find('a[href="/workspace"]').exists()).toBe(true)
+      expect(wrapper.find('a[href="/sessions/new"]').exists()).toBe(true)
+
+      // Task: signing in ADDS to the home page — the tagline, join-code
+      // box and "fill in a FIP on your own" block all stay visible.
+      expect(wrapper.text()).toContain(en.home.tagline)
+      expect(wrapper.find('#home-join-code').exists()).toBe(true)
+      expect(wrapper.text()).toContain(en.home.standaloneHeading)
+    })
+
+    it('hides the dashboard quick link when the deployment has it disabled', async () => {
+      const wrapper = await mountHome({ authenticated: true, dashboardEnabled: false })
+
+      expect(wrapper.find('a[href="/dashboard"]').exists()).toBe(false)
+    })
+
+    it('shows the dashboard quick link when the deployment has it enabled', async () => {
+      const wrapper = await mountHome({ authenticated: true, dashboardEnabled: true })
+
+      expect(wrapper.find('a[href="/dashboard"]').exists()).toBe(true)
+    })
+
+    it('lists recent FIPs from GET /api/me/fips', async () => {
+      myFipsMock.mockResolvedValue({
+        items: [makeFip({ id: 'fip-9', title: 'Recent one' })],
+        total: 1,
+      })
+
+      const wrapper = await mountHome({ authenticated: true })
+
+      expect(myFipsMock).toHaveBeenCalledWith({ limit: 5 })
+      expect(wrapper.text()).toContain('Recent one')
+      expect(wrapper.find('a[href="/fips/fip-9"]').exists()).toBe(true)
+    })
+
+    it('does not fetch recent FIPs for an anonymous visitor', async () => {
+      await mountHome({ authenticated: false })
+
+      expect(myFipsMock).not.toHaveBeenCalled()
+    })
+
+    // Workshop devices are shared between groups, and an edit token grants
+    // write access: if the device list followed the signed-in user, user B
+    // would get a working edit link for the anonymous FIP user A left in this
+    // browser. The list stays anonymous-only.
+    it('does not expose device FIPs, or their edit links, to a signed-in visitor', async () => {
+      listTokenFipIdsMock.mockReturnValue(['fip-1'])
+      getFipMock.mockResolvedValue(makeFip({ id: 'fip-1', title: 'Alpha' }))
+
+      const wrapper = await mountHome({ authenticated: true })
+
+      expect(wrapper.text()).not.toContain(en.home.yourFipsOnDevice)
+      expect(wrapper.find('a[href="/fips/fip-1/edit"]').exists()).toBe(false)
+      expect(getFipMock).not.toHaveBeenCalled()
+    })
   })
 })

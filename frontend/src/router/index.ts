@@ -18,6 +18,7 @@ import KnowledgeModelPrint from '@/views/KnowledgeModelPrint.vue'
 import Admin from '@/views/Admin.vue'
 import ChangePassword from '@/views/ChangePassword.vue'
 import Privacy from '@/views/Privacy.vue'
+import Guide from '@/views/Guide.vue'
 import ForgotPassword from '@/views/ForgotPassword.vue'
 import ResetPassword from '@/views/ResetPassword.vue'
 import VerifyEmail from '@/views/VerifyEmail.vue'
@@ -67,6 +68,23 @@ const routes: RouteRecordRaw[] = [
     name: 'Privacy',
     component: Privacy,
     meta: { requiresAuth: false },
+  },
+  {
+    // Public, no auth: participants have no account (same reasoning as
+    // Privacy above), and administrators reading their guide before
+    // provisioning an instance are not signed in yet either.
+    path: '/guide',
+    name: 'GuideParticipant',
+    component: Guide,
+    meta: { requiresAuth: false },
+    props: { guideId: 'participant' },
+  },
+  {
+    path: '/guide/admin',
+    name: 'GuideAdmin',
+    component: Guide,
+    meta: { requiresAuth: false },
+    props: { guideId: 'administrator' },
   },
   {
     path: '/forgot-password',
@@ -309,6 +327,8 @@ router.beforeEach(async (to, from) => {
   const MUST_CHANGE_PASSWORD_EXEMPT = new Set([
     'ChangePassword',
     'Privacy',
+    'GuideParticipant',
+    'GuideAdmin',
     'ForgotPassword',
     'ResetPassword',
     'VerifyEmail',

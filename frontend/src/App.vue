@@ -9,6 +9,7 @@
             <router-link to="/knowledge-models" class="nav-link">{{ $t('nav.knowledgeModels') }}</router-link>
             <router-link v-if="networkEnabled" to="/network" class="nav-link">{{ $t('network.navLabel') }}</router-link>
             <router-link v-if="dashboardEnabled" to="/dashboard" class="nav-link">{{ $t('dashboard.navLabel') }}</router-link>
+            <router-link to="/guide" class="nav-link">{{ $t('guide.navLabel') }}</router-link>
             <router-link v-if="!isAuthenticated" to="/login" class="nav-link">{{ $t('nav.login') }}</router-link>
             <router-link v-if="!isAuthenticated" to="/register" class="nav-link">{{ $t('nav.register') }}</router-link>
             <router-link v-if="isAuthenticated" to="/workspace" class="nav-link">{{ $t('nav.workspace') }}</router-link>

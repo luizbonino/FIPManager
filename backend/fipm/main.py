@@ -30,6 +30,7 @@ from fipm.routers import (
     fer_types,
     fers,
     fips,
+    guides,
     health,
     knowledge_models,
     me,
@@ -211,6 +212,7 @@ app.include_router(network.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(privacy.router, prefix="/api")
+app.include_router(guides.router, prefix="/api")
 app.include_router(feedback.router, prefix="/api")
 # spec 06-dmp-linkage.md §3: GET /fips/{id}/embed lives outside /api, so it
 # must be included here -- before the SPA catch-all below -- or the

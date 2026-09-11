@@ -45,6 +45,13 @@ class Settings(BaseSettings):
     admin_password: str | None = None
     default_language: str = "en"
     data_dir: str = str(_REPO_ROOT / "data")
+    # Offline user guides (spec: GET /api/guides): docs/*-guide*.md +
+    # docs/images/ are the single source of truth (never duplicated into
+    # data/) and ship in the image via `COPY docs/ /app/docs/` in the
+    # Dockerfile, which sets FIPM_GUIDES_DIR=/app/docs to match. Resolved
+    # relative to the repo root, like data_dir/db_path above, so a local
+    # checkout works with no env var set.
+    guides_dir: str = str(_REPO_ROOT / "docs")
     static_dir: str = str(_REPO_ROOT / "frontend" / "dist")
     session_ttl_days: int = 14
     cookie_secure: bool = True

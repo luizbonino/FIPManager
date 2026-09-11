@@ -157,7 +157,9 @@
     "standaloneHeading": "Ou preencha um FIP por conta própria",
     "standaloneText": "Não é necessária uma sessão. Escolha um questionário e comece; você pode compartilhar ou reivindicar o perfil depois.",
     "startFip": "Começar um FIP",
-    "yourFipsOnDevice": "FIPs neste dispositivo"
+    "yourFipsOnDevice": "FIPs neste dispositivo",
+    "createSession": "Criar uma sessão",
+    "recentFips": "Seus FIPs recentes"
   },
   "fipNew": {
     "title": "Novo FIP",
@@ -479,6 +481,14 @@
     "accept": "Li o aviso de privacidade.",
     "required": "Leia e aceite o aviso de privacidade.",
     "joinNotice": "Suas respostas são armazenadas por esta ferramenta e compartilhadas com o facilitador do workshop. Consulte o {link}."
+  },
+  "guide": {
+    "navLabel": "Guia",
+    "participantLabel": "Guia do participante",
+    "administratorLabel": "Guia do administrador",
+    "participantTitle": "Preenchendo um FIP — Guia para Participantes",
+    "administratorTitle": "Executando o Gerenciador de FIP — Guia para Administradores e Facilitadores",
+    "languageFallback": "Este guia ainda não está disponível no seu idioma. Exibindo em {language}."
   },
   "print": {
     "questionnaire": "Imprimir questionário",

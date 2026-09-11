@@ -954,6 +954,26 @@ class PrivacyOut(CamelModel):
 
 
 # ---------------------------------------------------------------------------
+# Offline user guides
+# ---------------------------------------------------------------------------
+
+
+class GuideListItemOut(CamelModel):
+    id: str
+    languages: list[str]
+
+
+class GuideListOut(CamelModel):
+    items: list[GuideListItemOut]
+
+
+class GuideOut(CamelModel):
+    id: str
+    language: str
+    markdown: str
+
+
+# ---------------------------------------------------------------------------
 # Feedback (spec 05-v1-completion.md §4)
 # ---------------------------------------------------------------------------
 
