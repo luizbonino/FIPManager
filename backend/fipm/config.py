@@ -165,6 +165,69 @@ class Settings(BaseSettings):
                 f"FIPM_SMTP_TLS must be one of 'starttls', 'ssl', 'none', got {self.smtp_tls!r}"
             )
 
+    # spec 13-fip-dashboard.md §7.5: the five-view dashboard. Defaults are
+    # the cost model of §3/§4, not measurements -- §8.2's scale test exists
+    # to replace them with real numbers on real hardware (§7.4).
+    dashboard_enabled: bool = True
+    dashboard_min_population: int = 5
+    dashboard_live_max_cells: int = 250_000
+    dashboard_sync_max_cells: int = 600_000
+    dashboard_fallback_max_fips: int = 200
+    dashboard_snapshot_ttl_seconds: int = 3600
+    dashboard_snapshot_max_bytes: int = 4 * 1024 * 1024
+    dashboard_csv_max_rows: int = 100_000
+    dashboard_backfill_on_startup: bool = True
+    dashboard_startup_backfill_max_fips: int = 500
+    dashboard_posting_budget: int = 20_000
+    dashboard_posting_cap: int = 2_000
+    dashboard_candidate_cap: int = 200
+    dashboard_df_skip_share: float = 0.20
+    dashboard_df_min_keys: int = 3
+    dashboard_lsh_k: int = 128
+    dashboard_lsh_bands: int = 32
+    dashboard_lsh_rows: int = 4
+    dashboard_lsh_seed: int = 20260911
+    dashboard_lsh_bucket_max: int = 500
+    dashboard_lsh_pair_cap: int = 200_000
+    dashboard_exact_pairs_max_fips: int = 300
+    dashboard_live_max_fips_scatter: int = 300
+    dashboard_cluster_min_sim: float = 0.6
+    dashboard_default_weighting: str = "principle"
+    # spec 13-fip-dashboard.md §11.3 (amendment, 11 Sep 2026): the scatter's
+    # `edges` are thresholded at dashboard_cluster_min_sim, ordered by
+    # similarity, and capped here -- an uncapped edge list is unbounded
+    # (300 FIPs already admits 44,850 pairs) in a view whose whole premise
+    # is that no response scales with the population.
+    dashboard_map_edge_cap: int = 5000
+
+    def check_dashboard_safety(self) -> None:
+        """spec 13-fip-dashboard.md §7.5: refuse to start with a dashboard
+        configuration that would silently corrupt LSH banding, admit a
+        `population_too_small` bypass, allow the sync path to be *smaller*
+        than the live-tier ceiling it must cover, or a document-frequency
+        skip share that can never trigger (<=0) or that skips everything
+        (>1). Modelled on `check_network_safety` above."""
+        if self.dashboard_lsh_bands * self.dashboard_lsh_rows != self.dashboard_lsh_k:
+            raise RuntimeError(
+                "FIPM_DASHBOARD_LSH_BANDS * FIPM_DASHBOARD_LSH_ROWS must equal "
+                f"FIPM_DASHBOARD_LSH_K, got {self.dashboard_lsh_bands} * "
+                f"{self.dashboard_lsh_rows} != {self.dashboard_lsh_k}"
+            )
+        if self.dashboard_min_population < 1:
+            raise RuntimeError(
+                f"FIPM_DASHBOARD_MIN_POPULATION must be >= 1, got {self.dashboard_min_population}"
+            )
+        if self.dashboard_sync_max_cells < self.dashboard_live_max_cells:
+            raise RuntimeError(
+                "FIPM_DASHBOARD_SYNC_MAX_CELLS must be >= FIPM_DASHBOARD_LIVE_MAX_CELLS, got "
+                f"{self.dashboard_sync_max_cells} < {self.dashboard_live_max_cells}"
+            )
+        if not (0 < self.dashboard_df_skip_share <= 1):
+            raise RuntimeError(
+                "FIPM_DASHBOARD_DF_SKIP_SHARE must be in (0, 1], got "
+                f"{self.dashboard_df_skip_share}"
+            )
+
     @property
     def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]

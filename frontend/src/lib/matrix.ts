@@ -146,11 +146,64 @@ export function refKey(id: string, version: string): string {
 /**
  * NFC-normalise, trim, collapse internal whitespace and casefold — the
  * *same* normalisation the backend's RDF export applies to free text
- * (spec 03 §2.4), so the matrix and the Turtle export agree on what "the
- * same resource" is.
+ * (spec 03 §2.4) and that `fipm.rdf.normalise_free_text`/`fipm.projection.
+ * convergence_key` use to compute the stored `fer_key` (spec 13 §1.5). This
+ * used to be `.toLowerCase()`, which is not Python's `str.casefold()`:
+ * `casefold()` additionally expands the German sharp s (`ß`) to `ss`
+ * (`"STRASSE".casefold() === "strasse" === "straße".casefold()`), while
+ * `toLowerCase()` leaves `ß` untouched (`"Straße".toLowerCase() ===
+ * "straße"`). That divergence let `Straße`/`STRASSE` collapse to one
+ * `fer_key` in the write-maintained projection (§13 confirmed finding #6)
+ * but stay two distinct keys in the session matrix's own convergence
+ * check -- fixed here, matching the projection's stored keys, since `rdf.py`
+ * is the side every backend consumer (the RDF export, `fip_declarations`)
+ * already agrees on. `toLowerCase()` remains correct for every other
+ * script; the extra `replace` covers JS's one missing special case.
+ *
+ * Round-3 fix (item B): `ß` is a German-specific rule and this project
+ * serves en/pt-PT/pt-BR/es, not de -- the divergence that actually bites
+ * here is PDF copy-paste text carrying pre-composed Latin ligature
+ * codepoints (U+FB00-FB06: `ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ`), which `casefold()` expands to
+ * their letter sequences (`"Scientiﬁc Data".casefold() ===
+ * "scientific data"`) but `toLowerCase()` leaves as the ligature glyph, so
+ * a pasted "Scientiﬁc Data" and a typed "Scientific Data" landed on two
+ * different `fer_key`s. Same story for the Greek final sigma `ς`, which
+ * `casefold()` folds to the regular `σ` (`toLowerCase()` on `ς` is a
+ * no-op) -- e.g. `"ΑΡΧΕΙΟΣ".casefold()` ends in `σ`, not `ς`. Both are
+ * single, case-invariant codepoints with one fixed expansion, so a plain
+ * `replace` reproduces `casefold()` exactly for them (no library needed).
+ * `ŉ` (U+0149) is included for the same reason: `casefold()` expands it to
+ * `ʼn` (U+02BC + "n"), one more fixed, unconditional expansion.
+ *
+ * Residual divergence (documented, not fixed): Python's `casefold()` also
+ * special-cases the Turkish dotless/dotted I pair, the Cherokee syllabary
+ * uppercase/lowercase forms it did not previously have, and a handful of
+ * other locale-agnostic-but-still-multi-codepoint expansions in the
+ * Unicode `CaseFolding.txt` "F"/"T" tables that `toLowerCase()` does not
+ * reproduce and that this function does not attempt to enumerate --
+ * `backend/tests/fixtures/dashboard/normalisation-cases.json`'s
+ * `turkish-dotless`/`turkish-dotted` groups exist precisely to pin that
+ * gap as accepted (both sides agree those two stay distinct keys), not to
+ * hide it. Full `casefold()` parity would need a Unicode case-folding
+ * table shipped to the browser, which the "no new dependencies" brief
+ * rules out.
  */
 export function normaliseFreeText(text: string): string {
-  return text.normalize('NFC').trim().replace(/\s+/g, ' ').toLowerCase()
+  return text
+    .normalize('NFC')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .replace(/ß/g, 'ss')
+    .replace(/ﬀ/g, 'ff')
+    .replace(/ﬁ/g, 'fi')
+    .replace(/ﬂ/g, 'fl')
+    .replace(/ﬃ/g, 'ffi')
+    .replace(/ﬄ/g, 'ffl')
+    .replace(/ﬅ/g, 'st')
+    .replace(/ﬆ/g, 'st')
+    .replace(/ς/g, 'σ')
+    .replace(/ŉ/g, 'ʼn')
 }
 
 function truncateLabel(name: string): string {

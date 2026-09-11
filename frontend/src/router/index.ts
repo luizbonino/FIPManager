@@ -24,6 +24,12 @@ import VerifyEmail from '@/views/VerifyEmail.vue'
 import FipMigrate from '@/views/FipMigrate.vue'
 import NetworkFipList from '@/views/NetworkFipList.vue'
 import NetworkFipDetail from '@/views/NetworkFipDetail.vue'
+import DashboardHome from '@/views/DashboardHome.vue'
+import DashboardCoverage from '@/views/DashboardCoverage.vue'
+import DashboardAdoption from '@/views/DashboardAdoption.vue'
+import DashboardSimilarity from '@/views/DashboardSimilarity.vue'
+import DashboardGaps from '@/views/DashboardGaps.vue'
+import DashboardEvolution from '@/views/DashboardEvolution.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useFipEditorStore } from '@/stores/fipEditor'
 import { useKmEditorStore } from '@/stores/kmEditor'
@@ -208,6 +214,50 @@ const routes: RouteRecordRaw[] = [
     path: '/knowledge-models/:id/:version/print',
     name: 'KnowledgeModelPrint',
     component: KnowledgeModelPrint,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    // spec 13 §6.1: anonymous viewers get the public/network populations,
+    // so this route (and its five children below) never require auth.
+    path: '/dashboard',
+    name: 'DashboardHome',
+    component: DashboardHome,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    path: '/dashboard/coverage',
+    name: 'DashboardCoverage',
+    component: DashboardCoverage,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    path: '/dashboard/adoption',
+    name: 'DashboardAdoption',
+    component: DashboardAdoption,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    path: '/dashboard/similarity',
+    name: 'DashboardSimilarity',
+    component: DashboardSimilarity,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    path: '/dashboard/gaps',
+    name: 'DashboardGaps',
+    component: DashboardGaps,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    path: '/dashboard/evolution',
+    name: 'DashboardEvolution',
+    component: DashboardEvolution,
     meta: { requiresAuth: false },
     props: true,
   },

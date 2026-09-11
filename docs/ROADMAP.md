@@ -72,7 +72,7 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] FIP migration between knowledge-model versions (DSW-style) — done 9 Sep, docs/specs/07-mail-and-migration.md: diff view, split/orphan decisions, migratedFrom in exports; verified in browser.
 - [ ] ORCID and Login Único Fiocruz sign-in (needs client registrations). Email verification and password reset done 9 Sep behind FIPM_MAIL_BACKEND (console by default; set smtp + FIPM_SMTP_* at deployment) and FIPM_REQUIRE_EMAIL_VERIFICATION (default off).
 - [ ] Understanding and assurance layer: coherence rules, positive/negative examples, section reflection, criteria per FER type, assessments read from the nanopublication network, automated probes (spec 12 §A–B, proposal 10 Sep).
-- [ ] FIP dashboard over a session, this instance's public FIPs and network FIPs: principle coverage, resource adoption, similarity and convergence, gaps, evolution (spec 12 §C).
+- [x] FIP dashboard: five views (coverage, resource adoption, similarity/convergence, gaps, evolution) over sessions, public FIPs, or network FIPs; scale-first with declaration projection, MinHash/LSH and snapshot cache (targeting 10k–100k FIPs); k-anonymity on aggregates with facilitator exemption; CSV export and print stylesheet per view; CLI commands: `backfill-declarations`, `check-declarations`, `refresh-dashboard`, `ingest-network-fips`; behind `FIPM_DASHBOARD_ENABLED` (done 11 Sep, docs/specs/13-fip-dashboard.md).
 - [ ] Team workspaces (share sessions, FIPs, models with collaborators); public FIP gallery.
 - [ ] Paper or report on the workshop results and the FIP–DMP linkage.
 

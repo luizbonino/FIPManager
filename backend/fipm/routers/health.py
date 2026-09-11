@@ -36,4 +36,5 @@ def health() -> HealthOut:
         privacy_version=privacy_version,
         languages=list(get_args(Language)),
         network_enabled=settings.network_enabled,
+        dashboard_enabled=settings.dashboard_enabled,
     )

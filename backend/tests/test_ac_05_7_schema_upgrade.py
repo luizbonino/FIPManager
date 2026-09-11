@@ -45,7 +45,13 @@ def _build_v3_db(db_path: str) -> None:
         );
         CREATE UNIQUE INDEX ix_users_email ON users(email);
         CREATE TABLE fips (
-            id VARCHAR NOT NULL PRIMARY KEY
+            id VARCHAR NOT NULL PRIMARY KEY,
+            visibility VARCHAR,
+            owner_id VARCHAR,
+            session_id VARCHAR,
+            questionnaire_id VARCHAR,
+            questionnaire_version VARCHAR,
+            updated_at DATETIME
         );
         CREATE TABLE schema_version (
             id INTEGER PRIMARY KEY,
@@ -138,7 +144,13 @@ CREATE TABLE users (
 );
 CREATE UNIQUE INDEX ix_users_email ON users(email);
 CREATE TABLE fips (
-    id VARCHAR NOT NULL PRIMARY KEY
+    id VARCHAR NOT NULL PRIMARY KEY,
+    visibility VARCHAR,
+    owner_id VARCHAR,
+    session_id VARCHAR,
+    questionnaire_id VARCHAR,
+    questionnaire_version VARCHAR,
+    updated_at DATETIME
 );
 CREATE TABLE schema_version (
     id INTEGER PRIMARY KEY,

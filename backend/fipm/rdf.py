@@ -261,14 +261,23 @@ def _frag(part: str) -> str:
     return quote(part, safe=".-")
 
 
-def _free_text_hash(text: str) -> str:
-    """First 16 hex chars of SHA-256 of the NFC-normalised, stripped,
-    whitespace-collapsed, casefolded text -- spec 03 §2.4, the same
-    normalisation the comparison matrix uses (spec 03 §1.2) so both agree on
-    what "the same resource" is."""
+def normalise_free_text(text: str) -> str:
+    """NFC-normalise, strip, collapse internal whitespace, casefold -- spec
+    03 §2.4 / spec 13-fip-dashboard.md §1.5: the *one* free-text
+    normalisation in the backend, exactly matching
+    `frontend/src/lib/matrix.ts::normaliseFreeText` (modulo casefold vs
+    lower-case, both fixture-tested against the same tricky-input table) and
+    reused, not reimplemented, by `_free_text_hash` and by
+    `fipm.projection.convergence_key`."""
     normalised = unicodedata.normalize("NFC", text).strip()
-    normalised = re.sub(r"\s+", " ", normalised).casefold()
-    return hashlib.sha256(normalised.encode("utf-8")).hexdigest()[:16]
+    return re.sub(r"\s+", " ", normalised).casefold()
+
+
+def _free_text_hash(text: str) -> str:
+    """First 16 hex chars of SHA-256 of `normalise_free_text(text)` -- spec
+    03 §2.4, the same normalisation the comparison matrix uses (spec 03
+    §1.2) so both agree on what "the same resource" is."""
+    return hashlib.sha256(normalise_free_text(text).encode("utf-8")).hexdigest()[:16]
 
 
 def _fer_type_class(settings: Settings, fer_type_key: str | None) -> URIRef | None:

@@ -40,6 +40,9 @@
           </label>
           <button type="button" class="btn btn-secondary" @click="printPage">{{ $t('matrix.print') }}</button>
           <a class="btn btn-secondary" :href="sessionExportTtlUrl(session.id)">{{ $t('export.sessionTtl') }}</a>
+          <router-link class="btn btn-secondary" :to="`/dashboard?pop=session:${session.id}`">
+            {{ $t('matrix.dashboardForSession') }}
+          </router-link>
         </div>
 
         <MatrixLegend />

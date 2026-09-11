@@ -74,7 +74,31 @@ logger = logging.getLogger(__name__)
 # "fetchedAt"}`). NULL on a pre-v7 row (or any FIP not created via
 # POST /fips/from-network) means "not from the network" -- no data
 # migration/backfill needed here either.
-SCHEMA_VERSION = 7
+# v8 (spec 13-fip-dashboard.md §7.1): six new tables (brief A) -- `fip_facets`,
+# `fip_cells`, `fip_declarations`, `fer_key_df`, `dashboard_populations`,
+# `dashboard_meta` -- all created by `create_all()` below (no `_ensure_
+# columns()` entries needed: every column on every one of them is new-table,
+# not new-column-on-an-existing-table). The one mechanism `create_all()`
+# cannot provide: four new *covering* indexes on the pre-existing `fips`
+# table (§2.2), added by `_ensure_indexes()` below, since `create_all()`
+# only creates missing tables, never adds an index to a table that already
+# exists. The projection itself starts empty on an upgraded DB and is
+# populated by the §7.2 startup backfill or `backfill-declarations`; no data
+# migration/backfill runs here. Brief B (spec §10.2) lands in the same v8
+# release and adds the remaining five of the eleven tables spec §7.1 names:
+# `fip_signatures`, `fip_signature_bands` (§4.2, one MinHash signature + 32
+# band rows per FIP), `lsh_hot_buckets` (§4.4, maintained by `refresh-
+# dashboard`/`ingest-network-fips`'s own hot-bucket refresh, never per-
+# request), `network_fips` (§5.4, the read-only nanopublication-network
+# shadow-FIP identity -- no `fips` row, `fip_id` prefixed `net:` so it can
+# never alias one), and `dashboard_snapshots` (§5.1, the T2 tier). All five
+# are new tables too (`create_all()` alone suffices; no `_ensure_columns()`
+# entries, no further `_ensure_indexes()` entries -- their indexes are all
+# declared inline on tables that don't yet exist on an upgraded database,
+# so `create_all()` creates them as part of the table DDL itself). Brief B
+# does not bump `SCHEMA_VERSION` further since it ships in the same
+# release as brief A.
+SCHEMA_VERSION = 8
 
 _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("users", "must_change_password", "BOOLEAN NOT NULL DEFAULT 0"),
@@ -87,6 +111,44 @@ _EXPECTED_COLUMNS: tuple[tuple[str, str, str], ...] = (
     ("fips", "orphaned_answers", "JSON"),
     ("workshop_sessions", "questionnaire_refs", "JSON"),
     ("fips", "network_origin", "JSON"),
+)
+
+# v8 (spec 13-fip-dashboard.md §1.9/§2.2): the four covering indexes on the
+# pre-existing `fips` table. `create_all()` never adds an index to a table
+# that already exists (same reason `_ensure_columns()` exists for columns),
+# so an upgraded v7 database would otherwise silently never get them --
+# every dashboard population query would then run an unindexed table scan
+# instead of the index-only scan §2.2 is built around. Kept in exact sync
+# with the `Index(...)` declarations in `Fip.__table_args__` (fipm.models).
+_EXPECTED_INDEXES: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    (
+        "fips",
+        "ix_fips_pop_vis",
+        (
+            "visibility",
+            "updated_at",
+            "id",
+            "session_id",
+            "owner_id",
+            "questionnaire_id",
+            "questionnaire_version",
+        ),
+    ),
+    ("fips", "ix_fips_pop_sess", ("session_id", "updated_at", "id", "visibility", "owner_id")),
+    (
+        "fips",
+        "ix_fips_pop_km",
+        (
+            "questionnaire_id",
+            "questionnaire_version",
+            "updated_at",
+            "id",
+            "visibility",
+            "owner_id",
+            "session_id",
+        ),
+    ),
+    ("fips", "ix_fips_pop_own", ("owner_id", "updated_at", "id", "visibility", "session_id")),
 )
 
 settings = get_settings()
@@ -107,6 +169,16 @@ def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:  # noqa: AN
 
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, expire_on_commit=False)
+
+# spec 13-fip-dashboard.md §1.6 (D3): every Session this factory creates
+# carries the dashboard projection's write hook -- registered here, once,
+# at import time, so no router/CLI command can forget it (that is the whole
+# point of D3). Deferred import: fipm.projection imports fipm.models, which
+# is already imported above, but keeping the import local avoids any import-
+# order surprise if that ever changes.
+from fipm.projection import register_projection_hooks  # noqa: E402
+
+register_projection_hooks(SessionLocal)
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -144,13 +216,39 @@ def _ensure_columns(bind: Engine | None = None) -> None:
                 logger.info("added column %s.%s", table, column)
 
 
+def _ensure_indexes(bind: Engine | None = None) -> None:
+    """Idempotently `CREATE INDEX IF NOT EXISTS` every `_EXPECTED_INDEXES`
+    entry -- SQLite (and Postgres, spec §1.9) both support the `IF NOT
+    EXISTS` form, so this is safe to run on both a brand-new database (where
+    `create_all()` already created these indexes as part of the table DDL,
+    making this a no-op) and an upgraded one (where the table predates the
+    index and `create_all()` alone would never add it). Same duplicate-
+    tolerant `OperationalError` handling as `_ensure_columns()`, for the same
+    two-processes-racing-at-startup reason."""
+    eng = bind if bind is not None else engine
+    with eng.begin() as conn:
+        for table, name, columns in _EXPECTED_INDEXES:
+            cols_sql = ", ".join(columns)
+            try:
+                conn.execute(text(f"CREATE INDEX IF NOT EXISTS {name} ON {table} ({cols_sql})"))
+            except OperationalError as exc:
+                if "already exists" in str(exc).lower():
+                    logger.info("index %s already created concurrently, skipping", name)
+                    continue
+                raise
+            else:
+                logger.info("ensured index %s on %s", name, table)
+
+
 def init_db() -> None:
-    """Create tables if missing, add missing columns to existing tables, and
-    reconcile schema_version (no Alembic migrations in v1)."""
+    """Create tables if missing, add missing columns to existing tables,
+    ensure indexes new to an existing table exist, and reconcile
+    schema_version (no Alembic migrations in v1)."""
     from fipm.models import SchemaVersionRow
 
     Base.metadata.create_all(bind=engine)
     _ensure_columns()
+    _ensure_indexes()
     with SessionLocal() as db:
         row = db.get(SchemaVersionRow, 1)
         if row is None:

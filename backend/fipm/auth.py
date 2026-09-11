@@ -176,6 +176,27 @@ def check_anonymous_fip_rate_limit(request: Request) -> None:
     _rate_limiter.record(f"anon-fip-ip:{ip}", ANONYMOUS_FIP_WINDOW_SECONDS)
 
 
+# spec 13-fip-dashboard.md §2.1: POST /api/dashboard/populations from an
+# anonymous caller (confirmed finding #9) -- `list_populations` never shows
+# an `owner_id IS NULL` row back to anyone, so an anonymous caller has no
+# way to reuse or even see a row it created; without a cap, that endpoint
+# alone can grow `dashboard_populations` unboundedly. Signed-in callers are
+# never subject to this (their rows are owner-scoped and visible to them),
+# same shape as `check_anonymous_fip_rate_limit`.
+ANONYMOUS_POPULATION_LIMIT_PER_IP = 30
+ANONYMOUS_POPULATION_WINDOW_SECONDS = 60 * 60
+
+
+def check_anonymous_population_rate_limit(request: Request) -> None:
+    ip = client_ip(request)
+    limited, retry = _rate_limiter.is_limited(
+        f"anon-pop-ip:{ip}", ANONYMOUS_POPULATION_LIMIT_PER_IP, ANONYMOUS_POPULATION_WINDOW_SECONDS
+    )
+    if limited:
+        _raise_rate_limited(retry)
+    _rate_limiter.record(f"anon-pop-ip:{ip}", ANONYMOUS_POPULATION_WINDOW_SECONDS)
+
+
 def check_feedback_rate_limit(request: Request) -> None:
     """20 per hour per client IP (spec 05-v1-completion.md §4, review
     finding 6). Only *checks* the cap -- call `record_feedback_attempt`

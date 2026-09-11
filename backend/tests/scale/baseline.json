@@ -1,0 +1,57 @@
+{
+  "n": 2000,
+  "n_quarter": 500,
+  "fips_full": 2000,
+  "fips_quarter": 500,
+  "neighbours_posting": {
+    "rows_scanned_at_n": 796,
+    "rows_scanned_at_n_quarter": 495,
+    "keys_used_at_n": 4,
+    "candidates_scored_at_n": 199
+  },
+  "views": {
+    "coverage": {
+      "statement_count": 2,
+      "wall_ms_at_n": 50.72,
+      "wall_ms_at_n_quarter": 29.12,
+      "under_soft_ceiling_3s": true
+    },
+    "gaps": {
+      "statement_count": 2,
+      "wall_ms_at_n": 37.36,
+      "wall_ms_at_n_quarter": 8.21,
+      "under_soft_ceiling_3s": true
+    },
+    "adoption": {
+      "statement_count": 4,
+      "wall_ms_at_n": 28.11,
+      "wall_ms_at_n_quarter": 13.92,
+      "under_soft_ceiling_3s": true
+    },
+    "evolution": {
+      "statement_count": 3,
+      "wall_ms_at_n": 14.4,
+      "wall_ms_at_n_quarter": 4.13,
+      "under_soft_ceiling_3s": true
+    },
+    "neighbours": {
+      "statement_count": 4,
+      "wall_ms_at_n": 50.5,
+      "wall_ms_at_n_quarter": 33.25,
+      "under_soft_ceiling_3s": true
+    },
+    "map": {
+      "statement_count": 6,
+      "wall_ms_at_n": 13210.39,
+      "wall_ms_at_n_quarter": 1122.42,
+      "under_soft_ceiling_3s": false
+    },
+    "clusters": {
+      "statement_count": 4,
+      "wall_ms_at_n": 13758.79,
+      "wall_ms_at_n_quarter": 1162.38,
+      "under_soft_ceiling_3s": false
+    }
+  },
+  "db_file_size_bytes_at_n": 37777408
+}

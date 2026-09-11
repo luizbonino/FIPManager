@@ -54,6 +54,17 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "f
 # own oracle -- neither may be reflowed to fit the line-length limit.
 "fipm/network.py" = ["E501"]
 "tests/test_ac_11_05_network_safety.py" = ["E501"]
+# spec 13-fip-dashboard.md test 39: a hand-built v7 schema fixture (mirrors
+# test_ac_05_7_schema_upgrade.py's pattern) -- the CREATE TABLE/INSERT DDL
+# is kept on as few lines as reasonably readable, not reflowed to 100 cols.
+"tests/test_ac_13_03_views.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# spec 13-fip-dashboard.md §8.2: the scale test harness (backend/tests/scale/)
+# is opt-in -- excluded from the default run, `uv run pytest -m scale` to
+# opt in (FIPM_TEST_SCALE_FIPS controls N, default 2000).
+markers = [
+    "scale: opt-in scale test (backend/tests/scale/), excluded by default",
+]
+addopts = "-m 'not scale'"

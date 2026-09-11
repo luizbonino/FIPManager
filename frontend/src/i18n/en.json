@@ -144,7 +144,9 @@
     "retry": "Retry",
     "notFound": "Not found",
     "view": "View",
-    "add": "Add"
+    "add": "Add",
+    "previous": "Previous",
+    "next": "Next"
   },
   "home": {
     "heading": "Build your Findable, Accessible, Interoperable, Reusable data plan",
@@ -343,7 +345,8 @@
     "successor": "→ replaced by {label}",
     "notApplicableShort": "N/A",
     "notApplicableFull": "Not applicable",
-    "absent": "Not part of this questionnaire"
+    "absent": "Not part of this questionnaire",
+    "dashboardForSession": "Dashboard for this session"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -592,5 +595,195 @@
     "prerequisitesTitle": "Still needed to publish",
     "previewTitle": "Preview: FIP nanopublication",
     "downloadButton": "Download bundle (.zip)"
+  },
+  "dashboard": {
+    "navLabel": "Dashboard",
+    "csv": "Export as CSV",
+    "nav": {
+      "coverage": "Coverage",
+      "adoption": "Resource adoption",
+      "similarity": "Similarity",
+      "gaps": "Gaps",
+      "evolution": "Evolution"
+    },
+    "home": {
+      "title": "FIP dashboard",
+      "fipsInPopulation": "FIPs in this population",
+      "coverageDesc": "Where the population is collectively strong or weak, per FAIR principle.",
+      "adoptionDesc": "Which resources are declared, by how many FIPs.",
+      "similarityDesc": "Nearest neighbours, clusters and the convergence map.",
+      "gapsDesc": "Questions left unanswered, none or not applicable.",
+      "evolutionDesc": "What is planned, and migration history.",
+      "fipCountWithheld": "Withheld"
+    },
+    "cellState": {
+      "current": "Current",
+      "planned": "Planned",
+      "none": "None",
+      "notApplicable": "Not applicable",
+      "unanswered": "Unanswered",
+      "absent": "Absent"
+    },
+    "legend": {
+      "title": "Legend",
+      "colourHint": "Every cell shows its count and share as text — colour is never the only signal."
+    },
+    "snapshot": {
+      "computedAgo": "Computed {age} ago",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing…",
+      "pending": "Computing a fresh snapshot (attempt {attempts} of {max})…",
+      "staleShownBelow": "Last known numbers, shown dimmed below while a fresh snapshot computes:",
+      "justNow": "just now",
+      "minutesAgo": "{minutes} minute(s)",
+      "hoursAgo": "{hours} hour(s)",
+      "unknownAge": "an unknown time"
+    },
+    "degraded": {
+      "staleCount": "{stale} of {total} FIPs have a stale or missing projection."
+    },
+    "errors": {
+      "dashboard_disabled": "The dashboard is turned off on this deployment.",
+      "population_too_small": "This population is too small to show without identifying individual FIPs (minimum {minimum}).",
+      "projection_stale": "The dashboard's data needs to be refreshed before this population can be shown.",
+      "projection_missing": "This population has not been indexed for the dashboard yet.",
+      "similarity_population_too_large": "This population is too large to compute similarity for directly — narrow it and try again.",
+      "invalid_population": "This population could not be understood.",
+      "questionnaire_too_large": "This questionnaire has too many questions for the dashboard.",
+      "refresh_in_progress": "A refresh for this population is already running.",
+      "unknown": "Something went wrong loading this view."
+    },
+    "population": {
+      "title": "Population",
+      "addTerm": "Add",
+      "add": "Add term",
+      "idLabel": "ID",
+      "versionLabel": "Version",
+      "sessionIdLabel": "Session ID",
+      "kind": {
+        "public": "All public FIPs",
+        "network": "Network FIPs",
+        "mine": "My FIPs",
+        "session": "A session",
+        "questionnaire": "A questionnaire",
+        "area": "An area"
+      },
+      "termSession": "Session: {id}",
+      "termQuestionnaire": "Questionnaire: {id}@{version}",
+      "termArea": "Area: {id}@{version}",
+      "noTerms": "No terms added yet — add one above.",
+      "remove": "Remove",
+      "advanced": "Date range",
+      "dateRange": "Only FIPs updated",
+      "updatedAfter": "After",
+      "updatedBefore": "Before",
+      "labelField": "Label",
+      "labelPlaceholder": "Name this population",
+      "save": "Save this population",
+      "saving": "Saving…",
+      "saveFailed": "Could not save this population — try again.",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied",
+      "tooLargeForLink": "This population is too large for an inline link — save it instead.",
+      "savedMeta": "{count} FIPs · computed {computedAt}"
+    },
+    "coverage": {
+      "title": "Coverage",
+      "groupBy": "Group by",
+      "level": {
+        "question": "Question",
+        "subPrinciple": "Sub-principle",
+        "principle": "Principle",
+        "group": "FAIR letter"
+      },
+      "scope": "Scope",
+      "scopeAny": "Metadata and data",
+      "scopeMetadata": "Metadata",
+      "scopeData": "Data",
+      "includeAssurance": "Show assurance mix",
+      "heatMapLabel": "Coverage heat map: rows are principles, columns are declaration states",
+      "noRows": "No rows to show for this population yet.",
+      "cellAriaLabel": "{row}, {state}: {count} FIPs ({share})",
+      "totals": "{fips} FIPs · {cells} cells"
+    },
+    "adoption": {
+      "title": "Resource adoption",
+      "groupBy": "Group by",
+      "groupByFer": "Resource",
+      "groupByFerType": "Resource type",
+      "groupByArea": "Area",
+      "groupByQuestion": "Question",
+      "status": "Status",
+      "statusAny": "Any status",
+      "catalogued": "Catalogue",
+      "cataloguedAny": "All resources",
+      "cataloguedOnly": "Catalogued only",
+      "longTail": "Free-text long tail",
+      "colLabel": "Resource",
+      "colFerType": "Type",
+      "colStatus": "Status",
+      "colFips": "FIPs",
+      "colShare": "Share",
+      "pageInfo": "{from}–{to} of {total}",
+      "truncated": "Showing the top 1000 of {total} groups — narrow the population for the full list."
+    },
+    "gaps": {
+      "title": "Gaps and coherence",
+      "minShare": "Minimum share",
+      "colQuestion": "Question",
+      "colUnanswered": "Unanswered",
+      "colNone": "None",
+      "colNotApplicable": "Not applicable",
+      "colPlanned": "Planned only",
+      "colCoherence": "Coherence flags",
+      "colTypeMismatch": "Type mismatches",
+      "truncated": "This list was truncated — narrow the population for the full list."
+    },
+    "evolution": {
+      "title": "Evolution",
+      "groupBy": "Group by",
+      "plannedTitle": "Planned and replacements",
+      "migrationTitle": "Migration history",
+      "colQuestion": "Question",
+      "colStatus": "Status",
+      "colFer": "Resource",
+      "colSuccessor": "Successor",
+      "colFrom": "Migrated from",
+      "colTo": "Questionnaire",
+      "colFips": "FIPs",
+      "truncated": "This list was truncated — narrow the population for the full list."
+    },
+    "similarity": {
+      "title": "Similarity and convergence",
+      "weighting": "Weighting",
+      "weightingPrinciple": "Equal per principle (default)",
+      "weightingQuestion": "Equal per question",
+      "weightingLetter": "Equal per FAIR letter",
+      "tabNeighbours": "Neighbours",
+      "tabDistribution": "Distribution",
+      "tabClusters": "Clusters",
+      "fipId": "FIP ID",
+      "fipIdPlaceholder": "Paste a FIP ID",
+      "typeaheadNoResults": "No matching FIPs",
+      "neighbourFip": "FIP",
+      "similarity": "Similarity",
+      "sharedKeys": "Shared resources",
+      "topShared": "Most shared",
+      "noNeighbours": "No neighbours found for this FIP in this population.",
+      "candidateBudgetExhausted": "The candidate search budget ran out before every FIP could be checked — this list may be incomplete.",
+      "postingTruncated": "Some very common resources were capped during the search, in a fixed (not random) order.",
+      "skippedPopularKeys": "These near-universal resources were skipped as uninformative: {keys}",
+      "histogramLabel": "Histogram of pairwise similarity scores",
+      "histogramBarLabel": "{from} to {to}: {count} pairs",
+      "hotBuckets": "{count} group(s) of near-identical FIPs were collapsed into a single representative rather than scored pairwise.",
+      "scatterUnavailable": "This population is too large to plot FIP-by-FIP — see the distribution and clusters instead.",
+      "scatterLabel": "Scatter plot of FIP similarity",
+      "clusterSize": "{size} FIPs",
+      "meanSimilarity": "mean similarity {value}",
+      "representative": "Representative",
+      "showMembers": "Show members ({count})",
+      "hideMembers": "Hide members",
+      "clustersTruncated": "Only the largest clusters are shown — narrow the population for the full list."
+    }
   }
 }

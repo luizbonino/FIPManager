@@ -1,0 +1,46 @@
+/* Print stylesheet for the dashboard views (spec 13 §6.3), imported by
+   DashboardCoverage.vue (and reusable by the other dashboard views).
+   Target: the coverage heat map on one A3 landscape sheet, legend visible. */
+
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 10mm;
+  }
+
+  .app-header,
+  .app-nav,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .heat-map-scroll {
+    overflow: visible;
+  }
+
+  .heat-map {
+    width: 100%;
+  }
+
+  .hm-value {
+    border: 1px solid #000 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .dashboard-legend {
+    display: flex !important;
+    break-inside: avoid;
+  }
+
+  .adoption-table,
+  .gaps-table,
+  .evolution-table {
+    break-inside: avoid;
+  }
+}

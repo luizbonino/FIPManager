@@ -914,6 +914,13 @@ def delete_fip(
     db.delete(fip)
     db.commit()
 
+    # spec 13-fip-dashboard.md §9 Q7: a deleted FIP's id must not survive
+    # inside a stored `clusters`/`map` snapshot payload -- scrub every such
+    # snapshot computed before this delete, rather than waiting out its TTL.
+    from fipm.dashboard.snapshots import scrub_snapshots_for_deleted_fip
+
+    scrub_snapshots_for_deleted_fip(db, datetime.now(UTC))
+
 
 @router.post("/{fip_id}/claim")
 def claim_fip(

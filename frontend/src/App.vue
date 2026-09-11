@@ -8,6 +8,7 @@
             <router-link to="/" class="nav-link">{{ $t('nav.home') }}</router-link>
             <router-link to="/knowledge-models" class="nav-link">{{ $t('nav.knowledgeModels') }}</router-link>
             <router-link v-if="networkEnabled" to="/network" class="nav-link">{{ $t('network.navLabel') }}</router-link>
+            <router-link v-if="dashboardEnabled" to="/dashboard" class="nav-link">{{ $t('dashboard.navLabel') }}</router-link>
             <router-link v-if="!isAuthenticated" to="/login" class="nav-link">{{ $t('nav.login') }}</router-link>
             <router-link v-if="!isAuthenticated" to="/register" class="nav-link">{{ $t('nav.register') }}</router-link>
             <router-link v-if="isAuthenticated" to="/workspace" class="nav-link">{{ $t('nav.workspace') }}</router-link>
@@ -46,6 +47,9 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 // check says otherwise — a failed/slow health check should not flicker
 // or permanently hide navigation the deployment actually offers.
 const networkEnabled = ref(true)
+// spec 13 §7.3: the Dashboard nav entry is hidden when `GET /api/health`
+// reports `dashboardEnabled: false` — same optimistic-until-known idiom.
+const dashboardEnabled = ref(true)
 // spec 05 §1: the "Admin" nav link — and only that link — reflects role;
 // the /admin route itself still renders `common.notFound` for anyone else.
 const isAdmin = computed(() => authStore.user?.role === 'admin')
@@ -64,6 +68,9 @@ onMounted(async () => {
     const health = await get<Record<string, unknown>>('/health')
     if (health.networkEnabled === false) {
       networkEnabled.value = false
+    }
+    if (health.dashboardEnabled === false) {
+      dashboardEnabled.value = false
     }
   } catch {
     // Best-effort only, like FeedbackForm.vue's own health check — leave

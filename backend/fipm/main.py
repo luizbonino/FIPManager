@@ -24,6 +24,7 @@ from fipm.mail import warn_if_console_in_production
 from fipm.routers import (
     admin,
     auth,
+    dashboard,
     embed,
     feedback,
     fer_types,
@@ -114,13 +115,50 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # it -- so it must not block startup in that case.
     if settings.network_enabled:
         settings.check_network_safety()
+    if settings.dashboard_enabled:
+        settings.check_dashboard_safety()
     warn_if_console_in_production(settings)
     try:
         summary = run_import()
         summary.print_report()
     except Exception:  # pragma: no cover - defensive: never block startup on bad data/
         logger.exception("startup import-data failed")
+    if settings.dashboard_enabled and settings.dashboard_backfill_on_startup:
+        _run_startup_dashboard_backfill(settings)
     yield
+
+
+def _run_startup_dashboard_backfill(settings) -> None:  # noqa: ANN001
+    """spec 13-fip-dashboard.md §7.2: after `init_db()`/`run_import()`, count
+    FIPs needing projection (§1.7's `--only-stale` predicate). 0 -> nothing.
+    <= `FIPM_DASHBOARD_STARTUP_BACKFILL_MAX_FIPS` (default 500) -> backfill
+    inline (500 FIPs is ~1.3 s, invisible -- the workshop laptop never needs
+    a CLI step). Above it -> log one WARNING and leave the projection stale;
+    `/api/dashboard/*` then behaves per §1.8. Never blocks a 100k-row
+    startup on a multi-minute backfill."""
+    from fipm.db import SessionLocal
+    from fipm.projection import stale_fip_ids
+
+    try:
+        with SessionLocal() as db:
+            cap = settings.dashboard_startup_backfill_max_fips
+            stale = stale_fip_ids(db, limit=cap + 1)
+        if not stale:
+            return
+        if len(stale) > cap:
+            logger.warning(
+                "dashboard projection has more than %d stale FIP(s); run "
+                "`python -m fipm backfill-declarations --only-stale` -- "
+                "/api/dashboard/* will 409 projection_stale until then",
+                cap,
+            )
+            return
+        from fipm.cli import _run_backfill
+
+        count, duration_s = _run_backfill(only_stale=True, batch=500, progress=False)
+        logger.info("startup dashboard backfill: %d FIP(s) in %.2fs", count, duration_s)
+    except Exception:  # pragma: no cover - defensive: never block startup
+        logger.exception("startup dashboard backfill failed")
 
 
 app = FastAPI(title="FIP Manager", lifespan=lifespan)
@@ -168,6 +206,7 @@ app.include_router(knowledge_models.router, prefix="/api")
 app.include_router(fers.router, prefix="/api")
 app.include_router(fer_types.router, prefix="/api")
 app.include_router(fips.router, prefix="/api")
+app.include_router(dashboard.router, prefix="/api")
 app.include_router(network.router, prefix="/api")
 app.include_router(sessions.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")

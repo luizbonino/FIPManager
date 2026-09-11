@@ -46,6 +46,9 @@ class HealthOut(CamelModel):
     # spec 11-nanopub-network.md §3.4: lets the frontend hide the Network
     # FIPs nav entry when FIPM_NETWORK_ENABLED=false.
     network_enabled: bool = True
+    # spec 13-fip-dashboard.md §7.3: lets the frontend hide the dashboard
+    # nav entry when FIPM_DASHBOARD_ENABLED=false.
+    dashboard_enabled: bool = True
 
 
 # ---------------------------------------------------------------------------

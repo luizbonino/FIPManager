@@ -1,0 +1,125 @@
+{
+  "description": "spec 13-fip-dashboard.md §1.5 / §8.1 test 2: 12 tricky free-text inputs, each with its expected fipm.rdf.normalise_free_text() output. Cases sharing the same 'group' must normalise to the SAME value (they are the same declared resource under different byte representations); cases in different groups normalise to DIFFERENT values. Consumed by backend/tests/test_ac_13_01_projection.py and, per spec §10.1, reused verbatim by the frontend's Vitest test of matrix.ts::normaliseFreeText (brief C).",
+  "cases": [
+    {
+      "id": "precomposed-nfc",
+      "group": "repositorio",
+      "text": "Repositório institucional",
+      "normalised": "repositório institucional"
+    },
+    {
+      "id": "decomposed-then-nfc",
+      "group": "repositorio",
+      "text": "Repositório institucional",
+      "normalised": "repositório institucional"
+    },
+    {
+      "id": "ordinary-space",
+      "group": "orcid-nbsp",
+      "text": "ORCID identifier service",
+      "normalised": "orcid identifier service"
+    },
+    {
+      "id": "nbsp-between-words",
+      "group": "orcid-nbsp",
+      "text": "ORCID identifier service",
+      "normalised": "orcid identifier service"
+    },
+    {
+      "id": "crlf-inside-text",
+      "group": "handle-crlf",
+      "text": "Handle\r\nregistry",
+      "normalised": "handle registry"
+    },
+    {
+      "id": "space-inside-text",
+      "group": "handle-crlf",
+      "text": "Handle registry",
+      "normalised": "handle registry"
+    },
+    {
+      "id": "padded-with-whitespace",
+      "group": "datacite-pad",
+      "text": "  \tDataCite schema\t  ",
+      "normalised": "datacite schema"
+    },
+    {
+      "id": "no-padding",
+      "group": "datacite-pad",
+      "text": "DataCite schema",
+      "normalised": "datacite schema"
+    },
+    {
+      "id": "mixed-case",
+      "group": "dublin-core-case",
+      "text": "Dublin CORE Schema",
+      "normalised": "dublin core schema"
+    },
+    {
+      "id": "lower-case",
+      "group": "dublin-core-case",
+      "text": "dublin core schema",
+      "normalised": "dublin core schema"
+    },
+    {
+      "id": "turkish-dotless-i",
+      "group": "turkish-dotless",
+      "text": "ARCHIVEı service",
+      "normalised": "archiveı service"
+    },
+    {
+      "id": "turkish-dotted-capital-i",
+      "group": "turkish-dotted",
+      "text": "İdentifier service",
+      "normalised": "i̇dentifier service"
+    },
+    {
+      "id": "german-sharp-s-lower",
+      "group": "strasse-sharp-s",
+      "text": "Straße service",
+      "normalised": "strasse service"
+    },
+    {
+      "id": "german-sharp-s-upper",
+      "group": "strasse-sharp-s",
+      "text": "STRASSE service",
+      "normalised": "strasse service"
+    },
+    {
+      "id": "ligature-fi-encoded",
+      "group": "scientific-ligature",
+      "text": "Scientiﬁc Data",
+      "normalised": "scientific data"
+    },
+    {
+      "id": "ligature-fi-ascii",
+      "group": "scientific-ligature",
+      "text": "Scientific Data",
+      "normalised": "scientific data"
+    },
+    {
+      "id": "final-sigma-word-final",
+      "group": "greek-final-sigma",
+      "text": "ΑΡΧΕΙΟΣ",
+      "normalised": "αρχειοσ"
+    },
+    {
+      "id": "final-sigma-regular",
+      "group": "greek-final-sigma",
+      "text": "αρχειοσ",
+      "normalised": "αρχειοσ"
+    },
+    {
+      "id": "n-with-apostrophe-ligature",
+      "group": "n-apostrophe",
+      "text": "ŉIjmegen service",
+      "normalised": "ʼnijmegen service"
+    },
+    {
+      "id": "n-with-apostrophe-expanded",
+      "group": "n-apostrophe",
+      "text": "ʼnIjmegen service",
+      "normalised": "ʼnijmegen service"
+    }
+  ]
+}

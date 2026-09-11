@@ -144,7 +144,9 @@
     "retry": "Tentar novamente",
     "notFound": "Não encontrado",
     "view": "Ver",
-    "add": "Adicionar"
+    "add": "Adicionar",
+    "previous": "Anterior",
+    "next": "Seguinte"
   },
   "home": {
     "heading": "Construa o seu plano de dados Localizável, Acessível, Interoperável e Reutilizável",
@@ -343,7 +345,8 @@
     "successor": "→ substituído por {label}",
     "notApplicableShort": "N/A",
     "notApplicableFull": "Não se aplica",
-    "absent": "Não faz parte deste questionário"
+    "absent": "Não faz parte deste questionário",
+    "dashboardForSession": "Painel para esta sessão"
   },
   "export": {
     "ttl": "Turtle (RDF)",
@@ -592,5 +595,195 @@
     "prerequisitesTitle": "Ainda necessário para publicar",
     "previewTitle": "Pré-visualização: nanopublicação do FIP",
     "downloadButton": "Transferir pacote (.zip)"
+  },
+  "dashboard": {
+    "navLabel": "Painel",
+    "csv": "Exportar como CSV",
+    "nav": {
+      "coverage": "Cobertura",
+      "adoption": "Adoção de recursos",
+      "similarity": "Semelhança",
+      "gaps": "Lacunas",
+      "evolution": "Evolução"
+    },
+    "home": {
+      "title": "Painel dos FIP",
+      "fipsInPopulation": "FIPs nesta população",
+      "coverageDesc": "Onde a população é coletivamente forte ou fraca, por princípio FAIR.",
+      "adoptionDesc": "Que recursos são declarados, e por quantos FIPs.",
+      "similarityDesc": "Vizinhos mais próximos, agrupamentos e o mapa de convergência.",
+      "gapsDesc": "Perguntas deixadas por responder, sem recurso ou não aplicáveis.",
+      "evolutionDesc": "O que está planeado, e o histórico de migração.",
+      "fipCountWithheld": "Confidencial"
+    },
+    "cellState": {
+      "current": "Atual",
+      "planned": "Planeado",
+      "none": "Nenhum",
+      "notApplicable": "Não aplicável",
+      "unanswered": "Por responder",
+      "absent": "Ausente"
+    },
+    "legend": {
+      "title": "Legenda",
+      "colourHint": "Cada célula mostra a sua contagem e percentagem em texto — a cor nunca é o único sinal."
+    },
+    "snapshot": {
+      "computedAgo": "Calculado há {age}",
+      "refresh": "Atualizar",
+      "refreshing": "A atualizar…",
+      "pending": "A calcular um novo instantâneo (tentativa {attempts} de {max})…",
+      "staleShownBelow": "Últimos números conhecidos, mostrados esbatidos abaixo enquanto se calcula um novo instantâneo:",
+      "justNow": "agora mesmo",
+      "minutesAgo": "{minutes} minuto(s)",
+      "hoursAgo": "{hours} hora(s)",
+      "unknownAge": "um tempo desconhecido"
+    },
+    "degraded": {
+      "staleCount": "{stale} de {total} FIPs têm uma projeção desatualizada ou em falta."
+    },
+    "errors": {
+      "dashboard_disabled": "O painel está desativado nesta implementação.",
+      "population_too_small": "Esta população é demasiado pequena para ser mostrada sem identificar FIPs individuais (mínimo {minimum}).",
+      "projection_stale": "Os dados do painel precisam de ser atualizados antes de esta população poder ser mostrada.",
+      "projection_missing": "Esta população ainda não foi indexada para o painel.",
+      "similarity_population_too_large": "Esta população é demasiado grande para calcular a semelhança diretamente — reduza-a e tente novamente.",
+      "invalid_population": "Não foi possível interpretar esta população.",
+      "questionnaire_too_large": "Este questionário tem demasiadas perguntas para o painel.",
+      "refresh_in_progress": "Já está em curso uma atualização para esta população.",
+      "unknown": "Ocorreu um erro ao carregar esta vista."
+    },
+    "population": {
+      "title": "População",
+      "addTerm": "Adicionar",
+      "add": "Adicionar termo",
+      "idLabel": "ID",
+      "versionLabel": "Versão",
+      "sessionIdLabel": "ID da sessão",
+      "kind": {
+        "public": "Todos os FIPs públicos",
+        "network": "FIPs da rede",
+        "mine": "Os meus FIPs",
+        "session": "Uma sessão",
+        "questionnaire": "Um questionário",
+        "area": "Uma área"
+      },
+      "termSession": "Sessão: {id}",
+      "termQuestionnaire": "Questionário: {id}@{version}",
+      "termArea": "Área: {id}@{version}",
+      "noTerms": "Ainda não foi adicionado nenhum termo — adicione um acima.",
+      "remove": "Remover",
+      "advanced": "Intervalo de datas",
+      "dateRange": "Apenas FIPs atualizados",
+      "updatedAfter": "Depois de",
+      "updatedBefore": "Antes de",
+      "labelField": "Etiqueta",
+      "labelPlaceholder": "Dê um nome a esta população",
+      "save": "Guardar esta população",
+      "saving": "A guardar…",
+      "saveFailed": "Não foi possível guardar esta população — tente novamente.",
+      "copyLink": "Copiar link",
+      "linkCopied": "Link copiado",
+      "tooLargeForLink": "Esta população é demasiado grande para um link incorporado — guarde-a.",
+      "savedMeta": "{count} FIPs · calculado {computedAt}"
+    },
+    "coverage": {
+      "title": "Cobertura",
+      "groupBy": "Agrupar por",
+      "level": {
+        "question": "Pergunta",
+        "subPrinciple": "Subprincípio",
+        "principle": "Princípio",
+        "group": "Letra FAIR"
+      },
+      "scope": "Âmbito",
+      "scopeAny": "Metadados e dados",
+      "scopeMetadata": "Metadados",
+      "scopeData": "Dados",
+      "includeAssurance": "Mostrar mistura de garantia",
+      "heatMapLabel": "Mapa de calor de cobertura: as linhas são princípios, as colunas são estados de declaração",
+      "noRows": "Ainda não há linhas a mostrar para esta população.",
+      "cellAriaLabel": "{row}, {state}: {count} FIPs ({share})",
+      "totals": "{fips} FIPs · {cells} células"
+    },
+    "adoption": {
+      "title": "Adoção de recursos",
+      "groupBy": "Agrupar por",
+      "groupByFer": "Recurso",
+      "groupByFerType": "Tipo de recurso",
+      "groupByArea": "Área",
+      "groupByQuestion": "Pergunta",
+      "status": "Estado",
+      "statusAny": "Qualquer estado",
+      "catalogued": "Catálogo",
+      "cataloguedAny": "Todos os recursos",
+      "cataloguedOnly": "Apenas catalogados",
+      "longTail": "Cauda longa de texto livre",
+      "colLabel": "Recurso",
+      "colFerType": "Tipo",
+      "colStatus": "Estado",
+      "colFips": "FIPs",
+      "colShare": "Percentagem",
+      "pageInfo": "{from}–{to} de {total}",
+      "truncated": "A mostrar os 1000 principais grupos de {total} — reduza a população para a lista completa."
+    },
+    "gaps": {
+      "title": "Lacunas e coerência",
+      "minShare": "Percentagem mínima",
+      "colQuestion": "Pergunta",
+      "colUnanswered": "Por responder",
+      "colNone": "Nenhum",
+      "colNotApplicable": "Não aplicável",
+      "colPlanned": "Apenas planeado",
+      "colCoherence": "Sinalizações de coerência",
+      "colTypeMismatch": "Incompatibilidades de tipo",
+      "truncated": "Esta lista foi truncada — reduza a população para a lista completa."
+    },
+    "evolution": {
+      "title": "Evolução",
+      "groupBy": "Agrupar por",
+      "plannedTitle": "Planeado e substituições",
+      "migrationTitle": "Histórico de migração",
+      "colQuestion": "Pergunta",
+      "colStatus": "Estado",
+      "colFer": "Recurso",
+      "colSuccessor": "Sucessor",
+      "colFrom": "Migrado de",
+      "colTo": "Questionário",
+      "colFips": "FIPs",
+      "truncated": "Esta lista foi truncada — reduza a população para a lista completa."
+    },
+    "similarity": {
+      "title": "Semelhança e convergência",
+      "weighting": "Ponderação",
+      "weightingPrinciple": "Igual por princípio (predefinição)",
+      "weightingQuestion": "Igual por pergunta",
+      "weightingLetter": "Igual por letra FAIR",
+      "tabNeighbours": "Vizinhos",
+      "tabDistribution": "Distribuição",
+      "tabClusters": "Agrupamentos",
+      "fipId": "ID do FIP",
+      "fipIdPlaceholder": "Cole um ID de FIP",
+      "typeaheadNoResults": "Nenhum FIP correspondente",
+      "neighbourFip": "FIP",
+      "similarity": "Semelhança",
+      "sharedKeys": "Recursos partilhados",
+      "topShared": "Mais partilhados",
+      "noNeighbours": "Não foram encontrados vizinhos para este FIP nesta população.",
+      "candidateBudgetExhausted": "O orçamento de pesquisa de candidatos esgotou-se antes de todos os FIPs poderem ser verificados — esta lista pode estar incompleta.",
+      "postingTruncated": "Alguns recursos muito comuns foram limitados durante a pesquisa, por uma ordem fixa (não aleatória).",
+      "skippedPopularKeys": "Estes recursos quase universais foram ignorados por não serem informativos: {keys}",
+      "histogramLabel": "Histograma das pontuações de semelhança entre pares",
+      "histogramBarLabel": "{from} a {to}: {count} pares",
+      "hotBuckets": "{count} grupo(s) de FIPs quase idênticos foram agregados num único representante em vez de comparados par a par.",
+      "scatterUnavailable": "Esta população é demasiado grande para representar FIP a FIP — veja a distribuição e os agrupamentos.",
+      "scatterLabel": "Gráfico de dispersão da semelhança entre FIPs",
+      "clusterSize": "{size} FIPs",
+      "meanSimilarity": "semelhança média {value}",
+      "representative": "Representante",
+      "showMembers": "Mostrar membros ({count})",
+      "hideMembers": "Ocultar membros",
+      "clustersTruncated": "Só são mostrados os maiores agrupamentos — reduza a população para a lista completa."
+    }
   }
 }
