@@ -55,6 +55,10 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [x] Co-facilitator feedback 10 Sep ("todas as opções… e, em Outros, abrir uma caixa"): suggested phrases per question (free-text options, editable in the model editor, shown in read and print views) and a built-in "Outro (especificar)" box on every question with options (done 10 Sep, docs/specs/10-suggested-phrases-and-other.md). Suggested-FER cap raised to 16.
 - [ ] Show the co-facilitator the omics draft on a phone and collect a second round of wording feedback before publishing the five areas.
 
+## Added 11 Sep · User documentation
+
+- [x] Documentation: `docs/administrator-guide.md` and `docs/participant-guide.md` with 26 screenshots (`docs/images/`, captured by `scripts/capture-screenshots.mjs`); `docs/README.md` documentation index (done 11 Sep); pt-PT, pt-BR, es translations drafted (pending review).
+
 ## 6 Oct · Workshop
 - Collect FIPs, export session, gather feedback (short form in the tool or paper).
 
