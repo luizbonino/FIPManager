@@ -448,7 +448,7 @@ requiere la publicación.
 > una declaración de clave y `nanopub-py` o `nanopub-java`. El lado de lectura y el lado de
 > preparación para exportación están completos; el lado de publicación deliberadamente no.
 
-`ingest-network-fips` elimina los FIP de la red como filas sombra de solo lectura para el análisis del
+`ingest-network-fips` incorpora los FIP de la red como filas sombra de solo lectura para el análisis del
 panel. Son hechos ingeridos, nunca recuperaciones en vivo — el panel nunca invoca la red mientras se
 renderiza.
 
