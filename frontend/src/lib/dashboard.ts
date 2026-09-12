@@ -246,7 +246,15 @@ function rollupKeyFor(row: CoverageRow, level: GroupingLevel): { key: string; su
 export function rollupCoverage(data: CoverageData, level: GroupingLevel): CoverageRow[] {
   if (level === 'question') return data.rows
 
+  // Preserve `order` sequence when possible, else fall back to key order.
+  // `data.order` holds keys at the level the SERVER grouped by (finest
+  // grain, e.g. question ids) — a rolled-up bucket's own key (e.g. a
+  // sub-principle) generally will not appear in it. So track, per bucket,
+  // the minimum order-index among the SOURCE rows that fed into it (mirrors
+  // the backend's `order_hint` in dashboard/views.py).
+  const orderIndex = new Map(data.order.map((k, i) => [k, i]))
   const merged = new Map<string, CoverageRow>()
+  const minOrderIndex = new Map<string, number>()
   for (const row of data.rows) {
     const { key, subPrinciple, principle, principleGroup } = rollupKeyFor(row, level)
     let target = merged.get(key)
@@ -271,6 +279,9 @@ export function rollupCoverage(data: CoverageData, level: GroupingLevel): Covera
     if (row.assurance && target.assurance) {
       for (const [k, v] of Object.entries(row.assurance)) target.assurance[k] = (target.assurance[k] ?? 0) + v
     }
+    const rowIndex = orderIndex.get(row.key) ?? Number.MAX_SAFE_INTEGER
+    const prevIndex = minOrderIndex.get(key) ?? Number.MAX_SAFE_INTEGER
+    if (rowIndex < prevIndex) minOrderIndex.set(key, rowIndex)
   }
 
   const rows = [...merged.values()]
@@ -278,11 +289,9 @@ export function rollupCoverage(data: CoverageData, level: GroupingLevel): Covera
     const total = COUNT_KEYS.reduce((sum, k) => sum + row.counts[k], 0)
     for (const k of COUNT_KEYS) row.shares[k] = total > 0 ? row.counts[k] / total : 0
   }
-  // Preserve `order` sequence when possible, else fall back to key order.
-  const orderIndex = new Map(data.order.map((k, i) => [k, i]))
   rows.sort((a, b) => {
-    const ai = orderIndex.get(a.key) ?? Number.MAX_SAFE_INTEGER
-    const bi = orderIndex.get(b.key) ?? Number.MAX_SAFE_INTEGER
+    const ai = minOrderIndex.get(a.key) ?? Number.MAX_SAFE_INTEGER
+    const bi = minOrderIndex.get(b.key) ?? Number.MAX_SAFE_INTEGER
     if (ai !== bi) return ai - bi
     return a.key.localeCompare(b.key)
   })

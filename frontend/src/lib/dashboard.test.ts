@@ -232,6 +232,44 @@ describe('rollupCoverage (spec 13 §3.1 / §6.2)', () => {
     expect(new Set(keys).size).toBe(3)
     expect(keys).not.toContain('undefined')
   })
+
+  // Regression: sorting a rolled-up row by looking up its OWN (rolled-up)
+  // key in `data.order` misses, because `data.order` holds question-level
+  // ids (e.g. 'F1-data', 'F1-metadata') and only a few sub-principles
+  // (F2, F3, A2) happen to coincide with a question id of the same name.
+  // The fix must record the minimum order-index across each bucket's
+  // SOURCE rows and sort by that, mirroring the backend's `order_hint`.
+  it('orders subPrinciple rollup by the minimum source-row index in data.order, not the rolled-up key itself', () => {
+    const order = [
+      'F1-data', 'F1-metadata', 'F2', 'F3', 'F4-data',
+      'A1.1-data', 'A1.2-data', 'A2',
+      'I1-data', 'I2-data', 'I3-data',
+      'R1.1-data', 'R1.2-data',
+    ]
+    const data: CoverageData = {
+      rows: [
+        makeRow({ key: 'F1-data', subPrinciple: 'F1', principle: 'F1', principleGroup: 'F', questions: ['F1-data'] }),
+        makeRow({ key: 'F1-metadata', subPrinciple: 'F1', principle: 'F1', principleGroup: 'F', questions: ['F1-metadata'] }),
+        makeRow({ key: 'F2', subPrinciple: 'F2', principle: 'F2', principleGroup: 'F', questions: ['F2'] }),
+        makeRow({ key: 'F3', subPrinciple: 'F3', principle: 'F3', principleGroup: 'F', questions: ['F3'] }),
+        makeRow({ key: 'F4-data', subPrinciple: 'F4', principle: 'F4', principleGroup: 'F', questions: ['F4-data'] }),
+        makeRow({ key: 'A1.1-data', subPrinciple: 'A1.1', principle: 'A1', principleGroup: 'A', questions: ['A1.1-data'] }),
+        makeRow({ key: 'A1.2-data', subPrinciple: 'A1.2', principle: 'A1', principleGroup: 'A', questions: ['A1.2-data'] }),
+        makeRow({ key: 'A2', subPrinciple: 'A2', principle: 'A2', principleGroup: 'A', questions: ['A2'] }),
+        makeRow({ key: 'I1-data', subPrinciple: 'I1', principle: 'I1', principleGroup: 'I', questions: ['I1-data'] }),
+        makeRow({ key: 'I2-data', subPrinciple: 'I2', principle: 'I2', principleGroup: 'I', questions: ['I2-data'] }),
+        makeRow({ key: 'I3-data', subPrinciple: 'I3', principle: 'I3', principleGroup: 'I', questions: ['I3-data'] }),
+        makeRow({ key: 'R1.1-data', subPrinciple: 'R1.1', principle: 'R1', principleGroup: 'R', questions: ['R1.1-data'] }),
+        makeRow({ key: 'R1.2-data', subPrinciple: 'R1.2', principle: 'R1', principleGroup: 'R', questions: ['R1.2-data'] }),
+      ],
+      totals: { fips: 10, cells: 130 },
+      order,
+    }
+    const rolled = rollupCoverage(data, 'subPrinciple')
+    expect(rolled.map((r) => r.key)).toEqual([
+      'F1', 'F2', 'F3', 'F4', 'A1.1', 'A1.2', 'A2', 'I1', 'I2', 'I3', 'R1.1', 'R1.2',
+    ])
+  })
 })
 
 // spec 13 §11.3 amendment: `NeighbourRow.topShared[].label` and
