@@ -32,6 +32,7 @@
       <p class="empty-title">{{ $t('dashboard.home.emptyTitle') }}</p>
       <p>{{ $t('dashboard.home.emptyBody') }}</p>
       <p v-if="emptyStateVisibilityHint">{{ $t('dashboard.home.emptyVisibilityHint') }}</p>
+      <p v-if="emptyStateNetworkHint">{{ $t('dashboard.home.emptyNetworkHint') }}</p>
       <div class="empty-actions no-print">
         <button type="button" class="btn btn-secondary" @click="pickerRef?.focusTerm('session')">
           {{ $t('dashboard.home.emptyTrySession') }}
@@ -132,6 +133,16 @@ const isEmptyPopulation = computed(() => view.envelope.value?.population.fipCoun
 const emptyStateVisibilityHint = computed(() => {
   const terms = spec.value.include
   return terms.length > 0 && terms.every((term) => term.kind === 'public' || term.kind === 'network')
+})
+
+// The "network" population reads a local copy ingested by an admin (`python
+// -m fipm ingest-network-fips`), not a live query — unlike the Network FIPs
+// browse page, which proxies live to Nanopub Query. An empty network
+// population here can therefore look like "the network is empty" when it
+// really means "nothing has been ingested to this instance yet".
+const emptyStateNetworkHint = computed(() => {
+  const terms = spec.value.include
+  return terms.length > 0 && terms.some((term) => term.kind === 'network')
 })
 
 function load() {

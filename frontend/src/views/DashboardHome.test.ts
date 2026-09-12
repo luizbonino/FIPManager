@@ -140,6 +140,24 @@ describe('DashboardHome.vue (spec 13 §6.1)', () => {
     expect(wrapper.text()).not.toContain(en.dashboard.home.emptyVisibilityHint)
   })
 
+  it('shows the network ingest hint for an empty network population', async () => {
+    getCoverageMock.mockResolvedValue({
+      status: 'ok',
+      envelope: makeEnvelope({ population: { hash: 'h5', authScope: 'pub', fipCount: 0 } }),
+    })
+    const { wrapper } = await mountView({ pop: 'network' })
+    expect(wrapper.text()).toContain(en.dashboard.home.emptyNetworkHint)
+  })
+
+  it('does not show the network ingest hint for a session-only empty population', async () => {
+    getCoverageMock.mockResolvedValue({
+      status: 'ok',
+      envelope: makeEnvelope({ population: { hash: 'h6', authScope: 'pub', fipCount: 0 } }),
+    })
+    const { wrapper } = await mountView({ pop: 'session:s1' })
+    expect(wrapper.text()).not.toContain(en.dashboard.home.emptyNetworkHint)
+  })
+
   it('offers one-click routes to session/questionnaire terms from the empty state', async () => {
     getCoverageMock.mockResolvedValue({
       status: 'ok',

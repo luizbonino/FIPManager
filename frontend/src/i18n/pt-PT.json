@@ -628,6 +628,7 @@
       "emptyTitle": "Nenhum FIP nesta população",
       "emptyBody": "Nenhum FIP nesta instância corresponde a esta população.",
       "emptyVisibilityHint": "As populações públicas e da rede excluem, por conceção, os FIPs partilhados apenas por link — se os seus FIPs usarem a partilha por link, não aparecerão aqui.",
+      "emptyNetworkHint": "Os FIPs da rede são apresentados aqui a partir de uma cópia mantida nesta instância, e não lidos em direto. A navegação na página da rede consulta diretamente a rede de nanopublicações, pelo que pode mostrar comunidades que ainda não foram copiadas para aqui. Um administrador importa-os executando `python -m fipm ingest-network-fips`.",
       "emptyTrySession": "Experimentar uma sessão",
       "emptyTryQuestionnaire": "Experimentar um questionário"
     },

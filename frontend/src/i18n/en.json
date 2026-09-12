@@ -628,6 +628,7 @@
       "emptyTitle": "No FIPs in this population",
       "emptyBody": "No FIPs on this instance match this population.",
       "emptyVisibilityHint": "Public and network populations exclude FIPs that are shared by link only, by design — if your FIPs use link sharing, they will not appear here.",
+      "emptyNetworkHint": "Network FIPs are shown here from a copy held on this instance, not read live. Browsing the network page queries the nanopublication network directly, so it can show communities that have not been copied here yet. An administrator brings them in by running `python -m fipm ingest-network-fips`.",
       "emptyTrySession": "Try a session",
       "emptyTryQuestionnaire": "Try a questionnaire"
     },
