@@ -77,6 +77,7 @@ Today: Mon 8 Sep 2026. Workshop: Tue 6 Oct 2026, CONFOA, Faro. Scope freeze for 
 - [ ] ORCID and Login Único Fiocruz sign-in (needs client registrations). Email verification and password reset done 9 Sep behind FIPM_MAIL_BACKEND (console by default; set smtp + FIPM_SMTP_* at deployment) and FIPM_REQUIRE_EMAIL_VERIFICATION (default off).
 - [ ] Understanding and assurance layer: coherence rules, positive/negative examples, section reflection, criteria per FER type, assessments read from the nanopublication network, automated probes (spec 12 §A–B, proposal 10 Sep).
 - [x] FIP dashboard: five views (coverage, resource adoption, similarity/convergence, gaps, evolution) over sessions, public FIPs, or network FIPs; scale-first with declaration projection, MinHash/LSH and snapshot cache (targeting 10k–100k FIPs); k-anonymity on aggregates with facilitator exemption; CSV export and print stylesheet per view; CLI commands: `backfill-declarations`, `check-declarations`, `refresh-dashboard`, `ingest-network-fips`; behind `FIPM_DASHBOARD_ENABLED` (done 11 Sep, docs/specs/13-fip-dashboard.md).
+- [ ] Operator runs `python -m fipm ingest-network-fips` before any session where the dashboard's network population is shown; it reads a local copy, not the live network, so the copy is a snapshot with no scheduler and no admin button (79 communities ingested on the local 8080 deployment 12 Sep 2026).
 - [ ] Team workspaces (share sessions, FIPs, models with collaborators); public FIP gallery.
 - [ ] Paper or report on the workshop results and the FIP–DMP linkage.
 
