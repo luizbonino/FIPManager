@@ -619,6 +619,7 @@
     "home": {
       "title": "Painel dos FIP",
       "fipsInPopulation": "FIPs nesta população",
+      "networkIngestedAt": "Cópia da rede de {date}",
       "coverageDesc": "Onde a população é coletivamente forte ou fraca, por princípio FAIR.",
       "adoptionDesc": "Que recursos são declarados, e por quantos FIPs.",
       "similarityDesc": "Vizinhos mais próximos, agrupamentos e o mapa de convergência.",

@@ -46,6 +46,7 @@
     <div v-else-if="view.envelope.value" class="headline-row">
       <p class="headline-number">{{ headlineFipCount }}</p>
       <p class="headline-label">{{ $t('dashboard.home.fipsInPopulation') }}</p>
+      <p v-if="networkIngestedAtLabel" class="headline-network-stamp">{{ networkIngestedAtLabel }}</p>
     </div>
 
     <nav class="view-cards no-print">
@@ -79,7 +80,7 @@ import type { CoverageData, SavedPopulation } from '@/types/dashboard'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const isAdmin = computed(() => authStore.user?.role === 'admin')
 
@@ -88,6 +89,7 @@ const savedLabel = ref<string | null>(null)
 const savedFipCount = ref<number | null>(null)
 const savedComputedAt = ref<string | null>(null)
 const pickerRef = ref<InstanceType<typeof PopulationPicker> | null>(null)
+const networkIngestedAt = ref<string | null>(null)
 
 const view = useDashboardView<CoverageData>()
 
@@ -145,6 +147,40 @@ const emptyStateNetworkHint = computed(() => {
   return terms.length > 0 && terms.some((term) => term.kind === 'network')
 })
 
+// spec 13 §5.4/§9 Q4: "the ingest timestamp always visible" next to any
+// network-bearing view. `GET /api/dashboard/populations`'s
+// `networkIngestedAt` is fetched lazily, the first time the selected
+// population includes a `network` term (rather than unconditionally on
+// every visit), and cached here so switching terms back and forth does not
+// refetch.
+const hasNetworkTerm = computed(() => spec.value.include.some((term) => term.kind === 'network'))
+const networkIngestedAtFetched = ref(false)
+
+const networkIngestedAtLabel = computed(() => {
+  if (!hasNetworkTerm.value || !networkIngestedAt.value) return null
+  const date = new Date(networkIngestedAt.value).toLocaleDateString(locale.value)
+  return t('dashboard.home.networkIngestedAt', { date })
+})
+
+async function fetchNetworkIngestedAt() {
+  if (networkIngestedAtFetched.value) return
+  networkIngestedAtFetched.value = true
+  try {
+    const result = await listPopulations()
+    networkIngestedAt.value = result.networkIngestedAt
+  } catch {
+    // Populations endpoint unreachable — the stamp just stays hidden.
+  }
+}
+
+watch(
+  hasNetworkTerm,
+  (value) => {
+    if (value) fetchNetworkIngestedAt()
+  },
+  { immediate: true }
+)
+
 function load() {
   if (!popParam.value) return
   view.run((ifNoneMatch) => getCoverage({ population: popParam.value }, { ifNoneMatch }))
@@ -162,6 +198,8 @@ async function applyDefaultPopulation() {
   let kind: 'public' | 'network' = 'public'
   try {
     const result = await listPopulations()
+    networkIngestedAt.value = result.networkIngestedAt
+    networkIngestedAtFetched.value = true
     if (result.networkIngestedAt) kind = 'network'
   } catch {
     // Populations endpoint unreachable — fall back to the public default
@@ -228,6 +266,12 @@ onMounted(async () => {
 
 .headline-label {
   margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.headline-network-stamp {
+  margin: 0;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 

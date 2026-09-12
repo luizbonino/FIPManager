@@ -188,4 +188,27 @@ describe('DashboardHome.vue (spec 13 §6.1)', () => {
     expect(wrapper.text()).toContain('9,412')
     expect(wrapper.text()).not.toContain(en.dashboard.home.emptyTitle)
   })
+
+  // ---------------------------------------------------------------------
+  // networkIngestedAt stamp (spec 13 §5.4/§9 Q4: "the ingest timestamp
+  // always visible" next to any network-bearing view).
+  // ---------------------------------------------------------------------
+
+  it('shows the network ingest stamp for a network population with a timestamp', async () => {
+    listPopulationsMock.mockResolvedValue({ items: [], networkIngestedAt: '2026-09-10T08:00:00Z' })
+    const { wrapper } = await mountView({ pop: 'network' })
+    expect(wrapper.text()).toContain('Network copy from')
+  })
+
+  it('does not show the network ingest stamp for a session-only population', async () => {
+    const { wrapper } = await mountView({ pop: 'session:s1' })
+    expect(listPopulationsMock).not.toHaveBeenCalled()
+    expect(wrapper.text()).not.toContain('Network copy from')
+  })
+
+  it('does not show the network ingest stamp when networkIngestedAt is null', async () => {
+    listPopulationsMock.mockResolvedValue({ items: [], networkIngestedAt: null })
+    const { wrapper } = await mountView({ pop: 'network' })
+    expect(wrapper.text()).not.toContain('Network copy from')
+  })
 })

@@ -619,6 +619,7 @@
     "home": {
       "title": "Panel de los FIP",
       "fipsInPopulation": "FIP en esta población",
+      "networkIngestedAt": "Copia de red del {date}",
       "coverageDesc": "Dónde la población es colectivamente fuerte o débil, por principio FAIR.",
       "adoptionDesc": "Qué recursos se declaran, y por cuántos FIP.",
       "similarityDesc": "Vecinos más cercanos, agrupaciones y el mapa de convergencia.",

@@ -619,6 +619,7 @@
     "home": {
       "title": "FIP dashboard",
       "fipsInPopulation": "FIPs in this population",
+      "networkIngestedAt": "Network copy from {date}",
       "coverageDesc": "Where the population is collectively strong or weak, per FAIR principle.",
       "adoptionDesc": "Which resources are declared, by how many FIPs.",
       "similarityDesc": "Nearest neighbours, clusters and the convergence map.",
