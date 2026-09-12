@@ -624,7 +624,12 @@
       "similarityDesc": "Nearest neighbours, clusters and the convergence map.",
       "gapsDesc": "Questions left unanswered, none or not applicable.",
       "evolutionDesc": "What is planned, and migration history.",
-      "fipCountWithheld": "Withheld"
+      "fipCountWithheld": "Withheld",
+      "emptyTitle": "No FIPs in this population",
+      "emptyBody": "No FIPs on this instance match this population.",
+      "emptyVisibilityHint": "Public and network populations exclude FIPs that are shared by link only, by design — if your FIPs use link sharing, they will not appear here.",
+      "emptyTrySession": "Try a session",
+      "emptyTryQuestionnaire": "Try a questionnaire"
     },
     "cellState": {
       "current": "Current",

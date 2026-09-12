@@ -297,7 +297,7 @@ export async function savePopulation(body: SavePopulationRequest): Promise<Saved
   return response.json()
 }
 
-export async function listPopulations(): Promise<{ items: SavedPopulation[] }> {
+export async function listPopulations(): Promise<{ items: SavedPopulation[]; networkIngestedAt: string | null }> {
   const response = await fetch(`${API_BASE}/populations`, { method: 'GET', credentials: 'include' })
   if (!response.ok) {
     const errorBody = await parseErrorBody(response)

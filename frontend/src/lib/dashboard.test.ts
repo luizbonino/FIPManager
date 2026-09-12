@@ -209,6 +209,29 @@ describe('rollupCoverage (spec 13 §3.1 / §6.2)', () => {
     const rolled = rollupCoverage(data, 'group')
     expect(rolled.map((r) => r.key).sort()).toEqual(['A', 'F'])
   })
+
+  // Regression: a `groupBy=question` response with `subPrinciple` missing
+  // (or `undefined`/empty on every row -- e.g. a backend contract drift like
+  // spec 13's coverage endpoint once shipped, which never emitted the field
+  // at all) makes `rollupKeyFor`'s `subPrinciple` case key every row
+  // identically, merging the whole heat map into one unlabelled bucket. A
+  // realistic multi-sub-principle, multi-question payload must roll up to
+  // one distinctly-keyed row per sub-principle, and every row's own default
+  // grouping level ('subPrinciple') must render, not collapse.
+  it('keeps rows from different sub-principles distinctly keyed under the default grouping (regression: missing subPrinciple collapses the heat map)', () => {
+    const data = makeData([
+      makeRow({ key: 'F1-metadata', subPrinciple: 'F1', principle: 'F1', principleGroup: 'F', questions: ['F1-metadata'] }),
+      makeRow({ key: 'F1-data', subPrinciple: 'F1', principle: 'F1', principleGroup: 'F', questions: ['F1-data'] }),
+      makeRow({ key: 'F2-metadata', subPrinciple: 'F2', principle: 'F2', principleGroup: 'F', questions: ['F2-metadata'] }),
+      makeRow({ key: 'A1.1-data', subPrinciple: 'A1.1', principle: 'A1', principleGroup: 'A', questions: ['A1.1-data'] }),
+    ])
+    const rolled = rollupCoverage(data, 'subPrinciple')
+    const keys = rolled.map((r) => r.key).sort()
+    expect(keys).toEqual(['A1.1', 'F1', 'F2'])
+    // Distinct rows, not one bucket keyed by a stringified `undefined`.
+    expect(new Set(keys).size).toBe(3)
+    expect(keys).not.toContain('undefined')
+  })
 })
 
 // spec 13 §11.3 amendment: `NeighbourRow.topShared[].label` and

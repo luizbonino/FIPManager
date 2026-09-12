@@ -624,7 +624,12 @@
       "similarityDesc": "Vecinos más cercanos, agrupaciones y el mapa de convergencia.",
       "gapsDesc": "Preguntas sin responder, sin recurso o no aplicables.",
       "evolutionDesc": "Lo que está planificado, y el historial de migración.",
-      "fipCountWithheld": "Confidencial"
+      "fipCountWithheld": "Confidencial",
+      "emptyTitle": "No hay FIP en esta población",
+      "emptyBody": "Ningún FIP de esta instancia coincide con esta población.",
+      "emptyVisibilityHint": "Las poblaciones públicas y de red excluyen, por diseño, los FIP compartidos solo por enlace — si sus FIP usan el uso compartido por enlace, no aparecerán aquí.",
+      "emptyTrySession": "Probar una sesión",
+      "emptyTryQuestionnaire": "Probar un cuestionario"
     },
     "cellState": {
       "current": "Actual",

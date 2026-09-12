@@ -198,18 +198,26 @@ def _km_content_cache(db: Session):
 GROUP_LEVELS = ("question", "subPrinciple", "principle", "group")
 
 
-def _coverage_row_key(cell_row: Any, group_by: str) -> tuple[str, str | None, str]:
-    """Returns `(key, principleForDisplay, level)`."""
+def _coverage_row_key(cell_row: Any, group_by: str) -> tuple[str, str | None, str | None, str]:
+    """Returns `(key, subPrincipleForDisplay, principleForDisplay, level)`.
+
+    `subPrincipleForDisplay` mirrors the frontend's client-side rollup
+    convention (`lib/dashboard.ts`'s `rollupKeyFor`): at the `question`
+    level it is the leaf's actual `fip_cells.sub_principle`; at every
+    coarser level, the bucket merges rows with different sub-principles,
+    so it is set to the bucket's own key (matching `CoverageRow.subPrinciple`
+    being required and non-null for every level the frontend renders).
+    """
     if group_by == "question":
-        return cell_row.question_id, cell_row.principle, "question"
+        return cell_row.question_id, cell_row.sub_principle, cell_row.principle, "question"
     if group_by == "principle":
         key = cell_row.principle or f"q:{cell_row.question_id}"
-        return key, cell_row.principle, "principle"
+        return key, key, cell_row.principle, "principle"
     if group_by == "group":
-        return cell_row.principle_group, cell_row.principle, "group"
+        return cell_row.principle_group, cell_row.principle_group, cell_row.principle, "group"
     # default: subPrinciple
     key = cell_row.sub_principle or f"q:{cell_row.question_id}"
-    return key, cell_row.principle, "subPrinciple"
+    return key, key, cell_row.principle, "subPrinciple"
 
 
 def _rollup_counts(
@@ -218,12 +226,13 @@ def _rollup_counts(
     buckets: dict[str, dict[str, Any]] = {}
     order_hint: dict[str, int] = {}
     for row in agg_rows:
-        key, principle, level = _coverage_row_key(row, group_by)
+        key, sub_principle, principle, level = _coverage_row_key(row, group_by)
         bucket = buckets.setdefault(
             key,
             {
                 "key": key,
                 "level": level,
+                "subPrinciple": sub_principle,
                 "principle": principle,
                 "principleGroup": row.principle_group,
                 "questions": set(),
@@ -248,6 +257,7 @@ def _rollup_counts(
         out = {
             "key": bucket["key"],
             "level": bucket["level"],
+            "subPrinciple": bucket["subPrinciple"],
             "principle": bucket["principle"],
             "principleGroup": bucket["principleGroup"],
             "questions": sorted(bucket["questions"]),

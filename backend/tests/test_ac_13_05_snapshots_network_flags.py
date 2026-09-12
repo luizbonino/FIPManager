@@ -359,6 +359,37 @@ def parc_seam(monkeypatch):
     return network
 
 
+# ---------------------------------------------------------------------------
+# `GET /api/dashboard/populations` reports `networkIngestedAt` (spec §5.4/
+# §9 A8) -- `null` before any ingest, the ingested row's `fetched_at`
+# afterwards. This is the signal the frontend's `/dashboard` default
+# (network-first, else public) reads. Placed before any other test in this
+# module runs `ingest_network_fips` (the shared session-scoped `app`/db
+# means a later test's ingest would otherwise leak into an "already
+# ingested" state here).
+# ---------------------------------------------------------------------------
+
+
+def test_list_populations_reports_network_ingested_at(app, db_session, parc_seam, client):
+    from fipm.config import get_settings
+    from fipm.network_ingest import ingest_network_fips
+
+    before = client.get("/api/dashboard/populations")
+    assert before.status_code == 200, before.text
+    assert before.json()["networkIngestedAt"] is None
+
+    report = ingest_network_fips(db_session, get_settings(), community_iri=PARC_COMMUNITY_IRI)
+    assert report.fips_written == 1
+
+    after = client.get("/api/dashboard/populations")
+    assert after.status_code == 200, after.text
+    ingested_at = after.json()["networkIngestedAt"]
+    assert ingested_at is not None
+    # Round-trips through `datetime.fromisoformat` (a `Z`-suffixed UTC
+    # timestamp, same convention as every other envelope timestamp here).
+    datetime.fromisoformat(ingested_at.replace("Z", "+00:00"))
+
+
 def test_ingest_network_fips_writes_shadow_rows_no_fips_row(app, db_session, parc_seam):
     from fipm.config import get_settings
     from fipm.network_ingest import ingest_network_fips, network_fip_id

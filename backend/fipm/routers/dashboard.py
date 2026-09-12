@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, Response
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from fipm.auth import check_anonymous_population_rate_limit
@@ -58,7 +59,7 @@ from fipm.dashboard.views import (
     gaps_view,
 )
 from fipm.db import get_db
-from fipm.models import DashboardPopulation, DashboardSnapshot, User
+from fipm.models import DashboardPopulation, DashboardSnapshot, NetworkFip, User
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -803,7 +804,19 @@ def list_populations(
         for r in rows
         if r.auth_scope == "pub" or (user is not None and r.owner_id == user.id)
     ]
-    return {"items": items, "total": len(items)}
+    # spec §5.4/§9 A8: `max(network_fips.fetched_at)` is `None` when
+    # `ingest-network-fips` has never run on this instance, which is exactly
+    # the signal the frontend's `/dashboard` default (network-first, else
+    # public) and the "ingest timestamp always visible" note need -- no
+    # extra bookkeeping table required.
+    network_ingested_at = db.query(func.max(NetworkFip.fetched_at)).scalar()
+    return {
+        "items": items,
+        "total": len(items),
+        "networkIngestedAt": network_ingested_at.isoformat().replace("+00:00", "Z")
+        if network_ingested_at is not None
+        else None,
+    }
 
 
 @router.get("/populations/{pop_hash}")

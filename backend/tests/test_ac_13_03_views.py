@@ -301,6 +301,54 @@ def test_coverage_grouping_levels_consistent(client, db_session):
 
 
 # ---------------------------------------------------------------------------
+# 17b. Every coverage row, at every groupBy level, carries a non-null
+#      `subPrinciple` -- the frontend's `CoverageRow` type (types/dashboard.ts)
+#      declares it required, and `lib/dashboard.ts`'s client-side rollup keys
+#      the `subPrinciple` grouping level directly off `row.subPrinciple`. A
+#      response missing (or null-ing) the field for any row merges every row
+#      into one `undefined`-keyed bucket in the heat map -- this must fail
+#      against that regression.
+# ---------------------------------------------------------------------------
+
+
+def test_coverage_rows_always_carry_sub_principle(client, db_session):
+    _create_fip(
+        client,
+        answers=[
+            {
+                "questionId": "F1-metadata",
+                "declarations": [{"ferId": "https://doi.org/", "status": "current"}],
+            }
+        ],
+    )
+    spec = parse_population_spec(
+        {"include": [{"kind": "questionnaire", "id": "test-km", "version": "1.0.0"}]}
+    )
+    for group_by in ("question", "subPrinciple", "principle", "group"):
+        rows = coverage_view(db_session, spec, None, group_by=group_by)["data"]["rows"]
+        assert rows, group_by
+        for row in rows:
+            # Every field CoverageRow declares must be present (not merely
+            # `None`-populated) -- guards against a field silently dropped
+            # from the wire payload, invisible to both the type checker and
+            # a test that only checks a few named fields.
+            for field in (
+                "key",
+                "level",
+                "subPrinciple",
+                "principle",
+                "principleGroup",
+                "questions",
+                "ferTypes",
+                "counts",
+                "shares",
+            ):
+                assert field in row, (group_by, field)
+            assert row["subPrinciple"], (group_by, row)
+            assert row["level"] == group_by
+
+
+# ---------------------------------------------------------------------------
 # 18. Adoption counts a FIP once when it declares the same FER on two
 #     questions (COUNT(DISTINCT fip_id) regression).
 # ---------------------------------------------------------------------------

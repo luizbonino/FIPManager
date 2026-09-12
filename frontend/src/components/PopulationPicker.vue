@@ -23,7 +23,7 @@
       </label>
       <label v-if="needsId" class="field">
         <span>{{ $t('dashboard.population.idLabel') }}</span>
-        <input v-model="draftId" type="text" />
+        <input ref="idInputRef" v-model="draftId" type="text" />
       </label>
       <label v-if="needsVersion" class="field">
         <span>{{ $t('dashboard.population.versionLabel') }}</span>
@@ -76,7 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { encodePopulationParam, type PopulationSpec, type PopulationTerm, type PopulationTermKind } from '@/lib/dashboard'
 import { savePopulation } from '@/api/dashboard'
@@ -113,6 +113,7 @@ const saveLabel = ref('')
 const saving = ref(false)
 const saveError = ref<string | null>(null)
 const copied = ref(false)
+const idInputRef = ref<HTMLInputElement | null>(null)
 
 const needsId = computed(() => ['session', 'questionnaire', 'area'].includes(draftKind.value))
 const needsVersion = computed(() => ['questionnaire', 'area'].includes(draftKind.value))
@@ -214,6 +215,23 @@ async function copyLink() {
     copied.value = false
   }, 2000)
 }
+
+/**
+ * Called by `DashboardHome.vue`'s empty-state "try a session" / "try a
+ * questionnaire" buttons (spec 13 §9 A8 follow-up): a one-click way into
+ * the term the caller most likely wants next, rather than prose telling
+ * them to scroll down and pick it themselves. Preselects the term kind and
+ * moves focus to its ID field; it does not add the term itself, since a
+ * session/questionnaire term is meaningless without an ID only the user
+ * knows.
+ */
+async function focusTerm(kind: PopulationTermKind) {
+  draftKind.value = kind
+  await nextTick()
+  idInputRef.value?.focus()
+}
+
+defineExpose({ focusTerm })
 </script>
 
 <style scoped>

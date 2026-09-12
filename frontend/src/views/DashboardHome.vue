@@ -2,7 +2,14 @@
   <div class="dashboard-home">
     <h1>{{ $t('dashboard.home.title') }}</h1>
 
-    <PopulationPicker v-model="spec" :saved-label="savedLabel" :saved-fip-count="savedFipCount" :saved-computed-at="savedComputedAt" @saved="onSaved" />
+    <PopulationPicker
+      ref="pickerRef"
+      v-model="spec"
+      :saved-label="savedLabel"
+      :saved-fip-count="savedFipCount"
+      :saved-computed-at="savedComputedAt"
+      @saved="onSaved"
+    />
 
     <SnapshotBanner
       :status="bannerStatus"
@@ -20,6 +27,20 @@
     <DegradedBanner v-if="view.errorCode.value" :reason="view.errorCode.value" variant="error" :is-admin="isAdmin" :hint="errorHint" :minimum="errorMinimum" />
 
     <p v-if="view.loading.value" class="loading">{{ $t('common.loading') }}</p>
+
+    <div v-else-if="isEmptyPopulation" class="empty-population">
+      <p class="empty-title">{{ $t('dashboard.home.emptyTitle') }}</p>
+      <p>{{ $t('dashboard.home.emptyBody') }}</p>
+      <p v-if="emptyStateVisibilityHint">{{ $t('dashboard.home.emptyVisibilityHint') }}</p>
+      <div class="empty-actions no-print">
+        <button type="button" class="btn btn-secondary" @click="pickerRef?.focusTerm('session')">
+          {{ $t('dashboard.home.emptyTrySession') }}
+        </button>
+        <button type="button" class="btn btn-secondary" @click="pickerRef?.focusTerm('questionnaire')">
+          {{ $t('dashboard.home.emptyTryQuestionnaire') }}
+        </button>
+      </div>
+    </div>
 
     <div v-else-if="view.envelope.value" class="headline-row">
       <p class="headline-number">{{ headlineFipCount }}</p>
@@ -40,7 +61,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { getCoverage, refreshDashboard } from '@/api/dashboard'
+import { getCoverage, listPopulations, refreshDashboard } from '@/api/dashboard'
 import { decodePopulationParam, emptyPopulationSpec, encodePopulationParam, formatCount } from '@/lib/dashboard'
 import { useDashboardView } from '@/composables/useDashboardView'
 import PopulationPicker from '@/components/PopulationPicker.vue'
@@ -65,6 +86,7 @@ const spec = ref(decodePopulationParam(String(route.query.pop ?? '')) ?? emptyPo
 const savedLabel = ref<string | null>(null)
 const savedFipCount = ref<number | null>(null)
 const savedComputedAt = ref<string | null>(null)
+const pickerRef = ref<InstanceType<typeof PopulationPicker> | null>(null)
 
 const view = useDashboardView<CoverageData>()
 
@@ -97,9 +119,44 @@ const headlineFipCount = computed(() => {
   return count === null ? t('dashboard.home.fipCountWithheld') : formatCount(count)
 })
 
+// A resolved population of exactly zero FIPs (spec 13 §9 A8 follow-up) is a
+// distinct state from `fipCount === null` (k-anonymity withholding a
+// nonzero count, handled by `headlineFipCount` above) — an honest "why"
+// instead of an empty headline/grids.
+const isEmptyPopulation = computed(() => view.envelope.value?.population.fipCount === 0)
+
+// §2.2 D9: public/network populations deliberately exclude `link`-visibility
+// FIPs. This only ever names the *rule*, never asserts that excluded FIPs
+// exist on this instance — that would be a count this component has not
+// fetched and has no way to verify.
+const emptyStateVisibilityHint = computed(() => {
+  const terms = spec.value.include
+  return terms.length > 0 && terms.every((term) => term.kind === 'public' || term.kind === 'network')
+})
+
 function load() {
   if (!popParam.value) return
   view.run((ifNoneMatch) => getCoverage({ population: popParam.value }, { ifNoneMatch }))
+}
+
+/**
+ * Spec 13 §9 A8: `/dashboard` with no `pop` at all starts from the network
+ * population once `ingest-network-fips` has run, else the public
+ * population — `GET /api/dashboard/populations`'s `networkIngestedAt` is
+ * the signal. Setting `spec.value` here reuses the existing `watch(spec,
+ * …)` below to reflect the choice into the URL exactly as a user-driven
+ * picker edit would, so the view cards and a copied link carry it too.
+ */
+async function applyDefaultPopulation() {
+  let kind: 'public' | 'network' = 'public'
+  try {
+    const result = await listPopulations()
+    if (result.networkIngestedAt) kind = 'network'
+  } catch {
+    // Populations endpoint unreachable — fall back to the public default
+    // rather than leaving the picker empty and the page requesting nothing.
+  }
+  spec.value = decodePopulationParam(kind) ?? emptyPopulationSpec()
 }
 
 function onSaved(saved: SavedPopulation) {
@@ -130,7 +187,13 @@ watch(spec, (value) => {
   }
 })
 
-onMounted(load)
+onMounted(async () => {
+  if (!route.query.pop) {
+    await applyDefaultPopulation()
+    return
+  }
+  load()
+})
 </script>
 
 <style scoped>
@@ -155,6 +218,30 @@ onMounted(load)
 .headline-label {
   margin: 0;
   color: var(--color-text-secondary);
+}
+
+.empty-population {
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  background-color: var(--color-hover);
+}
+
+.empty-population p {
+  margin: 0 0 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.empty-title {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text) !important;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
 }
 
 .view-cards {
