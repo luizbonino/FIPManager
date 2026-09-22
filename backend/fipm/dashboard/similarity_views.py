@@ -1206,14 +1206,18 @@ def typeahead_view(
     branches = []
     if local_ids:
         local_facets = aliased(FipFacets)
-        local_select = select(
-            Fip.id.label("fip_id"),
-            Fip.title.label("label"),
-            local_facets.area_key.label("area_key"),
-            Fip.updated_at.label("updated_at"),
-        ).outerjoin(
-            local_facets, and_(local_facets.fip_id == Fip.id, local_facets.source == "local")
-        ).where(Fip.id.in_(local_ids))
+        local_select = (
+            select(
+                Fip.id.label("fip_id"),
+                Fip.title.label("label"),
+                local_facets.area_key.label("area_key"),
+                Fip.updated_at.label("updated_at"),
+            )
+            .outerjoin(
+                local_facets, and_(local_facets.fip_id == Fip.id, local_facets.source == "local")
+            )
+            .where(Fip.id.in_(local_ids))
+        )
         if has_query:
             local_select = local_select.where(Fip.title.ilike(f"%{escaped}%", escape="\\"))
         branches.append(local_select)

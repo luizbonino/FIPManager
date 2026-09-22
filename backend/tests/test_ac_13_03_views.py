@@ -523,9 +523,7 @@ def test_csv_honours_csv_max_rows_truncation(client, monkeypatch):
     monkeypatch.setattr(get_settings(), "dashboard_csv_max_rows", 2)
 
     spec_q = "pop=public"
-    before = len(
-        client.get(f"/api/dashboard/adoption?{spec_q}&status=any").json()["data"]["rows"]
-    )
+    before = len(client.get(f"/api/dashboard/adoption?{spec_q}&status=any").json()["data"]["rows"])
 
     # Five distinct, catalogued FERs, each unique to this test -> five new
     # distinct adoption-by-FER rows on top of whatever else the population
@@ -543,9 +541,7 @@ def test_csv_honours_csv_max_rows_truncation(client, monkeypatch):
             ],
         )
 
-    adoption_json = client.get(
-        f"/api/dashboard/adoption?{spec_q}&status=any&limit=200"
-    ).json()
+    adoption_json = client.get(f"/api/dashboard/adoption?{spec_q}&status=any&limit=200").json()
     assert len(adoption_json["data"]["rows"]) == before + 5
 
     csv_resp = client.get(f"/api/dashboard/adoption.csv?{spec_q}&status=any")

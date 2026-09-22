@@ -81,13 +81,7 @@ def test_guide_image_rewrite_skips_fenced_code_blocks(tmp_path, monkeypatch):
     rewritten -- only real image references outside a fence are (review
     finding 6)."""
     (tmp_path / "participant-guide.md").write_text(
-        "# EN\n"
-        "\n"
-        "```\n"
-        "![alt](images/foo.png)\n"
-        "```\n"
-        "\n"
-        "![Real image](images/bar.png)\n",
+        "# EN\n\n```\n![alt](images/foo.png)\n```\n\n![Real image](images/bar.png)\n",
         encoding="utf-8",
     )
 

@@ -208,9 +208,7 @@ def test_readable_individually_still_false_for_a_stranger_and_a_private_fip_else
     pop = resolve_population(db_session, spec, stranger)
     assert "rf13-bob-private-fip-2" not in pop.fip_ids
     assert pop.count == 1
-    public_member = next(
-        m for m in pop.members if m.fip_id == "rf13-public-fip-in-alice2-sess"
-    )
+    public_member = next(m for m in pop.members if m.fip_id == "rf13-public-fip-in-alice2-sess")
     assert public_member.readable_individually is True
 
     # The above still never observes `readable_individually` return `False`
@@ -393,9 +391,7 @@ def test_refresh_writes_the_snapshot_the_default_get_reads(app, db_session, clie
 
     _, token = create_auth_session(db_session, owner, get_settings())
     client.cookies.set(COOKIE_NAME, token)
-    r = client.post(
-        "/api/dashboard/refresh", json={"population": phash, "views": ["coverage"]}
-    )
+    r = client.post("/api/dashboard/refresh", json={"population": phash, "views": ["coverage"]})
     assert r.status_code == 200, r.text
 
     # Before the fix this row was keyed on `params_hash({})`, which no GET
@@ -440,9 +436,7 @@ def test_refresh_sync_decision_uses_cells_not_raw_fip_count(app, db_session, cli
 
     _, token = create_auth_session(db_session, owner, get_settings())
     client.cookies.set(COOKIE_NAME, token)
-    r = client.post(
-        "/api/dashboard/refresh", json={"population": phash, "views": ["coverage"]}
-    )
+    r = client.post("/api/dashboard/refresh", json={"population": phash, "views": ["coverage"]})
     # Before the fix: pop.count (3) <= 50 -> "done" (sync) unconditionally,
     # the async/202 branch unreachable. After: estimated_cells (63) > 50.
     assert r.status_code == 202, r.text
@@ -570,9 +564,7 @@ def test_map_etag_changes_after_hot_bucket_refresh(app, db_session, monkeypatch)
     for fid in ids:
         _make_fip(db_session, fid, session_id="rf13-etag-hot-map-sess", answers=identical_answers)
 
-    spec = parse_population_spec(
-        {"include": [{"kind": "session", "id": "rf13-etag-hot-map-sess"}]}
-    )
+    spec = parse_population_spec({"include": [{"kind": "session", "id": "rf13-etag-hot-map-sess"}]})
 
     etag_before = sv.map_view(db_session, spec, None)["etag"]
     written = sv.refresh_hot_buckets(db_session)
@@ -738,16 +730,12 @@ def test_anonymous_population_save_is_rate_limited(app, client):
             "/api/dashboard/populations", json={"spec": {"include": [{"kind": "public"}]}}
         )
         assert r.status_code == 201, r.text
-    r = client.post(
-        "/api/dashboard/populations", json={"spec": {"include": [{"kind": "public"}]}}
-    )
+    r = client.post("/api/dashboard/populations", json={"spec": {"include": [{"kind": "public"}]}})
     assert r.status_code == 429, r.text
     assert "Retry-After" in r.headers
 
 
-def test_signed_in_population_save_is_not_rate_limited_by_the_anon_bucket(
-    app, db_session, client
-):
+def test_signed_in_population_save_is_not_rate_limited_by_the_anon_bucket(app, db_session, client):
     from fipm.auth import COOKIE_NAME, create_auth_session
     from fipm.config import get_settings
 
@@ -929,9 +917,7 @@ def test_map_etag_changes_when_underlying_declaration_changes(app, db_session):
     assert etag1 != etag2
 
 
-def test_map_top_clusters_reflects_the_same_connected_components_as_clusters_view(
-    app, db_session
-):
+def test_map_top_clusters_reflects_the_same_connected_components_as_clusters_view(app, db_session):
     """`map_view`'s `topClusters` had no coverage of its own -- only the
     `_build_clusters` unit and `clusters_view`'s own field were exercised.
     Same declarations, same population -> `map`'s `topClusters` and
