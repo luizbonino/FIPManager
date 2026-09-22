@@ -1,0 +1,644 @@
+<title>Inventário Tecnológico do FIP Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+  :root {
+    --ground:   #f4f7f6;
+    --surface:  #ffffff;
+    --raised:   #eef3f1;
+    --ink:      #141d1b;
+    --muted:    #5a6b67;
+    --faint:    #7d8d89;
+    --rule:     #d9e3e0;
+    --rule-firm:#bccac6;
+    --accent:   #1c5e57;
+    --accent-soft: #e2efec;
+    --ok:       #2c6a49;
+    --warn:     #8a5600;
+    --warn-soft:#fbf0dd;
+    --alert:    #9a3a2d;
+
+    --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    --step-0: 0.9375rem;
+    --step-1: 1.0625rem;
+    --step-2: 1.375rem;
+    --step-3: 1.875rem;
+    --step-4: 2.5rem;
+
+    --gut: clamp(1rem, 4vw, 3rem);
+    --maxw: 62rem;
+    --prose: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:   #0f1413;
+      --surface:  #161d1c;
+      --raised:   #1c2524;
+      --ink:      #e3eae8;
+      --muted:    #99aaa6;
+      --faint:    #7d8e8a;
+      --rule:     #24302e;
+      --rule-firm:#35443f;
+      --accent:   #6cc0b2;
+      --accent-soft: #17302c;
+      --ok:       #67b98d;
+      --warn:     #d6a44e;
+      --warn-soft:#2a2316;
+      --alert:    #e08a7a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:   #0f1413;
+    --surface:  #161d1c;
+    --raised:   #1c2524;
+    --ink:      #e3eae8;
+    --muted:    #99aaa6;
+    --faint:    #7d8e8a;
+    --rule:     #24302e;
+    --rule-firm:#35443f;
+    --accent:   #6cc0b2;
+    --accent-soft: #17302c;
+    --ok:       #67b98d;
+    --warn:     #d6a44e;
+    --warn-soft:#2a2316;
+    --alert:    #e08a7a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding-inline: var(--gut);
+    padding-block: clamp(2rem, 6vw, 4rem) 5rem;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.5rem; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.85rem;
+  }
+
+  h1 {
+    font-size: var(--step-4);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0 0 0.7rem;
+  }
+
+  .standfirst {
+    font-size: var(--step-1);
+    color: var(--muted);
+    max-width: var(--prose);
+    margin: 0;
+  }
+
+  .stamp {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    margin-top: 1.4rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--faint);
+  }
+  .stamp b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 3.25rem; }
+
+  h2 {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.014em;
+    margin: 0 0 0.4rem;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--muted);
+    max-width: var(--prose);
+    margin: 0 0 1.4rem;
+  }
+
+  h3 {
+    font-size: var(--step-0);
+    font-weight: 600;
+    margin: 1.75rem 0 0.7rem;
+    letter-spacing: 0.002em;
+  }
+
+  p { max-width: var(--prose); }
+
+  /* ---------- at a glance ---------- */
+
+  .glance {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 2.5rem;
+  }
+
+  .glance div { background: var(--surface); padding: 1.1rem 1.15rem; }
+
+  .glance dt {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 0.4rem;
+  }
+
+  .glance dd {
+    margin: 0;
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .glance dd span { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--muted); margin-top: 0.2rem; }
+
+  /* ---------- tables ---------- */
+
+  .scroller { overflow-x: auto; margin-top: 0.5rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    min-width: 34rem;
+  }
+
+  caption {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding-bottom: 0.55rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.55rem 0.9rem 0.55rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: baseline;
+  }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    border-bottom: 1px solid var(--rule-firm);
+    padding-bottom: 0.45rem;
+  }
+
+  tbody th { font-weight: 500; }
+
+  td.ver, .mono {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  td.note { color: var(--muted); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.875em;
+    background: var(--raised);
+    padding: 0.1em 0.38em;
+    border-radius: 2px;
+  }
+
+  /* ---------- egress ---------- */
+
+  .egress {
+    border: 1px solid var(--rule-firm);
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 1.25rem var(--gut) 1.4rem 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .egress table { min-width: 30rem; }
+  .egress caption { color: var(--accent); }
+
+  /* ---------- pills ---------- */
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    padding: 0.12em 0.5em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .pill-on  { background: var(--accent-soft); color: var(--accent); }
+  .pill-off { background: var(--raised); color: var(--muted); }
+  .pill-act { background: var(--warn-soft); color: var(--warn); }
+
+  /* ---------- not required ---------- */
+
+  .absent { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem 2rem; margin-top: 1.3rem; }
+  .absent div { border-top: 1px solid var(--rule); padding-top: 0.7rem; }
+  .absent strong { display: block; font-weight: 600; }
+  .absent span { color: var(--muted); font-size: 0.8125rem; }
+
+  /* ---------- action list ---------- */
+
+  .actions { margin-top: 1.3rem; padding-left: 0; list-style: none; display: grid; gap: 0.85rem; }
+  .actions li { display: grid; grid-template-columns: auto 1fr; gap: 0.85rem; align-items: baseline; border-top: 1px solid var(--rule); padding-top: 0.8rem; max-width: var(--prose); }
+  .actions .mark { font-family: var(--mono); font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--warn); text-transform: uppercase; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--rule);
+    color: var(--faint);
+    font-size: 0.8125rem;
+    max-width: var(--prose);
+  }
+
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Inventário tecnológico</p>
+    <h1>FIP&nbsp;Manager</h1>
+    <p class="standfirst">
+      Uma aplicação web autocontida para coletar Perfis de Implementação FAIR (FAIR Implementation Profiles) em oficinas.
+      Um contêiner, um banco de dados baseado em arquivo, nenhuma infraestrutura externa.
+    </p>
+    <div class="stamp">
+      <span>Aplicação <b>0.1.0</b></span>
+      <span>Esquema do BD <b>v8</b></span>
+      <span>Compilado em <b>14 set 2026</b></span>
+      <span>Status <b>pré-lançamento</b></span>
+    </div>
+  </header>
+
+  <dl class="glance">
+    <div>
+      <dt>Runtime</dt>
+      <dd>Python 3.12<span>Processo ASGI único (Uvicorn)</span></dd>
+    </div>
+    <div>
+      <dt>Armazenamento</dt>
+      <dd>SQLite<span>Um arquivo, modo WAL, em um volume montado</span></dd>
+    </div>
+    <div>
+      <dt>Escuta em</dt>
+      <dd>TCP 8000<span>HTTP dentro do contêiner</span></dd>
+    </div>
+    <div>
+      <dt>Saída</dt>
+      <dd>2 hosts<span>Ambos opcionais e configuráveis</span></dd>
+    </div>
+  </dl>
+
+  <section>
+    <h2>Linguagens e runtimes</h2>
+    <p class="lede">
+      Duas linguagens são usadas, mas apenas uma está presente em produção. O Node.js compila a aplicação
+      de navegador durante o build da imagem e é então descartado — o contêiner implantado não tem
+      runtime JavaScript.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Runtimes</caption>
+        <thead>
+          <tr><th scope="col">Linguagem</th><th scope="col">Versão</th><th scope="col">Onde executa</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Python</th>
+            <td class="ver">3.12</td>
+            <td class="note">Produção. Fixado em <code>&gt;=3.12,&lt;3.13</code>; imagem <code>python:3.12-slim</code></td>
+          </tr>
+          <tr>
+            <th scope="row">TypeScript</th>
+            <td class="ver">5.9.3</td>
+            <td class="note">Compilado para JavaScript em tempo de build; executa no navegador do usuário final</td>
+          </tr>
+          <tr>
+            <th scope="row">Node.js</th>
+            <td class="ver">20</td>
+            <td class="note"><span class="pill pill-off">Apenas build</span> Imagem <code>node:20-alpine</code>, descartada após o estágio de build</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Aplicação de servidor</h2>
+    <p class="lede">
+      As dependências são travadas em <code>uv.lock</code> e instaladas com <code>uv sync --frozen --no-dev</code>,
+      de modo que toda implantação resolve para versões idênticas. 46 pacotes no total, incluindo os transitivos.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Dependências diretas · versões resolvidas</caption>
+        <thead>
+          <tr><th scope="col">Pacote</th><th scope="col">Versão</th><th scope="col">Finalidade</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">FastAPI</th><td class="ver">0.141.1</td><td class="note">Framework de API HTTP</td></tr>
+          <tr><th scope="row">Starlette</th><td class="ver">1.6.0</td><td class="note">Toolkit ASGI por baixo do FastAPI</td></tr>
+          <tr><th scope="row">Uvicorn</th><td class="ver">0.52.4</td><td class="note">Servidor ASGI; o processo que escuta na porta 8000</td></tr>
+          <tr><th scope="row">SQLAlchemy</th><td class="ver">2.0.52</td><td class="note">Acesso ao banco de dados e definição de esquema</td></tr>
+          <tr><th scope="row">Pydantic</th><td class="ver">2.13.5</td><td class="note">Validação de requisição/resposta</td></tr>
+          <tr><th scope="row">pydantic-settings</th><td class="ver">2.15.0</td><td class="note">Configuração a partir de variáveis de ambiente</td></tr>
+          <tr><th scope="row">argon2-cffi</th><td class="ver">25.1.0</td><td class="note">Hash de senhas (Argon2)</td></tr>
+          <tr><th scope="row">rdflib</th><td class="ver">7.6.0</td><td class="note">Exportação RDF / Turtle / JSON-LD</td></tr>
+          <tr><th scope="row">httpx</th><td class="ver">0.28.1</td><td class="note">HTTP de saída para o serviço de nanopublicação</td></tr>
+          <tr><th scope="row">qrcode</th><td class="ver">8.2</td><td class="note">Imagens de QR do código de entrada (com Pillow)</td></tr>
+          <tr><th scope="row">python-multipart</th><td class="ver">0.0.32</td><td class="note">Análise de formulários e upload de arquivos</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1.2rem;color:var(--muted)">
+      Apenas para desenvolvimento, não instalado na imagem: <span class="mono">pytest 9.1.1</span>,
+      <span class="mono">pytest-cov</span>, <span class="mono">ruff 0.16.6</span>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Aplicação de navegador</h2>
+    <p class="lede">
+      Uma aplicação de página única (single-page application) compilada para arquivos estáticos em tempo de build e
+      servida pelo processo Python a partir de <code>/app/static</code>. Não há servidor web separado nem processo
+      Node em produção.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Enviado ao navegador</caption>
+        <thead>
+          <tr><th scope="col">Pacote</th><th scope="col">Versão</th><th scope="col">Finalidade</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Vue</th><td class="ver">3.4</td><td class="note">Framework de interface do usuário</td></tr>
+          <tr><th scope="row">Vue Router</th><td class="ver">4.3</td><td class="note">Roteamento no lado do cliente</td></tr>
+          <tr><th scope="row">Vue I18n</th><td class="ver">9.13</td><td class="note">Quatro idiomas: en, pt-PT, pt-BR, es</td></tr>
+          <tr><th scope="row">Pinia</th><td class="ver">2.1</td><td class="note">Estado do cliente</td></tr>
+          <tr><th scope="row">qrcode-generator</th><td class="ver">1.4.4</td><td class="note">Renderização de QR no navegador</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Toolchain de build</h3>
+    <p style="color:var(--muted)">
+      <span class="mono">Vite 5.1</span> · <span class="mono">vue-tsc 2.2</span> ·
+      <span class="mono">Vitest 1.6</span> · <span class="mono">jsdom</span>.
+      253 pacotes são travados para o build; nenhum deles chega à produção.
+    </p>
+  </section>
+
+  <section>
+    <h2>Armazenamento de dados</h2>
+    <p class="lede">
+      SQLite em modo WAL, como um único arquivo em um volume montado. Não há servidor de banco de dados para
+      provisionar, corrigir (patch) ou fazer backup separadamente — a unidade de backup é esse único arquivo.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Persistência</caption>
+        <thead>
+          <tr><th scope="col">Item</th><th scope="col">Valor</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Mecanismo</th><td>SQLite, incluído no Python — sem serviço separado</td></tr>
+          <tr><th scope="row">Modo de journal</th><td><code>WAL</code>, definido por conexão na inicialização</td></tr>
+          <tr><th scope="row">Caminho do arquivo</th><td class="mono">/data/fipm.db</td></tr>
+          <tr><th scope="row">Volume</th><td>Volume nomeado do Docker <code>fipm-data</code> montado em <code>/data</code></td></tr>
+          <tr><th scope="row">Versão do esquema</th><td>8, migrado automaticamente na inicialização</td></tr>
+          <tr><th scope="row">Dados de referência</th><td>Arquivos JSON em <code>/app/data</code>, carregados no banco de dados a cada inicialização</td></tr>
+          <tr><th scope="row">Backup</th><td>Script fornecido <code>scripts/backup-db.sh</code>; tire um snapshot do volume ou copie o arquivo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1.2rem">
+      Dados pessoais mantidos: endereços de e-mail de conta e hashes de senha Argon2, registros de sessão
+      no lado do servidor, e qualquer texto livre que os participantes digitem em seus perfis. A retenção para
+      perfis criados sem uma conta é de 12 meses, aplicada por um comando executado por um operador, e não por
+      um agendador.
+    </p>
+  </section>
+
+  <section>
+    <h2>Conexões de rede de saída</h2>
+    <p class="lede">
+      A lista relevante para o firewall. Ambos os destinos são recursos opcionais: a aplicação inicia,
+      atende e coleta perfis com todo o acesso de saída bloqueado.
+    </p>
+
+    <div class="egress">
+      <div class="scroller">
+        <table>
+          <caption>Tráfego de saída</caption>
+          <thead>
+            <tr><th scope="col">Destino</th><th scope="col">Porta</th><th scope="col">Finalidade</th><th scope="col">Chave</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="mono">query.knowledgepixels.com</th>
+              <td class="ver">443</td>
+              <td class="note">Lê perfis FAIR publicados a partir da rede de nanopublicação. Timeout de 10&nbsp;s, cache de 15&nbsp;min, limite de resposta de 8&nbsp;MiB. HTTPS é aplicado no código.</td>
+              <td><code>FIPM_NETWORK_ENABLED</code><br><span class="pill pill-on">ativo por padrão</span></td>
+            </tr>
+            <tr>
+              <th scope="row" class="mono">fiodmp.fiocruz.br</th>
+              <td class="ver">443</td>
+              <td class="note">Integração com plano de gestão de dados. Ainda não ativo — o endpoint é um stub.</td>
+              <td><code>FIPM_FIODMP_BASE_URL</code><br><span class="pill pill-off">inativo</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Relay SMTP de sua escolha</th>
+              <td class="ver">587</td>
+              <td class="note">Verificação de e-mail e redefinição de senha, via STARTTLS. Desativado por padrão — o e-mail é gravado no log em vez disso.</td>
+              <td><code>FIPM_MAIL_BACKEND</code><br><span class="pill pill-off">desativado por padrão</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3>Nenhum conteúdo de terceiros em tempo de execução</h3>
+    <p>
+      A aplicação de navegador não carrega scripts, fontes, folhas de estilo ou imagens de nenhum host
+      externo. Tudo o que ela precisa é servido a partir da própria origem da aplicação, de modo que
+      funciona plenamente em uma rede isolada ou em um hotspot de laptop.
+    </p>
+  </section>
+
+  <section>
+    <h2>Segurança</h2>
+    <div class="scroller">
+      <table>
+        <caption>Controles implementados</caption>
+        <thead>
+          <tr><th scope="col">Área</th><th scope="col">Implementação</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Armazenamento de senhas</th><td>Argon2 via <code>argon2-cffi</code>. Sem texto plano, sem armazenamento reversível.</td></tr>
+          <tr><th scope="row">Sessões</th><td>Registros no lado do servidor; o cookie é <code>HttpOnly</code>, <code>SameSite=Lax</code>, <code>Secure</code> por padrão. Expiração de 14 dias.</td></tr>
+          <tr><th scope="row">CSRF</th><td>Middleware em todas as requisições que alteram estado.</td></tr>
+          <tr><th scope="row">Autorização</th><td>Dois papéis, usuário e administrador. Verificações de propriedade e visibilidade por registro.</td></tr>
+          <tr><th scope="row">Limitação de taxa</th><td>No login e no envio de feedback.</td></tr>
+          <tr><th scope="row">Tamanho da requisição</th><td>Limitado a 2&nbsp;MiB.</td></tr>
+          <tr><th scope="row">CORS</th><td>Negado por padrão; lista de permissões via <code>FIPM_ALLOWED_ORIGINS</code>.</td></tr>
+          <tr><th scope="row">Incorporação (embedding)</th><td><code>frame-ancestors</code> restrito a uma origem configurada.</td></tr>
+          <tr><th scope="row">Cabeçalhos de proxy</th><td><code>X-Forwarded-For</code> confiável apenas quando <code>FIPM_TRUST_PROXY</code> está definido.</td></tr>
+          <tr><th scope="row">Proteção de produção</th><td>Definir <code>FIPM_ENV=production</code> faz a aplicação recusar-se a iniciar com segredos de desenvolvimento.</td></tr>
+          <tr><th scope="row">Privacidade agregada</th><td>Estatísticas do painel são omitidas abaixo de uma população de 5.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>O que a implantação precisa de você</h3>
+    <ul class="actions">
+      <li><span class="mark">Defina</span><span><code>FIPM_SECRET_KEY</code> com um segredo gerado. O padrão é um valor de desenvolvimento conhecido.</span></li>
+      <li><span class="mark">Defina</span><span><code>FIPM_ENV=production</code> para que a proteção acima fique ativa.</span></li>
+      <li><span class="mark">Defina</span><span><code>FIPM_BASE_URL</code> com a URL pública real — identificadores de perfil e links de QR de entrada são construídos a partir dela.</span></li>
+      <li><span class="mark">Forneça</span><span>TLS. A aplicação fala HTTP simples e espera estar atrás de um proxy reverso que encerra o HTTPS.</span></li>
+      <li><span class="mark">Defina</span><span><code>FIPM_CONTACT_EMAIL</code> e <code>FIPM_HOSTING_ORG</code>. Eles aparecem no aviso de privacidade.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Implantação</h2>
+    <div class="scroller">
+      <table>
+        <caption>Empacotamento e runtime</caption>
+        <thead>
+          <tr><th scope="col">Item</th><th scope="col">Valor</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Formato</th><td>Imagem Docker, build em múltiplos estágios; orquestrada com Docker Compose</td></tr>
+          <tr><th scope="row">Imagens base</th><td><code>python:3.12-slim</code> (runtime), <code>node:20-alpine</code> (build)</td></tr>
+          <tr><th scope="row">Porta do contêiner</th><td>8000</td></tr>
+          <tr><th scope="row">Processo</th><td>Um worker Uvicorn; os dados de referência são importados a cada inicialização</td></tr>
+          <tr><th scope="row">Verificação de saúde</th><td><code>GET /api/health</code> a cada 30&nbsp;s, 10&nbsp;s de tolerância na inicialização</td></tr>
+          <tr><th scope="row">Configuração</th><td>Variáveis de ambiente, todas com prefixo <code>FIPM_</code></td></tr>
+          <tr><th scope="row">CI</th><td>GitHub Actions — verificação de lint e formatação, suíte de testes do servidor, verificação de tipos e build do navegador, build da imagem</td></tr>
+          <tr><th scope="row">Testado em escala</th><td>80 participantes simultâneos, p95 abaixo de 10&nbsp;ms em escritas</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Não necessário</h2>
+    <p class="lede">
+      Muitas vezes a metade mais útil de um inventário. Nenhum dos itens a seguir precisa ser provisionado,
+      licenciado, monitorado ou corrigido para esta aplicação.
+    </p>
+    <div class="absent">
+      <div><strong>Sem servidor de banco de dados</strong><span>Sem instância de PostgreSQL, MySQL ou Oracle</span></div>
+      <div><strong>Sem cache ou broker</strong><span>Sem Redis, Memcached, RabbitMQ ou Kafka</span></div>
+      <div><strong>Sem mecanismo de busca</strong><span>Sem Elasticsearch ou Solr</span></div>
+      <div><strong>Sem armazenamento de objetos</strong><span>Nada é gravado fora do volume</span></div>
+      <div><strong>Sem Node.js em produção</strong><span>Apenas no estágio de build</span></div>
+      <div><strong>Sem dependência de CDN</strong><span>Todos os ativos são servidos pela própria aplicação</span></div>
+      <div><strong>Sem agendador em segundo plano</strong><span>Comandos de manutenção são executados por um operador</span></div>
+      <div><strong>Sem licenças comerciais</strong><span>Toda a stack é de código aberto</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Licenciamento</h2>
+    <div class="scroller">
+      <table>
+        <caption>Termos</caption>
+        <thead>
+          <tr><th scope="col">Componente</th><th scope="col">Licença</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">A aplicação</th><td>MIT</td></tr>
+          <tr><th scope="row">Perfis exportados pelos usuários</th><td>CC0 por padrão</td></tr>
+          <tr><th scope="row">Conteúdo do questionário</th><td>CC BY-SA 4.0 — FIP mini-questionnaire v2.0.0 © 2023 GO FAIR Foundation</td></tr>
+          <tr><th scope="row">Dependências do servidor</th><td>Predominantemente MIT e BSD, além de Apache&nbsp;2.0, ISC e Unlicense. Duas exceções observadas abaixo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Exceções de licença que vale registrar</h3>
+    <p>
+      Nenhuma dependência está sob GPL, LGPL ou AGPL. Duas ficam fora do conjunto puramente permissivo, e
+      nenhuma delas costuma ser motivo de preocupação — mas são as duas que uma auditoria vai questionar:
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Licenças não permissivas na árvore</caption>
+        <thead>
+          <tr><th scope="col">Pacote</th><th scope="col">Licença</th><th scope="col">O que é</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row" class="mono">certifi</th>
+            <td class="ver">MPL-2.0</td>
+            <td class="note">Pacote de certificados CA da Mozilla. Copyleft fraco, em nível de arquivo; o arquivo é usado sem modificações.</td>
+          </tr>
+          <tr>
+            <th scope="row" class="mono">typing_extensions</th>
+            <td class="ver">PSF-2.0</td>
+            <td class="note">Licença da Python Software Foundation, os mesmos termos do próprio Python.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:1.2rem">
+      A exportação RDF usa um vocabulário de extensão em
+      <span class="mono">https://w3id.org/fipm/ns#</span>. Esse identificador ainda não está registrado;
+      é um identificador nos arquivos exportados, não uma dependência em tempo de execução.
+    </p>
+  </section>
+
+  <footer>
+    Compilado a partir dos arquivos de trava de dependências do repositório, da definição do contêiner e do
+    esquema de configuração em 14 de setembro de 2026. As versões são as fixadas em <span class="mono">uv.lock</span> e
+    <span class="mono">package-lock.json</span>; a aplicação está em pré-lançamento e essas versões mudarão
+    antes da primeira versão marcada (tagged).
+  </footer>
+
+</div>

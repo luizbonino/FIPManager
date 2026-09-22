@@ -1,0 +1,642 @@
+<title>FIP Manager Technology Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+  :root {
+    --ground:   #f4f7f6;
+    --surface:  #ffffff;
+    --raised:   #eef3f1;
+    --ink:      #141d1b;
+    --muted:    #5a6b67;
+    --faint:    #7d8d89;
+    --rule:     #d9e3e0;
+    --rule-firm:#bccac6;
+    --accent:   #1c5e57;
+    --accent-soft: #e2efec;
+    --ok:       #2c6a49;
+    --warn:     #8a5600;
+    --warn-soft:#fbf0dd;
+    --alert:    #9a3a2d;
+
+    --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    --step-0: 0.9375rem;
+    --step-1: 1.0625rem;
+    --step-2: 1.375rem;
+    --step-3: 1.875rem;
+    --step-4: 2.5rem;
+
+    --gut: clamp(1rem, 4vw, 3rem);
+    --maxw: 62rem;
+    --prose: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:   #0f1413;
+      --surface:  #161d1c;
+      --raised:   #1c2524;
+      --ink:      #e3eae8;
+      --muted:    #99aaa6;
+      --faint:    #7d8e8a;
+      --rule:     #24302e;
+      --rule-firm:#35443f;
+      --accent:   #6cc0b2;
+      --accent-soft: #17302c;
+      --ok:       #67b98d;
+      --warn:     #d6a44e;
+      --warn-soft:#2a2316;
+      --alert:    #e08a7a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:   #0f1413;
+    --surface:  #161d1c;
+    --raised:   #1c2524;
+    --ink:      #e3eae8;
+    --muted:    #99aaa6;
+    --faint:    #7d8e8a;
+    --rule:     #24302e;
+    --rule-firm:#35443f;
+    --accent:   #6cc0b2;
+    --accent-soft: #17302c;
+    --ok:       #67b98d;
+    --warn:     #d6a44e;
+    --warn-soft:#2a2316;
+    --alert:    #e08a7a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding-inline: var(--gut);
+    padding-block: clamp(2rem, 6vw, 4rem) 5rem;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { border-bottom: 2px solid var(--ink); padding-bottom: 1.5rem; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.85rem;
+  }
+
+  h1 {
+    font-size: var(--step-4);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0 0 0.7rem;
+  }
+
+  .standfirst {
+    font-size: var(--step-1);
+    color: var(--muted);
+    max-width: var(--prose);
+    margin: 0;
+  }
+
+  .stamp {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    margin-top: 1.4rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--faint);
+  }
+  .stamp b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- sections ---------- */
+
+  section { margin-top: 3.25rem; }
+
+  h2 {
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.014em;
+    margin: 0 0 0.4rem;
+    text-wrap: balance;
+  }
+
+  .lede {
+    color: var(--muted);
+    max-width: var(--prose);
+    margin: 0 0 1.4rem;
+  }
+
+  h3 {
+    font-size: var(--step-0);
+    font-weight: 600;
+    margin: 1.75rem 0 0.7rem;
+    letter-spacing: 0.002em;
+  }
+
+  p { max-width: var(--prose); }
+
+  /* ---------- at a glance ---------- */
+
+  .glance {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 2.5rem;
+  }
+
+  .glance div { background: var(--surface); padding: 1.1rem 1.15rem; }
+
+  .glance dt {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 0.4rem;
+  }
+
+  .glance dd {
+    margin: 0;
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .glance dd span { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--muted); margin-top: 0.2rem; }
+
+  /* ---------- tables ---------- */
+
+  .scroller { overflow-x: auto; margin-top: 0.5rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    min-width: 34rem;
+  }
+
+  caption {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding-bottom: 0.55rem;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 0.55rem 0.9rem 0.55rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: baseline;
+  }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    border-bottom: 1px solid var(--rule-firm);
+    padding-bottom: 0.45rem;
+  }
+
+  tbody th { font-weight: 500; }
+
+  td.ver, .mono {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  td.note { color: var(--muted); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.875em;
+    background: var(--raised);
+    padding: 0.1em 0.38em;
+    border-radius: 2px;
+  }
+
+  /* ---------- egress ---------- */
+
+  .egress {
+    border: 1px solid var(--rule-firm);
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 1.25rem var(--gut) 1.4rem 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .egress table { min-width: 30rem; }
+  .egress caption { color: var(--accent); }
+
+  /* ---------- pills ---------- */
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    padding: 0.12em 0.5em;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .pill-on  { background: var(--accent-soft); color: var(--accent); }
+  .pill-off { background: var(--raised); color: var(--muted); }
+  .pill-act { background: var(--warn-soft); color: var(--warn); }
+
+  /* ---------- not required ---------- */
+
+  .absent { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem 2rem; margin-top: 1.3rem; }
+  .absent div { border-top: 1px solid var(--rule); padding-top: 0.7rem; }
+  .absent strong { display: block; font-weight: 600; }
+  .absent span { color: var(--muted); font-size: 0.8125rem; }
+
+  /* ---------- action list ---------- */
+
+  .actions { margin-top: 1.3rem; padding-left: 0; list-style: none; display: grid; gap: 0.85rem; }
+  .actions li { display: grid; grid-template-columns: auto 1fr; gap: 0.85rem; align-items: baseline; border-top: 1px solid var(--rule); padding-top: 0.8rem; max-width: var(--prose); }
+  .actions .mark { font-family: var(--mono); font-size: 0.6875rem; letter-spacing: 0.08em; color: var(--warn); text-transform: uppercase; }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.3rem;
+    border-top: 1px solid var(--rule);
+    color: var(--faint);
+    font-size: 0.8125rem;
+    max-width: var(--prose);
+  }
+
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible, :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Technology inventory</p>
+    <h1>FIP&nbsp;Manager</h1>
+    <p class="standfirst">
+      A self-contained web application for collecting FAIR Implementation Profiles at workshops.
+      One container, one file-based database, no external infrastructure.
+    </p>
+    <div class="stamp">
+      <span>Application <b>0.1.0</b></span>
+      <span>DB schema <b>v8</b></span>
+      <span>Compiled <b>14 Sep 2026</b></span>
+      <span>Status <b>pre-release</b></span>
+    </div>
+  </header>
+
+  <dl class="glance">
+    <div>
+      <dt>Runtime</dt>
+      <dd>Python 3.12<span>Single ASGI process (Uvicorn)</span></dd>
+    </div>
+    <div>
+      <dt>Storage</dt>
+      <dd>SQLite<span>One file, WAL mode, on a mounted volume</span></dd>
+    </div>
+    <div>
+      <dt>Listens on</dt>
+      <dd>TCP 8000<span>HTTP inside the container</span></dd>
+    </div>
+    <div>
+      <dt>Outbound</dt>
+      <dd>2 hosts<span>Both optional and switchable</span></dd>
+    </div>
+  </dl>
+
+  <section>
+    <h2>Languages and runtimes</h2>
+    <p class="lede">
+      Two languages are used, but only one is present in production. Node.js compiles the browser
+      application during the image build and is then discarded — the deployed container has no
+      JavaScript runtime.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Runtimes</caption>
+        <thead>
+          <tr><th scope="col">Language</th><th scope="col">Version</th><th scope="col">Where it runs</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Python</th>
+            <td class="ver">3.12</td>
+            <td class="note">Production. Pinned to <code>&gt;=3.12,&lt;3.13</code>; image <code>python:3.12-slim</code></td>
+          </tr>
+          <tr>
+            <th scope="row">TypeScript</th>
+            <td class="ver">5.9.3</td>
+            <td class="note">Compiled to JavaScript at build time; runs in the end user's browser</td>
+          </tr>
+          <tr>
+            <th scope="row">Node.js</th>
+            <td class="ver">20</td>
+            <td class="note"><span class="pill pill-off">Build only</span> Image <code>node:20-alpine</code>, discarded after the build stage</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Server application</h2>
+    <p class="lede">
+      Dependencies are locked in <code>uv.lock</code> and installed with <code>uv sync --frozen --no-dev</code>,
+      so every deployment resolves to identical versions. 46 packages in total including transitive ones.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Direct dependencies · resolved versions</caption>
+        <thead>
+          <tr><th scope="col">Package</th><th scope="col">Version</th><th scope="col">Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">FastAPI</th><td class="ver">0.141.1</td><td class="note">HTTP API framework</td></tr>
+          <tr><th scope="row">Starlette</th><td class="ver">1.6.0</td><td class="note">ASGI toolkit underneath FastAPI</td></tr>
+          <tr><th scope="row">Uvicorn</th><td class="ver">0.52.4</td><td class="note">ASGI server; the process that listens on 8000</td></tr>
+          <tr><th scope="row">SQLAlchemy</th><td class="ver">2.0.52</td><td class="note">Database access and schema definition</td></tr>
+          <tr><th scope="row">Pydantic</th><td class="ver">2.13.5</td><td class="note">Request/response validation</td></tr>
+          <tr><th scope="row">pydantic-settings</th><td class="ver">2.15.0</td><td class="note">Configuration from environment variables</td></tr>
+          <tr><th scope="row">argon2-cffi</th><td class="ver">25.1.0</td><td class="note">Password hashing (Argon2)</td></tr>
+          <tr><th scope="row">rdflib</th><td class="ver">7.6.0</td><td class="note">RDF / Turtle / JSON-LD export</td></tr>
+          <tr><th scope="row">httpx</th><td class="ver">0.28.1</td><td class="note">Outbound HTTP to the nanopublication service</td></tr>
+          <tr><th scope="row">qrcode</th><td class="ver">8.2</td><td class="note">Join-code QR images (with Pillow)</td></tr>
+          <tr><th scope="row">python-multipart</th><td class="ver">0.0.32</td><td class="note">Form and file upload parsing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1.2rem;color:var(--muted)">
+      Development only, not installed in the image: <span class="mono">pytest 9.1.1</span>,
+      <span class="mono">pytest-cov</span>, <span class="mono">ruff 0.16.6</span>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Browser application</h2>
+    <p class="lede">
+      A single-page application compiled to static files at build time and served by the Python process
+      from <code>/app/static</code>. There is no separate web server and no Node process in production.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Shipped to the browser</caption>
+        <thead>
+          <tr><th scope="col">Package</th><th scope="col">Version</th><th scope="col">Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Vue</th><td class="ver">3.4</td><td class="note">User interface framework</td></tr>
+          <tr><th scope="row">Vue Router</th><td class="ver">4.3</td><td class="note">Client-side routing</td></tr>
+          <tr><th scope="row">Vue I18n</th><td class="ver">9.13</td><td class="note">Four languages: en, pt-PT, pt-BR, es</td></tr>
+          <tr><th scope="row">Pinia</th><td class="ver">2.1</td><td class="note">Client state</td></tr>
+          <tr><th scope="row">qrcode-generator</th><td class="ver">1.4.4</td><td class="note">QR rendering in the browser</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Build toolchain</h3>
+    <p style="color:var(--muted)">
+      <span class="mono">Vite 5.1</span> · <span class="mono">vue-tsc 2.2</span> ·
+      <span class="mono">Vitest 1.6</span> · <span class="mono">jsdom</span>.
+      253 packages are locked for the build; none of them reach production.
+    </p>
+  </section>
+
+  <section>
+    <h2>Data storage</h2>
+    <p class="lede">
+      SQLite in WAL mode, as a single file on a mounted volume. There is no database server to
+      provision, patch or back up separately — the backup unit is that one file.
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Persistence</caption>
+        <thead>
+          <tr><th scope="col">Item</th><th scope="col">Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Engine</th><td>SQLite, bundled with Python — no separate service</td></tr>
+          <tr><th scope="row">Journal mode</th><td><code>WAL</code>, set per connection at startup</td></tr>
+          <tr><th scope="row">File path</th><td class="mono">/data/fipm.db</td></tr>
+          <tr><th scope="row">Volume</th><td>Docker named volume <code>fipm-data</code> mounted at <code>/data</code></td></tr>
+          <tr><th scope="row">Schema version</th><td>8, migrated forward automatically on start</td></tr>
+          <tr><th scope="row">Reference data</th><td>JSON files under <code>/app/data</code>, loaded into the database on every boot</td></tr>
+          <tr><th scope="row">Backup</th><td>Provided script <code>scripts/backup-db.sh</code>; snapshot the volume or copy the file</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1.2rem">
+      Personal data held: account email addresses and Argon2 password hashes, server-side session
+      records, and any free text participants type into their profiles. Retention for profiles created
+      without an account is 12 months, enforced by an operator-run command rather than a scheduler.
+    </p>
+  </section>
+
+  <section>
+    <h2>Outbound network connections</h2>
+    <p class="lede">
+      The firewall-relevant list. Both destinations are optional features: the application starts,
+      serves and collects profiles with all outbound access blocked.
+    </p>
+
+    <div class="egress">
+      <div class="scroller">
+        <table>
+          <caption>Egress</caption>
+          <thead>
+            <tr><th scope="col">Destination</th><th scope="col">Port</th><th scope="col">Purpose</th><th scope="col">Switch</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="mono">query.knowledgepixels.com</th>
+              <td class="ver">443</td>
+              <td class="note">Reads published FAIR profiles from the nanopublication network. 10&nbsp;s timeout, 15&nbsp;min cache, 8&nbsp;MiB response cap. HTTPS is enforced in code.</td>
+              <td><code>FIPM_NETWORK_ENABLED</code><br><span class="pill pill-on">on by default</span></td>
+            </tr>
+            <tr>
+              <th scope="row" class="mono">fiodmp.fiocruz.br</th>
+              <td class="ver">443</td>
+              <td class="note">Data management plan integration. Not yet active — the endpoint is a stub.</td>
+              <td><code>FIPM_FIODMP_BASE_URL</code><br><span class="pill pill-off">inactive</span></td>
+            </tr>
+            <tr>
+              <th scope="row">SMTP relay of your choice</th>
+              <td class="ver">587</td>
+              <td class="note">Email verification and password reset, over STARTTLS. Disabled by default — mail is written to the log instead.</td>
+              <td><code>FIPM_MAIL_BACKEND</code><br><span class="pill pill-off">off by default</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3>No third-party content at runtime</h3>
+    <p>
+      The browser application loads no scripts, fonts, stylesheets or images from any external host.
+      Everything it needs is served from the application's own origin, so it works fully on an isolated
+      network or a laptop hotspot.
+    </p>
+  </section>
+
+  <section>
+    <h2>Security</h2>
+    <div class="scroller">
+      <table>
+        <caption>Controls in place</caption>
+        <thead>
+          <tr><th scope="col">Area</th><th scope="col">Implementation</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Password storage</th><td>Argon2 via <code>argon2-cffi</code>. No plaintext, no reversible storage.</td></tr>
+          <tr><th scope="row">Sessions</th><td>Server-side records; cookie is <code>HttpOnly</code>, <code>SameSite=Lax</code>, <code>Secure</code> by default. 14-day expiry.</td></tr>
+          <tr><th scope="row">CSRF</th><td>Middleware on all state-changing requests.</td></tr>
+          <tr><th scope="row">Authorisation</th><td>Two roles, user and admin. Per-record ownership and visibility checks.</td></tr>
+          <tr><th scope="row">Rate limiting</th><td>On sign-in and feedback submission.</td></tr>
+          <tr><th scope="row">Request size</th><td>Capped at 2&nbsp;MiB.</td></tr>
+          <tr><th scope="row">CORS</th><td>Deny by default; allowlist via <code>FIPM_ALLOWED_ORIGINS</code>.</td></tr>
+          <tr><th scope="row">Embedding</th><td><code>frame-ancestors</code> restricted to a configured origin.</td></tr>
+          <tr><th scope="row">Proxy headers</th><td><code>X-Forwarded-For</code> trusted only when <code>FIPM_TRUST_PROXY</code> is set.</td></tr>
+          <tr><th scope="row">Production guard</th><td>Setting <code>FIPM_ENV=production</code> makes the application refuse to start with development secrets.</td></tr>
+          <tr><th scope="row">Aggregate privacy</th><td>Dashboard statistics are withheld below a population of 5.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>What the deployment needs from you</h3>
+    <ul class="actions">
+      <li><span class="mark">Set</span><span><code>FIPM_SECRET_KEY</code> to a generated secret. The default is a known development value.</span></li>
+      <li><span class="mark">Set</span><span><code>FIPM_ENV=production</code> so the guard above is active.</span></li>
+      <li><span class="mark">Set</span><span><code>FIPM_BASE_URL</code> to the real public URL — profile identifiers and QR join links are built from it.</span></li>
+      <li><span class="mark">Provide</span><span>TLS. The application speaks plain HTTP and expects to sit behind a reverse proxy that terminates HTTPS.</span></li>
+      <li><span class="mark">Set</span><span><code>FIPM_CONTACT_EMAIL</code> and <code>FIPM_HOSTING_ORG</code>. They appear in the privacy notice.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Deployment</h2>
+    <div class="scroller">
+      <table>
+        <caption>Packaging and runtime</caption>
+        <thead>
+          <tr><th scope="col">Item</th><th scope="col">Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Format</th><td>Docker image, multi-stage build; orchestrated with Docker Compose</td></tr>
+          <tr><th scope="row">Base images</th><td><code>python:3.12-slim</code> (runtime), <code>node:20-alpine</code> (build)</td></tr>
+          <tr><th scope="row">Container port</th><td>8000</td></tr>
+          <tr><th scope="row">Process</th><td>One Uvicorn worker; reference data is imported on each start</td></tr>
+          <tr><th scope="row">Health check</th><td><code>GET /api/health</code> every 30&nbsp;s, 10&nbsp;s grace on start</td></tr>
+          <tr><th scope="row">Configuration</th><td>Environment variables, all prefixed <code>FIPM_</code></td></tr>
+          <tr><th scope="row">CI</th><td>GitHub Actions — lint and format check, server test suite, browser type-check and build, image build</td></tr>
+          <tr><th scope="row">Scale tested</th><td>80 concurrent participants, p95 under 10&nbsp;ms on writes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Not required</h2>
+    <p class="lede">
+      Often the more useful half of an inventory. None of the following needs to be provisioned,
+      licensed, monitored or patched for this application.
+    </p>
+    <div class="absent">
+      <div><strong>No database server</strong><span>No PostgreSQL, MySQL or Oracle instance</span></div>
+      <div><strong>No cache or broker</strong><span>No Redis, Memcached, RabbitMQ or Kafka</span></div>
+      <div><strong>No search engine</strong><span>No Elasticsearch or Solr</span></div>
+      <div><strong>No object storage</strong><span>Nothing written outside the volume</span></div>
+      <div><strong>No Node.js in production</strong><span>Build-stage only</span></div>
+      <div><strong>No CDN dependency</strong><span>All assets served from the application itself</span></div>
+      <div><strong>No background scheduler</strong><span>Maintenance commands are run by an operator</span></div>
+      <div><strong>No commercial licences</strong><span>Entire stack is open source</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Licensing</h2>
+    <div class="scroller">
+      <table>
+        <caption>Terms</caption>
+        <thead>
+          <tr><th scope="col">Component</th><th scope="col">Licence</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">The application</th><td>MIT</td></tr>
+          <tr><th scope="row">Profiles exported by users</th><td>CC0 by default</td></tr>
+          <tr><th scope="row">Questionnaire content</th><td>CC BY-SA 4.0 — FIP mini-questionnaire v2.0.0 © 2023 GO FAIR Foundation</td></tr>
+          <tr><th scope="row">Server dependencies</th><td>Predominantly MIT and BSD, plus Apache&nbsp;2.0, ISC and Unlicense. Two exceptions noted below.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Licence exceptions worth recording</h3>
+    <p>
+      No dependency is under GPL, LGPL or AGPL. Two fall outside the plain permissive set, and neither
+      is normally a concern — but they are the two an audit will ask about:
+    </p>
+    <div class="scroller">
+      <table>
+        <caption>Non-permissive licences in the tree</caption>
+        <thead>
+          <tr><th scope="col">Package</th><th scope="col">Licence</th><th scope="col">What it is</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row" class="mono">certifi</th>
+            <td class="ver">MPL-2.0</td>
+            <td class="note">Mozilla's CA certificate bundle. Weak, file-level copyleft; the file is used unmodified.</td>
+          </tr>
+          <tr>
+            <th scope="row" class="mono">typing_extensions</th>
+            <td class="ver">PSF-2.0</td>
+            <td class="note">Python Software Foundation licence, the same terms as Python itself.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:1.2rem">
+      The RDF export uses an extension vocabulary at
+      <span class="mono">https://w3id.org/fipm/ns#</span>. That identifier is not yet registered;
+      it is an identifier in exported files, not a runtime dependency.
+    </p>
+  </section>
+
+  <footer>
+    Compiled from the repository's dependency lock files, container definition and configuration
+    schema on 14 September 2026. Versions are those pinned in <span class="mono">uv.lock</span> and
+    <span class="mono">package-lock.json</span>; the application is pre-release and these will change
+    before the first tagged version.
+  </footer>
+
+</div>
